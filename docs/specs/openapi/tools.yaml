@@ -1,0 +1,600 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Static Tools API
+  version: 1.0.0
+  description: |
+    Static recovery tool management API for Regal Recovery.
+
+    Provides access to foundational recovery tools:
+    - 3 Circles (inner, middle, outer boundaries)
+    - Relapse Prevention Plan (7-section comprehensive plan)
+    - Vision Document (future self visualization)
+
+    All tools support versioning and restore from previous versions.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Three Circles
+    description: Inner, middle, outer circle boundary management
+  - name: Relapse Prevention
+    description: Comprehensive relapse prevention plan
+  - name: Vision
+    description: Future self vision document
+
+paths:
+  /tools/three-circles:
+    get:
+      operationId: getThreeCircles
+      tags: [Three Circles]
+      summary: Get 3 Circles document
+      description: |
+        Retrieve user's 3 Circles document.
+
+        Returns current version with inner circle (bottom lines),
+        middle circle (slippery behaviors), and outer circle (healthy boundaries).
+      responses:
+        '200':
+          description: OK - 3 Circles retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ThreeCircles'
+              example:
+                data:
+                  id: tc_1a2b3c4d
+                  version: 3
+                  innerCircle:
+                    - "Viewing pornography"
+                    - "Sexual contact outside of marriage"
+                    - "Masturbation"
+                  middleCircle:
+                    - "Late night internet browsing"
+                    - "Isolating when stressed"
+                    - "Excessive time on social media"
+                  outerCircle:
+                    - "Daily prayer and meditation"
+                    - "Regular SAA meetings"
+                    - "Exercise 3x per week"
+                    - "Accountability calls"
+                  lastModifiedAt: "2026-03-20T14:30:00Z"
+                  links:
+                    self: https://api.regalrecovery.com/v1/tools/three-circles
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found - No 3 Circles document created yet
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateThreeCircles
+      tags: [Three Circles]
+      summary: Update 3 Circles document
+      description: |
+        Update user's 3 Circles document.
+
+        Creates a new version while preserving history for restore.
+        All three circles must be provided (full replace semantics).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - innerCircle
+                - middleCircle
+                - outerCircle
+              properties:
+                innerCircle:
+                  type: array
+                  items:
+                    type: string
+                  minItems: 1
+                  maxItems: 20
+                  description: Bottom line behaviors (must not engage)
+                middleCircle:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 30
+                  description: Slippery behaviors (caution zone)
+                outerCircle:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 30
+                  description: Healthy boundaries and activities
+            example:
+              innerCircle:
+                - "Viewing pornography"
+                - "Sexual contact outside of marriage"
+              middleCircle:
+                - "Late night internet browsing"
+                - "Isolating when stressed"
+              outerCircle:
+                - "Daily prayer and meditation"
+                - "Regular SAA meetings"
+                - "Exercise 3x per week"
+      responses:
+        '200':
+          description: OK - 3 Circles updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ThreeCircles'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tools/relapse-prevention-plan:
+    get:
+      operationId: getRelapsePlan
+      tags: [Relapse Prevention]
+      summary: Get relapse prevention plan
+      description: |
+        Retrieve user's comprehensive relapse prevention plan.
+
+        7-section plan structure:
+        1. Warning signs (emotional, mental, physical)
+        2. High-risk situations
+        3. Coping strategies
+        4. Emergency contacts
+        5. Daily routine
+        6. Recovery goals
+        7. Relapse response protocol
+      responses:
+        '200':
+          description: OK - Relapse plan retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RelapsePlan'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateRelapsePlan
+      tags: [Relapse Prevention]
+      summary: Update relapse prevention plan
+      description: |
+        Update user's relapse prevention plan.
+
+        All sections must be provided (full replace semantics).
+        Creates new version while preserving history.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - warningSigns
+                - highRiskSituations
+                - copingStrategies
+                - emergencyContacts
+                - dailyRoutine
+                - recoveryGoals
+                - relapseResponse
+              properties:
+                warningSigns:
+                  type: object
+                  properties:
+                    emotional:
+                      type: array
+                      items:
+                        type: string
+                    mental:
+                      type: array
+                      items:
+                        type: string
+                    physical:
+                      type: array
+                      items:
+                        type: string
+                highRiskSituations:
+                  type: array
+                  items:
+                    type: string
+                copingStrategies:
+                  type: array
+                  items:
+                    type: string
+                emergencyContacts:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      phone:
+                        type: string
+                      relationship:
+                        type: string
+                dailyRoutine:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      time:
+                        type: string
+                      activity:
+                        type: string
+                recoveryGoals:
+                  type: object
+                  properties:
+                    shortTerm:
+                      type: array
+                      items:
+                        type: string
+                    longTerm:
+                      type: array
+                      items:
+                        type: string
+                relapseResponse:
+                  type: array
+                  items:
+                    type: string
+                  description: Step-by-step protocol if relapse occurs
+      responses:
+        '200':
+          description: OK - Relapse plan updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RelapsePlan'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tools/vision:
+    get:
+      operationId: getVision
+      tags: [Vision]
+      summary: Get vision document
+      description: |
+        Retrieve user's vision document (future self visualization).
+
+        Vision document captures desired future state across life domains:
+        - Personal identity and values
+        - Relationships and family
+        - Career and purpose
+        - Health and wellness
+        - Spiritual life
+        - Legacy and impact
+      responses:
+        '200':
+          description: OK - Vision retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Vision'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateVision
+      tags: [Vision]
+      summary: Update vision document
+      description: |
+        Update user's vision document.
+
+        Full replace semantics with version history preservation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                personalIdentity:
+                  type: string
+                  description: Who I want to be (values, character)
+                relationships:
+                  type: string
+                  description: Family and relationship vision
+                career:
+                  type: string
+                  description: Career and purpose vision
+                health:
+                  type: string
+                  description: Physical and mental health vision
+                spiritual:
+                  type: string
+                  description: Spiritual life vision
+                legacy:
+                  type: string
+                  description: Impact and legacy vision
+            example:
+              personalIdentity: "I am a man of integrity, humility, and compassion. I am honest with myself and others."
+              relationships: "I am a loving, present husband and father. My family trusts me completely."
+              career: "I am fulfilling my purpose by helping others recover from addiction."
+              health: "I am physically strong and mentally resilient. I prioritize self-care."
+              spiritual: "I have a deep, authentic relationship with God built on daily prayer."
+              legacy: "I leave a legacy of healing, hope, and transformation in my community."
+      responses:
+        '200':
+          description: OK - Vision updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Vision'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    ThreeCircles:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^tc_[a-zA-Z0-9]+$'
+        version:
+          type: integer
+          description: Document version number
+        innerCircle:
+          type: array
+          items:
+            type: string
+          description: Bottom line behaviors (must not engage)
+        middleCircle:
+          type: array
+          items:
+            type: string
+          description: Slippery behaviors (caution zone)
+        outerCircle:
+          type: array
+          items:
+            type: string
+          description: Healthy boundaries and activities
+        lastModifiedAt:
+          type: string
+          format: date-time
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    RelapsePlan:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^rp_[a-zA-Z0-9]+$'
+        version:
+          type: integer
+        warningSigns:
+          type: object
+          properties:
+            emotional:
+              type: array
+              items:
+                type: string
+            mental:
+              type: array
+              items:
+                type: string
+            physical:
+              type: array
+              items:
+                type: string
+        highRiskSituations:
+          type: array
+          items:
+            type: string
+        copingStrategies:
+          type: array
+          items:
+            type: string
+        emergencyContacts:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              phone:
+                type: string
+              relationship:
+                type: string
+        dailyRoutine:
+          type: array
+          items:
+            type: object
+            properties:
+              time:
+                type: string
+              activity:
+                type: string
+        recoveryGoals:
+          type: object
+          properties:
+            shortTerm:
+              type: array
+              items:
+                type: string
+            longTerm:
+              type: array
+              items:
+                type: string
+        relapseResponse:
+          type: array
+          items:
+            type: string
+        lastModifiedAt:
+          type: string
+          format: date-time
+
+    Vision:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^vis_[a-zA-Z0-9]+$'
+        version:
+          type: integer
+        personalIdentity:
+          type: string
+        relationships:
+          type: string
+        career:
+          type: string
+        health:
+          type: string
+        spiritual:
+          type: string
+        legacy:
+          type: string
+        lastModifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

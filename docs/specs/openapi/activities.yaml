@@ -1,0 +1,4082 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Activities API
+  version: 1.0.0
+  description: |
+    Recovery activities tracking API for Regal Recovery.
+
+    Covers all recovery activities including:
+    - Daily sobriety commitments (morning and evening)
+    - Journal entries (bullets, free-form, prompted, structured, emotional, time-based)
+    - Check-ins (daily, evening, person-specific)
+    - FASTER Scale assessments
+    - Personal Craziness Index (PCI)
+    - Urge logs with emergency tools integration
+    - Mood ratings (multiple per day)
+    - Gratitude entries
+    - Phone call logs
+    - Prayer logs
+    - Meeting attendance logs
+    - Exercise and nutrition tracking
+    - Integrity inventory
+    - Acting-in behaviors
+    - Post-mortem analysis
+    - Financial tracking
+    - Step work
+    - Devotional completions
+    - Goals (weekly/daily)
+    - Spouse check-in preparation (FANOS/FITNAP)
+
+    All activity timestamps are immutable once recorded. Activities support optional ephemeral mode (auto-deleted after 30 days).
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Commitments
+    description: Daily sobriety commitments (morning/evening)
+  - name: Journals
+    description: Free-form and prompted journaling
+  - name: Emotional Journal
+    description: Emotional awareness journaling with GPS and selfie
+  - name: Time Journal
+    description: Interval-based journaling with sensor data
+  - name: Check-Ins
+    description: Daily recovery check-ins
+  - name: Person Check-Ins
+    description: Spouse, sponsor, counselor check-ins
+  - name: FASTER Scale
+    description: FASTER Scale relapse stage assessments
+  - name: PCI
+    description: Personal Craziness Index
+  - name: Urges
+    description: Urge logging and emergency tools
+  - name: Mood
+    description: Mood ratings
+  - name: Gratitude
+    description: Gratitude entries
+  - name: Phone Calls
+    description: Phone call logs
+  - name: Prayer
+    description: Prayer logs
+  - name: Meetings
+    description: Meeting attendance logs
+  - name: Exercise
+    description: Physical activity tracking
+  - name: Nutrition
+    description: Nutrition and meal tracking
+  - name: Devotionals
+    description: Devotional completion logs
+  - name: Integrity Inventory
+    description: Daily integrity inventory
+  - name: Acting-In
+    description: Acting-in behaviors (outer circle)
+  - name: Post-Mortem
+    description: Post-relapse analysis
+  - name: Financial
+    description: Financial tracking
+  - name: Step Work
+    description: 12-step work entries
+  - name: Goals
+    description: Recovery goals (weekly/daily)
+  - name: Spouse Check-In Prep
+    description: FANOS/FITNAP spouse check-in preparation
+
+paths:
+  /activities/commitments/morning:
+    post:
+      operationId: createMorningCommitment
+      tags: [Commitments]
+      summary: Submit morning sobriety commitment
+      description: |
+        Record morning sobriety commitment for the day.
+
+        Part of the core daily recovery routine. Tracked as a consecutive-day streak.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                  description: Timestamp of commitment (typically morning)
+                addictionIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Specific addictions being committed to today
+                notes:
+                  type: string
+                  maxLength: 500
+                  description: Optional reflection notes
+            example:
+              timestamp: "2026-03-28T07:00:00Z"
+              addictionIds: ["a_67890"]
+              notes: "Feeling strong today. Looking forward to a meeting tonight."
+      responses:
+        '201':
+          description: Created - Commitment recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      commitmentId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      type:
+                        type: string
+                        enum: [morning]
+                      consecutiveDays:
+                        type: integer
+                        description: Current morning commitment streak
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  commitmentId: cm_11111
+                  timestamp: "2026-03-28T07:00:00Z"
+                  type: morning
+                  consecutiveDays: 47
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/commitments/morning/cm_11111
+                meta:
+                  createdAt: "2026-03-28T07:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/commitments/evening:
+    post:
+      operationId: createEveningCommitment
+      tags: [Commitments]
+      summary: Submit evening sobriety review
+      description: |
+        Record evening sobriety review with commitment status for the day.
+
+        Reviews all active commitments and marks them as kept or broken.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - commitmentReviews
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                commitmentReviews:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - commitmentId
+                      - kept
+                    properties:
+                      commitmentId:
+                        type: string
+                      kept:
+                        type: boolean
+                      notes:
+                        type: string
+                        maxLength: 500
+                sobrietyMaintained:
+                  type: boolean
+                notes:
+                  type: string
+                  maxLength: 1000
+            example:
+              timestamp: "2026-03-28T21:00:00Z"
+              commitmentReviews:
+                - commitmentId: cm_77777
+                  kept: true
+                  notes: "Called sponsor at lunch"
+                - commitmentId: cm_88888
+                  kept: true
+                  notes: "Attended Tuesday meeting"
+              sobrietyMaintained: true
+              notes: "Good day overall. Felt supported."
+      responses:
+        '201':
+          description: Created - Evening review recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      reviewId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      commitmentsKept:
+                        type: integer
+                      commitmentsTotal:
+                        type: integer
+                      consistencyScore:
+                        type: number
+                        format: float
+                        description: Percentage of commitments kept
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/journal:
+    post:
+      operationId: createJournalEntry
+      tags: [Journals]
+      summary: Create journal entry
+      description: |
+        Create a free-form or prompted journal entry.
+
+        Supports ephemeral mode (auto-deleted after 30 days per user preference).
+        Journal entries are never shared by default; opt-in permission required.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateJournalRequest'
+            example:
+              mode: morning
+              content: "Today I'm grateful for my support group and 47 days of sobriety..."
+              emotionalTags: ["grateful", "hopeful"]
+              prompt: "What are you grateful for today?"
+              isEphemeral: false
+      responses:
+        '201':
+          description: Created - Journal entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JournalEntryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listJournalEntries
+      tags: [Journals]
+      summary: List journal entries
+      description: |
+        Retrieve journal entries with pagination and optional filters.
+
+        Ephemeral entries are included if not yet expired.
+      parameters:
+        - name: mode
+          in: query
+          schema:
+            type: string
+            enum: [morning, evening, free-form, prompted]
+          description: Filter by journal mode
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: "-timestamp"
+          description: "Sort field: -timestamp (desc), timestamp (asc)"
+      responses:
+        '200':
+          description: OK - Journal entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/JournalEntry'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/journal/{entryId}:
+    get:
+      operationId: getJournalEntry
+      tags: [Journals]
+      summary: Get journal entry by ID
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK - Journal entry retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/JournalEntry'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateJournalEntry
+      tags: [Journals]
+      summary: Update journal entry
+      description: |
+        Update journal entry content or tags.
+
+        Timestamp cannot be modified (immutable per FR2.7).
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  maxLength: 10000
+                emotionalTags:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 10
+      responses:
+        '200':
+          description: OK - Entry updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/JournalEntry'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteJournalEntry
+      tags: [Journals]
+      summary: Delete journal entry
+      description: |
+        Permanently delete journal entry.
+
+        Cannot be undone. For ephemeral entries, manual deletion accelerates removal.
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content - Entry deleted
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/emotional-journal:
+    post:
+      operationId: createEmotionalJournalEntry
+      tags: [Emotional Journal]
+      summary: Create emotional journal entry
+      description: |
+        Record emotional awareness entry with automatic GPS location and optional selfie.
+
+        Designed for frequent, low-friction use throughout the day. Supports ephemeral mode.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmotionalJournalRequest'
+            example:
+              timestamp: "2026-03-28T15:00:00Z"
+              emotion: "anxiety"
+              activity: "Preparing for meeting"
+              reason: "Upcoming meeting with a difficult coworker"
+              intensity: 6
+              copingStrategy: "Called sponsor, did breathing exercise"
+              location:
+                latitude: 40.758
+                longitude: -73.9855
+                areaName: "Midtown East, NYC"
+                accuracy: "high"
+              selfieKey: "s3://regal-recovery-media/u_12345/selfies/temp_xyz.jpg"
+              isEphemeral: true
+      responses:
+        '201':
+          description: Created - Emotional journal entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmotionalJournalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listEmotionalJournalEntries
+      tags: [Emotional Journal]
+      summary: List emotional journal entries
+      parameters:
+        - name: emotion
+          in: query
+          schema:
+            type: string
+          description: Filter by emotion
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Emotional journal entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EmotionalJournalEntry'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/time-journal:
+    post:
+      operationId: createTimeJournalEntry
+      tags: [Time Journal]
+      summary: Create time journal entry
+      description: |
+        Record interval-based (30-60 min) time journal entry with automatic GPS, sensor metadata, emotion, needs, and notes.
+
+        Designed for pattern recognition across the day.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTimeJournalRequest'
+            example:
+              timestamp: "2026-03-28T14:00:00Z"
+              emotion: "focused"
+              intensity: 6
+              activity: "Working on project report"
+              needs: "Taking a break soon"
+              notes: "Feeling productive. No urges today so far."
+              location:
+                latitude: 40.7128
+                longitude: -74.006
+                areaName: "Midtown, NYC"
+                accuracy: "high"
+              sensorData:
+                motionState: "stationary"
+                batteryLevel: 72
+                screenTime: null
+              selfieKey: "s3://regal-recovery-media/u_12345/selfies/tj_xyz.jpg"
+              isEphemeral: false
+      responses:
+        '201':
+          description: Created - Time journal entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeJournalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listTimeJournalEntries
+      tags: [Time Journal]
+      summary: List time journal entries
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Time journal entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TimeJournalEntry'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/check-ins:
+    post:
+      operationId: createCheckIn
+      tags: [Check-Ins]
+      summary: Submit daily recovery check-in
+      description: |
+        Submit structured daily or evening check-in with responses and computed score.
+
+        Check-in questions adapt based on recovery stage (early/active/sustained).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckInRequest'
+            example:
+              type: daily
+              responses:
+                sobrietyStatus: "yes"
+                urgeCount: 2
+                meetingAttended: true
+                spiritualPractices: true
+                emotionalState: 7
+                supportNetworkContact: true
+                overallRecoveryHealth: 8
+      responses:
+        '201':
+          description: Created - Check-in recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckInResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listCheckIns
+      tags: [Check-Ins]
+      summary: List check-ins
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [daily, evening, morning]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: "-timestamp"
+      responses:
+        '200':
+          description: OK - Check-ins retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CheckIn'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/faster-scale:
+    post:
+      operationId: createFASTERScaleEntry
+      tags: [FASTER Scale]
+      summary: Submit FASTER Scale assessment
+      description: |
+        Record FASTER Scale relapse stage assessment.
+
+        Stages: Restoration → Forgetting Priorities → Anxiety → Speeding Up → Ticked Off → Exhausted → Relapse
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFASTERScaleRequest'
+            example:
+              timestamp: "2026-03-28T20:00:00Z"
+              stage: "Ticked_Off"
+              indicators: ["irritability", "blame", "isolation"]
+              notes: "Noticed I was snapping at coworkers today"
+      responses:
+        '201':
+          description: Created - FASTER Scale entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FASTERScaleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listFASTERScaleEntries
+      tags: [FASTER Scale]
+      summary: List FASTER Scale entries
+      parameters:
+        - name: stage
+          in: query
+          schema:
+            type: string
+            enum: [Restoration, Forgetting_Priorities, Anxiety, Speeding_Up, Ticked_Off, Exhausted, Relapse]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - FASTER Scale entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FASTERScaleEntry'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/pci:
+    post:
+      operationId: createPCIEntry
+      tags: [PCI]
+      summary: Submit Personal Craziness Index
+      description: |
+        Record PCI assessment with checked behaviors and computed score.
+
+        PCI tracks 12 relapse warning behaviors.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePCIRequest'
+            example:
+              timestamp: "2026-03-28T19:00:00Z"
+              checkedBehaviors: ["fantasy", "objectification", "isolation", "dishonesty"]
+      responses:
+        '201':
+          description: Created - PCI entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PCIResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPCIEntries
+      tags: [PCI]
+      summary: List PCI entries
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - PCI entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PCIEntry'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/urges:
+    post:
+      operationId: createUrgeLog
+      tags: [Urges]
+      summary: Log urge event
+      description: |
+        Record urge with intensity, triggers, duration, and outcome.
+
+        Triggers emergency tools and follow-up notifications if intensity >= 7.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUrgeLogRequest'
+            example:
+              addictionId: "a_67890"
+              intensity: 8
+              triggers: ["emotional", "digital", "relational"]
+              notes: "Feeling lonely after a difficult conversation"
+              sobrietyMaintained: true
+              durationMinutes: 15
+      responses:
+        '201':
+          description: Created - Urge logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrgeLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listUrgeLogs
+      tags: [Urges]
+      summary: List urge logs
+      parameters:
+        - name: addictionId
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: filter
+          in: query
+          schema:
+            type: string
+          description: "OData filter (e.g., intensity gt 5)"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: "-timestamp"
+      responses:
+        '200':
+          description: OK - Urge logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UrgeLog'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/urges/{urgeId}/resolve:
+    post:
+      operationId: resolveUrge
+      tags: [Urges]
+      summary: Mark urge as resolved
+      description: |
+        Update urge with final outcome (sobriety maintained or not) and resolution notes.
+      parameters:
+        - name: urgeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sobrietyMaintained
+              properties:
+                sobrietyMaintained:
+                  type: boolean
+                resolutionNotes:
+                  type: string
+                  maxLength: 1000
+      responses:
+        '200':
+          description: OK - Urge resolved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/UrgeLog'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood:
+    post:
+      operationId: createMoodRating
+      tags: [Mood]
+      summary: Log mood rating
+      description: |
+        Record mood rating (1-10 scale) with emotion and optional notes.
+
+        Multiple mood ratings per day are supported.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - rating
+                - emotion
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                emotion:
+                  type: string
+                  description: Primary emotion
+                notes:
+                  type: string
+                  maxLength: 500
+            example:
+              timestamp: "2026-03-28T14:00:00Z"
+              rating: 7
+              emotion: "calm"
+              notes: "Good afternoon. Feeling centered after lunch with a friend."
+      responses:
+        '201':
+          description: Created - Mood rating saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      moodId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      rating:
+                        type: integer
+                      emotion:
+                        type: string
+                      notes:
+                        type: string
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listMoodRatings
+      tags: [Mood]
+      summary: List mood ratings
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Mood ratings retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        moodId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        rating:
+                          type: integer
+                        emotion:
+                          type: string
+                        notes:
+                          type: string
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude:
+    post:
+      operationId: createGratitudeEntry
+      tags: [Gratitude]
+      summary: Create gratitude entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - content
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                content:
+                  type: string
+                  maxLength: 1000
+                isEphemeral:
+                  type: boolean
+                  default: false
+            example:
+              timestamp: "2026-03-28T07:00:00Z"
+              content: "Grateful for 47 days of sobriety and my sponsor's patience."
+              isEphemeral: false
+      responses:
+        '201':
+          description: Created - Gratitude entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      gratitudeId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      content:
+                        type: string
+                      isEphemeral:
+                        type: boolean
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listGratitudeEntries
+      tags: [Gratitude]
+      summary: List gratitude entries
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Gratitude entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        gratitudeId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        content:
+                          type: string
+                        isEphemeral:
+                          type: boolean
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/phone-calls:
+    post:
+      operationId: createPhoneCallLog
+      tags: [Phone Calls]
+      summary: Log phone call
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - contactType
+                - durationMinutes
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                contactType:
+                  type: string
+                  enum: [sponsor, accountability-partner, counselor, spouse, friend, other]
+                contactId:
+                  type: string
+                  description: Support contact ID (if applicable)
+                direction:
+                  type: string
+                  enum: [outgoing, incoming]
+                  default: outgoing
+                connected:
+                  type: boolean
+                  default: true
+                  description: Whether call was answered
+                durationMinutes:
+                  type: integer
+                  minimum: 0
+                notes:
+                  type: string
+                  maxLength: 500
+            example:
+              timestamp: "2026-03-28T12:30:00Z"
+              contactType: "sponsor"
+              contactId: "c_99999"
+              direction: "outgoing"
+              connected: true
+              durationMinutes: 15
+              notes: "Discussed urge triggers from earlier today"
+      responses:
+        '201':
+          description: Created - Phone call logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      callId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      contactType:
+                        type: string
+                      durationMinutes:
+                        type: integer
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPhoneCallLogs
+      tags: [Phone Calls]
+      summary: List phone call logs
+      parameters:
+        - name: contactType
+          in: query
+          schema:
+            type: string
+            enum: [sponsor, accountability-partner, counselor, spouse, friend, other]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Phone call logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        callId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        contactType:
+                          type: string
+                        direction:
+                          type: string
+                        connected:
+                          type: boolean
+                        durationMinutes:
+                          type: integer
+                        notes:
+                          type: string
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/prayer:
+    post:
+      operationId: createPrayerLog
+      tags: [Prayer]
+      summary: Log prayer activity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - prayerType
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                prayerType:
+                  type: string
+                  enum: [morning, evening, centering, gratitude, petition, intercession, other]
+                content:
+                  type: string
+                  maxLength: 5000
+                durationMinutes:
+                  type: integer
+                  minimum: 0
+                isEphemeral:
+                  type: boolean
+                  default: false
+            example:
+              timestamp: "2026-03-28T06:00:00Z"
+              prayerType: "morning"
+              content: "Lord, grant me strength today..."
+              durationMinutes: 10
+              isEphemeral: false
+      responses:
+        '201':
+          description: Created - Prayer logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      prayerId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      prayerType:
+                        type: string
+                      durationMinutes:
+                        type: integer
+                      isEphemeral:
+                        type: boolean
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPrayerLogs
+      tags: [Prayer]
+      summary: List prayer logs
+      parameters:
+        - name: prayerType
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Prayer logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        prayerId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        prayerType:
+                          type: string
+                        durationMinutes:
+                          type: integer
+                        isEphemeral:
+                          type: boolean
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/meetings:
+    post:
+      operationId: createMeetingLog
+      tags: [Meetings]
+      summary: Log meeting attendance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - meetingType
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                meetingType:
+                  type: string
+                  enum: [SAA, SA, SLAA, CR, AA, NA, Smart_Recovery, other]
+                name:
+                  type: string
+                  maxLength: 200
+                location:
+                  type: string
+                  maxLength: 300
+                durationMinutes:
+                  type: integer
+                  minimum: 0
+                notes:
+                  type: string
+                  maxLength: 1000
+            example:
+              timestamp: "2026-03-28T19:00:00Z"
+              meetingType: "SAA"
+              name: "Tuesday Night Recovery"
+              location: "Community Center"
+              durationMinutes: 60
+              notes: "Shared my story. Felt supported."
+      responses:
+        '201':
+          description: Created - Meeting logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      meetingId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      meetingType:
+                        type: string
+                      name:
+                        type: string
+                      location:
+                        type: string
+                      durationMinutes:
+                        type: integer
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listMeetingLogs
+      tags: [Meetings]
+      summary: List meeting logs
+      parameters:
+        - name: meetingType
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Meeting logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        meetingId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        meetingType:
+                          type: string
+                        name:
+                          type: string
+                        location:
+                          type: string
+                        durationMinutes:
+                          type: integer
+                        notes:
+                          type: string
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise:
+    post:
+      operationId: createExerciseLog
+      tags: [Exercise]
+      summary: Log exercise activity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - type
+                - durationMinutes
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                type:
+                  type: string
+                  description: Exercise type (running, cycling, weightlifting, yoga, etc.)
+                durationMinutes:
+                  type: integer
+                  minimum: 1
+                calories:
+                  type: integer
+                  minimum: 0
+                source:
+                  type: string
+                  enum: [manual, apple-health, google-fit]
+                  default: manual
+                notes:
+                  type: string
+                  maxLength: 500
+            example:
+              timestamp: "2026-03-28T06:30:00Z"
+              type: "running"
+              durationMinutes: 30
+              calories: 320
+              source: "manual"
+      responses:
+        '201':
+          description: Created - Exercise logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      exerciseId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      type:
+                        type: string
+                      durationMinutes:
+                        type: integer
+                      calories:
+                        type: integer
+                      source:
+                        type: string
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listExerciseLogs
+      tags: [Exercise]
+      summary: List exercise logs
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Exercise logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        exerciseId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        type:
+                          type: string
+                        durationMinutes:
+                          type: integer
+                        calories:
+                          type: integer
+                        source:
+                          type: string
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/nutrition:
+    post:
+      operationId: createNutritionLog
+      tags: [Nutrition]
+      summary: Log nutrition entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - mealType
+                - description
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                mealType:
+                  type: string
+                  enum: [breakfast, lunch, dinner, snack]
+                description:
+                  type: string
+                  maxLength: 500
+                healthRating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  description: Self-assessed health rating (1=poor, 5=excellent)
+                notes:
+                  type: string
+                  maxLength: 500
+            example:
+              timestamp: "2026-03-28T12:00:00Z"
+              mealType: "lunch"
+              description: "Grilled chicken salad, water"
+              healthRating: 4
+      responses:
+        '201':
+          description: Created - Nutrition logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      nutritionId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      mealType:
+                        type: string
+                      description:
+                        type: string
+                      healthRating:
+                        type: integer
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listNutritionLogs
+      tags: [Nutrition]
+      summary: List nutrition logs
+      parameters:
+        - name: mealType
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Nutrition logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        nutritionId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        mealType:
+                          type: string
+                        description:
+                          type: string
+                        healthRating:
+                          type: integer
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/devotionals:
+    post:
+      operationId: createDevotionalCompletion
+      tags: [Devotionals]
+      summary: Log devotional completion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - devotionalId
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                devotionalId:
+                  type: string
+                  description: Reference to devotional content item
+                reflection:
+                  type: string
+                  maxLength: 2000
+                scriptureReference:
+                  type: string
+                  description: Key scripture from devotional
+            example:
+              timestamp: "2026-03-28T06:30:00Z"
+              devotionalId: "d_content_001"
+              reflection: "The passage about surrender resonated with my week..."
+              scriptureReference: "Psalm 51:10"
+      responses:
+        '201':
+          description: Created - Devotional completion logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      entryId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      devotionalId:
+                        type: string
+                      scriptureReference:
+                        type: string
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listDevotionalCompletions
+      tags: [Devotionals]
+      summary: List devotional completions
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Devotional completions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entryId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        devotionalId:
+                          type: string
+                        scriptureReference:
+                          type: string
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/integrity-inventory:
+    post:
+      operationId: createIntegrityInventory
+      tags: [Integrity Inventory]
+      summary: Submit daily integrity inventory
+      description: |
+        Record daily integrity inventory with 5 dimensions + perception scores.
+
+        Dimensions: Honesty, Commitments, Secrecy, Amends, Perception
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - responses
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                responses:
+                  type: object
+                  required:
+                    - wasHonestToday
+                    - keptCommitments
+                    - avoidedSecrecy
+                    - madeAmends
+                  properties:
+                    wasHonestToday:
+                      type: boolean
+                    keptCommitments:
+                      type: boolean
+                    avoidedSecrecy:
+                      type: boolean
+                    madeAmends:
+                      type: boolean
+                    perceptionScore:
+                      type: integer
+                      minimum: 1
+                      maximum: 10
+                      description: How others would rate my integrity today
+                    notes:
+                      type: string
+                      maxLength: 1000
+            example:
+              timestamp: "2026-03-28T21:30:00Z"
+              responses:
+                wasHonestToday: true
+                keptCommitments: true
+                avoidedSecrecy: true
+                madeAmends: false
+                perceptionScore: 8
+                notes: "Forgot to follow up on an amends letter."
+      responses:
+        '201':
+          description: Created - Integrity inventory saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      inventoryId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      responses:
+                        type: object
+                      score:
+                        type: integer
+                        description: Computed integrity score (0-5 scale)
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listIntegrityInventories
+      tags: [Integrity Inventory]
+      summary: List integrity inventories
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Integrity inventories retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        inventoryId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        responses:
+                          type: object
+                        score:
+                          type: integer
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in:
+    post:
+      operationId: createActingInLog
+      tags: [Acting-In]
+      summary: Log acting-in behavior
+      description: |
+        Record outer-circle acting-in behavior (positive recovery actions).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - activityType
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                activityType:
+                  type: string
+                  description: Type of acting-in behavior
+                  example: "called-sponsor"
+                description:
+                  type: string
+                  maxLength: 500
+                category:
+                  type: string
+                  enum: [outer-circle, middle-circle-avoided]
+                  default: outer-circle
+            example:
+              timestamp: "2026-03-28T17:00:00Z"
+              activityType: "called-sponsor"
+              description: "Called sponsor when urge hit instead of isolating"
+              category: "outer-circle"
+      responses:
+        '201':
+          description: Created - Acting-in behavior logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      entryId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      activityType:
+                        type: string
+                      description:
+                        type: string
+                      category:
+                        type: string
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listActingInLogs
+      tags: [Acting-In]
+      summary: List acting-in logs
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Acting-in logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entryId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        activityType:
+                          type: string
+                        description:
+                          type: string
+                        category:
+                          type: string
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/post-mortem:
+    post:
+      operationId: createPostMortemAnalysis
+      tags: [Post-Mortem]
+      summary: Create post-relapse analysis
+      description: |
+        Submit post-mortem analysis after a relapse event.
+
+        Includes 6 sections: what happened, early warnings, FASTER stage, emotional state, what would I do differently, action items.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostMortemRequest'
+            example:
+              timestamp: "2026-03-28T23:00:00Z"
+              relapseId: "r_98765"
+              sections:
+                whatHappened: "Browsed social media late at night alone..."
+                earlyWarnings: "Skipped evening check-in, isolated after dinner"
+                fasterStage: "Exhausted"
+                emotionalState: "lonely, bored, tired"
+                whatWouldIDifferently: "Call sponsor before 9pm, avoid phone in bedroom"
+              triggers: ["isolation", "digital", "fatigue", "emotional"]
+              actionItems:
+                - "Set phone charging station outside bedroom"
+                - "Schedule evening sponsor call for next 7 days"
+                - "Update Three Circles inner boundary"
+      responses:
+        '201':
+          description: Created - Post-mortem analysis saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMortemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPostMortemAnalyses
+      tags: [Post-Mortem]
+      summary: List post-mortem analyses
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Post-mortem analyses retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostMortemAnalysis'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/financial:
+    post:
+      operationId: createFinancialEntry
+      tags: [Financial]
+      summary: Log financial tracking entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - category
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                category:
+                  type: string
+                  enum: [expense-tracking, budget-review, debt-payment, savings-goal, financial-amends]
+                amount:
+                  type: number
+                  format: decimal
+                  minimum: 0
+                notes:
+                  type: string
+                  maxLength: 1000
+                flagged:
+                  type: boolean
+                  default: false
+                  description: Flag for counselor review
+            example:
+              timestamp: "2026-03-28T10:00:00Z"
+              category: "expense-tracking"
+              amount: 0
+              notes: "Reviewed monthly budget, no unaccounted spending"
+              flagged: false
+      responses:
+        '201':
+          description: Created - Financial entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      entryId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      category:
+                        type: string
+                      amount:
+                        type: number
+                      flagged:
+                        type: boolean
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listFinancialEntries
+      tags: [Financial]
+      summary: List financial entries
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Financial entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entryId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        category:
+                          type: string
+                        amount:
+                          type: number
+                        notes:
+                          type: string
+                        flagged:
+                          type: boolean
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/step-work:
+    post:
+      operationId: createStepWorkEntry
+      tags: [Step Work]
+      summary: Create 12-step work entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - timestamp
+                - stepNumber
+                - content
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                stepNumber:
+                  type: integer
+                  minimum: 1
+                  maximum: 12
+                title:
+                  type: string
+                  maxLength: 200
+                content:
+                  type: string
+                  maxLength: 10000
+                promptId:
+                  type: string
+                  description: Reference to step work prompt
+                isEphemeral:
+                  type: boolean
+                  default: false
+            example:
+              timestamp: "2026-03-28T20:00:00Z"
+              stepNumber: 4
+              title: "Step 4: Moral Inventory"
+              content: "Looking at resentments toward my father..."
+              promptId: "step4-prompt-3"
+              isEphemeral: false
+      responses:
+        '201':
+          description: Created - Step work entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      entryId:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      stepNumber:
+                        type: integer
+                      title:
+                        type: string
+                      isEphemeral:
+                        type: boolean
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listStepWorkEntries
+      tags: [Step Work]
+      summary: List step work entries
+      parameters:
+        - name: stepNumber
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Step work entries retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        entryId:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                        stepNumber:
+                          type: integer
+                        title:
+                          type: string
+                        isEphemeral:
+                          type: boolean
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/goals:
+    post:
+      operationId: createGoal
+      tags: [Goals]
+      summary: Create recovery goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - category
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                description:
+                  type: string
+                  maxLength: 1000
+                category:
+                  type: string
+                  enum: [sobriety, spiritual, relational, physical, financial, career, other]
+                targetDate:
+                  type: string
+                  format: date
+                  description: Optional target completion date
+                milestones:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      label:
+                        type: string
+                      targetDate:
+                        type: string
+                        format: date
+            example:
+              title: "90-day sobriety milestone"
+              description: "Maintain sobriety for 90 consecutive days"
+              category: "sobriety"
+              targetDate: "2026-05-10"
+              milestones:
+                - label: "30 days"
+                  targetDate: "2026-03-11"
+                - label: "60 days"
+                  targetDate: "2026-04-10"
+                - label: "90 days"
+                  targetDate: "2026-05-10"
+      responses:
+        '201':
+          description: Created - Goal created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      goalId:
+                        type: string
+                      title:
+                        type: string
+                      category:
+                        type: string
+                      status:
+                        type: string
+                        enum: [in-progress, completed, abandoned]
+                      progressPercent:
+                        type: integer
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listGoals
+      tags: [Goals]
+      summary: List recovery goals
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [in-progress, completed, abandoned]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Goals retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        goalId:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        category:
+                          type: string
+                        status:
+                          type: string
+                        targetDate:
+                          type: string
+                          format: date
+                        progressPercent:
+                          type: integer
+                        milestones:
+                          type: array
+                          items:
+                            type: object
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/goals/{goalId}:
+    patch:
+      operationId: updateGoal
+      tags: [Goals]
+      summary: Update goal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 200
+                description:
+                  type: string
+                  maxLength: 1000
+                status:
+                  type: string
+                  enum: [in-progress, completed, abandoned]
+                progressPercent:
+                  type: integer
+                  minimum: 0
+                  maximum: 100
+                milestones:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '200':
+          description: OK - Goal updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      goalId:
+                        type: string
+                      title:
+                        type: string
+                      status:
+                        type: string
+                      progressPercent:
+                        type: integer
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteGoal
+      tags: [Goals]
+      summary: Delete goal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content - Goal deleted
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/spouse-check-in-prep:
+    post:
+      operationId: createSpouseCheckInPrep
+      tags: [Spouse Check-In Prep]
+      summary: Create spouse check-in preparation (FANOS/FITNAP)
+      description: |
+        Prepare for spouse check-in using FANOS (Feelings, Appreciation, Needs, Ownership, Sobriety) or FITNAP framework.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSpouseCheckInPrepRequest'
+            example:
+              timestamp: "2026-03-28T18:00:00Z"
+              format: "FANOS"
+              feelings:
+                primary: "hopeful"
+                secondary: "nervous"
+                notes: "Hopeful about our progress but nervous about the conversation"
+              appreciation: "Thank you for being patient while I work through this"
+              needs: "I need 30 minutes of uninterrupted time to share tonight"
+              ownership: "I take responsibility for not communicating my schedule change yesterday"
+              sobriety: "47 days sober. Had 2 urges this week, both managed."
+      responses:
+        '201':
+          description: Created - Spouse check-in prep saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpouseCheckInPrepResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listSpouseCheckInPreps
+      tags: [Spouse Check-In Prep]
+      summary: List spouse check-in preparations
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [FANOS, FITNAP]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Spouse check-in preps retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SpouseCheckInPrep'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CreateJournalRequest:
+      type: object
+      required:
+        - mode
+        - content
+      properties:
+        mode:
+          type: string
+          enum: [morning, evening, free-form, prompted]
+        content:
+          type: string
+          maxLength: 10000
+        emotionalTags:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        prompt:
+          type: string
+          maxLength: 500
+          description: Journal prompt (if prompted mode)
+        isEphemeral:
+          type: boolean
+          default: false
+          description: Auto-delete after 30 days
+
+    JournalEntry:
+      type: object
+      properties:
+        entryId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        mode:
+          type: string
+        content:
+          type: string
+        emotionalTags:
+          type: array
+          items:
+            type: string
+        prompt:
+          type: string
+        isEphemeral:
+          type: boolean
+        ephemeralDeleteAt:
+          type: string
+          format: date-time
+          nullable: true
+        links:
+          $ref: '#/components/schemas/Links'
+
+    JournalEntryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/JournalEntry'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    CreateEmotionalJournalRequest:
+      type: object
+      required:
+        - timestamp
+        - emotion
+        - activity
+        - intensity
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        emotion:
+          type: string
+          description: Primary emotion
+        activity:
+          type: string
+          maxLength: 500
+          description: What user is doing
+        reason:
+          type: string
+          maxLength: 1000
+          description: Why user feels this way
+        intensity:
+          type: integer
+          minimum: 1
+          maximum: 10
+        copingStrategy:
+          type: string
+          maxLength: 500
+        location:
+          $ref: '#/components/schemas/Location'
+        selfieKey:
+          type: string
+          description: S3 key for optional selfie
+        isEphemeral:
+          type: boolean
+          default: false
+
+    EmotionalJournalEntry:
+      type: object
+      properties:
+        entryId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        emotion:
+          type: string
+        activity:
+          type: string
+        reason:
+          type: string
+        intensity:
+          type: integer
+        copingStrategy:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        selfieKey:
+          type: string
+        isEphemeral:
+          type: boolean
+        ephemeralDeleteAt:
+          type: string
+          format: date-time
+          nullable: true
+        links:
+          $ref: '#/components/schemas/Links'
+
+    EmotionalJournalResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/EmotionalJournalEntry'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    CreateTimeJournalRequest:
+      type: object
+      required:
+        - timestamp
+        - emotion
+        - intensity
+        - activity
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        emotion:
+          type: string
+        intensity:
+          type: integer
+          minimum: 1
+          maximum: 10
+        activity:
+          type: string
+          maxLength: 500
+        needs:
+          type: string
+          maxLength: 500
+        notes:
+          type: string
+          maxLength: 1000
+        location:
+          $ref: '#/components/schemas/Location'
+        sensorData:
+          $ref: '#/components/schemas/SensorData'
+        selfieKey:
+          type: string
+        isEphemeral:
+          type: boolean
+          default: false
+
+    TimeJournalEntry:
+      type: object
+      properties:
+        entryId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        emotion:
+          type: string
+        intensity:
+          type: integer
+        activity:
+          type: string
+        needs:
+          type: string
+        notes:
+          type: string
+        location:
+          $ref: '#/components/schemas/Location'
+        sensorData:
+          $ref: '#/components/schemas/SensorData'
+        selfieKey:
+          type: string
+        isEphemeral:
+          type: boolean
+        links:
+          $ref: '#/components/schemas/Links'
+
+    TimeJournalResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/TimeJournalEntry'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        areaName:
+          type: string
+          description: City or neighborhood name
+        accuracy:
+          type: string
+          enum: [high, medium, low]
+
+    SensorData:
+      type: object
+      properties:
+        motionState:
+          type: string
+          enum: [stationary, walking, running, driving, unknown]
+        batteryLevel:
+          type: integer
+          minimum: 0
+          maximum: 100
+        screenTime:
+          type: integer
+          description: Screen time in minutes (today)
+          nullable: true
+
+    CreateCheckInRequest:
+      type: object
+      required:
+        - type
+        - responses
+      properties:
+        type:
+          type: string
+          enum: [daily, evening, morning]
+        responses:
+          type: object
+          description: Structured check-in responses (questions adapt by recovery stage)
+          additionalProperties: true
+
+    CheckIn:
+      type: object
+      properties:
+        checkInId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        type:
+          type: string
+        responses:
+          type: object
+        score:
+          type: integer
+          description: Computed check-in health score (0-100)
+        colorCode:
+          type: string
+          enum: [green, yellow, red]
+        links:
+          $ref: '#/components/schemas/Links'
+
+    CheckInResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CheckIn'
+        meta:
+          type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            consecutiveDays:
+              type: integer
+
+    CreateFASTERScaleRequest:
+      type: object
+      required:
+        - timestamp
+        - stage
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        stage:
+          type: string
+          enum: [Restoration, Forgetting_Priorities, Anxiety, Speeding_Up, Ticked_Off, Exhausted, Relapse]
+        indicators:
+          type: array
+          items:
+            type: string
+          description: Checked indicators for this stage
+        notes:
+          type: string
+          maxLength: 1000
+
+    FASTERScaleEntry:
+      type: object
+      properties:
+        entryId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        stage:
+          type: string
+        indicators:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        links:
+          $ref: '#/components/schemas/Links'
+
+    FASTERScaleResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/FASTERScaleEntry'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    CreatePCIRequest:
+      type: object
+      required:
+        - timestamp
+        - checkedBehaviors
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        checkedBehaviors:
+          type: array
+          items:
+            type: string
+          description: List of PCI behaviors checked
+          maxItems: 12
+
+    PCIEntry:
+      type: object
+      properties:
+        entryId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        checkedBehaviors:
+          type: array
+          items:
+            type: string
+        score:
+          type: integer
+          description: PCI score (count of checked behaviors)
+        links:
+          $ref: '#/components/schemas/Links'
+
+    PCIResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PCIEntry'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    CreateUrgeLogRequest:
+      type: object
+      required:
+        - addictionId
+        - intensity
+      properties:
+        addictionId:
+          type: string
+        intensity:
+          type: integer
+          minimum: 1
+          maximum: 10
+        triggers:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        notes:
+          type: string
+          maxLength: 2000
+        sobrietyMaintained:
+          type: boolean
+          default: true
+        durationMinutes:
+          type: integer
+          minimum: 0
+
+    UrgeLog:
+      type: object
+      properties:
+        urgeId:
+          type: string
+        addictionId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        intensity:
+          type: integer
+        triggers:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        sobrietyMaintained:
+          type: boolean
+        durationMinutes:
+          type: integer
+        resolved:
+          type: boolean
+        resolutionNotes:
+          type: string
+        links:
+          $ref: '#/components/schemas/Links'
+
+    UrgeLogResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/UrgeLog'
+        meta:
+          type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            followUpScheduled:
+              type: string
+              format: date-time
+              description: Automatic follow-up notification time
+
+    CreatePostMortemRequest:
+      type: object
+      required:
+        - timestamp
+        - relapseId
+        - sections
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        relapseId:
+          type: string
+          description: Reference to relapse record
+        sections:
+          type: object
+          required:
+            - whatHappened
+            - earlyWarnings
+            - fasterStage
+            - emotionalState
+            - whatWouldIDifferently
+          properties:
+            whatHappened:
+              type: string
+              maxLength: 2000
+            earlyWarnings:
+              type: string
+              maxLength: 2000
+            fasterStage:
+              type: string
+            emotionalState:
+              type: string
+              maxLength: 1000
+            whatWouldIDifferently:
+              type: string
+              maxLength: 2000
+        triggers:
+          type: array
+          items:
+            type: string
+          maxItems: 15
+        actionItems:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+
+    PostMortemAnalysis:
+      type: object
+      properties:
+        analysisId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        relapseId:
+          type: string
+        sections:
+          type: object
+        triggers:
+          type: array
+          items:
+            type: string
+        actionItems:
+          type: array
+          items:
+            type: string
+        links:
+          $ref: '#/components/schemas/Links'
+
+    PostMortemResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PostMortemAnalysis'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    CreateSpouseCheckInPrepRequest:
+      type: object
+      required:
+        - timestamp
+        - format
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        format:
+          type: string
+          enum: [FANOS, FITNAP]
+        feelings:
+          type: object
+          properties:
+            primary:
+              type: string
+            secondary:
+              type: string
+            notes:
+              type: string
+              maxLength: 1000
+        appreciation:
+          type: string
+          maxLength: 1000
+        needs:
+          type: string
+          maxLength: 1000
+        ownership:
+          type: string
+          maxLength: 1000
+        sobriety:
+          type: string
+          maxLength: 1000
+
+    SpouseCheckInPrep:
+      type: object
+      properties:
+        entryId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        format:
+          type: string
+        feelings:
+          type: object
+        appreciation:
+          type: string
+        needs:
+          type: string
+        ownership:
+          type: string
+        sobriety:
+          type: string
+        links:
+          $ref: '#/components/schemas/Links'
+
+    SpouseCheckInPrepResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/SpouseCheckInPrep'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+        first:
+          type: string
+          format: uri
+          nullable: true
+        last:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

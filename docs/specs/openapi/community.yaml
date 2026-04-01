@@ -1,0 +1,747 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Community & Support Network API
+  version: 1.0.0
+  description: |
+    Support network and accountability partner management API for Regal Recovery.
+
+    Features:
+    - Add accountability partners and support contacts
+    - Granular, opt-in permission management (per-category data sharing)
+    - Private messaging between user and support contacts
+    - Broadcast messages to entire support network
+    - Silent notification revocation for sensitive contacts
+
+    Privacy-first: All data sharing requires explicit opt-in per category.
+    Contacts cannot request permissions—user must grant them proactively.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Contacts
+    description: Support contact management
+  - name: Permissions
+    description: Granular data sharing permissions
+  - name: Messaging
+    description: Direct and broadcast messaging
+
+paths:
+  /community/contacts:
+    get:
+      operationId: listContacts
+      tags: [Contacts]
+      summary: List support contacts
+      description: |
+        Retrieve all support contacts for authenticated user.
+
+        Returns contacts with their current permission levels and relationship status.
+      responses:
+        '200':
+          description: OK - Contacts retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SupportContact'
+                  meta:
+                    type: object
+                    properties:
+                      totalContacts:
+                        type: integer
+              example:
+                data:
+                  - id: contact_1a2b3c4d
+                    userId: u_2b3c4d5e
+                    displayName: John Smith
+                    relationship: sponsor
+                    email: john@example.com
+                    phoneNumber: "+1-555-123-4567"
+                    notificationsEnabled: true
+                    permissions:
+                      canViewStreaks: true
+                      canViewCheckIns: true
+                      canViewUrges: false
+                      canViewJournals: false
+                      canViewLocation: false
+                      canViewAssessments: false
+                    createdAt: "2026-03-15T10:00:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/community/contacts/contact_1a2b3c4d
+                      messages: https://api.regalrecovery.com/v1/community/messages/contact_1a2b3c4d
+                meta:
+                  totalContacts: 3
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createContact
+      tags: [Contacts]
+      summary: Add support contact
+      description: |
+        Add a new support contact (accountability partner, sponsor, therapist, friend).
+
+        Contact is added with no permissions by default.
+        User must explicitly grant permissions via PUT /community/permissions/{contactId}.
+
+        If invited user doesn't have a Regal Recovery account, they receive an invitation email.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContactRequest'
+            example:
+              email: sponsor@example.com
+              displayName: John Smith
+              relationship: sponsor
+              phoneNumber: "+1-555-123-4567"
+      responses:
+        '201':
+          description: Created - Contact added successfully
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SupportContact'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflict - Contact already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /community/contacts/{id}:
+    delete:
+      operationId: deleteContact
+      tags: [Contacts]
+      summary: Remove support contact
+      description: |
+        Remove support contact from network.
+
+        Revokes all permissions and deletes message history.
+        Contact can no longer view any shared data.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^contact_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Contact removed
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /community/contacts/{id}/revoke-silent:
+    post:
+      operationId: revokeSilentNotifications
+      tags: [Contacts]
+      summary: Silently revoke notifications
+      description: |
+        Disable notifications to contact without removing them from network.
+
+        Used when user wants to stop alerting contact (e.g., abusive relationship)
+        but doesn't want to trigger confrontation by removing them entirely.
+
+        Contact remains in network with current permissions but receives no alerts.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^contact_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Notifications silently revoked
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /community/permissions/{contactId}:
+    get:
+      operationId: getContactPermissions
+      tags: [Permissions]
+      summary: Get contact permissions
+      description: |
+        Retrieve current permission settings for a contact.
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^contact_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Permissions retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Permission'
+              example:
+                data:
+                  contactId: contact_1a2b3c4d
+                  canViewStreaks: true
+                  canViewCheckIns: true
+                  canViewUrges: false
+                  canViewJournals: false
+                  canViewLocation: false
+                  canViewAssessments: false
+                  updatedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateContactPermissions
+      tags: [Permissions]
+      summary: Update contact permissions
+      description: |
+        Update permission settings for a contact.
+
+        All permissions default to false (opt-in required).
+        User controls exactly which categories of data are shared.
+
+        Permission categories:
+        - canViewStreaks: Sobriety streak data
+        - canViewCheckIns: Daily check-ins
+        - canViewUrges: Urge logs and intensity
+        - canViewJournals: Private journal entries
+        - canViewLocation: Real-time location during high-risk situations
+        - canViewAssessments: Clinical assessment results
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^contact_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePermissionRequest'
+            example:
+              canViewStreaks: true
+              canViewCheckIns: true
+              canViewUrges: true
+              canViewJournals: false
+              canViewLocation: false
+              canViewAssessments: false
+      responses:
+        '200':
+          description: OK - Permissions updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Permission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /community/messages/{contactId}:
+    get:
+      operationId: getMessages
+      tags: [Messaging]
+      summary: Get message thread with contact
+      description: |
+        Retrieve message history with a specific contact.
+
+        Returns paginated message thread in chronological order.
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^contact_[a-zA-Z0-9]+$'
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Messages retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: sendMessage
+      tags: [Messaging]
+      summary: Send message to contact
+      description: |
+        Send a private message to a support contact.
+
+        Contact receives push notification and email alert.
+      parameters:
+        - name: contactId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^contact_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+            example:
+              text: "I'm struggling today and could use some encouragement."
+      responses:
+        '201':
+          description: Created - Message sent
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /community/broadcasts:
+    post:
+      operationId: sendBroadcast
+      tags: [Messaging]
+      summary: Send broadcast to all contacts
+      description: |
+        Send a message to all support contacts at once.
+
+        All contacts with notifications enabled receive the message.
+        Useful for urgent situations or celebration announcements.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+                urgency:
+                  type: string
+                  enum: [normal, high, emergency]
+                  default: normal
+            example:
+              text: "I'm celebrating 90 days sober today! Thank you all for your support."
+              urgency: normal
+      responses:
+        '201':
+          description: Created - Broadcast sent
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Broadcast'
+              example:
+                data:
+                  id: bcast_1a2b3c4d
+                  text: "I'm celebrating 90 days sober today!"
+                  urgency: normal
+                  recipientCount: 3
+                  sentAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    SupportContact:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^contact_[a-zA-Z0-9]+$'
+        userId:
+          type: string
+          pattern: '^u_[a-zA-Z0-9]+$'
+          description: Regal Recovery user ID (null if not registered)
+          nullable: true
+        displayName:
+          type: string
+        relationship:
+          type: string
+          enum: [sponsor, accountability-partner, therapist, family, friend, pastor, other]
+        email:
+          type: string
+          format: email
+        phoneNumber:
+          type: string
+          nullable: true
+        notificationsEnabled:
+          type: boolean
+          description: Whether contact receives notifications
+        permissions:
+          $ref: '#/components/schemas/Permission'
+        createdAt:
+          type: string
+          format: date-time
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            messages:
+              type: string
+              format: uri
+
+    CreateContactRequest:
+      type: object
+      required:
+        - email
+        - displayName
+        - relationship
+      properties:
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        relationship:
+          type: string
+          enum: [sponsor, accountability-partner, therapist, family, friend, pastor, other]
+        phoneNumber:
+          type: string
+          nullable: true
+
+    Permission:
+      type: object
+      properties:
+        contactId:
+          type: string
+          pattern: '^contact_[a-zA-Z0-9]+$'
+        canViewStreaks:
+          type: boolean
+          default: false
+        canViewCheckIns:
+          type: boolean
+          default: false
+        canViewUrges:
+          type: boolean
+          default: false
+        canViewJournals:
+          type: boolean
+          default: false
+        canViewLocation:
+          type: boolean
+          default: false
+        canViewAssessments:
+          type: boolean
+          default: false
+        updatedAt:
+          type: string
+          format: date-time
+
+    UpdatePermissionRequest:
+      type: object
+      properties:
+        canViewStreaks:
+          type: boolean
+        canViewCheckIns:
+          type: boolean
+        canViewUrges:
+          type: boolean
+        canViewJournals:
+          type: boolean
+        canViewLocation:
+          type: boolean
+        canViewAssessments:
+          type: boolean
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^msg_[a-zA-Z0-9]+$'
+        contactId:
+          type: string
+        senderId:
+          type: string
+          description: User ID of sender
+        senderName:
+          type: string
+        text:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Broadcast:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^bcast_[a-zA-Z0-9]+$'
+        text:
+          type: string
+        urgency:
+          type: string
+          enum: [normal, high, emergency]
+        recipientCount:
+          type: integer
+          description: Number of contacts who received the broadcast
+        sentAt:
+          type: string
+          format: date-time
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+          properties:
+            pointer:
+              type: string
+            parameter:
+              type: string
+            header:
+              type: string
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

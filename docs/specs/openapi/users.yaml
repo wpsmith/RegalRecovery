@@ -1,0 +1,888 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Users API
+  version: 1.0.0
+  description: |
+    User profile and settings management API.
+
+    Manages:
+    - User profile (name, demographics, recovery details)
+    - App settings (preferences, notifications, privacy)
+    - Addiction tracking (primary and secondary addictions)
+    - Privacy controls (data sharing permissions)
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Profile
+    description: User profile management
+  - name: Settings
+    description: App settings and preferences
+  - name: Privacy
+    description: Privacy controls and data sharing
+  - name: Addictions
+    description: Addiction tracking and management
+
+paths:
+  /users/me:
+    get:
+      operationId: getMyProfile
+      tags: [Profile]
+      summary: Get authenticated user profile
+      description: |
+        Retrieve the full profile for the authenticated user.
+
+        Includes demographics, recovery details, and links to related resources.
+      responses:
+        '200':
+          description: OK - Profile retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+              example:
+                data:
+                  userId: u_1a2b3c4d
+                  email: john@example.com
+                  displayName: John
+                  role: User
+                  primaryAddictionId: a_67890
+                  preferredLanguage: en
+                  preferredBibleVersion: NIV
+                  emailVerified: true
+                  biometricEnabled: true
+                  birthYear: 1985
+                  gender: male
+                  maritalStatus: married
+                  timeZone: America/New_York
+                  links:
+                    self: https://api.regalrecovery.com/v1/users/me
+                    profile: https://api.regalrecovery.com/v1/users/me/profile
+                    settings: https://api.regalrecovery.com/v1/users/me/settings
+                    addictions: https://api.regalrecovery.com/v1/users/me/addictions
+                    streaks: https://api.regalrecovery.com/v1/tracking/streaks
+                meta:
+                  createdAt: "2026-03-28T10:00:00Z"
+                  modifiedAt: "2026-03-28T14:30:00Z"
+                  version: "1.0.0"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateMyProfile
+      tags: [Profile]
+      summary: Update authenticated user profile
+      description: |
+        Partial update of user profile using JSON Merge Patch (RFC 7396).
+
+        Only provided fields are updated; missing fields are not changed.
+        Use If-Match header for optimistic locking.
+      parameters:
+        - name: If-Match
+          in: header
+          schema:
+            type: string
+          description: ETag from previous GET for optimistic locking
+          example: "\"33a64df551425fcc55e4d42a148795d9f25f89d4\""
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+            example:
+              displayName: Jonathan
+              gender: male
+              birthYear: 1985
+              maritalStatus: married
+      responses:
+        '200':
+          description: OK - Profile updated successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/settings:
+    get:
+      operationId: getMySettings
+      tags: [Settings]
+      summary: Get user settings
+      description: |
+        Retrieve app settings and preferences.
+
+        Includes notification preferences, content preferences, and UI settings.
+      responses:
+        '200':
+          description: OK - Settings retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsResponse'
+              example:
+                data:
+                  notifications:
+                    dailyReminder: true
+                    dailyReminderTime: "08:00"
+                    eveningCheckIn: true
+                    eveningCheckInTime: "20:00"
+                    milestoneAlerts: true
+                    urgeFollowUp: true
+                    supportNetworkUpdates: true
+                    pushEnabled: true
+                    emailEnabled: false
+                    smsEnabled: false
+                  content:
+                    preferredBibleVersion: NIV
+                    contentLanguage: en
+                    devotionalFrequency: daily
+                    affirmationFrequency: daily
+                  ui:
+                    theme: system
+                    colorScheme: blue
+                    compactMode: false
+                    showCalendarHeatmap: true
+                  privacy:
+                    profileVisibility: contacts-only
+                    allowMilestoneSharing: true
+                    shareLocationForMeetings: true
+                  links:
+                    self: https://api.regalrecovery.com/v1/users/me/settings
+                meta:
+                  modifiedAt: "2026-03-28T14:30:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateMySettings
+      tags: [Settings]
+      summary: Update user settings
+      description: |
+        Full replacement of user settings.
+
+        All setting fields must be provided (PUT semantics).
+        Use PATCH if you want to update only specific fields.
+      parameters:
+        - name: If-Match
+          in: header
+          schema:
+            type: string
+          description: ETag for optimistic locking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettings'
+      responses:
+        '200':
+          description: OK - Settings updated successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            ETag:
+              $ref: '#/components/headers/ETag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/privacy:
+    get:
+      operationId: getMyPrivacySettings
+      tags: [Privacy]
+      summary: Get privacy settings
+      description: |
+        Retrieve privacy controls and data sharing preferences.
+      responses:
+        '200':
+          description: OK - Privacy settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySettingsResponse'
+              example:
+                data:
+                  profileVisibility: contacts-only
+                  allowMilestoneSharing: true
+                  shareLocationForMeetings: true
+                  allowAnonymousStorySubmission: true
+                  dataRetention:
+                    ephemeralJournalDays: 30
+                    autoDeleteUrges: false
+                  links:
+                    self: https://api.regalrecovery.com/v1/users/me/privacy
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateMyPrivacySettings
+      tags: [Privacy]
+      summary: Update privacy settings
+      description: |
+        Full replacement of privacy settings.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivacySettings'
+      responses:
+        '200':
+          description: OK - Privacy settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacySettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/addictions:
+    get:
+      operationId: getMyAddictions
+      tags: [Addictions]
+      summary: List user addictions
+      description: |
+        Retrieve all addictions being tracked by the user.
+
+        Primary addiction is marked with isPrimary=true.
+      responses:
+        '200':
+          description: OK - Addictions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Addiction'
+                  meta:
+                    type: object
+                    properties:
+                      totalAddictions:
+                        type: integer
+              example:
+                data:
+                  - addictionId: a_67890
+                    type: sex-addiction
+                    sobrietyStartDate: "2026-01-15"
+                    isPrimary: true
+                    currentStreakDays: 73
+                    links:
+                      self: https://api.regalrecovery.com/v1/users/me/addictions/a_67890
+                      streak: https://api.regalrecovery.com/v1/tracking/streaks/a_67890
+                  - addictionId: a_67891
+                    type: pornography
+                    sobrietyStartDate: "2026-01-15"
+                    isPrimary: false
+                    currentStreakDays: 73
+                    links:
+                      self: https://api.regalrecovery.com/v1/users/me/addictions/a_67891
+                      streak: https://api.regalrecovery.com/v1/tracking/streaks/a_67891
+                meta:
+                  totalAddictions: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: addMyAddiction
+      tags: [Addictions]
+      summary: Add addiction to track
+      description: |
+        Add a new addiction to track.
+
+        User can track multiple addictions simultaneously.
+        Only one addiction can be marked as primary.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAddictionRequest'
+            example:
+              type: pornography
+              sobrietyStartDate: "2026-01-15"
+              isPrimary: false
+      responses:
+        '201':
+          description: Created - Addiction added successfully
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the created addiction resource
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Addiction'
+                  meta:
+                    type: object
+                    properties:
+                      createdAt:
+                        type: string
+                        format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Conflict - Addiction type already tracked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/addictions/{addictionId}:
+    delete:
+      operationId: deleteMyAddiction
+      tags: [Addictions]
+      summary: Remove addiction tracking
+      description: |
+        Stop tracking an addiction.
+
+        Historical data (streaks, milestones) is preserved but no longer displayed.
+        Cannot delete primary addiction without setting a new primary first.
+      parameters:
+        - name: addictionId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          example: a_67891
+      responses:
+        '204':
+          description: No Content - Addiction removed successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '400':
+          description: Bad Request - Cannot delete primary addiction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me/addictions/{addictionId}/primary:
+    patch:
+      operationId: setPrimaryAddiction
+      tags: [Addictions]
+      summary: Set primary addiction
+      description: |
+        Mark an addiction as primary.
+
+        Only one addiction can be primary at a time.
+        Previous primary is automatically changed to non-primary.
+      parameters:
+        - name: addictionId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          example: a_67891
+      responses:
+        '200':
+          description: OK - Primary addiction updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Addiction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    ETag:
+      description: Entity tag for optimistic locking
+      schema:
+        type: string
+        example: "\"33a64df551425fcc55e4d42a148795d9f25f89d4\""
+
+  schemas:
+    UserProfileResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/UserProfile'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    UserProfile:
+      type: object
+      properties:
+        userId:
+          type: string
+          pattern: '^u_[a-zA-Z0-9]+$'
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [User, Spouse, Sponsor, Coach, Counselor, Admin]
+        primaryAddictionId:
+          type: string
+          pattern: '^a_[a-zA-Z0-9]+$'
+        preferredLanguage:
+          type: string
+          enum: [en, es, fr, de, pt]
+        preferredBibleVersion:
+          type: string
+          enum: [NIV, ESV, KJV, NKJV, NLT, MSG]
+        emailVerified:
+          type: boolean
+        biometricEnabled:
+          type: boolean
+        birthYear:
+          type: integer
+          minimum: 1900
+          maximum: 2024
+        gender:
+          type: string
+          enum: [male, female, non-binary, prefer-not-to-say]
+        maritalStatus:
+          type: string
+          enum: [single, married, divorced, widowed, separated, prefer-not-to-say]
+        timeZone:
+          type: string
+          description: IANA time zone identifier
+          example: America/New_York
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            profile:
+              type: string
+              format: uri
+            settings:
+              type: string
+              format: uri
+            addictions:
+              type: string
+              format: uri
+            streaks:
+              type: string
+              format: uri
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 50
+        preferredLanguage:
+          type: string
+          enum: [en, es, fr, de, pt]
+        preferredBibleVersion:
+          type: string
+          enum: [NIV, ESV, KJV, NKJV, NLT, MSG]
+        birthYear:
+          type: integer
+          minimum: 1900
+          maximum: 2024
+        gender:
+          type: string
+          enum: [male, female, non-binary, prefer-not-to-say]
+        maritalStatus:
+          type: string
+          enum: [single, married, divorced, widowed, separated, prefer-not-to-say]
+        timeZone:
+          type: string
+
+    UserSettingsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/UserSettings'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    UserSettings:
+      type: object
+      properties:
+        notifications:
+          type: object
+          properties:
+            dailyReminder:
+              type: boolean
+            dailyReminderTime:
+              type: string
+              pattern: '^\d{2}:\d{2}$'
+              example: "08:00"
+            eveningCheckIn:
+              type: boolean
+            eveningCheckInTime:
+              type: string
+              pattern: '^\d{2}:\d{2}$'
+              example: "20:00"
+            milestoneAlerts:
+              type: boolean
+            urgeFollowUp:
+              type: boolean
+            supportNetworkUpdates:
+              type: boolean
+            pushEnabled:
+              type: boolean
+            emailEnabled:
+              type: boolean
+            smsEnabled:
+              type: boolean
+        content:
+          type: object
+          properties:
+            preferredBibleVersion:
+              type: string
+              enum: [NIV, ESV, KJV, NKJV, NLT, MSG]
+            contentLanguage:
+              type: string
+              enum: [en, es, fr, de, pt]
+            devotionalFrequency:
+              type: string
+              enum: [daily, weekly, never]
+            affirmationFrequency:
+              type: string
+              enum: [daily, weekly, never]
+        ui:
+          type: object
+          properties:
+            theme:
+              type: string
+              enum: [light, dark, system]
+            colorScheme:
+              type: string
+              enum: [blue, green, purple, orange]
+            compactMode:
+              type: boolean
+            showCalendarHeatmap:
+              type: boolean
+        privacy:
+          type: object
+          properties:
+            profileVisibility:
+              type: string
+              enum: [public, contacts-only, private]
+            allowMilestoneSharing:
+              type: boolean
+            shareLocationForMeetings:
+              type: boolean
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    PrivacySettingsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PrivacySettings'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    PrivacySettings:
+      type: object
+      properties:
+        profileVisibility:
+          type: string
+          enum: [public, contacts-only, private]
+        allowMilestoneSharing:
+          type: boolean
+        shareLocationForMeetings:
+          type: boolean
+        allowAnonymousStorySubmission:
+          type: boolean
+        dataRetention:
+          type: object
+          properties:
+            ephemeralJournalDays:
+              type: integer
+              minimum: 1
+              maximum: 365
+              description: Days before ephemeral journal entries are auto-deleted
+            autoDeleteUrges:
+              type: boolean
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    Addiction:
+      type: object
+      properties:
+        addictionId:
+          type: string
+          pattern: '^a_[a-zA-Z0-9]+$'
+        type:
+          type: string
+          enum:
+            - sex-addiction
+            - pornography
+            - alcohol
+            - drugs
+            - gambling
+            - eating
+            - gaming
+            - other
+        sobrietyStartDate:
+          type: string
+          format: date
+        isPrimary:
+          type: boolean
+        currentStreakDays:
+          type: integer
+          minimum: 0
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            streak:
+              type: string
+              format: uri
+
+    AddAddictionRequest:
+      type: object
+      required:
+        - type
+        - sobrietyStartDate
+      properties:
+        type:
+          type: string
+          enum:
+            - sex-addiction
+            - pornography
+            - alcohol
+            - drugs
+            - gambling
+            - eating
+            - gaming
+            - other
+        sobrietyStartDate:
+          type: string
+          format: date
+          description: Cannot be in the future
+        isPrimary:
+          type: boolean
+          default: false
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        version:
+          type: string
+          example: "1.0.0"
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    PreconditionFailed:
+      description: Precondition Failed - ETag mismatch (optimistic locking failure)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

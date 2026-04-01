@@ -1,0 +1,137 @@
+{
+  "activities": [
+    {
+      "activityId": "act_checkin_001",
+      "userId": "u_alex",
+      "type": "check-in",
+      "timestamp": "2026-03-31T08:00:00Z",
+      "data": {
+        "physicalHealth": 8,
+        "emotionalWellbeing": 7,
+        "spiritualConnection": 9,
+        "supportNetwork": 8,
+        "cravings": 2,
+        "note": "Great start to the day"
+      }
+    },
+    {
+      "activityId": "act_checkin_002",
+      "userId": "u_alex",
+      "type": "check-in",
+      "timestamp": "2026-03-30T08:15:00Z",
+      "data": {
+        "physicalHealth": 7,
+        "emotionalWellbeing": 6,
+        "spiritualConnection": 8,
+        "supportNetwork": 7,
+        "cravings": 3,
+        "note": "Feeling steady"
+      }
+    },
+    {
+      "activityId": "act_checkin_003",
+      "userId": "u_alex",
+      "type": "check-in",
+      "timestamp": "2026-03-29T08:30:00Z",
+      "data": {
+        "physicalHealth": 9,
+        "emotionalWellbeing": 8,
+        "spiritualConnection": 9,
+        "supportNetwork": 9,
+        "cravings": 1,
+        "note": "Strong day yesterday"
+      }
+    },
+    {
+      "activityId": "act_checkin_004",
+      "userId": "u_alex",
+      "type": "check-in",
+      "timestamp": "2026-03-28T08:00:00Z",
+      "data": {
+        "physicalHealth": 6,
+        "emotionalWellbeing": 5,
+        "spiritualConnection": 7,
+        "supportNetwork": 6,
+        "cravings": 5,
+        "note": "Struggled a bit"
+      }
+    },
+    {
+      "activityId": "act_checkin_005",
+      "userId": "u_alex",
+      "type": "check-in",
+      "timestamp": "2026-03-27T08:10:00Z",
+      "data": {
+        "physicalHealth": 8,
+        "emotionalWellbeing": 7,
+        "spiritualConnection": 8,
+        "supportNetwork": 8,
+        "cravings": 2,
+        "note": "Good recovery momentum"
+      }
+    },
+    {
+      "activityId": "act_urge_001",
+      "userId": "u_alex",
+      "type": "urge-log",
+      "timestamp": "2026-03-30T21:30:00Z",
+      "data": {
+        "intensity": 6,
+        "triggers": ["emotional", "digital"],
+        "duration": 15,
+        "sobrietyMaintained": true,
+        "coping": ["prayer", "called sponsor"]
+      }
+    },
+    {
+      "activityId": "act_urge_002",
+      "userId": "u_alex",
+      "type": "urge-log",
+      "timestamp": "2026-03-28T22:00:00Z",
+      "data": {
+        "intensity": 7,
+        "triggers": ["stress", "fatigue"],
+        "duration": 25,
+        "sobrietyMaintained": true,
+        "coping": ["walked outside", "breathing exercises"]
+      }
+    },
+    {
+      "activityId": "act_urge_003",
+      "userId": "u_alex",
+      "type": "urge-log",
+      "timestamp": "2026-03-26T20:15:00Z",
+      "data": {
+        "intensity": 5,
+        "triggers": ["boredom"],
+        "duration": 10,
+        "sobrietyMaintained": true,
+        "coping": ["read devotional", "texted accountability partner"]
+      }
+    },
+    {
+      "activityId": "act_journal_001",
+      "userId": "u_alex",
+      "type": "journal",
+      "timestamp": "2026-03-29T21:00:00Z",
+      "data": {
+        "title": "Reflecting on progress",
+        "content": "270 days feels like a miracle. Each day is a gift.",
+        "mood": "grateful",
+        "tags": ["gratitude", "milestone"]
+      }
+    },
+    {
+      "activityId": "act_journal_002",
+      "userId": "u_alex",
+      "type": "journal",
+      "timestamp": "2026-03-25T19:30:00Z",
+      "data": {
+        "title": "Tough evening",
+        "content": "Had some difficult moments but pushed through with prayer.",
+        "mood": "challenged",
+        "tags": ["struggle", "victory"]
+      }
+    }
+  ]
+}

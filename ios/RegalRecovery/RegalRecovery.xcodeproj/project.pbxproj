@@ -1,0 +1,948 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		10000001 /* RegalRecoveryApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000001 /* RegalRecoveryApp.swift */; };
+		10000002 /* "Color+RR.swift in Sources" */ = {isa = PBXBuildFile; fileRef = 20000002 /* "Color+RR.swift" */; };
+		10000003 /* ColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000003 /* ColorTheme.swift */; };
+		10000004 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000004 /* Typography.swift */; };
+		10000005 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000005 /* Components.swift */; };
+		10000006 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000006 /* MockData.swift */; };
+		10000117 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000117 /* ContentData.swift */; };
+		10000007 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000007 /* Types.swift */; };
+		10000008 /* RRModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000008 /* RRModels.swift */; };
+		10000009 /* RepositoryProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000009 /* RepositoryProtocols.swift */; };
+		10000010 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000010 /* SeedData.swift */; };
+		10000011 /* SwiftDataRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000011 /* SwiftDataRepositories.swift */; };
+		10000012 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000012 /* APIClient.swift */; };
+		10000013 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000013 /* APIError.swift */; };
+		10000014 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000014 /* APIModels.swift */; };
+		10000015 /* Endpoints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000015 /* Endpoints.swift */; };
+		10000016 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000016 /* AuthService.swift */; };
+		10000017 /* AuthUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000017 /* AuthUser.swift */; };
+		10000018 /* BiometricService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000018 /* BiometricService.swift */; };
+		10000019 /* KeychainHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000019 /* KeychainHelper.swift */; };
+		10000020 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000020 /* NetworkMonitor.swift */; };
+		10000021 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000021 /* SyncEngine.swift */; };
+		10000022 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000022 /* ServiceContainer.swift */; };
+		10000023 /* FeatureFlagService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000023 /* FeatureFlagService.swift */; };
+		10000024 /* ActivityError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000024 /* ActivityError.swift */; };
+		10000025 /* ActivityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000025 /* ActivityViewModel.swift */; };
+		10000026 /* AffirmationsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000026 /* AffirmationsViewModel.swift */; };
+		10000027 /* CheckInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000027 /* CheckInViewModel.swift */; };
+		10000028 /* CommitmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000028 /* CommitmentViewModel.swift */; };
+		10000029 /* DevotionalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000029 /* DevotionalViewModel.swift */; };
+		10000030 /* EmotionalJournalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000030 /* EmotionalJournalViewModel.swift */; };
+		10000031 /* ExerciseViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000031 /* ExerciseViewModel.swift */; };
+		10000032 /* FASTERScaleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000032 /* FASTERScaleViewModel.swift */; };
+		10000033 /* FeatureFlagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000033 /* FeatureFlagViewModel.swift */; };
+		10000034 /* GoalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000034 /* GoalViewModel.swift */; };
+		10000035 /* GratitudeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000035 /* GratitudeViewModel.swift */; };
+		10000036 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000036 /* HomeViewModel.swift */; };
+		10000037 /* JournalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000037 /* JournalViewModel.swift */; };
+		10000038 /* MeetingFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000038 /* MeetingFinderViewModel.swift */; };
+		10000039 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000039 /* MeetingViewModel.swift */; };
+		10000040 /* MoodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000040 /* MoodViewModel.swift */; };
+		10000041 /* NotificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000041 /* NotificationViewModel.swift */; };
+		10000042 /* PhoneCallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000042 /* PhoneCallViewModel.swift */; };
+		10000043 /* PrayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000043 /* PrayerViewModel.swift */; };
+		10000044 /* PrivacyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000044 /* PrivacyViewModel.swift */; };
+		10000045 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000045 /* ProfileViewModel.swift */; };
+		10000046 /* ProgressViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000046 /* ProgressViewModel.swift */; };
+		10000047 /* SpouseCheckInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000047 /* SpouseCheckInViewModel.swift */; };
+		10000048 /* StepWorkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000048 /* StepWorkViewModel.swift */; };
+		10000049 /* StreakViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000049 /* StreakViewModel.swift */; };
+		10000050 /* ThreeCirclesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000050 /* ThreeCirclesViewModel.swift */; };
+		10000051 /* TimeJournalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000051 /* TimeJournalViewModel.swift */; };
+		10000052 /* UrgeLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000052 /* UrgeLogViewModel.swift */; };
+		10000053 /* ActivitiesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000053 /* ActivitiesListView.swift */; };
+		10000054 /* AffirmationLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000054 /* AffirmationLogView.swift */; };
+		10000055 /* EmotionalJournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000055 /* EmotionalJournalView.swift */; };
+		10000056 /* EveningReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000056 /* EveningReviewView.swift */; };
+		10000057 /* ExerciseLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000057 /* ExerciseLogView.swift */; };
+		10000058 /* FASTERScaleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000058 /* FASTERScaleView.swift */; };
+		10000059 /* GratitudeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000059 /* GratitudeListView.swift */; };
+		10000060 /* JournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000060 /* JournalView.swift */; };
+		10000061 /* MeetingsAttendedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000061 /* MeetingsAttendedView.swift */; };
+		10000062 /* MoodRatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000062 /* MoodRatingView.swift */; };
+		10000063 /* MorningCommitmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000063 /* MorningCommitmentView.swift */; };
+		10000064 /* PhoneCallLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000064 /* PhoneCallLogView.swift */; };
+		10000065 /* PostMortemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000065 /* PostMortemView.swift */; };
+		10000066 /* PrayerLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000066 /* PrayerLogView.swift */; };
+		10000067 /* RecoveryCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000067 /* RecoveryCheckInView.swift */; };
+		10000068 /* SobrietyCommitmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000068 /* SobrietyCommitmentView.swift */; };
+		10000069 /* SpouseCheckInPrepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000069 /* SpouseCheckInPrepView.swift */; };
+		10000070 /* StepWorkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000070 /* StepWorkView.swift */; };
+		10000071 /* TimeJournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000071 /* TimeJournalView.swift */; };
+		10000072 /* UrgeLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000072 /* UrgeLogView.swift */; };
+		10000073 /* WeeklyGoalsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000073 /* WeeklyGoalsView.swift */; };
+		10000074 /* AffirmationDeckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000074 /* AffirmationDeckView.swift */; };
+		10000075 /* ContentTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000075 /* ContentTabView.swift */; };
+		10000076 /* CrisisHotlinesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000076 /* CrisisHotlinesView.swift */; };
+		10000077 /* DevotionalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000077 /* DevotionalView.swift */; };
+		10000078 /* GlossaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000078 /* GlossaryView.swift */; };
+		10000079 /* PrayersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000079 /* PrayersView.swift */; };
+		10000080 /* ResourcesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000080 /* ResourcesView.swift */; };
+		10000081 /* BreathingExerciseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000081 /* BreathingExerciseView.swift */; };
+		10000082 /* EmergencyFABButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000082 /* EmergencyFABButton.swift */; };
+		10000083 /* EmergencyOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000083 /* EmergencyOverlayView.swift */; };
+		10000084 /* CommitmentsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000084 /* CommitmentsCard.swift */; };
+		10000085 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000085 /* HomeView.swift */; };
+		10000086 /* MilestoneBadgesRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000086 /* MilestoneBadgesRow.swift */; };
+		10000087 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000087 /* ProgressView.swift */; };
+		10000088 /* QuickActionsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000088 /* QuickActionsRow.swift */; };
+		10000089 /* RecentActivityFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000089 /* RecentActivityFeed.swift */; };
+		10000090 /* StreakHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000090 /* StreakHeroCard.swift */; };
+		10000091 /* AccountSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000091 /* AccountSetupView.swift */; };
+		10000092 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000092 /* OnboardingFlow.swift */; };
+		10000093 /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000093 /* PermissionsView.swift */; };
+		10000094 /* RecoverySetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000094 /* RecoverySetupView.swift */; };
+		10000095 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000095 /* WelcomeView.swift */; };
+		10000096 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000096 /* AboutView.swift */; };
+		10000097 /* AddictionManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000097 /* AddictionManagementView.swift */; };
+		10000098 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000098 /* AppearanceSettingsView.swift */; };
+		10000099 /* DebugFlagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000099 /* DebugFlagsView.swift */; };
+		10000100 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000100 /* NotificationSettingsView.swift */; };
+		10000101 /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000101 /* PrivacySettingsView.swift */; };
+		10000102 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000102 /* ProfileEditView.swift */; };
+		10000103 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000103 /* SettingsView.swift */; };
+		10000104 /* SupportNetworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000104 /* SupportNetworkView.swift */; };
+		10000105 /* FASTERScaleToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000105 /* FASTERScaleToolView.swift */; };
+		10000106 /* MeetingFinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000106 /* MeetingFinderView.swift */; };
+		10000107 /* PanicButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000107 /* PanicButtonView.swift */; };
+		10000108 /* ThreeCirclesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000108 /* ThreeCirclesView.swift */; };
+		10000109 /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000109 /* ToolsView.swift */; };
+		10000110 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000116 /* ContentData.swift */; };
+		10000200 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000200 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		30000001 /* RegalRecovery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegalRecovery.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		20000001 /* RegalRecoveryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegalRecoveryApp.swift; sourceTree = "<group>"; };
+		20000002 /* Color+RR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+RR.swift"; sourceTree = "<group>"; };
+		20000003 /* ColorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTheme.swift; sourceTree = "<group>"; };
+		20000004 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		20000005 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
+		20000006 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
+		20000117 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
+		20000007 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		20000008 /* RRModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRModels.swift; sourceTree = "<group>"; };
+		20000009 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
+		20000010 /* SeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedData.swift; sourceTree = "<group>"; };
+		20000011 /* SwiftDataRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataRepositories.swift; sourceTree = "<group>"; };
+		20000012 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		20000013 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+		20000014 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
+		20000015 /* Endpoints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoints.swift; sourceTree = "<group>"; };
+		20000016 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		20000017 /* AuthUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthUser.swift; sourceTree = "<group>"; };
+		20000018 /* BiometricService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricService.swift; sourceTree = "<group>"; };
+		20000019 /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
+		20000020 /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		20000021 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
+		20000022 /* ServiceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceContainer.swift; sourceTree = "<group>"; };
+		20000023 /* FeatureFlagService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagService.swift; sourceTree = "<group>"; };
+		20000024 /* ActivityError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityError.swift; sourceTree = "<group>"; };
+		20000025 /* ActivityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityViewModel.swift; sourceTree = "<group>"; };
+		20000026 /* AffirmationsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsViewModel.swift; sourceTree = "<group>"; };
+		20000027 /* CheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInViewModel.swift; sourceTree = "<group>"; };
+		20000028 /* CommitmentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentViewModel.swift; sourceTree = "<group>"; };
+		20000029 /* DevotionalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevotionalViewModel.swift; sourceTree = "<group>"; };
+		20000030 /* EmotionalJournalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalJournalViewModel.swift; sourceTree = "<group>"; };
+		20000031 /* ExerciseViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseViewModel.swift; sourceTree = "<group>"; };
+		20000032 /* FASTERScaleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERScaleViewModel.swift; sourceTree = "<group>"; };
+		20000033 /* FeatureFlagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagViewModel.swift; sourceTree = "<group>"; };
+		20000034 /* GoalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalViewModel.swift; sourceTree = "<group>"; };
+		20000035 /* GratitudeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeViewModel.swift; sourceTree = "<group>"; };
+		20000036 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		20000037 /* JournalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalViewModel.swift; sourceTree = "<group>"; };
+		20000038 /* MeetingFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingFinderViewModel.swift; sourceTree = "<group>"; };
+		20000039 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
+		20000040 /* MoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodViewModel.swift; sourceTree = "<group>"; };
+		20000041 /* NotificationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewModel.swift; sourceTree = "<group>"; };
+		20000042 /* PhoneCallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCallViewModel.swift; sourceTree = "<group>"; };
+		20000043 /* PrayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerViewModel.swift; sourceTree = "<group>"; };
+		20000044 /* PrivacyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyViewModel.swift; sourceTree = "<group>"; };
+		20000045 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
+		20000046 /* ProgressViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressViewModel.swift; sourceTree = "<group>"; };
+		20000047 /* SpouseCheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpouseCheckInViewModel.swift; sourceTree = "<group>"; };
+		20000048 /* StepWorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepWorkViewModel.swift; sourceTree = "<group>"; };
+		20000049 /* StreakViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModel.swift; sourceTree = "<group>"; };
+		20000050 /* ThreeCirclesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesViewModel.swift; sourceTree = "<group>"; };
+		20000051 /* TimeJournalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalViewModel.swift; sourceTree = "<group>"; };
+		20000052 /* UrgeLogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModel.swift; sourceTree = "<group>"; };
+		20000053 /* ActivitiesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesListView.swift; sourceTree = "<group>"; };
+		20000054 /* AffirmationLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationLogView.swift; sourceTree = "<group>"; };
+		20000055 /* EmotionalJournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalJournalView.swift; sourceTree = "<group>"; };
+		20000056 /* EveningReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReviewView.swift; sourceTree = "<group>"; };
+		20000057 /* ExerciseLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseLogView.swift; sourceTree = "<group>"; };
+		20000058 /* FASTERScaleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERScaleView.swift; sourceTree = "<group>"; };
+		20000059 /* GratitudeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeListView.swift; sourceTree = "<group>"; };
+		20000060 /* JournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalView.swift; sourceTree = "<group>"; };
+		20000061 /* MeetingsAttendedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingsAttendedView.swift; sourceTree = "<group>"; };
+		20000062 /* MoodRatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodRatingView.swift; sourceTree = "<group>"; };
+		20000063 /* MorningCommitmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorningCommitmentView.swift; sourceTree = "<group>"; };
+		20000064 /* PhoneCallLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCallLogView.swift; sourceTree = "<group>"; };
+		20000065 /* PostMortemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemView.swift; sourceTree = "<group>"; };
+		20000066 /* PrayerLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLogView.swift; sourceTree = "<group>"; };
+		20000067 /* RecoveryCheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryCheckInView.swift; sourceTree = "<group>"; };
+		20000068 /* SobrietyCommitmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SobrietyCommitmentView.swift; sourceTree = "<group>"; };
+		20000069 /* SpouseCheckInPrepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpouseCheckInPrepView.swift; sourceTree = "<group>"; };
+		20000070 /* StepWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepWorkView.swift; sourceTree = "<group>"; };
+		20000071 /* TimeJournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalView.swift; sourceTree = "<group>"; };
+		20000072 /* UrgeLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogView.swift; sourceTree = "<group>"; };
+		20000073 /* WeeklyGoalsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyGoalsView.swift; sourceTree = "<group>"; };
+		20000074 /* AffirmationDeckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationDeckView.swift; sourceTree = "<group>"; };
+		20000075 /* ContentTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentTabView.swift; sourceTree = "<group>"; };
+		20000076 /* CrisisHotlinesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrisisHotlinesView.swift; sourceTree = "<group>"; };
+		20000077 /* DevotionalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevotionalView.swift; sourceTree = "<group>"; };
+		20000078 /* GlossaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlossaryView.swift; sourceTree = "<group>"; };
+		20000079 /* PrayersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayersView.swift; sourceTree = "<group>"; };
+		20000080 /* ResourcesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourcesView.swift; sourceTree = "<group>"; };
+		20000081 /* BreathingExerciseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreathingExerciseView.swift; sourceTree = "<group>"; };
+		20000082 /* EmergencyFABButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyFABButton.swift; sourceTree = "<group>"; };
+		20000083 /* EmergencyOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyOverlayView.swift; sourceTree = "<group>"; };
+		20000084 /* CommitmentsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentsCard.swift; sourceTree = "<group>"; };
+		20000085 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		20000086 /* MilestoneBadgesRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilestoneBadgesRow.swift; sourceTree = "<group>"; };
+		20000087 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		20000088 /* QuickActionsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsRow.swift; sourceTree = "<group>"; };
+		20000089 /* RecentActivityFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentActivityFeed.swift; sourceTree = "<group>"; };
+		20000090 /* StreakHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakHeroCard.swift; sourceTree = "<group>"; };
+		20000091 /* AccountSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSetupView.swift; sourceTree = "<group>"; };
+		20000092 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
+		20000093 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
+		20000094 /* RecoverySetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoverySetupView.swift; sourceTree = "<group>"; };
+		20000095 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
+		20000096 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
+		20000097 /* AddictionManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddictionManagementView.swift; sourceTree = "<group>"; };
+		20000098 /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
+		20000099 /* DebugFlagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugFlagsView.swift; sourceTree = "<group>"; };
+		20000100 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
+		20000101 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
+		20000102 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
+		20000103 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		20000104 /* SupportNetworkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportNetworkView.swift; sourceTree = "<group>"; };
+		20000105 /* FASTERScaleToolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERScaleToolView.swift; sourceTree = "<group>"; };
+		20000106 /* MeetingFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingFinderView.swift; sourceTree = "<group>"; };
+		20000107 /* PanicButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanicButtonView.swift; sourceTree = "<group>"; };
+		20000108 /* ThreeCirclesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesView.swift; sourceTree = "<group>"; };
+		20000109 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
+		20000110 /* AffirmationsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsViewModelTests.swift; sourceTree = "<group>"; };
+		20000111 /* CheckInViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInViewModelTests.swift; sourceTree = "<group>"; };
+		20000112 /* EmotionalJournalViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalJournalViewModelTests.swift; sourceTree = "<group>"; };
+		20000113 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
+		20000114 /* StreakViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModelTests.swift; sourceTree = "<group>"; };
+		20000115 /* UrgeLogViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModelTests.swift; sourceTree = "<group>"; };
+		20000116 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
+		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		40000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		50000001 = {
+			isa = PBXGroup;
+			children = (
+				50000002 /* RegalRecovery */,
+				50000003 /* Products */,
+				50000004 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		50000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				30000001 /* RegalRecovery.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		50000004 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		50000002 /* RegalRecovery */ = {
+			isa = PBXGroup;
+			children = (
+				20000001 /* RegalRecoveryApp.swift */,
+				20000200 /* Assets.xcassets */,
+				20000201 /* Info.plist */,
+				50000010 /* Theme */,
+				50000011 /* Models */,
+				50000012 /* Data */,
+				50000020 /* Services */,
+				50000030 /* ViewModels */,
+				50000040 /* Views */,
+				50000060 /* Tests */,
+			);
+			path = RegalRecovery;
+			sourceTree = "<group>";
+		};
+		50000010 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				20000002 /* Color+RR.swift */,
+				20000003 /* ColorTheme.swift */,
+				20000005 /* Components.swift */,
+				20000004 /* Typography.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		50000011 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				20000116 /* ContentData.swift */,
+				20000117 /* ContentData.swift */,
+				20000006 /* MockData.swift */,
+				20000007 /* Types.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		50000012 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				50000013 /* Models */,
+				50000014 /* Repositories */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		50000013 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				20000008 /* RRModels.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		50000014 /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				20000009 /* RepositoryProtocols.swift */,
+				20000010 /* SeedData.swift */,
+				20000011 /* SwiftDataRepositories.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		50000020 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				50000021 /* API */,
+				50000022 /* Auth */,
+				50000023 /* Sync */,
+				20000022 /* ServiceContainer.swift */,
+				20000023 /* FeatureFlagService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		50000021 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				20000012 /* APIClient.swift */,
+				20000013 /* APIError.swift */,
+				20000014 /* APIModels.swift */,
+				20000015 /* Endpoints.swift */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		50000022 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				20000016 /* AuthService.swift */,
+				20000017 /* AuthUser.swift */,
+				20000018 /* BiometricService.swift */,
+				20000019 /* KeychainHelper.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		50000023 /* Sync */ = {
+			isa = PBXGroup;
+			children = (
+				20000020 /* NetworkMonitor.swift */,
+				20000021 /* SyncEngine.swift */,
+			);
+			path = Sync;
+			sourceTree = "<group>";
+		};
+		50000030 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				20000024 /* ActivityError.swift */,
+				20000025 /* ActivityViewModel.swift */,
+				20000026 /* AffirmationsViewModel.swift */,
+				20000027 /* CheckInViewModel.swift */,
+				20000028 /* CommitmentViewModel.swift */,
+				20000029 /* DevotionalViewModel.swift */,
+				20000030 /* EmotionalJournalViewModel.swift */,
+				20000031 /* ExerciseViewModel.swift */,
+				20000032 /* FASTERScaleViewModel.swift */,
+				20000033 /* FeatureFlagViewModel.swift */,
+				20000034 /* GoalViewModel.swift */,
+				20000035 /* GratitudeViewModel.swift */,
+				20000036 /* HomeViewModel.swift */,
+				20000037 /* JournalViewModel.swift */,
+				20000038 /* MeetingFinderViewModel.swift */,
+				20000039 /* MeetingViewModel.swift */,
+				20000040 /* MoodViewModel.swift */,
+				20000041 /* NotificationViewModel.swift */,
+				20000042 /* PhoneCallViewModel.swift */,
+				20000043 /* PrayerViewModel.swift */,
+				20000044 /* PrivacyViewModel.swift */,
+				20000045 /* ProfileViewModel.swift */,
+				20000046 /* ProgressViewModel.swift */,
+				20000047 /* SpouseCheckInViewModel.swift */,
+				20000048 /* StepWorkViewModel.swift */,
+				20000049 /* StreakViewModel.swift */,
+				20000050 /* ThreeCirclesViewModel.swift */,
+				20000051 /* TimeJournalViewModel.swift */,
+				20000052 /* UrgeLogViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		50000040 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				50000041 /* Activities */,
+				50000042 /* Content */,
+				50000043 /* Emergency */,
+				50000044 /* Home */,
+				50000045 /* Onboarding */,
+				50000046 /* Settings */,
+				50000047 /* Tools */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		50000041 /* Activities */ = {
+			isa = PBXGroup;
+			children = (
+				20000053 /* ActivitiesListView.swift */,
+				20000054 /* AffirmationLogView.swift */,
+				20000055 /* EmotionalJournalView.swift */,
+				20000056 /* EveningReviewView.swift */,
+				20000057 /* ExerciseLogView.swift */,
+				20000058 /* FASTERScaleView.swift */,
+				20000059 /* GratitudeListView.swift */,
+				20000060 /* JournalView.swift */,
+				20000061 /* MeetingsAttendedView.swift */,
+				20000062 /* MoodRatingView.swift */,
+				20000063 /* MorningCommitmentView.swift */,
+				20000064 /* PhoneCallLogView.swift */,
+				20000065 /* PostMortemView.swift */,
+				20000066 /* PrayerLogView.swift */,
+				20000067 /* RecoveryCheckInView.swift */,
+				20000068 /* SobrietyCommitmentView.swift */,
+				20000069 /* SpouseCheckInPrepView.swift */,
+				20000070 /* StepWorkView.swift */,
+				20000071 /* TimeJournalView.swift */,
+				20000072 /* UrgeLogView.swift */,
+				20000073 /* WeeklyGoalsView.swift */,
+			);
+			path = Activities;
+			sourceTree = "<group>";
+		};
+		50000042 /* Content */ = {
+			isa = PBXGroup;
+			children = (
+				20000074 /* AffirmationDeckView.swift */,
+				20000075 /* ContentTabView.swift */,
+				20000076 /* CrisisHotlinesView.swift */,
+				20000077 /* DevotionalView.swift */,
+				20000078 /* GlossaryView.swift */,
+				20000079 /* PrayersView.swift */,
+				20000080 /* ResourcesView.swift */,
+			);
+			path = Content;
+			sourceTree = "<group>";
+		};
+		50000043 /* Emergency */ = {
+			isa = PBXGroup;
+			children = (
+				20000081 /* BreathingExerciseView.swift */,
+				20000082 /* EmergencyFABButton.swift */,
+				20000083 /* EmergencyOverlayView.swift */,
+			);
+			path = Emergency;
+			sourceTree = "<group>";
+		};
+		50000044 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				20000084 /* CommitmentsCard.swift */,
+				20000085 /* HomeView.swift */,
+				20000086 /* MilestoneBadgesRow.swift */,
+				20000087 /* ProgressView.swift */,
+				20000088 /* QuickActionsRow.swift */,
+				20000089 /* RecentActivityFeed.swift */,
+				20000090 /* StreakHeroCard.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		50000045 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				20000091 /* AccountSetupView.swift */,
+				20000092 /* OnboardingFlow.swift */,
+				20000093 /* PermissionsView.swift */,
+				20000094 /* RecoverySetupView.swift */,
+				20000095 /* WelcomeView.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		50000046 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				20000096 /* AboutView.swift */,
+				20000097 /* AddictionManagementView.swift */,
+				20000098 /* AppearanceSettingsView.swift */,
+				20000099 /* DebugFlagsView.swift */,
+				20000100 /* NotificationSettingsView.swift */,
+				20000101 /* PrivacySettingsView.swift */,
+				20000102 /* ProfileEditView.swift */,
+				20000103 /* SettingsView.swift */,
+				20000104 /* SupportNetworkView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		50000047 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				20000105 /* FASTERScaleToolView.swift */,
+				20000106 /* MeetingFinderView.swift */,
+				20000107 /* PanicButtonView.swift */,
+				20000108 /* ThreeCirclesView.swift */,
+				20000109 /* ToolsView.swift */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		50000060 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				50000061 /* Unit */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		50000061 /* Unit */ = {
+			isa = PBXGroup;
+			children = (
+				20000110 /* AffirmationsViewModelTests.swift */,
+				20000111 /* CheckInViewModelTests.swift */,
+				20000112 /* EmotionalJournalViewModelTests.swift */,
+				20000113 /* ProfileViewModelTests.swift */,
+				20000114 /* StreakViewModelTests.swift */,
+				20000115 /* UrgeLogViewModelTests.swift */,
+			);
+			path = Unit;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		60000001 /* RegalRecovery */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 80000002 /* Build configuration list for PBXNativeTarget "RegalRecovery" */;
+			buildPhases = (
+				70000001 /* Sources */,
+				40000001 /* Frameworks */,
+				70000002 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RegalRecovery;
+			productName = RegalRecovery;
+			productReference = 30000001 /* RegalRecovery.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		50000099 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 80000001 /* Build configuration list for PBXProject "RegalRecovery" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 50000001;
+			productRefGroup = 50000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				60000001 /* RegalRecovery */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		70000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10000200 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		70000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				10000001 /* RegalRecoveryApp.swift in Sources */,
+				10000002 /* "Color+RR.swift in Sources" */,
+				10000003 /* ColorTheme.swift in Sources */,
+				10000004 /* Typography.swift in Sources */,
+				10000005 /* Components.swift in Sources */,
+				10000006 /* MockData.swift in Sources */,
+				10000117 /* ContentData.swift in Sources */,
+				10000007 /* Types.swift in Sources */,
+				10000008 /* RRModels.swift in Sources */,
+				10000009 /* RepositoryProtocols.swift in Sources */,
+				10000010 /* SeedData.swift in Sources */,
+				10000011 /* SwiftDataRepositories.swift in Sources */,
+				10000012 /* APIClient.swift in Sources */,
+				10000013 /* APIError.swift in Sources */,
+				10000014 /* APIModels.swift in Sources */,
+				10000015 /* Endpoints.swift in Sources */,
+				10000016 /* AuthService.swift in Sources */,
+				10000017 /* AuthUser.swift in Sources */,
+				10000018 /* BiometricService.swift in Sources */,
+				10000019 /* KeychainHelper.swift in Sources */,
+				10000020 /* NetworkMonitor.swift in Sources */,
+				10000021 /* SyncEngine.swift in Sources */,
+				10000022 /* ServiceContainer.swift in Sources */,
+				10000023 /* FeatureFlagService.swift in Sources */,
+				10000024 /* ActivityError.swift in Sources */,
+				10000025 /* ActivityViewModel.swift in Sources */,
+				10000026 /* AffirmationsViewModel.swift in Sources */,
+				10000027 /* CheckInViewModel.swift in Sources */,
+				10000028 /* CommitmentViewModel.swift in Sources */,
+				10000029 /* DevotionalViewModel.swift in Sources */,
+				10000030 /* EmotionalJournalViewModel.swift in Sources */,
+				10000031 /* ExerciseViewModel.swift in Sources */,
+				10000032 /* FASTERScaleViewModel.swift in Sources */,
+				10000033 /* FeatureFlagViewModel.swift in Sources */,
+				10000034 /* GoalViewModel.swift in Sources */,
+				10000035 /* GratitudeViewModel.swift in Sources */,
+				10000036 /* HomeViewModel.swift in Sources */,
+				10000037 /* JournalViewModel.swift in Sources */,
+				10000038 /* MeetingFinderViewModel.swift in Sources */,
+				10000039 /* MeetingViewModel.swift in Sources */,
+				10000040 /* MoodViewModel.swift in Sources */,
+				10000041 /* NotificationViewModel.swift in Sources */,
+				10000042 /* PhoneCallViewModel.swift in Sources */,
+				10000043 /* PrayerViewModel.swift in Sources */,
+				10000044 /* PrivacyViewModel.swift in Sources */,
+				10000045 /* ProfileViewModel.swift in Sources */,
+				10000046 /* ProgressViewModel.swift in Sources */,
+				10000047 /* SpouseCheckInViewModel.swift in Sources */,
+				10000048 /* StepWorkViewModel.swift in Sources */,
+				10000049 /* StreakViewModel.swift in Sources */,
+				10000050 /* ThreeCirclesViewModel.swift in Sources */,
+				10000051 /* TimeJournalViewModel.swift in Sources */,
+				10000052 /* UrgeLogViewModel.swift in Sources */,
+				10000053 /* ActivitiesListView.swift in Sources */,
+				10000054 /* AffirmationLogView.swift in Sources */,
+				10000055 /* EmotionalJournalView.swift in Sources */,
+				10000056 /* EveningReviewView.swift in Sources */,
+				10000057 /* ExerciseLogView.swift in Sources */,
+				10000058 /* FASTERScaleView.swift in Sources */,
+				10000059 /* GratitudeListView.swift in Sources */,
+				10000060 /* JournalView.swift in Sources */,
+				10000061 /* MeetingsAttendedView.swift in Sources */,
+				10000062 /* MoodRatingView.swift in Sources */,
+				10000063 /* MorningCommitmentView.swift in Sources */,
+				10000064 /* PhoneCallLogView.swift in Sources */,
+				10000065 /* PostMortemView.swift in Sources */,
+				10000066 /* PrayerLogView.swift in Sources */,
+				10000067 /* RecoveryCheckInView.swift in Sources */,
+				10000068 /* SobrietyCommitmentView.swift in Sources */,
+				10000069 /* SpouseCheckInPrepView.swift in Sources */,
+				10000070 /* StepWorkView.swift in Sources */,
+				10000071 /* TimeJournalView.swift in Sources */,
+				10000072 /* UrgeLogView.swift in Sources */,
+				10000073 /* WeeklyGoalsView.swift in Sources */,
+				10000074 /* AffirmationDeckView.swift in Sources */,
+				10000075 /* ContentTabView.swift in Sources */,
+				10000076 /* CrisisHotlinesView.swift in Sources */,
+				10000077 /* DevotionalView.swift in Sources */,
+				10000078 /* GlossaryView.swift in Sources */,
+				10000079 /* PrayersView.swift in Sources */,
+				10000080 /* ResourcesView.swift in Sources */,
+				10000081 /* BreathingExerciseView.swift in Sources */,
+				10000082 /* EmergencyFABButton.swift in Sources */,
+				10000083 /* EmergencyOverlayView.swift in Sources */,
+				10000084 /* CommitmentsCard.swift in Sources */,
+				10000085 /* HomeView.swift in Sources */,
+				10000086 /* MilestoneBadgesRow.swift in Sources */,
+				10000087 /* ProgressView.swift in Sources */,
+				10000088 /* QuickActionsRow.swift in Sources */,
+				10000089 /* RecentActivityFeed.swift in Sources */,
+				10000090 /* StreakHeroCard.swift in Sources */,
+				10000091 /* AccountSetupView.swift in Sources */,
+				10000092 /* OnboardingFlow.swift in Sources */,
+				10000093 /* PermissionsView.swift in Sources */,
+				10000094 /* RecoverySetupView.swift in Sources */,
+				10000095 /* WelcomeView.swift in Sources */,
+				10000096 /* AboutView.swift in Sources */,
+				10000097 /* AddictionManagementView.swift in Sources */,
+				10000098 /* AppearanceSettingsView.swift in Sources */,
+				10000099 /* DebugFlagsView.swift in Sources */,
+				10000100 /* NotificationSettingsView.swift in Sources */,
+				10000101 /* PrivacySettingsView.swift in Sources */,
+				10000102 /* ProfileEditView.swift in Sources */,
+				10000103 /* SettingsView.swift in Sources */,
+				10000104 /* SupportNetworkView.swift in Sources */,
+				10000105 /* FASTERScaleToolView.swift in Sources */,
+				10000106 /* MeetingFinderView.swift in Sources */,
+				10000107 /* PanicButtonView.swift in Sources */,
+				10000108 /* ThreeCirclesView.swift in Sources */,
+				10000109 /* ToolsView.swift in Sources */,
+				10000110 /* ContentData.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		90000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		90000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		90000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RegalRecovery/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.regalrecovery.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		90000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = NO;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RegalRecovery/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.regalrecovery.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		80000001 /* Build configuration list for PBXProject "RegalRecovery" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				90000001 /* Debug */,
+				90000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		80000002 /* Build configuration list for PBXNativeTarget "RegalRecovery" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				90000003 /* Debug */,
+				90000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 50000099 /* Project object */;
+}

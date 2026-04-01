@@ -1,0 +1,514 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Third-Party Integrations API
+  version: 1.0.0
+  description: |
+    Third-party integration API for Regal Recovery.
+
+    Integrations:
+    - Apple Health & Google Fit (sleep, steps, heart rate)
+    - Calendar sync (Google Calendar, Apple Calendar)
+    - SAA/SA meeting finder (nearby meetings, meeting details)
+
+    All integrations require explicit user authorization via OAuth 2.0.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Health Sync
+    description: Apple Health and Google Fit integration
+  - name: Calendar
+    description: Calendar synchronization
+  - name: Meetings
+    description: SAA/SA meeting finder
+
+paths:
+  /integrations/health/sync:
+    post:
+      operationId: syncHealthData
+      tags: [Health Sync]
+      summary: Sync health data
+      description: |
+        Submit health data from Apple Health or Google Fit.
+
+        Client aggregates health metrics and syncs to backend for analytics.
+        Includes sleep duration, quality, steps, heart rate, and workouts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HealthSyncPayload'
+            example:
+              platform: ios
+              dataPoints:
+                - type: sleep
+                  date: "2026-03-28"
+                  value: 7.5
+                  unit: hours
+                  metadata:
+                    quality: good
+                    startTime: "2026-03-27T23:00:00Z"
+                    endTime: "2026-03-28T06:30:00Z"
+                - type: steps
+                  date: "2026-03-28"
+                  value: 8542
+                  unit: steps
+                - type: heart-rate
+                  date: "2026-03-28"
+                  value: 72
+                  unit: bpm
+                  metadata:
+                    resting: true
+      responses:
+        '204':
+          description: No Content - Health data synced successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /integrations/health/status:
+    get:
+      operationId: getHealthSyncStatus
+      tags: [Health Sync]
+      summary: Get health sync status
+      description: |
+        Retrieve health integration status and last sync timestamp.
+
+        Shows whether Apple Health or Google Fit is connected and syncing.
+      responses:
+        '200':
+          description: OK - Health sync status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      platform:
+                        type: string
+                        enum: [ios, android, none]
+                      isConnected:
+                        type: boolean
+                      lastSyncAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      dataTypes:
+                        type: array
+                        items:
+                          type: string
+                          enum: [sleep, steps, heart-rate, workouts]
+              example:
+                data:
+                  platform: ios
+                  isConnected: true
+                  lastSyncAt: "2026-03-28T10:00:00Z"
+                  dataTypes: [sleep, steps, heart-rate]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /integrations/calendar/tomorrow:
+    get:
+      operationId: getCalendarTomorrow
+      tags: [Calendar]
+      summary: Get tomorrow's calendar events
+      description: |
+        Retrieve calendar events for tomorrow to enable AI agent planning.
+
+        Agent uses calendar data to suggest optimal times for recovery activities.
+        Requires Google Calendar or Apple Calendar authorization.
+      responses:
+        '200':
+          description: OK - Calendar events retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CalendarEvent'
+              example:
+                data:
+                  - id: evt_1a2b3c4d
+                    title: "Team Meeting"
+                    startTime: "2026-03-29T10:00:00Z"
+                    endTime: "2026-03-29T11:00:00Z"
+                    isAllDay: false
+                  - id: evt_2b3c4d5e
+                    title: "SAA Meeting"
+                    startTime: "2026-03-29T19:00:00Z"
+                    endTime: "2026-03-29T20:00:00Z"
+                    isAllDay: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Calendar authorization required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /integrations/meetings/nearby:
+    get:
+      operationId: findNearbyMeetings
+      tags: [Meetings]
+      summary: Find nearby recovery meetings
+      description: |
+        Search for SAA/SA meetings near a location.
+
+        Returns meetings within specified radius sorted by distance.
+        Includes meeting details, times, format (in-person/virtual), and contact info.
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+          description: Latitude
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: number
+            format: float
+          description: Longitude
+        - name: radius
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+          description: Search radius in miles
+        - name: day
+          in: query
+          schema:
+            type: string
+            enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+          description: Filter by day of week
+      responses:
+        '200':
+          description: OK - Nearby meetings found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Meeting'
+              example:
+                data:
+                  - id: mtg_1a2b3c4d
+                    name: "Monday Night Recovery Group"
+                    type: saa
+                    format: in-person
+                    day: monday
+                    time: "19:00"
+                    duration: 90
+                    address:
+                      street: "123 Main St"
+                      city: "Seattle"
+                      state: "WA"
+                      zip: "98101"
+                      country: US
+                    location:
+                      lat: 47.6062
+                      lon: -122.3321
+                    distance: 2.4
+                    distanceUnit: miles
+                    contactPhone: "+1-555-123-4567"
+                    notes: "Open meeting, newcomers welcome"
+                    links:
+                      self: https://api.regalrecovery.com/v1/integrations/meetings/mtg_1a2b3c4d
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /integrations/meetings/{id}:
+    get:
+      operationId: getMeetingDetails
+      tags: [Meetings]
+      summary: Get meeting details
+      description: |
+        Retrieve detailed information for a specific meeting.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^mtg_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Meeting details retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Meeting'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    HealthSyncPayload:
+      type: object
+      required:
+        - platform
+        - dataPoints
+      properties:
+        platform:
+          type: string
+          enum: [ios, android]
+        dataPoints:
+          type: array
+          items:
+            type: object
+            required:
+              - type
+              - date
+              - value
+              - unit
+            properties:
+              type:
+                type: string
+                enum: [sleep, steps, heart-rate, workouts]
+              date:
+                type: string
+                format: date
+              value:
+                type: number
+                format: float
+              unit:
+                type: string
+                enum: [hours, steps, bpm, minutes, calories]
+              metadata:
+                type: object
+                description: Additional context (varies by data type)
+
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^evt_[a-zA-Z0-9]+$'
+        title:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        isAllDay:
+          type: boolean
+        location:
+          type: string
+          nullable: true
+
+    Meeting:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^mtg_[a-zA-Z0-9]+$'
+        name:
+          type: string
+        type:
+          type: string
+          enum: [saa, sa, slaa, aa, na]
+          description: Meeting fellowship type
+        format:
+          type: string
+          enum: [in-person, virtual, hybrid]
+        day:
+          type: string
+          enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+        time:
+          type: string
+          pattern: '^\d{2}:\d{2}$'
+          description: Meeting time in HH:MM format (24-hour)
+        duration:
+          type: integer
+          description: Duration in minutes
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            zip:
+              type: string
+            country:
+              type: string
+        location:
+          type: object
+          properties:
+            lat:
+              type: number
+              format: float
+            lon:
+              type: number
+              format: float
+        distance:
+          type: number
+          format: float
+          nullable: true
+          description: Distance from search location
+        distanceUnit:
+          type: string
+          enum: [miles, kilometers]
+        virtualUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Virtual meeting URL (Zoom, etc.)
+        contactPhone:
+          type: string
+          nullable: true
+        contactEmail:
+          type: string
+          format: email
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,531 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Notifications API
+  version: 1.0.0
+  description: |
+    Notification management API for Regal Recovery.
+
+    Features:
+    - Granular notification preferences per category
+    - Quiet hours configuration
+    - Notification history with read/unread status
+    - Snooze and dismiss capabilities
+    - Push notification, email, and SMS delivery channels
+
+    All notifications respect user preferences and quiet hours.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Preferences
+    description: Notification preference management
+  - name: History
+    description: Notification history and interactions
+
+paths:
+  /notifications/preferences:
+    get:
+      operationId: getNotificationPreferences
+      tags: [Preferences]
+      summary: Get notification preferences
+      description: |
+        Retrieve user's notification preferences.
+
+        Includes per-category toggles, delivery channels, and quiet hours configuration.
+      responses:
+        '200':
+          description: OK - Preferences retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/NotificationPreferences'
+              example:
+                data:
+                  categories:
+                    checkInReminders:
+                      enabled: true
+                      channels: [push, email]
+                    milestoneAchievements:
+                      enabled: true
+                      channels: [push, email]
+                    urgentSupportRequests:
+                      enabled: true
+                      channels: [push, sms, email]
+                    dailyAffirmations:
+                      enabled: true
+                      channels: [push]
+                    weeklyReports:
+                      enabled: true
+                      channels: [email]
+                    accountabilityAlerts:
+                      enabled: true
+                      channels: [push, email]
+                    contentUpdates:
+                      enabled: false
+                      channels: []
+                  quietHours:
+                    enabled: true
+                    startTime: "22:00"
+                    endTime: "07:00"
+                    timezone: America/New_York
+                  lastModifiedAt: "2026-03-15T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateNotificationPreferences
+      tags: [Preferences]
+      summary: Update notification preferences
+      description: |
+        Update user's notification preferences.
+
+        Full replace semantics for preferences object.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferences'
+            example:
+              categories:
+                checkInReminders:
+                  enabled: true
+                  channels: [push]
+                milestoneAchievements:
+                  enabled: true
+                  channels: [push, email]
+                urgentSupportRequests:
+                  enabled: true
+                  channels: [push, sms, email]
+                dailyAffirmations:
+                  enabled: true
+                  channels: [push]
+                weeklyReports:
+                  enabled: true
+                  channels: [email]
+                accountabilityAlerts:
+                  enabled: true
+                  channels: [push]
+                contentUpdates:
+                  enabled: false
+                  channels: []
+              quietHours:
+                enabled: true
+                startTime: "22:00"
+                endTime: "07:00"
+                timezone: America/New_York
+      responses:
+        '200':
+          description: OK - Preferences updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/NotificationPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /notifications/history:
+    get:
+      operationId: getNotificationHistory
+      tags: [History]
+      summary: Get notification history
+      description: |
+        Retrieve notification history with read/unread status.
+
+        Returns paginated list of notifications in reverse chronological order.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: unreadOnly
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Filter to unread notifications only
+      responses:
+        '200':
+          description: OK - Notification history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Notification'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+                      unreadCount:
+                        type: integer
+              example:
+                data:
+                  - id: notif_1a2b3c4d
+                    category: milestoneAchievements
+                    title: "30 Days Sober!"
+                    message: "Congratulations! You've reached 30 days of sobriety."
+                    priority: normal
+                    isRead: false
+                    createdAt: "2026-03-28T10:00:00Z"
+                    actionUrl: https://app.regalrecovery.com/milestones/30-days
+                    links:
+                      self: https://api.regalrecovery.com/v1/notifications/history/notif_1a2b3c4d
+                  - id: notif_2b3c4d5e
+                    category: checkInReminders
+                    title: "Daily Check-In"
+                    message: "Don't forget to complete your daily check-in."
+                    priority: normal
+                    isRead: true
+                    createdAt: "2026-03-28T08:00:00Z"
+                    readAt: "2026-03-28T08:15:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/notifications/history/notif_2b3c4d5e
+                meta:
+                  page:
+                    nextCursor: bmV4dA
+                    limit: 50
+                  unreadCount: 3
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /notifications/{id}/snooze:
+    post:
+      operationId: snoozeNotification
+      tags: [History]
+      summary: Snooze notification
+      description: |
+        Snooze notification for specified duration.
+
+        Notification will be re-delivered after snooze period expires.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^notif_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [duration]
+              properties:
+                duration:
+                  type: integer
+                  description: Snooze duration in minutes
+                  enum: [15, 30, 60, 120, 240, 480, 1440]
+            example:
+              duration: 60
+      responses:
+        '204':
+          description: No Content - Notification snoozed
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /notifications/{id}/dismiss:
+    post:
+      operationId: dismissNotification
+      tags: [History]
+      summary: Dismiss notification
+      description: |
+        Mark notification as read and dismissed.
+
+        Notification will not be re-delivered.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^notif_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Notification dismissed
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    NotificationPreferences:
+      type: object
+      properties:
+        categories:
+          type: object
+          properties:
+            checkInReminders:
+              $ref: '#/components/schemas/CategoryPreference'
+            milestoneAchievements:
+              $ref: '#/components/schemas/CategoryPreference'
+            urgentSupportRequests:
+              $ref: '#/components/schemas/CategoryPreference'
+            dailyAffirmations:
+              $ref: '#/components/schemas/CategoryPreference'
+            weeklyReports:
+              $ref: '#/components/schemas/CategoryPreference'
+            accountabilityAlerts:
+              $ref: '#/components/schemas/CategoryPreference'
+            contentUpdates:
+              $ref: '#/components/schemas/CategoryPreference'
+        quietHours:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            startTime:
+              type: string
+              pattern: '^\d{2}:\d{2}$'
+              description: Start time in HH:MM format (24-hour)
+              example: "22:00"
+            endTime:
+              type: string
+              pattern: '^\d{2}:\d{2}$'
+              description: End time in HH:MM format (24-hour)
+              example: "07:00"
+            timezone:
+              type: string
+              description: IANA timezone identifier
+              example: America/New_York
+        lastModifiedAt:
+          type: string
+          format: date-time
+
+    CategoryPreference:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether notifications for this category are enabled
+        channels:
+          type: array
+          items:
+            type: string
+            enum: [push, email, sms]
+          description: Delivery channels for this category
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^notif_[a-zA-Z0-9]+$'
+        category:
+          type: string
+          enum:
+            - checkInReminders
+            - milestoneAchievements
+            - urgentSupportRequests
+            - dailyAffirmations
+            - weeklyReports
+            - accountabilityAlerts
+            - contentUpdates
+        title:
+          type: string
+        message:
+          type: string
+        priority:
+          type: string
+          enum: [low, normal, high, urgent]
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          nullable: true
+        actionUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: Deep link to relevant app screen
+        snoozedUntil:
+          type: string
+          format: date-time
+          nullable: true
+          description: If snoozed, when notification will reappear
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

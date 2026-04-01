@@ -1,0 +1,478 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Clinical Assessments API
+  version: 1.0.0
+  description: |
+    Clinical assessment management API for Regal Recovery.
+
+    Provides standardized clinical assessments:
+    - SAST-R (Sexual Addiction Screening Test - Revised)
+    - Family Impact Assessment
+    - Denial & Rationalization Assessment
+    - Addiction Severity Index
+    - Relationship Health Assessment
+
+    Assessments generate clinical scores with interpretation and track progress over time.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Assessments
+    description: Clinical assessment management
+
+paths:
+  /assessments/available:
+    get:
+      operationId: listAvailableAssessments
+      tags: [Assessments]
+      summary: List available assessments
+      description: |
+        Retrieve list of all available clinical assessments.
+
+        Returns assessment metadata including description, question count, and completion status.
+      responses:
+        '200':
+          description: OK - Available assessments retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Assessment'
+              example:
+                data:
+                  - type: sast-r
+                    name: Sexual Addiction Screening Test - Revised
+                    description: Clinical screening tool for sexual addiction
+                    questionCount: 45
+                    estimatedMinutes: 15
+                    lastCompleted: "2026-02-15T10:00:00Z"
+                    completionCount: 2
+                  - type: family-impact
+                    name: Family Impact Assessment
+                    description: Measures impact of addiction on family relationships
+                    questionCount: 30
+                    estimatedMinutes: 10
+                    lastCompleted: null
+                    completionCount: 0
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /assessments/{type}/submit:
+    post:
+      operationId: submitAssessment
+      tags: [Assessments]
+      summary: Submit completed assessment
+      description: |
+        Submit assessment responses for scoring and interpretation.
+
+        Returns clinical score, severity level, and personalized interpretation.
+        Results are stored for historical tracking.
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [sast-r, family-impact, denial, addiction-severity, relationship-health]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssessmentSubmission'
+            example:
+              responses:
+                - questionId: "q1"
+                  answer: "agree"
+                - questionId: "q2"
+                  answer: "strongly-agree"
+                - questionId: "q3"
+                  answer: "neutral"
+      responses:
+        '201':
+          description: Created - Assessment scored and saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AssessmentResult'
+              example:
+                data:
+                  id: result_1a2b3c4d
+                  type: sast-r
+                  score: 32
+                  maxScore: 45
+                  percentile: 71
+                  severity: moderate
+                  interpretation: "Your responses indicate moderate concern for sexual addiction. Consider consulting with a therapist specializing in sexual addiction."
+                  recommendations:
+                    - "Continue daily check-ins and accountability"
+                    - "Consider weekly therapy sessions"
+                    - "Engage with support group regularly"
+                  completedAt: "2026-03-28T10:00:00Z"
+                  links:
+                    self: https://api.regalrecovery.com/v1/assessments/sast-r/results/result_1a2b3c4d
+                    history: https://api.regalrecovery.com/v1/assessments/sast-r/history
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /assessments/{type}/history:
+    get:
+      operationId: getAssessmentHistory
+      tags: [Assessments]
+      summary: Get assessment history
+      description: |
+        Retrieve historical results for a specific assessment type.
+
+        Shows score progression over time for tracking recovery progress.
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [sast-r, family-impact, denial, addiction-severity, relationship-health]
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK - Assessment history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AssessmentResult'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+                      trend:
+                        type: string
+                        enum: [improving, stable, worsening]
+                        description: Overall score trend direction
+              example:
+                data:
+                  - id: result_1a2b3c4d
+                    type: sast-r
+                    score: 32
+                    severity: moderate
+                    completedAt: "2026-03-28T10:00:00Z"
+                  - id: result_2b3c4d5e
+                    type: sast-r
+                    score: 38
+                    severity: moderate
+                    completedAt: "2026-02-15T10:00:00Z"
+                meta:
+                  page:
+                    limit: 20
+                  trend: improving
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /assessments/{type}/results/{id}:
+    get:
+      operationId: getAssessmentResult
+      tags: [Assessments]
+      summary: Get specific assessment result
+      description: |
+        Retrieve detailed results for a specific assessment completion.
+
+        Includes full interpretation, recommendations, and comparison to previous results.
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [sast-r, family-impact, denial, addiction-severity, relationship-health]
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^result_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Assessment result retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AssessmentResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Assessment:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [sast-r, family-impact, denial, addiction-severity, relationship-health]
+        name:
+          type: string
+        description:
+          type: string
+        questionCount:
+          type: integer
+        estimatedMinutes:
+          type: integer
+        lastCompleted:
+          type: string
+          format: date-time
+          nullable: true
+        completionCount:
+          type: integer
+
+    AssessmentSubmission:
+      type: object
+      required:
+        - responses
+      properties:
+        responses:
+          type: array
+          items:
+            type: object
+            required:
+              - questionId
+              - answer
+            properties:
+              questionId:
+                type: string
+              answer:
+                type: string
+
+    AssessmentResult:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^result_[a-zA-Z0-9]+$'
+        type:
+          type: string
+          enum: [sast-r, family-impact, denial, addiction-severity, relationship-health]
+        score:
+          type: integer
+          description: Raw score
+        maxScore:
+          type: integer
+          description: Maximum possible score
+        percentile:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Percentile compared to normative data
+        severity:
+          type: string
+          enum: [none, low, moderate, high, severe]
+          description: Clinical severity level
+        interpretation:
+          type: string
+          description: Personalized interpretation of results
+        recommendations:
+          type: array
+          items:
+            type: string
+          description: Recommended next steps based on results
+        completedAt:
+          type: string
+          format: date-time
+        previousScore:
+          type: integer
+          nullable: true
+          description: Score from previous completion (if any)
+        percentChange:
+          type: number
+          format: float
+          nullable: true
+          description: Percent change from previous score
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            history:
+              type: string
+              format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

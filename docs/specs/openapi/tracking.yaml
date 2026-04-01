@@ -1,0 +1,969 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Tracking API
+  version: 1.0.0
+  description: |
+    Sobriety tracking, streak management, milestones, and calendar API.
+
+    Tracks sobriety streaks, calculates milestones, provides calendar views of recovery history.
+    All dates and times use the user's configured time zone.
+
+    Streak calculation follows the compassionate messaging philosophy:
+    - Celebrates progress, not perfection
+    - Shows total sober days over time periods (e.g., "247 out of the last 250 days")
+    - Preserves streak history even after relapse
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Streaks
+    description: Sobriety streak tracking
+  - name: Milestones
+    description: Milestone achievements
+  - name: Calendar
+    description: Calendar views of recovery activities
+  - name: History
+    description: Historical tracking data
+  - name: Relapses
+    description: Relapse logging
+
+paths:
+  /tracking/streaks:
+    get:
+      operationId: getStreaks
+      tags: [Streaks]
+      summary: Get all sobriety streaks
+      description: |
+        Retrieve all sobriety streaks for the authenticated user's tracked addictions.
+
+        Includes current streak, longest streak, next milestone, and compassionate stats.
+      responses:
+        '200':
+          description: OK - Streaks retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StreaksResponse'
+              example:
+                data:
+                  - streakId: s_11111
+                    addictionId: a_67890
+                    addictionType: sex-addiction
+                    currentStreakDays: 47
+                    longestStreakDays: 120
+                    sobrietyStartDate: "2026-02-09"
+                    lastRelapseDate: null
+                    totalSoberDaysLast30: 30
+                    totalSoberDaysLast90: 87
+                    totalSoberDaysLast365: 247
+                    nextMilestone:
+                      days: 60
+                      daysRemaining: 13
+                      label: 2 Months
+                    links:
+                      self: https://api.regalrecovery.com/v1/tracking/streaks/a_67890
+                      milestones: https://api.regalrecovery.com/v1/tracking/milestones?addictionId=a_67890
+                      calendar: https://api.regalrecovery.com/v1/tracking/calendar?addictionId=a_67890
+                meta:
+                  totalAddictions: 1
+                  totalSoberDays: 2847
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tracking/streaks/{addictionId}:
+    get:
+      operationId: getStreakByAddiction
+      tags: [Streaks]
+      summary: Get streak for specific addiction
+      description: |
+        Retrieve sobriety streak details for a specific addiction.
+      parameters:
+        - name: addictionId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          example: a_67890
+      responses:
+        '200':
+          description: OK - Streak retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Streak'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tracking/milestones:
+    get:
+      operationId: getMilestones
+      tags: [Milestones]
+      summary: Get milestone achievements
+      description: |
+        Retrieve all achieved and upcoming milestones.
+
+        Milestones: 1, 3, 7, 14, 21, 30, 60, 90, 120, 180, 270, 365 days, then yearly.
+      parameters:
+        - name: addictionId
+          in: query
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          description: Filter by specific addiction
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [achieved, upcoming]
+          description: Filter by achievement status
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: -achievedAt
+          description: 'Sort field: -achievedAt (desc), achievedAt (asc), days'
+          example: -achievedAt
+      responses:
+        '200':
+          description: OK - Milestones retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MilestonesResponse'
+              example:
+                data:
+                  - milestoneId: m_12345
+                    addictionId: a_67890
+                    addictionType: sex-addiction
+                    days: 30
+                    label: 1 Month
+                    achievedAt: "2026-03-10T00:00:00Z"
+                    celebrated: true
+                    links:
+                      self: https://api.regalrecovery.com/v1/tracking/milestones/m_12345
+                  - milestoneId: m_12346
+                    addictionId: a_67890
+                    addictionType: sex-addiction
+                    days: 60
+                    label: 2 Months
+                    achievedAt: null
+                    daysRemaining: 13
+                    celebrated: false
+                    links:
+                      self: https://api.regalrecovery.com/v1/tracking/milestones/m_12346
+                meta:
+                  totalAchieved: 7
+                  totalUpcoming: 5
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tracking/calendar:
+    get:
+      operationId: getCalendar
+      tags: [Calendar]
+      summary: Get calendar view of activities
+      description: |
+        Retrieve calendar view showing daily activity completion and sobriety status.
+
+        Returns month view by default; specify date range for custom periods.
+        Each day includes sobriety status, check-ins, urges, and activity counts.
+      parameters:
+        - name: month
+          in: query
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+          description: Month to retrieve (YYYY-MM format)
+          example: "2026-03"
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date for custom range (YYYY-MM-DD)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date for custom range (YYYY-MM-DD)
+        - name: addictionId
+          in: query
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          description: Filter by specific addiction
+      responses:
+        '200':
+          description: OK - Calendar retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarResponse'
+              example:
+                data:
+                  month: "2026-03"
+                  days:
+                    - date: "2026-03-28"
+                      sobrietyStatus: clean
+                      checkInCompleted: true
+                      checkInScore: 85
+                      urgeCount: 2
+                      activities:
+                        commitment: true
+                        journal: true
+                        devotional: true
+                        meeting: false
+                        exercise: true
+                      heatmapValue: 8
+                      links:
+                        detail: https://api.regalrecovery.com/v1/tracking/calendar/2026-03-28
+                    - date: "2026-03-27"
+                      sobrietyStatus: clean
+                      checkInCompleted: true
+                      checkInScore: 92
+                      urgeCount: 0
+                      activities:
+                        commitment: true
+                        journal: true
+                        devotional: true
+                        meeting: true
+                        exercise: false
+                      heatmapValue: 9
+                      links:
+                        detail: https://api.regalrecovery.com/v1/tracking/calendar/2026-03-27
+                meta:
+                  totalDays: 31
+                  cleanDays: 28
+                  urgeCount: 15
+                  checkInCompletionRate: 0.90
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tracking/calendar/{date}:
+    get:
+      operationId: getCalendarDay
+      tags: [Calendar]
+      summary: Get detailed day view
+      description: |
+        Retrieve detailed activity breakdown for a specific date.
+
+        Includes all activities, check-ins, urges, and timestamps.
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-03-28"
+      responses:
+        '200':
+          description: OK - Day details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarDayResponse'
+              example:
+                data:
+                  date: "2026-03-28"
+                  sobrietyStatus: clean
+                  checkIns:
+                    - checkInId: c_55555
+                      type: morning
+                      score: 85
+                      timestamp: "2026-03-28T08:30:00Z"
+                  urges:
+                    - urgeId: u_77777
+                      intensity: 8
+                      timestamp: "2026-03-28T16:45:00Z"
+                      sobrietyMaintained: true
+                  activities:
+                    - activityType: commitment
+                      timestamp: "2026-03-28T08:00:00Z"
+                    - activityType: journal
+                      timestamp: "2026-03-28T21:30:00Z"
+                    - activityType: devotional
+                      timestamp: "2026-03-28T08:15:00Z"
+                  links:
+                    self: https://api.regalrecovery.com/v1/tracking/calendar/2026-03-28
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tracking/history:
+    get:
+      operationId: getHistory
+      tags: [History]
+      summary: Get historical tracking data
+      description: |
+        Retrieve historical streak and relapse data.
+
+        Shows all past streaks, relapses, and recovery patterns over time.
+      parameters:
+        - name: addictionId
+          in: query
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          description: Filter by specific addiction
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Number of records per page
+      responses:
+        '200':
+          description: OK - History retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+              example:
+                data:
+                  - periodStart: "2026-02-09"
+                    periodEnd: "2026-03-28"
+                    streakDays: 47
+                    status: active
+                    milestones: [1, 3, 7, 14, 21, 30]
+                  - periodStart: "2025-08-15"
+                    periodEnd: "2026-02-08"
+                    streakDays: 120
+                    status: ended
+                    endedReason: relapse
+                    milestones: [1, 3, 7, 14, 21, 30, 60, 90]
+                links:
+                  self: https://api.regalrecovery.com/v1/tracking/history
+                  next: https://api.regalrecovery.com/v1/tracking/history?cursor=cXdlcnR5
+                meta:
+                  page:
+                    nextCursor: cXdlcnR5
+                    limit: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /tracking/relapses:
+    post:
+      operationId: logRelapse
+      tags: [Relapses]
+      summary: Log a relapse event
+      description: |
+        Record a relapse event for a tracked addiction.
+
+        Resets current streak but preserves historical data.
+        Triggers post-mortem analysis flow in mobile app.
+
+        Returns compassionate messaging emphasizing total recovery progress.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogRelapseRequest'
+            example:
+              addictionId: a_67890
+              timestamp: "2026-03-28T22:15:00Z"
+              notes: Detailed context about the event
+      responses:
+        '201':
+          description: Created - Relapse logged successfully
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the relapse record
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogRelapseResponse'
+              example:
+                data:
+                  relapseId: r_98765
+                  addictionId: a_67890
+                  timestamp: "2026-03-28T22:15:00Z"
+                  previousStreakDays: 47
+                  notes: Detailed context about the event
+                  postMortemPrompted: true
+                  links:
+                    self: https://api.regalrecovery.com/v1/tracking/relapses/r_98765
+                    postMortem: https://api.regalrecovery.com/v1/activities/post-mortem?relapseId=r_98765
+                    newStreak: https://api.regalrecovery.com/v1/tracking/streaks/a_67890
+                meta:
+                  createdAt: "2026-03-28T22:16:00Z"
+                  message: Your 47-day streak has been preserved in your history. You were sober 247 out of the last 250 days — that matters.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    StreaksResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Streak'
+        meta:
+          type: object
+          properties:
+            totalAddictions:
+              type: integer
+            totalSoberDays:
+              type: integer
+              description: Cumulative sober days across all addictions all-time
+            retrievedAt:
+              type: string
+              format: date-time
+
+    Streak:
+      type: object
+      properties:
+        streakId:
+          type: string
+          pattern: '^s_[a-zA-Z0-9]+$'
+        addictionId:
+          type: string
+          pattern: '^a_[a-zA-Z0-9]+$'
+        addictionType:
+          type: string
+          enum:
+            - sex-addiction
+            - pornography
+            - alcohol
+            - drugs
+            - gambling
+            - eating
+            - gaming
+            - other
+        currentStreakDays:
+          type: integer
+          minimum: 0
+        longestStreakDays:
+          type: integer
+          minimum: 0
+        sobrietyStartDate:
+          type: string
+          format: date
+        lastRelapseDate:
+          type: string
+          format: date
+          nullable: true
+        totalSoberDaysLast30:
+          type: integer
+          description: Total clean days in last 30 days
+        totalSoberDaysLast90:
+          type: integer
+          description: Total clean days in last 90 days
+        totalSoberDaysLast365:
+          type: integer
+          description: Total clean days in last 365 days
+        nextMilestone:
+          type: object
+          nullable: true
+          properties:
+            days:
+              type: integer
+            daysRemaining:
+              type: integer
+            label:
+              type: string
+              example: 2 Months
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            milestones:
+              type: string
+              format: uri
+            calendar:
+              type: string
+              format: uri
+
+    MilestonesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Milestone'
+        meta:
+          type: object
+          properties:
+            totalAchieved:
+              type: integer
+            totalUpcoming:
+              type: integer
+
+    Milestone:
+      type: object
+      properties:
+        milestoneId:
+          type: string
+          pattern: '^m_[a-zA-Z0-9]+$'
+        addictionId:
+          type: string
+          pattern: '^a_[a-zA-Z0-9]+$'
+        addictionType:
+          type: string
+        days:
+          type: integer
+        label:
+          type: string
+          example: 1 Month
+        achievedAt:
+          type: string
+          format: date-time
+          nullable: true
+        daysRemaining:
+          type: integer
+          nullable: true
+          description: Days until achievement (for upcoming milestones)
+        celebrated:
+          type: boolean
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    CalendarResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            month:
+              type: string
+              pattern: '^\d{4}-\d{2}$'
+            days:
+              type: array
+              items:
+                $ref: '#/components/schemas/CalendarDay'
+        meta:
+          type: object
+          properties:
+            totalDays:
+              type: integer
+            cleanDays:
+              type: integer
+            urgeCount:
+              type: integer
+            checkInCompletionRate:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+
+    CalendarDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        sobrietyStatus:
+          type: string
+          enum: [clean, relapse, no-data]
+        checkInCompleted:
+          type: boolean
+        checkInScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+          nullable: true
+        urgeCount:
+          type: integer
+          minimum: 0
+        activities:
+          type: object
+          properties:
+            commitment:
+              type: boolean
+            journal:
+              type: boolean
+            devotional:
+              type: boolean
+            meeting:
+              type: boolean
+            exercise:
+              type: boolean
+        heatmapValue:
+          type: integer
+          minimum: 0
+          maximum: 10
+          description: Intensity value for calendar heatmap (0-10 scale)
+        links:
+          type: object
+          properties:
+            detail:
+              type: string
+              format: uri
+
+    CalendarDayResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+            sobrietyStatus:
+              type: string
+              enum: [clean, relapse, no-data]
+            checkIns:
+              type: array
+              items:
+                type: object
+                properties:
+                  checkInId:
+                    type: string
+                  type:
+                    type: string
+                  score:
+                    type: integer
+                  timestamp:
+                    type: string
+                    format: date-time
+            urges:
+              type: array
+              items:
+                type: object
+                properties:
+                  urgeId:
+                    type: string
+                  intensity:
+                    type: integer
+                  timestamp:
+                    type: string
+                    format: date-time
+                  sobrietyMaintained:
+                    type: boolean
+            activities:
+              type: array
+              items:
+                type: object
+                properties:
+                  activityType:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+            links:
+              type: object
+              properties:
+                self:
+                  type: string
+                  format: uri
+
+    HistoryResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              periodStart:
+                type: string
+                format: date
+              periodEnd:
+                type: string
+                format: date
+              streakDays:
+                type: integer
+              status:
+                type: string
+                enum: [active, ended]
+              endedReason:
+                type: string
+                enum: [relapse, user-reset]
+                nullable: true
+              milestones:
+                type: array
+                items:
+                  type: integer
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+
+    LogRelapseRequest:
+      type: object
+      required:
+        - addictionId
+        - timestamp
+      properties:
+        addictionId:
+          type: string
+          pattern: '^a_[a-zA-Z0-9]+$'
+        timestamp:
+          type: string
+          format: date-time
+          description: When the relapse occurred
+        notes:
+          type: string
+          maxLength: 2000
+          description: Context about the relapse (optional)
+
+    LogRelapseResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            relapseId:
+              type: string
+              pattern: '^r_[a-zA-Z0-9]+$'
+            addictionId:
+              type: string
+              pattern: '^a_[a-zA-Z0-9]+$'
+            timestamp:
+              type: string
+              format: date-time
+            previousStreakDays:
+              type: integer
+            notes:
+              type: string
+            postMortemPrompted:
+              type: boolean
+            links:
+              type: object
+              properties:
+                self:
+                  type: string
+                  format: uri
+                postMortem:
+                  type: string
+                  format: uri
+                newStreak:
+                  type: string
+                  format: uri
+        meta:
+          type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            message:
+              type: string
+              description: Compassionate encouragement message
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+        first:
+          type: string
+          format: uri
+          nullable: true
+        last:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

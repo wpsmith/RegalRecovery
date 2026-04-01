@@ -1,0 +1,634 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Backup & Data Rights API
+  version: 1.0.0
+  description: |
+    Backup and data subject rights API for Regal Recovery.
+
+    Features:
+    - Full account backup creation and restoration
+    - Backup history and versioning
+    - GDPR-compliant data export (Data Subject Request)
+    - Right to erasure (account deletion with grace period)
+
+    All backups are encrypted at rest and in transit.
+    Data exports include all personal data in machine-readable format (JSON).
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Backup
+    description: Account backup and restoration
+  - name: Data Subject Requests
+    description: GDPR data export and account deletion
+
+paths:
+  /backup/create:
+    post:
+      operationId: createBackup
+      tags: [Backup]
+      summary: Create account backup
+      description: |
+        Create full account backup including all recovery data.
+
+        Backup includes:
+        - Profile and settings
+        - Sobriety tracking data (streaks, check-ins, urges, relapses)
+        - Activities (journals, commitments, self-care logs)
+        - Recovery tools (3 Circles, relapse plan, vision)
+        - Assessment results
+        - Support contacts and permissions
+        - Content favorites
+
+        Backup is asynchronous. Poll /backup/status/{id} for completion.
+      responses:
+        '202':
+          description: Accepted - Backup creation started
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      backupId:
+                        type: string
+                        pattern: '^bkp_[a-zA-Z0-9]+$'
+                      status:
+                        type: string
+                        enum: [pending, processing, completed, failed]
+                      createdAt:
+                        type: string
+                        format: date-time
+                      links:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            format: uri
+              example:
+                data:
+                  backupId: bkp_1a2b3c4d
+                  status: processing
+                  createdAt: "2026-03-28T10:00:00Z"
+                  links:
+                    status: https://api.regalrecovery.com/v1/backup/status/bkp_1a2b3c4d
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Too Many Requests - Backup rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                example: 3600
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /backup/list:
+    get:
+      operationId: listBackups
+      tags: [Backup]
+      summary: List account backups
+      description: |
+        Retrieve list of all backups for authenticated user.
+
+        Returns backups in reverse chronological order.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: OK - Backups retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Backup'
+              example:
+                data:
+                  - id: bkp_1a2b3c4d
+                    status: completed
+                    sizeBytes: 2458624
+                    createdAt: "2026-03-28T10:00:00Z"
+                    completedAt: "2026-03-28T10:02:15Z"
+                    expiresAt: "2026-06-28T10:00:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/backup/status/bkp_1a2b3c4d
+                  - id: bkp_2b3c4d5e
+                    status: completed
+                    sizeBytes: 2402816
+                    createdAt: "2026-02-28T10:00:00Z"
+                    completedAt: "2026-02-28T10:01:52Z"
+                    expiresAt: "2026-05-28T10:00:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/backup/status/bkp_2b3c4d5e
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /backup/restore/{id}:
+    post:
+      operationId: restoreBackup
+      tags: [Backup]
+      summary: Restore from backup
+      description: |
+        Restore account from backup.
+
+        WARNING: This operation will overwrite all current data with backup contents.
+        Restoration is asynchronous. Poll /backup/status/{id} for completion.
+
+        Current data is automatically backed up before restoration begins.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^bkp_[a-zA-Z0-9]+$'
+      responses:
+        '202':
+          description: Accepted - Restoration started
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      restoreId:
+                        type: string
+                      status:
+                        type: string
+                        enum: [pending, processing, completed, failed]
+                      startedAt:
+                        type: string
+                        format: date-time
+                      links:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /backup/status/{id}:
+    get:
+      operationId: getBackupStatus
+      tags: [Backup]
+      summary: Get backup status
+      description: |
+        Check status of backup or restoration operation.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^bkp_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Backup status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/BackupStatus'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /dsr/export:
+    post:
+      operationId: requestDataExport
+      tags: [Data Subject Requests]
+      summary: Request data export
+      description: |
+        Request complete data export (GDPR Article 15 - Right of Access).
+
+        Export includes all personal data in machine-readable JSON format:
+        - Account information
+        - All recovery data
+        - Activity history
+        - Analytics data
+        - Support network
+        - Assessment results
+
+        Export is asynchronous and takes 15-30 minutes.
+        Download link valid for 7 days.
+      responses:
+        '202':
+          description: Accepted - Export request created
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ExportRequest'
+              example:
+                data:
+                  requestId: exp_1a2b3c4d
+                  status: pending
+                  requestedAt: "2026-03-28T10:00:00Z"
+                  estimatedCompletionAt: "2026-03-28T10:30:00Z"
+                  links:
+                    status: https://api.regalrecovery.com/v1/dsr/export/status
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          description: Too Many Requests - Export rate limit exceeded (1 per 24 hours)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /dsr/export/status:
+    get:
+      operationId: getExportStatus
+      tags: [Data Subject Requests]
+      summary: Get export status
+      description: |
+        Check status of data export request.
+
+        When completed, response includes download link valid for 7 days.
+      responses:
+        '200':
+          description: OK - Export status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ExportStatus'
+              example:
+                data:
+                  requestId: exp_1a2b3c4d
+                  status: completed
+                  requestedAt: "2026-03-28T10:00:00Z"
+                  completedAt: "2026-03-28T10:22:14Z"
+                  fileSizeBytes: 4826112
+                  expiresAt: "2026-04-04T10:22:14Z"
+                  links:
+                    download: https://api.regalrecovery.com/v1/dsr/export/download?token=...
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found - No export request exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /dsr/export/download:
+    get:
+      operationId: downloadExport
+      tags: [Data Subject Requests]
+      summary: Download data export
+      description: |
+        Download data export archive.
+
+        Returns ZIP file containing JSON data files.
+        Requires valid download token from export status response.
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Single-use download token
+      responses:
+        '200':
+          description: OK - Export file download
+          headers:
+            Content-Type:
+              schema:
+                type: string
+                example: application/zip
+            Content-Disposition:
+              schema:
+                type: string
+                example: attachment; filename="regal-recovery-export-2026-03-28.zip"
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: Gone - Download link expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /dsr/account:
+    delete:
+      operationId: deleteAccount
+      tags: [Data Subject Requests]
+      summary: Delete account
+      description: |
+        Request account deletion (GDPR Article 17 - Right to Erasure).
+
+        Initiates 30-day grace period before permanent deletion.
+        During grace period, user can cancel deletion by logging in.
+
+        After grace period:
+        - All personal data permanently deleted
+        - Anonymized analytics retained for platform improvement
+        - Support contacts notified of disconnection
+      responses:
+        '202':
+          description: Accepted - Account deletion initiated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deletionScheduledAt:
+                        type: string
+                        format: date-time
+                        description: When account will be permanently deleted
+                      cancellationDeadline:
+                        type: string
+                        format: date-time
+                        description: Last moment to cancel deletion by logging in
+              example:
+                data:
+                  deletionScheduledAt: "2026-04-27T10:00:00Z"
+                  cancellationDeadline: "2026-04-27T09:59:59Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Backup:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^bkp_[a-zA-Z0-9]+$'
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        sizeBytes:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          description: Backup retention expiration (90 days)
+        errorMessage:
+          type: string
+          nullable: true
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    BackupStatus:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^bkp_[a-zA-Z0-9]+$'
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        progress:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Completion percentage
+        sizeBytes:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        errorMessage:
+          type: string
+          nullable: true
+
+    ExportRequest:
+      type: object
+      properties:
+        requestId:
+          type: string
+          pattern: '^exp_[a-zA-Z0-9]+$'
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        requestedAt:
+          type: string
+          format: date-time
+        estimatedCompletionAt:
+          type: string
+          format: date-time
+        links:
+          type: object
+          properties:
+            status:
+              type: string
+              format: uri
+
+    ExportStatus:
+      type: object
+      properties:
+        requestId:
+          type: string
+          pattern: '^exp_[a-zA-Z0-9]+$'
+        status:
+          type: string
+          enum: [pending, processing, completed, failed]
+        requestedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        fileSizeBytes:
+          type: integer
+          nullable: true
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Download link expiration (7 days after completion)
+        errorMessage:
+          type: string
+          nullable: true
+        links:
+          type: object
+          properties:
+            download:
+              type: string
+              format: uri
+              nullable: true
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

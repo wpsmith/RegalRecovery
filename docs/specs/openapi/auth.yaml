@@ -1,0 +1,1069 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Authentication API
+  version: 1.0.0
+  description: |
+    Authentication and session management API for Regal Recovery.
+
+    Supports multiple authentication methods:
+    - Email/password registration and login
+    - Apple ID and Google OAuth 2.0 social sign-in
+    - WebAuthn passkeys for passwordless authentication
+    - Biometric authentication (Face ID, Touch ID, Android Biometric)
+    - Session management with secure token rotation
+
+    All endpoints use AWS Cognito for identity management with JWT access tokens.
+    Tokens expire after 15 minutes; refresh tokens rotate on every use.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Registration
+    description: User account creation
+  - name: Authentication
+    description: Login and token management
+  - name: Passkeys
+    description: WebAuthn passkey authentication
+  - name: Sessions
+    description: Session management and device tracking
+  - name: Password
+    description: Password reset and recovery
+
+paths:
+  /auth/register:
+    post:
+      operationId: register
+      tags: [Registration]
+      summary: Register new user account
+      description: |
+        Create a new user account with email and password.
+
+        Returns 201 Created with Location header pointing to the new user resource.
+        Access token is returned in response body for immediate authentication.
+
+        Email verification is sent asynchronously; user can use the app immediately.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            example:
+              email: john@example.com
+              password: SecurePassword123!
+              displayName: John
+              primaryAddiction: sex-addiction
+              sobrietyStartDate: "2026-03-28"
+              preferredLanguage: en
+              timeZone: America/New_York
+      responses:
+        '201':
+          description: Created - User registered successfully
+          headers:
+            Location:
+              description: URI of the created user resource
+              schema:
+                type: string
+                format: uri
+                example: https://api.regalrecovery.com/v1/users/u_1a2b3c4d
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+              example:
+                data:
+                  userId: u_1a2b3c4d
+                  email: john@example.com
+                  displayName: John
+                  emailVerified: false
+                  accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                  expiresIn: 900
+                  tokenType: Bearer
+                  links:
+                    self: https://api.regalrecovery.com/v1/users/u_1a2b3c4d
+                    profile: https://api.regalrecovery.com/v1/users/me/profile
+                    streaks: https://api.regalrecovery.com/v1/tracking/streaks
+                meta:
+                  createdAt: "2026-03-28T10:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Conflict - Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: 550e8400-e29b-41d4-a716-446655440000
+                    code: "rr:0x00000409"
+                    status: 409
+                    title: Email Already Registered
+                    detail: An account with email john@example.com already exists
+                    correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+                    source:
+                      pointer: /email
+                    links:
+                      about: https://docs.regalrecovery.com/errors/email-conflict
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [Authentication]
+      summary: Authenticate user
+      description: |
+        Authenticate with email and password.
+
+        Returns access token (15 min TTL) and refresh token.
+        Access token must be included in Authorization header for all authenticated requests.
+
+        If MFA is enabled, returns 202 Accepted with MFA challenge.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              email: john@example.com
+              password: SecurePassword123!
+              deviceId: device_abc123
+              deviceName: "John's iPhone 15 Pro"
+      responses:
+        '200':
+          description: OK - Authentication successful
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                data:
+                  userId: u_1a2b3c4d
+                  accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                  expiresIn: 900
+                  tokenType: Bearer
+                  sessionId: session_xyz789
+                  links:
+                    self: https://api.regalrecovery.com/v1/users/me
+                meta:
+                  lastLoginAt: "2026-03-28T10:00:00Z"
+        '202':
+          description: Accepted - MFA challenge required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      challengeType:
+                        type: string
+                        enum: [SMS_MFA, SOFTWARE_TOKEN_MFA]
+                      session:
+                        type: string
+                        description: Session token for MFA verification
+              example:
+                data:
+                  challengeType: SMS_MFA
+                  session: mfa_session_token
+        '401':
+          description: Unauthorized - Invalid credentials
+          headers:
+            WWW-Authenticate:
+              schema:
+                type: string
+                example: Bearer realm="Regal Recovery"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: 550e8400-e29b-41d4-a716-446655440001
+                    code: "rr:0x00000401"
+                    status: 401
+                    title: Invalid Credentials
+                    detail: Email or password is incorrect
+                    correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [Authentication]
+      summary: Refresh access token
+      description: |
+        Exchange refresh token for new access token.
+
+        Refresh tokens rotate on every use (single-use tokens).
+        Old refresh token is invalidated and new one returned.
+
+        Returns 401 if refresh token is expired or already used.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  description: JWT refresh token from login or previous refresh
+            example:
+              refreshToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: OK - Token refreshed successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+              example:
+                data:
+                  accessToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                  refreshToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+                  expiresIn: 900
+                  tokenType: Bearer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [Authentication]
+      summary: Log out current session
+      description: |
+        Invalidate current access token and refresh token.
+
+        After logout, access token can no longer be used for authenticated requests.
+        Client should delete stored tokens and redirect to login.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  description: Optional refresh token to invalidate
+            example:
+              refreshToken: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '204':
+          description: No Content - Logout successful
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/sessions:
+    get:
+      operationId: listSessions
+      tags: [Sessions]
+      summary: List active sessions
+      description: |
+        Retrieve all active sessions for the authenticated user.
+
+        Shows device name, location, IP address, and last activity timestamp.
+        Useful for security auditing and device management.
+      responses:
+        '200':
+          description: OK - Sessions retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Session'
+                  meta:
+                    type: object
+                    properties:
+                      totalSessions:
+                        type: integer
+              example:
+                data:
+                  - sessionId: session_xyz789
+                    deviceId: device_abc123
+                    deviceName: "John's iPhone 15 Pro"
+                    deviceType: mobile
+                    ipAddress: "192.168.1.100"
+                    location:
+                      city: Seattle
+                      region: WA
+                      country: US
+                    createdAt: "2026-03-28T10:00:00Z"
+                    lastActivityAt: "2026-03-28T14:30:00Z"
+                    expiresAt: "2026-04-27T10:00:00Z"
+                    isCurrent: true
+                    links:
+                      self: https://api.regalrecovery.com/v1/auth/sessions/session_xyz789
+                  - sessionId: session_def456
+                    deviceId: device_ghi789
+                    deviceName: "MacBook Pro"
+                    deviceType: desktop
+                    ipAddress: "192.168.1.105"
+                    location:
+                      city: Seattle
+                      region: WA
+                      country: US
+                    createdAt: "2026-03-25T08:00:00Z"
+                    lastActivityAt: "2026-03-27T22:15:00Z"
+                    expiresAt: "2026-04-24T08:00:00Z"
+                    isCurrent: false
+                    links:
+                      self: https://api.regalrecovery.com/v1/auth/sessions/session_def456
+                meta:
+                  totalSessions: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/sessions/{sessionId}:
+    delete:
+      operationId: revokeSession
+      tags: [Sessions]
+      summary: Revoke session
+      description: |
+        Revoke a specific session by ID.
+
+        Invalidates all tokens associated with that session.
+        User will be logged out on that device.
+
+        Cannot revoke the current session (use /auth/logout instead).
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^session_[a-zA-Z0-9]+$'
+          example: session_def456
+      responses:
+        '204':
+          description: No Content - Session revoked successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+        '400':
+          description: Bad Request - Cannot revoke current session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: 550e8400-e29b-41d4-a716-446655440002
+                    code: "rr:0x00000400"
+                    status: 400
+                    title: Cannot Revoke Current Session
+                    detail: Use /auth/logout to end your current session
+                    correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/passkey/register:
+    post:
+      operationId: registerPasskey
+      tags: [Passkeys]
+      summary: Register WebAuthn passkey
+      description: |
+        Begin WebAuthn passkey registration flow.
+
+        Returns publicKeyCredentialCreationOptions for navigator.credentials.create().
+        Client completes WebAuthn ceremony and submits credential to /auth/passkey/verify.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [displayName]
+              properties:
+                displayName:
+                  type: string
+                  description: User-friendly name for the passkey
+                  example: "John's Face ID"
+      responses:
+        '200':
+          description: OK - Passkey registration challenge created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      challenge:
+                        type: string
+                        description: Base64-encoded challenge for WebAuthn
+                      rp:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          id:
+                            type: string
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          name:
+                            type: string
+                          displayName:
+                            type: string
+                      pubKeyCredParams:
+                        type: array
+                        items:
+                          type: object
+                      timeout:
+                        type: integer
+                      attestation:
+                        type: string
+                      authenticatorSelection:
+                        type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/passkey/authenticate:
+    post:
+      operationId: authenticatePasskey
+      tags: [Passkeys]
+      summary: Authenticate with passkey
+      description: |
+        Authenticate using WebAuthn passkey.
+
+        Returns access token on successful authentication.
+        No password required.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credentialId, authenticatorData, clientDataJSON, signature]
+              properties:
+                credentialId:
+                  type: string
+                authenticatorData:
+                  type: string
+                  format: byte
+                clientDataJSON:
+                  type: string
+                  format: byte
+                signature:
+                  type: string
+                  format: byte
+                userHandle:
+                  type: string
+      responses:
+        '200':
+          description: OK - Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/password-reset:
+    post:
+      operationId: requestPasswordReset
+      tags: [Password]
+      summary: Request password reset
+      description: |
+        Send password reset email.
+
+        Always returns 204 regardless of whether email exists (security best practice).
+        Reset link expires after 1 hour.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+            example:
+              email: john@example.com
+      responses:
+        '204':
+          description: No Content - Password reset email sent (if account exists)
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/verify-email:
+    post:
+      operationId: verifyEmail
+      tags: [Registration]
+      summary: Verify email address
+      description: |
+        Confirm email address with verification code.
+
+        Code is sent via email during registration or when requesting resend.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, code]
+              properties:
+                email:
+                  type: string
+                  format: email
+                code:
+                  type: string
+                  pattern: '^\d{6}$'
+                  description: 6-digit verification code
+            example:
+              email: john@example.com
+              code: "123456"
+      responses:
+        '200':
+          description: OK - Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      emailVerified:
+                        type: boolean
+                        example: true
+        '400':
+          description: Bad Request - Invalid or expired code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: 550e8400-e29b-41d4-a716-446655440003
+                    code: "rr:0x00000400"
+                    status: 400
+                    title: Invalid Verification Code
+                    detail: The code you entered is invalid or has expired
+                    correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        AWS Cognito JWT access token.
+
+        Include in Authorization header: Authorization: Bearer <token>
+
+        Tokens expire after 15 minutes. Use /auth/refresh to get new token.
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+        example: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - displayName
+        - primaryAddiction
+        - sobrietyStartDate
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address (must be unique)
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: |
+            Password meeting requirements:
+            - Minimum 8 characters
+            - At least one uppercase letter
+            - At least one lowercase letter
+            - At least one number
+            - At least one special character
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 50
+          description: User's display name (first name or nickname)
+        primaryAddiction:
+          type: string
+          enum:
+            - sex-addiction
+            - pornography
+            - alcohol
+            - drugs
+            - gambling
+            - eating
+            - gaming
+            - other
+          description: Primary addiction type
+        sobrietyStartDate:
+          type: string
+          format: date
+          description: Sobriety start date (YYYY-MM-DD). Cannot be in the future.
+          example: "2026-03-28"
+        preferredLanguage:
+          type: string
+          enum: [en, es, fr, de, pt]
+          default: en
+          description: Preferred language for app content
+        timeZone:
+          type: string
+          description: IANA time zone identifier
+          example: America/New_York
+
+    RegisterResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            userId:
+              type: string
+              pattern: '^u_[a-zA-Z0-9]+$'
+              example: u_1a2b3c4d
+            email:
+              type: string
+              format: email
+            displayName:
+              type: string
+            emailVerified:
+              type: boolean
+            accessToken:
+              type: string
+              description: JWT access token (15 min TTL)
+            refreshToken:
+              type: string
+              description: JWT refresh token (30 day TTL, single-use)
+            expiresIn:
+              type: integer
+              description: Access token TTL in seconds
+              example: 900
+            tokenType:
+              type: string
+              enum: [Bearer]
+              example: Bearer
+            links:
+              type: object
+              properties:
+                self:
+                  type: string
+                  format: uri
+                profile:
+                  type: string
+                  format: uri
+                streaks:
+                  type: string
+                  format: uri
+        meta:
+          type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        deviceId:
+          type: string
+          description: Unique device identifier for session tracking
+        deviceName:
+          type: string
+          description: User-friendly device name
+          example: "John's iPhone 15 Pro"
+
+    LoginResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            userId:
+              type: string
+              pattern: '^u_[a-zA-Z0-9]+$'
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+            expiresIn:
+              type: integer
+              example: 900
+            tokenType:
+              type: string
+              enum: [Bearer]
+            sessionId:
+              type: string
+              pattern: '^session_[a-zA-Z0-9]+$'
+            links:
+              type: object
+              properties:
+                self:
+                  type: string
+                  format: uri
+        meta:
+          type: object
+          properties:
+            lastLoginAt:
+              type: string
+              format: date-time
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+              description: New refresh token (old one is invalidated)
+            expiresIn:
+              type: integer
+              example: 900
+            tokenType:
+              type: string
+              enum: [Bearer]
+
+    Session:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          pattern: '^session_[a-zA-Z0-9]+$'
+        deviceId:
+          type: string
+        deviceName:
+          type: string
+        deviceType:
+          type: string
+          enum: [mobile, tablet, desktop, web]
+        ipAddress:
+          type: string
+          format: ipv4
+        location:
+          type: object
+          properties:
+            city:
+              type: string
+            region:
+              type: string
+            country:
+              type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastActivityAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        isCurrent:
+          type: boolean
+          description: Whether this is the current session
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for this error occurrence
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+          description: Application-specific error code
+          example: "rr:0x00000001"
+        status:
+          type: integer
+          description: HTTP status code
+        title:
+          type: string
+          description: Human-readable summary (stable across occurrences)
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence
+        correlationId:
+          type: string
+          format: uuid
+          description: Request correlation ID for distributed tracing
+        source:
+          type: object
+          description: Reference to source of the error
+          properties:
+            pointer:
+              type: string
+              description: JSON Pointer (RFC 6901) to field in request
+              example: /email
+            parameter:
+              type: string
+              description: Query parameter name
+            header:
+              type: string
+              description: Header name
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+              description: Link to documentation about this error
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request syntax
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440000
+                code: "rr:0x00000400"
+                status: 400
+                title: Bad Request
+                detail: Request body is malformed or missing required fields
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440001
+                code: "rr:0x00000401"
+                status: 401
+                title: Unauthorized
+                detail: Access token is missing, invalid, or expired
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440004
+                code: "rr:0x00000404"
+                status: 404
+                title: Not Found
+                detail: The requested resource does not exist
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440022
+                code: "rr:0x00000422"
+                status: 422
+                title: Validation Failed
+                detail: Password does not meet security requirements
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+                source:
+                  pointer: /password
+
+    TooManyRequests:
+      description: Too Many Requests - Rate limit exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            description: Seconds to wait before retrying
+            example: 60
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+            example: 100
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+            example: 0
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+            description: Unix timestamp when rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440029
+                code: "rr:0x00000429"
+                status: 429
+                title: Too Many Requests
+                detail: Rate limit exceeded. Please try again in 60 seconds.
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440500
+                code: "rr:0x00000500"
+                status: 500
+                title: Internal Server Error
+                detail: An unexpected error occurred. Please try again later.
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5

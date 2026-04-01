@@ -1,0 +1,693 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Feature Flags API
+  version: 1.0.0
+  description: |
+    Feature flag system for Regal Recovery.
+
+    Provides runtime control over features, activities, and tools without requiring app releases.
+    Supports gradual rollout, kill switches, tier gating, tenant gating, platform filtering,
+    and version requirements.
+
+    All flags are stored in DynamoDB, cached in Valkey with 60-second TTL, and cached locally
+    on mobile devices. Offline apps use last-known flag state.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Flags
+    description: Feature flag evaluation for current user
+  - name: Admin
+    description: Admin-only flag management
+
+paths:
+  /flags:
+    get:
+      operationId: getFlags
+      tags: [Flags]
+      summary: Get all evaluated flags for current user
+      description: |
+        Returns all feature flags evaluated for the authenticated user.
+
+        Each flag is evaluated based on:
+        - Master enabled/disabled switch
+        - User's subscription tier
+        - User's tenant
+        - User's platform (iOS/Android)
+        - User's app version
+        - Rollout percentage (deterministic hash)
+
+        This endpoint is called on app launch and every 5 minutes in the background.
+        Results are cached locally for offline access.
+
+        Only returns flag key and enabled/disabled status. Admin properties
+        (rolloutPercentage, tiers, etc.) are NOT exposed to clients.
+      responses:
+        '200':
+          description: OK - Flags evaluated successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+            Cache-Control:
+              description: Cache for 60 seconds
+              schema:
+                type: string
+                example: max-age=60
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluatedFlagsResponse'
+              example:
+                data:
+                  - key: feature.recovery-agent
+                    enabled: true
+                  - key: activity.time-journal
+                    enabled: true
+                  - key: activity.faster-scale
+                    enabled: true
+                  - key: feature.panic-button-biometric
+                    enabled: false
+                  - key: feature.couples-mode
+                    enabled: false
+                meta:
+                  evaluatedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/flags:
+    get:
+      operationId: listAdminFlags
+      tags: [Admin]
+      summary: List all flags with full configuration
+      description: |
+        Returns all feature flags with complete configuration details.
+
+        Admin-only endpoint. Requires `admin` role.
+
+        Includes all flag properties: enabled, rolloutPercentage, tiers, tenants,
+        platforms, minAppVersion, description, updatedAt, updatedBy.
+      security:
+        - bearerAuth: [admin]
+      responses:
+        '200':
+          description: OK - All flags retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FlagConfig'
+                  meta:
+                    type: object
+                    properties:
+                      totalFlags:
+                        type: integer
+              example:
+                data:
+                  - key: feature.recovery-agent
+                    enabled: true
+                    rolloutPercentage: 100
+                    tiers: ["premium", "premium-plus"]
+                    tenants: ["*"]
+                    platforms: ["ios", "android"]
+                    minAppVersion: "1.2.0"
+                    description: "AI-powered Recovery Agent with guided tool walkthroughs"
+                    updatedAt: "2026-04-01T12:00:00Z"
+                    updatedBy: "admin@regalrecovery.com"
+                  - key: activity.time-journal
+                    enabled: true
+                    rolloutPercentage: 25
+                    tiers: ["*"]
+                    tenants: ["*"]
+                    platforms: ["*"]
+                    minAppVersion: "1.3.0"
+                    description: "Interval-based journaling with GPS and sensor data"
+                    updatedAt: "2026-03-15T10:00:00Z"
+                    updatedBy: "admin@regalrecovery.com"
+                meta:
+                  totalFlags: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Admin role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/flags/{key}:
+    put:
+      operationId: updateFlag
+      tags: [Admin]
+      summary: Update flag configuration
+      description: |
+        Update a feature flag's configuration.
+
+        Admin-only endpoint. Requires `admin` role.
+
+        All fields are optional. Only provided fields are updated.
+        Changes are audited in the flag audit log.
+
+        Cache is invalidated on update (60-second TTL reset).
+      security:
+        - bearerAuth: [admin]
+      parameters:
+        - name: key
+          in: path
+          required: true
+          description: Flag key (e.g., feature.recovery-agent)
+          schema:
+            type: string
+            pattern: '^(feature|activity|tool)\.[a-z0-9\-]+$'
+          example: feature.recovery-agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlagUpdate'
+            example:
+              enabled: true
+              rolloutPercentage: 50
+              tiers: ["premium", "premium-plus"]
+      responses:
+        '200':
+          description: OK - Flag updated successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/FlagConfig'
+              example:
+                data:
+                  key: feature.recovery-agent
+                  enabled: true
+                  rolloutPercentage: 50
+                  tiers: ["premium", "premium-plus"]
+                  tenants: ["*"]
+                  platforms: ["ios", "android"]
+                  minAppVersion: "1.2.0"
+                  description: "AI-powered Recovery Agent with guided tool walkthroughs"
+                  updatedAt: "2026-03-28T10:30:00Z"
+                  updatedBy: "admin@regalrecovery.com"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Admin role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/flags/{key}/audit:
+    get:
+      operationId: getFlagAudit
+      tags: [Admin]
+      summary: Get flag change history
+      description: |
+        Returns paginated audit log of all changes to a feature flag.
+
+        Admin-only endpoint. Requires `admin` role.
+
+        Shows who changed what and when. Sorted newest first.
+      security:
+        - bearerAuth: [admin]
+      parameters:
+        - name: key
+          in: path
+          required: true
+          description: Flag key (e.g., feature.recovery-agent)
+          schema:
+            type: string
+            pattern: '^(feature|activity|tool)\.[a-z0-9\-]+$'
+          example: feature.recovery-agent
+        - name: cursor
+          in: query
+          description: Pagination cursor
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of audit entries per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK - Audit log retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FlagAuditEntry'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+              example:
+                data:
+                  - timestamp: "2026-03-28T10:30:00Z"
+                    changedBy: "admin@regalrecovery.com"
+                    changes:
+                      - field: rolloutPercentage
+                        oldValue: 25
+                        newValue: 50
+                      - field: tiers
+                        oldValue: ["*"]
+                        newValue: ["premium", "premium-plus"]
+                  - timestamp: "2026-03-15T10:00:00Z"
+                    changedBy: "admin@regalrecovery.com"
+                    changes:
+                      - field: enabled
+                        oldValue: false
+                        newValue: true
+                links:
+                  self: https://api.regalrecovery.com/v1/admin/flags/feature.recovery-agent/audit?limit=20
+                  next: null
+                meta:
+                  page:
+                    nextCursor: null
+                    limit: 20
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Admin role required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    EvaluatedFlag:
+      type: object
+      required:
+        - key
+        - enabled
+      properties:
+        key:
+          type: string
+          description: Flag key identifier
+          pattern: '^(feature|activity|tool)\.[a-z0-9\-]+$'
+          example: feature.recovery-agent
+        enabled:
+          type: boolean
+          description: Whether this flag is enabled for the current user
+          example: true
+
+    EvaluatedFlagsResponse:
+      type: object
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluatedFlag'
+        meta:
+          type: object
+          required:
+            - evaluatedAt
+          properties:
+            evaluatedAt:
+              type: string
+              format: date-time
+              description: Server timestamp when flags were evaluated
+
+    FlagConfig:
+      type: object
+      required:
+        - key
+        - enabled
+        - rolloutPercentage
+        - tiers
+        - tenants
+        - platforms
+      properties:
+        key:
+          type: string
+          pattern: '^(feature|activity|tool)\.[a-z0-9\-]+$'
+          example: feature.recovery-agent
+        enabled:
+          type: boolean
+          description: Master on/off switch (kill switch)
+          example: true
+        rolloutPercentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Percentage of users who see the feature (gradual rollout)
+          example: 25
+        tiers:
+          type: array
+          items:
+            type: string
+            enum: [free-trial, premium, premium-plus, "*"]
+          description: Subscription tiers allowed to access this feature
+          example: ["premium", "premium-plus"]
+        tenants:
+          type: array
+          items:
+            type: string
+          description: Tenant IDs allowed to access this feature, or ["*"] for all
+          example: ["*"]
+        platforms:
+          type: array
+          items:
+            type: string
+            enum: [ios, android, "*"]
+          description: Platforms where this feature is available
+          example: ["ios", "android"]
+        minAppVersion:
+          type: string
+          nullable: true
+          pattern: '^\d+\.\d+\.\d+$'
+          description: Minimum app version required (semver)
+          example: "1.2.0"
+        description:
+          type: string
+          description: Human-readable description of the feature
+          example: "AI-powered Recovery Agent with guided tool walkthroughs"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+        updatedBy:
+          type: string
+          format: email
+          description: Email of admin who last updated the flag
+
+    FlagUpdate:
+      type: object
+      description: Partial update to flag configuration (all fields optional)
+      properties:
+        enabled:
+          type: boolean
+        rolloutPercentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+        tiers:
+          type: array
+          items:
+            type: string
+            enum: [free-trial, premium, premium-plus, "*"]
+        tenants:
+          type: array
+          items:
+            type: string
+        platforms:
+          type: array
+          items:
+            type: string
+            enum: [ios, android, "*"]
+        minAppVersion:
+          type: string
+          nullable: true
+          pattern: '^\d+\.\d+\.\d+$'
+        description:
+          type: string
+
+    FlagAuditEntry:
+      type: object
+      required:
+        - timestamp
+        - changedBy
+        - changes
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the change occurred
+        changedBy:
+          type: string
+          format: email
+          description: Email of admin who made the change
+        changes:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - oldValue
+              - newValue
+            properties:
+              field:
+                type: string
+                description: Field name that changed
+                example: rolloutPercentage
+              oldValue:
+                description: Previous value
+                nullable: true
+              newValue:
+                description: New value
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for this error occurrence
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+          description: Application-specific error code
+          example: "rr:0x00000001"
+        status:
+          type: integer
+          description: HTTP status code
+        title:
+          type: string
+          description: Human-readable summary (stable across occurrences)
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence
+        correlationId:
+          type: string
+          format: uuid
+          description: Request correlation ID for distributed tracing
+        source:
+          type: object
+          description: Reference to source of the error
+          properties:
+            pointer:
+              type: string
+              description: JSON Pointer (RFC 6901) to field in request
+              example: /rolloutPercentage
+            parameter:
+              type: string
+              description: Query parameter name
+            header:
+              type: string
+              description: Header name
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+              description: Link to documentation about this error
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request syntax
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440000
+                code: "rr:0x00000400"
+                status: 400
+                title: Bad Request
+                detail: Request body is malformed or missing required fields
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440001
+                code: "rr:0x00000401"
+                status: 401
+                title: Unauthorized
+                detail: Access token is missing, invalid, or expired
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440004
+                code: "rr:0x00000404"
+                status: 404
+                title: Not Found
+                detail: The requested flag does not exist
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440022
+                code: "rr:0x00000422"
+                status: 422
+                title: Validation Failed
+                detail: rolloutPercentage must be between 0 and 100
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5
+                source:
+                  pointer: /rolloutPercentage
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: 550e8400-e29b-41d4-a716-446655440500
+                code: "rr:0x00000500"
+                status: 500
+                title: Internal Server Error
+                detail: An unexpected error occurred. Please try again later.
+                correlationId: fe8793b2-1bf0-4d29-bf10-adcf72640ec5

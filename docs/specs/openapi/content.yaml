@@ -1,0 +1,792 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Content & Resources API
+  version: 1.0.0
+  description: |
+    Content library management API for Regal Recovery.
+
+    Provides access to:
+    - Daily affirmations with categories and packs
+    - Daily devotionals with scripture and reflections
+    - Prayers organized by pack and theme
+    - Educational resources (articles, videos, courses)
+    - Content packs for purchase and ownership management
+
+    All content supports internationalization and is filterable by category, pack, and addiction type.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Affirmations
+    description: Daily affirmations and favorites
+  - name: Devotionals
+    description: Daily devotionals with scripture
+  - name: Prayers
+    description: Recovery prayers by theme
+  - name: Resources
+    description: Educational articles, videos, and courses
+  - name: Content Packs
+    description: Purchasable content pack management
+
+paths:
+  /content/affirmations:
+    get:
+      operationId: listAffirmations
+      tags: [Affirmations]
+      summary: List affirmations
+      description: |
+        Retrieve paginated list of affirmations.
+
+        Supports filtering by pack, category, and addiction type.
+        Returns cursor-based pagination with optional favorites indicator.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: pack
+          in: query
+          schema:
+            type: string
+          description: Filter by content pack ID
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [recovery, faith, strength, serenity, courage, hope]
+      responses:
+        '200':
+          description: OK - Affirmations retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Affirmation'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+              example:
+                data:
+                  - id: aff_1a2b3c4d
+                    text: "I am worthy of love and recovery"
+                    category: strength
+                    packId: pack_core
+                    packName: Core Recovery Pack
+                    isFavorite: true
+                    language: en
+                    links:
+                      self: https://api.regalrecovery.com/v1/content/affirmations/aff_1a2b3c4d
+                  - id: aff_2b3c4d5e
+                    text: "Today I choose freedom over addiction"
+                    category: recovery
+                    packId: pack_core
+                    packName: Core Recovery Pack
+                    isFavorite: false
+                    language: en
+                    links:
+                      self: https://api.regalrecovery.com/v1/content/affirmations/aff_2b3c4d5e
+                links:
+                  self: https://api.regalrecovery.com/v1/content/affirmations?limit=20
+                  next: https://api.regalrecovery.com/v1/content/affirmations?cursor=bmV4dA&limit=20
+                meta:
+                  page:
+                    nextCursor: bmV4dA
+                    limit: 20
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/affirmations/today:
+    get:
+      operationId: getTodayAffirmation
+      tags: [Affirmations]
+      summary: Get today's affirmation
+      description: |
+        Retrieve the daily affirmation for the authenticated user.
+
+        Affirmation is selected based on user's timezone, recovery journey stage, and preferences.
+        Same affirmation is returned for the entire day.
+      responses:
+        '200':
+          description: OK - Today's affirmation retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Affirmation'
+              example:
+                data:
+                  id: aff_1a2b3c4d
+                  text: "I am worthy of love and recovery"
+                  category: strength
+                  packId: pack_core
+                  packName: Core Recovery Pack
+                  isFavorite: true
+                  language: en
+                  links:
+                    self: https://api.regalrecovery.com/v1/content/affirmations/aff_1a2b3c4d
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/affirmations/{id}:
+    get:
+      operationId: getAffirmation
+      tags: [Affirmations]
+      summary: Get affirmation by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^aff_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Affirmation retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Affirmation'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/affirmations/favorites/{id}:
+    post:
+      operationId: addFavoriteAffirmation
+      tags: [Affirmations]
+      summary: Add affirmation to favorites
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^aff_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Added to favorites
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: removeFavoriteAffirmation
+      tags: [Affirmations]
+      summary: Remove affirmation from favorites
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^aff_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Removed from favorites
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/devotionals:
+    get:
+      operationId: listDevotionals
+      tags: [Devotionals]
+      summary: List devotionals
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK - Devotionals retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Devotional'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/devotionals/today:
+    get:
+      operationId: getTodayDevotional
+      tags: [Devotionals]
+      summary: Get today's devotional
+      responses:
+        '200':
+          description: OK - Today's devotional retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Devotional'
+              example:
+                data:
+                  id: dev_1a2b3c4d
+                  title: "Finding Strength in Weakness"
+                  scripture: "2 Corinthians 12:9"
+                  scriptureText: "My grace is sufficient for you, for my power is made perfect in weakness."
+                  reflection: "In our recovery journey, we must acknowledge our weaknesses and rely on God's strength..."
+                  prayerPrompt: "Lord, help me to see my weaknesses as opportunities for Your strength to shine through..."
+                  date: "2026-03-28"
+                  links:
+                    self: https://api.regalrecovery.com/v1/content/devotionals/dev_1a2b3c4d
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/prayers:
+    get:
+      operationId: listPrayers
+      tags: [Prayers]
+      summary: List prayers
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: pack
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK - Prayers retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Prayer'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/resources:
+    get:
+      operationId: listResources
+      tags: [Resources]
+      summary: List educational resources
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [article, video, course, podcast]
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK - Resources retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Resource'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/packs:
+    get:
+      operationId: listContentPacks
+      tags: [Content Packs]
+      summary: List available content packs
+      description: |
+        Retrieve all content packs available for purchase.
+
+        Shows pack details, pricing, and ownership status.
+      responses:
+        '200':
+          description: OK - Content packs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContentPack'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/packs/owned:
+    get:
+      operationId: listOwnedPacks
+      tags: [Content Packs]
+      summary: List owned content packs
+      responses:
+        '200':
+          description: OK - Owned packs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ContentPack'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/packs/{id}/purchase:
+    post:
+      operationId: purchaseContentPack
+      tags: [Content Packs]
+      summary: Purchase content pack
+      description: |
+        Purchase a content pack via in-app purchase.
+
+        Returns purchase result with ownership confirmation.
+        Integrates with Apple App Store and Google Play Store.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pack_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [receiptData, platform]
+              properties:
+                receiptData:
+                  type: string
+                  description: Base64-encoded purchase receipt
+                platform:
+                  type: string
+                  enum: [ios, android]
+      responses:
+        '200':
+          description: OK - Purchase completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PurchaseResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Affirmation:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^aff_[a-zA-Z0-9]+$'
+        text:
+          type: string
+          description: Affirmation text
+        category:
+          type: string
+          enum: [recovery, faith, strength, serenity, courage, hope]
+        packId:
+          type: string
+          description: Content pack ID
+        packName:
+          type: string
+        isFavorite:
+          type: boolean
+        language:
+          type: string
+          enum: [en, es, fr, de, pt]
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    Devotional:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^dev_[a-zA-Z0-9]+$'
+        title:
+          type: string
+        scripture:
+          type: string
+          description: Bible verse reference
+        scriptureText:
+          type: string
+          description: Full verse text
+        reflection:
+          type: string
+          description: Devotional reflection content
+        prayerPrompt:
+          type: string
+          description: Suggested prayer
+        date:
+          type: string
+          format: date
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    Prayer:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^pryr_[a-zA-Z0-9]+$'
+        title:
+          type: string
+        text:
+          type: string
+        theme:
+          type: string
+          enum: [serenity, courage, wisdom, strength, gratitude, surrender]
+        packId:
+          type: string
+        packName:
+          type: string
+        language:
+          type: string
+          enum: [en, es, fr, de, pt]
+
+    Resource:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^res_[a-zA-Z0-9]+$'
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [article, video, course, podcast]
+        category:
+          type: string
+        url:
+          type: string
+          format: uri
+        thumbnailUrl:
+          type: string
+          format: uri
+        duration:
+          type: integer
+          description: Duration in seconds (for video/podcast)
+        author:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+
+    ContentPack:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^pack_[a-zA-Z0-9]+$'
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          example: USD
+        itemCount:
+          type: integer
+          description: Number of items in pack
+        thumbnailUrl:
+          type: string
+          format: uri
+        isOwned:
+          type: boolean
+        purchasedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    PurchaseResult:
+      type: object
+      properties:
+        packId:
+          type: string
+        transactionId:
+          type: string
+        purchasedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [completed, pending, failed]
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+          properties:
+            pointer:
+              type: string
+            parameter:
+              type: string
+            header:
+              type: string
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

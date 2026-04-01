@@ -1,0 +1,15 @@
+{
+  "users": [
+    {
+      "userId": "u_alex",
+      "email": "alex@example.com",
+      "name": "Alex",
+      "addictions": ["Sex Addiction (SA)", "Pornography"],
+      "sobrietyDate": "2025-07-04",
+      "bibleVersion": "ESV",
+      "timezone": "America/Chicago",
+      "tenantId": "DEFAULT",
+      "motivations": ["Faith", "Family", "Freedom"]
+    }
+  ]
+}

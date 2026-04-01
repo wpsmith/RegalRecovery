@@ -1,0 +1,21 @@
+services:
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"        # LocalStack gateway
+    environment:
+      - SERVICES=dynamodb,s3,sqs,sns,ssm,sts
+      - DEFAULT_REGION=us-east-1
+      - EAGER_SERVICE_LOADING=1
+      - LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT=1
+    volumes:
+      - localstack-data:/var/lib/localstack
+
+  valkey:
+    image: valkey/valkey:7-alpine
+    ports:
+      - "6380:6379"
+    command: valkey-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+
+volumes:
+  localstack-data:

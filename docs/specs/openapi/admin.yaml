@@ -1,0 +1,842 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Admin & B2B Tenant Management API
+  version: 1.0.0
+  description: |
+    Administrative and B2B tenant management API for Regal Recovery.
+
+    Features:
+    - Multi-tenant organization management
+    - Tenant-level analytics and usage statistics (aggregate only, privacy-preserving)
+    - Content library management for admins
+    - Tenant-specific branding and configuration
+    - License and subscription management
+
+    Security:
+    - All admin endpoints require `tenant:admin` scope
+    - Content management requires `content:admin` scope
+    - Tenant admins can only access their own tenant data
+    - Platform admins (Regal Recovery staff) can access all tenants
+
+    Privacy: Tenant admins NEVER have access to individual user data or personal information.
+    Only aggregate, anonymized statistics are exposed.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Tenants
+    description: Tenant organization management
+  - name: Content Management
+    description: Content library administration
+
+paths:
+  /admin/tenants:
+    get:
+      operationId: listTenants
+      tags: [Tenants]
+      summary: List tenants
+      description: |
+        List all tenants (platform admin only) or current user's tenant (tenant admin).
+
+        Platform admins see all tenants. Tenant admins see only their own.
+      security:
+        - bearerAuth: [tenant:admin]
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK - Tenants retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createTenant
+      tags: [Tenants]
+      summary: Create tenant
+      description: |
+        Create new tenant organization (platform admin only).
+
+        Initializes tenant with default configuration, admin user, and subscription.
+      security:
+        - bearerAuth: [tenant:admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - domain
+                - adminEmail
+                - subscriptionTier
+              properties:
+                name:
+                  type: string
+                  description: Organization name
+                  example: "Acme Recovery Center"
+                domain:
+                  type: string
+                  description: Unique tenant domain slug
+                  pattern: '^[a-z0-9-]+$'
+                  example: acme-recovery
+                adminEmail:
+                  type: string
+                  format: email
+                  description: Email for tenant admin user
+                adminName:
+                  type: string
+                  description: Name of tenant admin
+                subscriptionTier:
+                  type: string
+                  enum: [trial, basic, professional, enterprise]
+                branding:
+                  type: object
+                  properties:
+                    logoUrl:
+                      type: string
+                      format: uri
+                    primaryColor:
+                      type: string
+                      pattern: '^#[0-9A-Fa-f]{6}$'
+                    supportEmail:
+                      type: string
+                      format: email
+      responses:
+        '201':
+          description: Created - Tenant created successfully
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: Conflict - Domain already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/tenants/{id}:
+    get:
+      operationId: getTenant
+      tags: [Tenants]
+      summary: Get tenant details
+      description: |
+        Retrieve tenant details and configuration.
+
+        Tenant admins can only access their own tenant.
+      security:
+        - bearerAuth: [tenant:admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tenant_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Tenant retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateTenant
+      tags: [Tenants]
+      summary: Update tenant
+      description: |
+        Update tenant configuration.
+
+        Partial update (JSON Merge Patch RFC 7396).
+      security:
+        - bearerAuth: [tenant:admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tenant_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                subscriptionTier:
+                  type: string
+                  enum: [trial, basic, professional, enterprise]
+                isActive:
+                  type: boolean
+                branding:
+                  type: object
+                  properties:
+                    logoUrl:
+                      type: string
+                      format: uri
+                    primaryColor:
+                      type: string
+                    supportEmail:
+                      type: string
+                      format: email
+      responses:
+        '200':
+          description: OK - Tenant updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Tenant'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteTenant
+      tags: [Tenants]
+      summary: Delete tenant
+      description: |
+        Deactivate tenant (platform admin only).
+
+        Soft delete with 90-day grace period before permanent deletion.
+        All tenant users are notified and lose access immediately.
+      security:
+        - bearerAuth: [tenant:admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tenant_[a-zA-Z0-9]+$'
+      responses:
+        '202':
+          description: Accepted - Tenant deactivation initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deletionScheduledAt:
+                        type: string
+                        format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/tenants/{id}/stats:
+    get:
+      operationId: getTenantStats
+      tags: [Tenants]
+      summary: Get tenant statistics
+      description: |
+        Retrieve aggregate usage statistics for tenant.
+
+        PRIVACY: Only aggregate, anonymized data. No individual user information.
+
+        Includes:
+        - Total user count
+        - Active users (last 30 days)
+        - Check-in completion rate
+        - Average sobriety days
+        - Feature adoption metrics
+      security:
+        - bearerAuth: [tenant:admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tenant_[a-zA-Z0-9]+$'
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 365d, all]
+            default: 30d
+      responses:
+        '200':
+          description: OK - Tenant statistics retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TenantStats'
+              example:
+                data:
+                  totalUsers: 247
+                  activeUsers: 189
+                  newUsers: 12
+                  checkInCompletionRate: 0.87
+                  averageSobrietyDays: 124
+                  featureAdoption:
+                    dailyCheckIns: 0.92
+                    journaling: 0.68
+                    supportNetwork: 0.74
+                    recoveryTools: 0.81
+                  period: 30d
+                  generatedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/content:
+    get:
+      operationId: listAdminContent
+      tags: [Content Management]
+      summary: List content (admin view)
+      description: |
+        List all content for management (platform admin only).
+
+        Includes published, draft, and archived content.
+      security:
+        - bearerAuth: [content:admin]
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [affirmation, devotional, prayer, resource]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published, archived]
+      responses:
+        '200':
+          description: OK - Content retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminContent'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createAdminContent
+      tags: [Content Management]
+      summary: Create content
+      description: |
+        Create new content item (platform admin only).
+      security:
+        - bearerAuth: [content:admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContentRequest'
+      responses:
+        '201':
+          description: Created - Content created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AdminContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /admin/content/{id}:
+    patch:
+      operationId: updateAdminContent
+      tags: [Content Management]
+      summary: Update content
+      description: |
+        Update content item (platform admin only).
+      security:
+        - bearerAuth: [content:admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContentRequest'
+      responses:
+        '200':
+          description: OK - Content updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AdminContent'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteAdminContent
+      tags: [Content Management]
+      summary: Delete content
+      description: |
+        Archive content item (platform admin only).
+
+        Soft delete. Content no longer visible to users but retained for audit.
+      security:
+        - bearerAuth: [content:admin]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content - Content archived
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token with tenant:admin or content:admin scope
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^tenant_[a-zA-Z0-9]+$'
+        name:
+          type: string
+        domain:
+          type: string
+          description: Unique tenant domain slug
+        subscriptionTier:
+          type: string
+          enum: [trial, basic, professional, enterprise]
+        isActive:
+          type: boolean
+        userCount:
+          type: integer
+        branding:
+          type: object
+          properties:
+            logoUrl:
+              type: string
+              format: uri
+            primaryColor:
+              type: string
+            supportEmail:
+              type: string
+              format: email
+        createdAt:
+          type: string
+          format: date-time
+        subscriptionEndsAt:
+          type: string
+          format: date-time
+          nullable: true
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            stats:
+              type: string
+              format: uri
+
+    TenantStats:
+      type: object
+      properties:
+        totalUsers:
+          type: integer
+        activeUsers:
+          type: integer
+          description: Users active in last 30 days
+        newUsers:
+          type: integer
+          description: Users added in period
+        checkInCompletionRate:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        averageSobrietyDays:
+          type: integer
+        featureAdoption:
+          type: object
+          properties:
+            dailyCheckIns:
+              type: number
+              format: float
+            journaling:
+              type: number
+              format: float
+            supportNetwork:
+              type: number
+              format: float
+            recoveryTools:
+              type: number
+              format: float
+        period:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+
+    AdminContent:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [affirmation, devotional, prayer, resource]
+        status:
+          type: string
+          enum: [draft, published, archived]
+        title:
+          type: string
+        text:
+          type: string
+        category:
+          type: string
+        packId:
+          type: string
+          nullable: true
+        language:
+          type: string
+          enum: [en, es, fr, de, pt]
+        createdAt:
+          type: string
+          format: date-time
+        publishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdBy:
+          type: string
+          description: Admin user who created content
+
+    CreateContentRequest:
+      type: object
+      required:
+        - type
+        - title
+        - text
+        - language
+      properties:
+        type:
+          type: string
+          enum: [affirmation, devotional, prayer, resource]
+        title:
+          type: string
+        text:
+          type: string
+        category:
+          type: string
+        packId:
+          type: string
+          nullable: true
+        language:
+          type: string
+          enum: [en, es, fr, de, pt]
+        status:
+          type: string
+          enum: [draft, published]
+          default: draft
+
+    UpdateContentRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+        category:
+          type: string
+        packId:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [draft, published, archived]
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

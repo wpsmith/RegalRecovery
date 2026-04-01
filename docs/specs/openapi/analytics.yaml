@@ -1,0 +1,763 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Analytics & Health Score API
+  version: 1.0.0
+  description: |
+    Analytics and recovery health metrics API for Regal Recovery.
+
+    Provides:
+    - Comprehensive dashboard with key recovery metrics
+    - Health score calculation based on multiple behavioral signals
+    - Historical health score trends
+    - Metric trend analysis (streaks, check-ins, urges, sleep, etc.)
+    - Cross-metric correlations to identify patterns
+    - AI-generated insights and recommendations
+
+    All analytics are privacy-preserving and stored locally with optional cloud backup.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Dashboard
+    description: Recovery dashboard overview
+  - name: Health Score
+    description: Recovery health score calculation
+  - name: Trends
+    description: Metric trend analysis
+  - name: Insights
+    description: AI-generated insights and recommendations
+
+paths:
+  /analytics/dashboard:
+    get:
+      operationId: getDashboard
+      tags: [Dashboard]
+      summary: Get recovery dashboard
+      description: |
+        Retrieve comprehensive dashboard with key recovery metrics.
+
+        Includes:
+        - Current streak and all-time best
+        - Recent check-ins and completion rate
+        - Urge frequency and intensity trends
+        - Upcoming milestones
+        - Health score summary
+        - Recent achievements
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 365d, all]
+            default: 30d
+          description: Time period for aggregated metrics
+      responses:
+        '200':
+          description: OK - Dashboard retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Dashboard'
+              example:
+                data:
+                  currentStreak:
+                    days: 73
+                    startDate: "2026-01-15"
+                  allTimeBest:
+                    days: 145
+                    startDate: "2025-06-01"
+                    endDate: "2025-10-24"
+                  checkIns:
+                    completedToday: true
+                    completionRate: 0.92
+                    recentCount: 27
+                    period: 30d
+                  urges:
+                    totalCount: 12
+                    averageIntensity: 4.2
+                    lastUrge: "2026-03-25T14:30:00Z"
+                    period: 30d
+                  healthScore:
+                    current: 82
+                    trend: improving
+                    lastUpdated: "2026-03-28T10:00:00Z"
+                  nextMilestone:
+                    days: 90
+                    daysRemaining: 17
+                    achievementAt: "2026-04-14"
+                  recentAchievements:
+                    - id: ach_1a2b3c4d
+                      type: streak-milestone
+                      title: "60 Days Strong"
+                      achievedAt: "2026-03-15T00:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /analytics/health-score:
+    get:
+      operationId: getHealthScore
+      tags: [Health Score]
+      summary: Get current health score
+      description: |
+        Retrieve current recovery health score with component breakdown.
+
+        Health score (0-100) is calculated from weighted factors:
+        - Sobriety streak consistency (25%)
+        - Check-in completion rate (20%)
+        - Urge frequency and management (20%)
+        - Sleep quality (15%)
+        - Self-care activities (10%)
+        - Support network engagement (10%)
+
+        Score interpretation:
+        - 0-39: High risk - immediate support needed
+        - 40-59: Moderate risk - increased vigilance
+        - 60-79: Good - steady recovery progress
+        - 80-100: Excellent - strong recovery foundation
+      responses:
+        '200':
+          description: OK - Health score retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/HealthScore'
+              example:
+                data:
+                  score: 82
+                  trend: improving
+                  interpretation: excellent
+                  components:
+                    streakConsistency:
+                      score: 95
+                      weight: 0.25
+                      contribution: 23.75
+                    checkInRate:
+                      score: 92
+                      weight: 0.20
+                      contribution: 18.4
+                    urgeManagement:
+                      score: 78
+                      weight: 0.20
+                      contribution: 15.6
+                    sleepQuality:
+                      score: 65
+                      weight: 0.15
+                      contribution: 9.75
+                    selfCare:
+                      score: 80
+                      weight: 0.10
+                      contribution: 8.0
+                    supportNetwork:
+                      score: 70
+                      weight: 0.10
+                      contribution: 7.0
+                  lastUpdated: "2026-03-28T10:00:00Z"
+                  links:
+                    history: https://api.regalrecovery.com/v1/analytics/health-score/history
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /analytics/health-score/history:
+    get:
+      operationId: getHealthScoreHistory
+      tags: [Health Score]
+      summary: Get health score history
+      description: |
+        Retrieve historical health score data for trend visualization.
+
+        Returns daily health score values for the specified period.
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 365d]
+            default: 30d
+        - name: granularity
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+            default: daily
+      responses:
+        '200':
+          description: OK - Health score history retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        score:
+                          type: integer
+                          minimum: 0
+                          maximum: 100
+                  meta:
+                    type: object
+                    properties:
+                      period:
+                        type: string
+                      granularity:
+                        type: string
+                      dataPoints:
+                        type: integer
+              example:
+                data:
+                  - date: "2026-03-28"
+                    score: 82
+                  - date: "2026-03-27"
+                    score: 81
+                  - date: "2026-03-26"
+                    score: 79
+                meta:
+                  period: 30d
+                  granularity: daily
+                  dataPoints: 30
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /analytics/trends/{metric}:
+    get:
+      operationId: getMetricTrend
+      tags: [Trends]
+      summary: Get metric trend analysis
+      description: |
+        Retrieve trend analysis for a specific recovery metric.
+
+        Available metrics:
+        - streaks: Sobriety streak data over time
+        - check-ins: Check-in completion patterns
+        - urges: Urge frequency, intensity, and triggers
+        - sleep: Sleep duration and quality
+        - mood: Mood ratings over time
+        - activities: Self-care activity completion
+      parameters:
+        - name: metric
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [streaks, check-ins, urges, sleep, mood, activities]
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 365d, all]
+            default: 30d
+        - name: granularity
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly, monthly]
+            default: daily
+      responses:
+        '200':
+          description: OK - Metric trend retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TrendData'
+              example:
+                data:
+                  metric: urges
+                  period: 30d
+                  granularity: daily
+                  dataPoints:
+                    - date: "2026-03-28"
+                      value: 0
+                    - date: "2026-03-27"
+                      value: 1
+                    - date: "2026-03-26"
+                      value: 2
+                  summary:
+                    total: 12
+                    average: 0.4
+                    min: 0
+                    max: 3
+                    trend: decreasing
+                    percentChange: -35.5
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /analytics/correlations:
+    get:
+      operationId: getCorrelations
+      tags: [Trends]
+      summary: Get cross-metric correlations
+      description: |
+        Identify correlations between different recovery metrics.
+
+        Uses statistical analysis to find patterns, e.g.:
+        - Low sleep correlates with higher urge intensity
+        - Missed check-ins predict increased urges within 48 hours
+        - Exercise reduces urge frequency by 40%
+
+        Helps users understand what behaviors strengthen or weaken recovery.
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [30d, 90d, 365d, all]
+            default: 90d
+      responses:
+        '200':
+          description: OK - Correlations retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Correlation'
+              example:
+                data:
+                  - id: corr_1a2b3c4d
+                    metricA: sleep-duration
+                    metricB: urge-intensity
+                    correlation: -0.68
+                    strength: strong
+                    direction: negative
+                    interpretation: "Lower sleep duration strongly correlates with higher urge intensity"
+                    confidence: 0.92
+                  - id: corr_2b3c4d5e
+                    metricA: exercise-frequency
+                    metricB: urge-frequency
+                    correlation: -0.54
+                    strength: moderate
+                    direction: negative
+                    interpretation: "More frequent exercise moderately correlates with fewer urges"
+                    confidence: 0.85
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /analytics/insights:
+    get:
+      operationId: getInsights
+      tags: [Insights]
+      summary: Get AI-generated insights
+      description: |
+        Retrieve personalized insights and recommendations based on recovery data.
+
+        AI analyzes behavior patterns and generates actionable insights:
+        - Risk warnings (e.g., "Urge frequency increased 40% this week")
+        - Positive reinforcement (e.g., "7-day check-in streak! Keep it up!")
+        - Recommendations (e.g., "Consider reaching out to your sponsor")
+        - Pattern detection (e.g., "Urges tend to occur Tuesday evenings")
+
+        Insights are refreshed daily and prioritized by relevance.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 20
+            default: 10
+      responses:
+        '200':
+          description: OK - Insights retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Insight'
+              example:
+                data:
+                  - id: ins_1a2b3c4d
+                    type: pattern
+                    priority: high
+                    title: "Urge Pattern Detected"
+                    message: "Your urges tend to peak on weekday evenings between 6-8 PM. Consider scheduling activities during this window."
+                    actionable: true
+                    suggestedActions:
+                      - "Schedule gym time at 6 PM"
+                      - "Plan dinner with accountability partner"
+                      - "Set reminder to call sponsor"
+                    generatedAt: "2026-03-28T10:00:00Z"
+                  - id: ins_2b3c4d5e
+                    type: celebration
+                    priority: medium
+                    title: "30-Day Check-In Streak"
+                    message: "Amazing! You've completed check-ins for 30 consecutive days. This consistency strengthens recovery."
+                    actionable: false
+                    generatedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Dashboard:
+      type: object
+      properties:
+        currentStreak:
+          type: object
+          properties:
+            days:
+              type: integer
+            startDate:
+              type: string
+              format: date
+        allTimeBest:
+          type: object
+          properties:
+            days:
+              type: integer
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+          nullable: true
+        checkIns:
+          type: object
+          properties:
+            completedToday:
+              type: boolean
+            completionRate:
+              type: number
+              format: float
+              minimum: 0
+              maximum: 1
+            recentCount:
+              type: integer
+            period:
+              type: string
+        urges:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+            averageIntensity:
+              type: number
+              format: float
+            lastUrge:
+              type: string
+              format: date-time
+              nullable: true
+            period:
+              type: string
+        healthScore:
+          type: object
+          properties:
+            current:
+              type: integer
+              minimum: 0
+              maximum: 100
+            trend:
+              type: string
+              enum: [improving, stable, declining]
+            lastUpdated:
+              type: string
+              format: date-time
+        nextMilestone:
+          type: object
+          properties:
+            days:
+              type: integer
+            daysRemaining:
+              type: integer
+            achievementAt:
+              type: string
+              format: date
+          nullable: true
+        recentAchievements:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              title:
+                type: string
+              achievedAt:
+                type: string
+                format: date-time
+
+    HealthScore:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        trend:
+          type: string
+          enum: [improving, stable, declining]
+        interpretation:
+          type: string
+          enum: [high-risk, moderate-risk, good, excellent]
+        components:
+          type: object
+          properties:
+            streakConsistency:
+              $ref: '#/components/schemas/ScoreComponent'
+            checkInRate:
+              $ref: '#/components/schemas/ScoreComponent'
+            urgeManagement:
+              $ref: '#/components/schemas/ScoreComponent'
+            sleepQuality:
+              $ref: '#/components/schemas/ScoreComponent'
+            selfCare:
+              $ref: '#/components/schemas/ScoreComponent'
+            supportNetwork:
+              $ref: '#/components/schemas/ScoreComponent'
+        lastUpdated:
+          type: string
+          format: date-time
+        links:
+          type: object
+          properties:
+            history:
+              type: string
+              format: uri
+
+    ScoreComponent:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        weight:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+        contribution:
+          type: number
+          format: float
+          description: Weighted contribution to overall score
+
+    TrendData:
+      type: object
+      properties:
+        metric:
+          type: string
+        period:
+          type: string
+        granularity:
+          type: string
+        dataPoints:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              value:
+                type: number
+        summary:
+          type: object
+          properties:
+            total:
+              type: number
+            average:
+              type: number
+            min:
+              type: number
+            max:
+              type: number
+            trend:
+              type: string
+              enum: [increasing, stable, decreasing]
+            percentChange:
+              type: number
+              format: float
+              description: Percent change vs previous period
+
+    Correlation:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^corr_[a-zA-Z0-9]+$'
+        metricA:
+          type: string
+        metricB:
+          type: string
+        correlation:
+          type: number
+          format: float
+          minimum: -1
+          maximum: 1
+          description: Pearson correlation coefficient
+        strength:
+          type: string
+          enum: [none, weak, moderate, strong, very-strong]
+        direction:
+          type: string
+          enum: [positive, negative]
+        interpretation:
+          type: string
+        confidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+
+    Insight:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^ins_[a-zA-Z0-9]+$'
+        type:
+          type: string
+          enum: [pattern, risk, celebration, recommendation, milestone]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        title:
+          type: string
+        message:
+          type: string
+        actionable:
+          type: boolean
+        suggestedActions:
+          type: array
+          items:
+            type: string
+          nullable: true
+        generatedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

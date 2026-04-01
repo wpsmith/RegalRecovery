@@ -1,0 +1,626 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery AI Agent API
+  version: 1.0.0
+  description: |
+    Recovery Agent (AI chatbot) API for Regal Recovery.
+
+    Features:
+    - Context-aware conversational AI for recovery support
+    - Multi-turn conversations with persistent history
+    - Tool execution capabilities (submit check-ins, log urges, schedule activities)
+    - Calendar integration for proactive planning
+    - Crisis detection and escalation to human support
+
+    Agent uses Claude (Anthropic) with recovery-specific training and guardrails.
+    All conversations are private and encrypted.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Conversations
+    description: AI conversation management
+  - name: Messages
+    description: Message exchange with agent
+  - name: Tool Execution
+    description: Agent-triggered tool actions
+
+paths:
+  /agent/conversations:
+    post:
+      operationId: createConversation
+      tags: [Conversations]
+      summary: Start new conversation
+      description: |
+        Create a new conversation with the Recovery Agent.
+
+        Each conversation maintains independent context and history.
+        Agent is initialized with user's recovery profile and recent activity.
+
+        Optional preferredModel field allows A/B testing different LLM models via LiteLLM.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: Optional conversation title
+                  maxLength: 100
+                initialMessage:
+                  type: string
+                  description: Optional first message
+                  maxLength: 2000
+                preferredModel:
+                  type: string
+                  description: Optional preferred LLM model for A/B testing (e.g., claude-3-opus, claude-3-sonnet)
+                  example: claude-3-opus
+            example:
+              title: "Evening check-in"
+              initialMessage: "I'm feeling tempted tonight and need some support."
+              preferredModel: claude-3-opus
+      responses:
+        '201':
+          description: Created - Conversation started
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Conversation'
+              example:
+                data:
+                  id: conv_1a2b3c4d
+                  title: "Evening check-in"
+                  createdAt: "2026-03-28T19:30:00Z"
+                  lastMessageAt: "2026-03-28T19:30:00Z"
+                  messageCount: 1
+                  links:
+                    self: https://api.regalrecovery.com/v1/agent/conversations/conv_1a2b3c4d
+                    messages: https://api.regalrecovery.com/v1/agent/conversations/conv_1a2b3c4d/messages
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listConversations
+      tags: [Conversations]
+      summary: List conversations
+      description: |
+        Retrieve list of all conversations for authenticated user.
+
+        Returns conversations in reverse chronological order (most recent first).
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK - Conversations retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /agent/conversations/{id}:
+    get:
+      operationId: getConversation
+      tags: [Conversations]
+      summary: Get conversation details
+      description: |
+        Retrieve conversation metadata and full message history.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^conv_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Conversation retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    allOf:
+                      - $ref: '#/components/schemas/Conversation'
+                      - type: object
+                        properties:
+                          messages:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/AgentMessage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteConversation
+      tags: [Conversations]
+      summary: Delete conversation
+      description: |
+        Delete conversation and all associated messages.
+
+        This action is irreversible. Conversation history is permanently removed.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^conv_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Conversation deleted
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /agent/conversations/{id}/messages:
+    post:
+      operationId: sendMessage
+      tags: [Messages]
+      summary: Send message to agent
+      description: |
+        Send message to Recovery Agent and receive response.
+
+        Agent processes message with full conversation context.
+        May trigger tool executions (e.g., logging check-in, scheduling activity).
+
+        Response is streamed if client supports Server-Sent Events (SSE).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^conv_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                  minLength: 1
+                  maxLength: 2000
+            example:
+              text: "I'm struggling with urges tonight. What should I do?"
+      responses:
+        '201':
+          description: Created - Message sent and response received
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      userMessage:
+                        $ref: '#/components/schemas/AgentMessage'
+                      agentMessage:
+                        $ref: '#/components/schemas/AgentMessage'
+                      toolExecutions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ToolExecution'
+                        description: Tools executed by agent during response
+              example:
+                data:
+                  userMessage:
+                    id: msg_1a2b3c4d
+                    role: user
+                    text: "I'm struggling with urges tonight. What should I do?"
+                    timestamp: "2026-03-28T19:35:00Z"
+                  agentMessage:
+                    id: msg_2b3c4d5e
+                    role: agent
+                    text: "I hear you're struggling with urges right now. Let's work through this together. First, take three deep breaths..."
+                    timestamp: "2026-03-28T19:35:03Z"
+                  toolExecutions: []
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /agent/conversations/{id}/execute-tool:
+    post:
+      operationId: executeToolForUser
+      tags: [Tool Execution]
+      summary: Agent executes tool on user's behalf
+      description: |
+        Agent executes a recovery tool walkthrough with user's consent.
+
+        Supported tool walkthroughs:
+        - faster-scale: FASTER Scale 6-stage guided assessment
+        - post-mortem: Post-Mortem Analysis (6-section 24-hour review)
+        - check-in: Recovery Check-in (5-7 configurable questions)
+        - integrity-inventory: Integrity Inventory (5 dimensions)
+        - spouse-checkin-prep: Spouse Check-in Preparation (FANOS/FITNAP)
+        - relapse-prevention-plan: Relapse Prevention Plan review and update
+        - pci: Personal Craziness Index
+        - emotional-journal: Emotional Journaling entry
+        - time-journal: Time Journal interval entry
+
+        All tool executions require explicit user confirmation after data collection.
+        The agent collects data conversationally, shows a summary, and only submits
+        when the user confirms.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^conv_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - toolType
+                - collectedData
+                - confirmed
+              properties:
+                toolType:
+                  type: string
+                  enum:
+                    - faster-scale
+                    - post-mortem
+                    - check-in
+                    - integrity-inventory
+                    - spouse-checkin-prep
+                    - relapse-prevention-plan
+                    - pci
+                    - emotional-journal
+                    - time-journal
+                  description: Type of recovery tool walkthrough
+                collectedData:
+                  type: object
+                  description: Data collected during walkthrough
+                  additionalProperties: true
+                confirmed:
+                  type: boolean
+                  description: User confirmed submission after reviewing summary
+            example:
+              toolType: faster-scale
+              collectedData:
+                stage: "Ticked_Off"
+                indicators:
+                  forgetting: false
+                  anxiety: true
+                  speeding: false
+                  ticked: true
+                  exhausted: false
+                  relapse: false
+                notes: "Noticed I was snapping at coworkers today"
+              confirmed: true
+      responses:
+        '200':
+          description: OK - Tool executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ToolExecutionResult'
+              example:
+                data:
+                  toolType: faster-scale
+                  status: success
+                  result:
+                    activityId: activity_3c4d5e6f
+                    timestamp: "2026-03-28T19:35:00Z"
+                    stage: "Ticked_Off"
+                  message: "FASTER Scale entry recorded. You're in the Ticked Off stage. Consider reaching out to your sponsor."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^conv_[a-zA-Z0-9]+$'
+        title:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        lastMessageAt:
+          type: string
+          format: date-time
+        messageCount:
+          type: integer
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            messages:
+              type: string
+              format: uri
+
+    AgentMessage:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^msg_[a-zA-Z0-9]+$'
+        role:
+          type: string
+          enum: [user, agent, system, tool-result]
+          description: Message role - user, agent, system, or tool-result
+        text:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          nullable: true
+          description: Additional context (e.g., crisis flags, tool references)
+          properties:
+            model:
+              type: string
+              description: Which Bedrock model was used for this message
+              example: anthropic.claude-3-opus-20240229-v1:0
+            tokensUsed:
+              type: object
+              description: Token usage for this message
+              properties:
+                inputTokens:
+                  type: integer
+                  example: 250
+                outputTokens:
+                  type: integer
+                  example: 150
+
+    ToolExecution:
+      type: object
+      properties:
+        tool:
+          type: string
+          enum:
+            - submit-check-in
+            - log-urge
+            - create-journal-entry
+            - schedule-activity
+            - contact-support
+        parameters:
+          type: object
+        executedAt:
+          type: string
+          format: date-time
+
+    ToolExecutionResult:
+      type: object
+      properties:
+        toolType:
+          type: string
+          enum:
+            - faster-scale
+            - post-mortem
+            - check-in
+            - integrity-inventory
+            - spouse-checkin-prep
+            - relapse-prevention-plan
+            - pci
+            - emotional-journal
+            - time-journal
+        status:
+          type: string
+          enum: [success, failed]
+        result:
+          type: object
+          nullable: true
+          description: Tool-specific result data (includes created activityId)
+        message:
+          type: string
+          description: Human-readable result message
+        errorMessage:
+          type: string
+          nullable: true
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
