@@ -123,9 +123,16 @@ enum MockData {
 
     static let fasterHistory: [FASTEREntry] = {
         var entries: [FASTEREntry] = []
+        let stages: [FASTERStage] = [.restoration, .restoration, .forgettingPriorities, .restoration, .anxiety, .forgettingPriorities, .restoration]
         for i in 0..<30 {
-            let stage: FASTERStage = i % 7 == 3 ? .anxiety : .forgettingPriorities
-            entries.append(FASTEREntry(date: daysAgo(29 - i), stage: stage))
+            let stage = stages[i % stages.count]
+            let indicators = Array(stage.indicators.prefix(i % 3 + 1))
+            entries.append(FASTEREntry(
+                date: daysAgo(29 - i),
+                stage: stage,
+                moodScore: (i % 5) + 1,
+                selectedIndicators: indicators
+            ))
         }
         return entries
     }()
