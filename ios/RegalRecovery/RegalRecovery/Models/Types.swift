@@ -564,7 +564,8 @@ struct DailyEligibleActivity {
             typicalHour: 7,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.sobriety-commitment"
+            featureFlagKey: "activity.sobriety-commitment",
+            section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
             activityType: ActivityType.affirmationLog.rawValue,
@@ -576,7 +577,8 @@ struct DailyEligibleActivity {
             typicalHour: 7,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.affirmations"
+            featureFlagKey: "activity.affirmations",
+            section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
             activityType: ActivityType.journal.rawValue,
@@ -588,7 +590,8 @@ struct DailyEligibleActivity {
             typicalHour: 7,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.journaling"
+            featureFlagKey: "activity.journaling",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: "devotional",
@@ -600,7 +603,8 @@ struct DailyEligibleActivity {
             typicalHour: 7,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.devotionals"
+            featureFlagKey: "activity.devotionals",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.prayer.rawValue,
@@ -612,7 +616,8 @@ struct DailyEligibleActivity {
             typicalHour: 7,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.prayer"
+            featureFlagKey: "activity.prayer",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: "memoryVerseReview",
@@ -624,7 +629,8 @@ struct DailyEligibleActivity {
             typicalHour: 7,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.memory-verse"
+            featureFlagKey: "activity.memory-verse",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.emotionalJournal.rawValue,
@@ -636,7 +642,8 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.emotional-journaling"
+            featureFlagKey: "activity.emotional-journaling",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.mood.rawValue,
@@ -648,7 +655,8 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.mood"
+            featureFlagKey: "activity.mood",
+            section: .selfCare
         ),
         DailyEligibleActivity(
             activityType: ActivityType.gratitude.rawValue,
@@ -660,7 +668,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.gratitude"
+            featureFlagKey: "activity.gratitude",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.phoneCalls.rawValue,
@@ -672,7 +681,8 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.phone-calls"
+            featureFlagKey: "activity.phone-calls",
+            section: .connection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.exercise.rawValue,
@@ -684,7 +694,8 @@ struct DailyEligibleActivity {
             typicalHour: 8,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.exercise"
+            featureFlagKey: "activity.exercise",
+            section: .selfCare
         ),
         DailyEligibleActivity(
             activityType: ActivityType.meetingsAttended.rawValue,
@@ -696,7 +707,8 @@ struct DailyEligibleActivity {
             typicalHour: 20,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.meetings"
+            featureFlagKey: "activity.meetings",
+            section: .connection
         ),
         DailyEligibleActivity(
             activityType: "personCheckInSpouse",
@@ -708,7 +720,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.person-check-ins"
+            featureFlagKey: "activity.person-check-ins",
+            section: .connection
         ),
         DailyEligibleActivity(
             activityType: "personCheckInSponsor",
@@ -720,7 +733,8 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.person-check-ins"
+            featureFlagKey: "activity.person-check-ins",
+            section: .connection
         ),
         DailyEligibleActivity(
             activityType: "personCheckInCounselor",
@@ -732,7 +746,8 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.person-check-ins"
+            featureFlagKey: "activity.person-check-ins",
+            section: .connection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.spouseCheckIn.rawValue,
@@ -744,7 +759,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.spouse-checkin-prep"
+            featureFlagKey: "activity.spouse-checkin-prep",
+            section: .connection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.recoveryCheckIn.rawValue,
@@ -756,7 +772,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.check-ins"
+            featureFlagKey: "activity.check-ins",
+            section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
             activityType: ActivityType.fasterScale.rawValue,
@@ -768,7 +785,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.faster-scale"
+            featureFlagKey: "activity.faster-scale",
+            section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
             activityType: "pci",
@@ -780,7 +798,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.pci"
+            featureFlagKey: "activity.pci",
+            section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
             activityType: ActivityType.weeklyGoals.rawValue,
@@ -792,7 +811,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.goals"
+            featureFlagKey: "activity.goals",
+            section: .growth
         ),
         DailyEligibleActivity(
             activityType: "nutrition",
@@ -804,7 +824,8 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.nutrition"
+            featureFlagKey: "activity.nutrition",
+            section: .selfCare
         ),
         DailyEligibleActivity(
             activityType: ActivityType.timeJournal.rawValue,
@@ -816,7 +837,8 @@ struct DailyEligibleActivity {
             typicalHour: 7,
             typicalMinute: 0,
             typicalBlock: "Morning",
-            featureFlagKey: "activity.time-journal"
+            featureFlagKey: "activity.time-journal",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: "actingInBehaviors",
@@ -828,7 +850,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.acting-in-behaviors"
+            featureFlagKey: "activity.acting-in-behaviors",
+            section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
             activityType: "voiceJournal",
@@ -840,7 +863,8 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.voice-journal"
+            featureFlagKey: "activity.voice-journal",
+            section: .journalingReflection
         ),
         DailyEligibleActivity(
             activityType: "bookReading",
@@ -852,7 +876,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.book-reading"
+            featureFlagKey: "activity.book-reading",
+            section: .growth
         ),
     ]
 }

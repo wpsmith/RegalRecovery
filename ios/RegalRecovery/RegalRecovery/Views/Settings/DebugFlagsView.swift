@@ -17,6 +17,8 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.analytics-dashboard", label: "Analytics Dashboard", enabled: true),
         FeatureFlag(key: "feature.meeting-finder", label: "Meeting Finder", enabled: true),
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
+        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
+        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
     ]
 
     @State private var activities: [FeatureFlag] = [
@@ -56,8 +58,6 @@ struct DebugFlagsView: View {
 
     @State private var futureFeatures: [FeatureFlag] = [
         // Recovery Work & Tools
-        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
-        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
         FeatureFlag(key: "feature.partners.redemptiveliving.backbone", label: "Backbone (Redemptive Living)", enabled: false),
         FeatureFlag(key: "feature.relapse-prevention-plan", label: "Relapse Prevention Plan", enabled: false),
         FeatureFlag(key: "feature.post-mortem", label: "Post-Mortem", enabled: true),
@@ -255,6 +255,8 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.analytics-dashboard", label: "Analytics Dashboard", enabled: true),
         FeatureFlag(key: "feature.meeting-finder", label: "Meeting Finder", enabled: true),
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
+        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
+        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
     ]
 
     private static let defaultActivities: [FeatureFlag] = [
@@ -292,8 +294,6 @@ struct DebugFlagsView: View {
 
     private static let defaultFutureFeatures: [FeatureFlag] = [
         // Recovery Work & Tools
-        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
-        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
         FeatureFlag(key: "feature.partners.redemptiveliving.backbone", label: "Backbone (Redemptive Living)", enabled: false),
         FeatureFlag(key: "feature.relapse-prevention-plan", label: "Relapse Prevention Plan", enabled: false),
         FeatureFlag(key: "feature.post-mortem", label: "Post-Mortem", enabled: true),

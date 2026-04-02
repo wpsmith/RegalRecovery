@@ -41,6 +41,7 @@ struct TodayView: View {
             VStack(spacing: 16) {
                 greetingHeader
                 scoreSummary
+                quickActions
                 recoveryWorkCards
                 activityListHeader
                 activityList
@@ -77,6 +78,61 @@ struct TodayView: View {
             totalCompleted: viewModel.totalCompleted,
             totalPlanned: viewModel.totalPlanned
         )
+    }
+
+    // MARK: - Quick Actions
+
+    @ViewBuilder
+    private var quickActions: some View {
+        if FeatureFlagStore.shared.isEnabled("feature.quick-actions") {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    quickActionCard(icon: "flame.fill", label: "Log Urge", color: .orange) {
+                        UrgeLogView()
+                    }
+                    quickActionCard(icon: "heart.text.clipboard", label: "Check In", color: .rrPrimary) {
+                        RecoveryCheckInView()
+                    }
+                    quickActionCard(icon: "book.fill", label: "Journal", color: .blue) {
+                        JournalView()
+                    }
+                    quickActionCard(icon: "hands.and.sparkles.fill", label: "Pray", color: .purple) {
+                        PrayerLogView()
+                    }
+                    quickActionCard(icon: "phone.fill", label: "Call Someone", color: .green) {
+                        PhoneCallLogView()
+                    }
+                    quickActionCard(icon: "gauge.with.dots.needle.67percent", label: "FASTER", color: .orange) {
+                        FASTERScaleView()
+                    }
+                }
+            }
+        }
+    }
+
+    private func quickActionCard<Destination: View>(
+        icon: String,
+        label: String,
+        color: Color,
+        @ViewBuilder destination: () -> Destination
+    ) -> some View {
+        NavigationLink {
+            destination()
+        } label: {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(color)
+                Text(label)
+                    .font(RRFont.caption2)
+                    .foregroundStyle(Color.rrText)
+            }
+            .frame(width: 72, height: 64)
+            .background(Color.rrSurface)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Sobriety Module
