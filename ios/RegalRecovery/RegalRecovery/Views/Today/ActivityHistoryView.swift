@@ -1,0 +1,173 @@
+import SwiftUI
+import SwiftData
+
+struct ActivityHistoryView: View {
+    @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
+    @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
+    @Query(sort: \RRJournalEntry.date, order: .reverse) private var journals: [RRJournalEntry]
+    @Query(sort: \RREmotionalJournal.date, order: .reverse) private var emotionalJournals: [RREmotionalJournal]
+    @Query(sort: \RRFASTEREntry.date, order: .reverse) private var fasterEntries: [RRFASTEREntry]
+    @Query(sort: \RRUrgeLog.date, order: .reverse) private var urgeLogs: [RRUrgeLog]
+    @Query(sort: \RRMoodEntry.date, order: .reverse) private var moodEntries: [RRMoodEntry]
+    @Query(sort: \RRGratitudeEntry.date, order: .reverse) private var gratitudeEntries: [RRGratitudeEntry]
+    @Query(sort: \RRPrayerLog.date, order: .reverse) private var prayerLogs: [RRPrayerLog]
+    @Query(sort: \RRExerciseLog.date, order: .reverse) private var exerciseLogs: [RRExerciseLog]
+    @Query(sort: \RRPhoneCallLog.date, order: .reverse) private var phoneCallLogs: [RRPhoneCallLog]
+    @Query(sort: \RRMeetingLog.date, order: .reverse) private var meetingLogs: [RRMeetingLog]
+    @Query(sort: \RRSpouseCheckIn.date, order: .reverse) private var spouseCheckIns: [RRSpouseCheckIn]
+
+    @State private var displayLimit = 50
+
+    private var allActivities: [(date: Date, item: RecentActivity)] {
+        let fmt = RelativeDateTimeFormatter()
+        fmt.unitsStyle = .short
+
+        var all: [(date: Date, item: RecentActivity)] = []
+
+        for c in commitments {
+            let label = c.type == "morning" ? "Morning Commitment" : "Evening Review"
+            let icon = c.type == "morning" ? "sunrise.fill" : "moon.stars.fill"
+            let color: Color = c.type == "morning" ? .rrSecondary : .rrPrimary
+            all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: color)))
+        }
+        for ci in checkIns {
+            all.append((ci.date, RecentActivity(title: "Recovery Check-in", detail: "Score: \(ci.score)", time: fmt.localizedString(for: ci.date, relativeTo: Date()), icon: ActivityType.recoveryCheckIn.icon, iconColor: ActivityType.recoveryCheckIn.iconColor)))
+        }
+        for m in moodEntries {
+            let emoji = m.score >= 7 ? "\u{1F60A}" : m.score >= 5 ? "\u{1F610}" : "\u{1F61F}"
+            all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: ActivityType.mood.icon, iconColor: ActivityType.mood.iconColor)))
+        }
+        for p in prayerLogs {
+            all.append((p.date, RecentActivity(title: "Prayer", detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: ActivityType.prayer.icon, iconColor: ActivityType.prayer.iconColor)))
+        }
+        for e in exerciseLogs {
+            all.append((e.date, RecentActivity(title: "Exercise", detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: ActivityType.exercise.icon, iconColor: ActivityType.exercise.iconColor)))
+        }
+        for f in fasterEntries {
+            let stage = FASTERStage(rawValue: f.stage) ?? .forgettingPriorities
+            all.append((f.date, RecentActivity(title: "FASTER Scale", detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: ActivityType.fasterScale.icon, iconColor: stage.color)))
+        }
+        for j in journals {
+            let snippet = String(j.content.prefix(40))
+            all.append((j.date, RecentActivity(title: "Journal", detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: ActivityType.journal.icon, iconColor: ActivityType.journal.iconColor)))
+        }
+        for ej in emotionalJournals {
+            all.append((ej.date, RecentActivity(title: "Emotional Journal", detail: "\(ej.emotion), \(ej.intensity)/10", time: fmt.localizedString(for: ej.date, relativeTo: Date()), icon: ActivityType.emotionalJournal.icon, iconColor: ActivityType.emotionalJournal.iconColor)))
+        }
+        for g in gratitudeEntries {
+            all.append((g.date, RecentActivity(title: "Gratitude", detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: ActivityType.gratitude.icon, iconColor: ActivityType.gratitude.iconColor)))
+        }
+        for u in urgeLogs {
+            all.append((u.date, RecentActivity(title: "Urge Log", detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: Date()), icon: ActivityType.urgeLog.icon, iconColor: ActivityType.urgeLog.iconColor)))
+        }
+        for pc in phoneCallLogs {
+            all.append((pc.date, RecentActivity(title: "Phone Call", detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: Date()), icon: ActivityType.phoneCalls.icon, iconColor: ActivityType.phoneCalls.iconColor)))
+        }
+        for ml in meetingLogs {
+            all.append((ml.date, RecentActivity(title: "Meeting", detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: ActivityType.meetingsAttended.icon, iconColor: ActivityType.meetingsAttended.iconColor)))
+        }
+        for sc in spouseCheckIns {
+            all.append((sc.date, RecentActivity(title: "Spouse Check-in", detail: sc.framework, time: fmt.localizedString(for: sc.date, relativeTo: Date()), icon: ActivityType.spouseCheckIn.icon, iconColor: ActivityType.spouseCheckIn.iconColor)))
+        }
+
+        return all.sorted { $0.date > $1.date }
+    }
+
+    private var groupedActivities: [(key: String, items: [RecentActivity])] {
+        let limited = allActivities.prefix(displayLimit)
+        let calendar = Calendar.current
+
+        let grouped = Dictionary(grouping: limited) { entry -> String in
+            if calendar.isDateInToday(entry.date) { return "Today" }
+            if calendar.isDateInYesterday(entry.date) { return "Yesterday" }
+            return entry.date.formatted(.dateTime.month(.wide).day().year())
+        }
+
+        // Sort groups by the latest date in each group (descending)
+        return grouped
+            .map { (key: $0.key, items: $0.value.map(\.item)) }
+            .sorted { lhs, rhs in
+                let lhsDate = limited.first(where: { sectionLabel(for: $0.date) == lhs.key })?.date ?? .distantPast
+                let rhsDate = limited.first(where: { sectionLabel(for: $0.date) == rhs.key })?.date ?? .distantPast
+                return lhsDate > rhsDate
+            }
+    }
+
+    private func sectionLabel(for date: Date) -> String {
+        let calendar = Calendar.current
+        if calendar.isDateInToday(date) { return "Today" }
+        if calendar.isDateInYesterday(date) { return "Yesterday" }
+        return date.formatted(.dateTime.month(.wide).day().year())
+    }
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                if allActivities.isEmpty {
+                    emptyState
+                } else {
+                    ForEach(groupedActivities, id: \.key) { section in
+                        Text(section.key)
+                            .font(RRFont.headline)
+                            .foregroundStyle(Color.rrText)
+                            .padding(.top, 20)
+                            .padding(.bottom, 8)
+
+                        ForEach(section.items) { activity in
+                            RecentActivityRow(activity: activity)
+
+                            if activity.id != section.items.last?.id {
+                                Divider()
+                                    .padding(.leading, 44)
+                            }
+                        }
+                    }
+
+                    if allActivities.count > displayLimit {
+                        Button {
+                            displayLimit += 50
+                        } label: {
+                            Text("Load More")
+                                .font(RRFont.subheadline)
+                                .foregroundStyle(Color.rrPrimary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 16)
+        }
+        .background(Color.rrBackground)
+        .navigationTitle("Activity History")
+        .navigationBarTitleDisplayMode(.large)
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 16) {
+            Spacer().frame(height: 60)
+
+            Image(systemName: "clock.arrow.circlepath")
+                .font(.system(size: 48))
+                .foregroundStyle(Color.rrPrimary.opacity(0.5))
+
+            Text("No activities yet")
+                .font(RRFont.title3)
+                .foregroundStyle(Color.rrText)
+
+            Text("Activities you log will appear here.")
+                .font(RRFont.body)
+                .foregroundStyle(Color.rrTextSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+#Preview {
+    NavigationStack {
+        ActivityHistoryView()
+    }
+    .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
+}
