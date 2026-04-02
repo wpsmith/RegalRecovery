@@ -10,7 +10,6 @@ struct ProfileEditView: View {
     @State private var birthYear: Int = 1990
     @State private var gender: String = "Male"
     @State private var timezone: String = "America/Chicago"
-    @State private var bibleVersion: String = "ESV"
     @State private var hasLoaded = false
 
     private let genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"]
@@ -22,7 +21,6 @@ struct ProfileEditView: View {
         "America/Anchorage",
         "Pacific/Honolulu",
     ]
-    private let bibleVersionOptions = ["ESV", "NIV", "NKJV", "KJV", "NLT", "NASB", "CSB", "MSG"]
 
     var body: some View {
         Form {
@@ -72,15 +70,6 @@ struct ProfileEditView: View {
                 Text("Timezone")
             }
 
-            Section {
-                Picker("Bible Version", selection: $bibleVersion) {
-                    ForEach(bibleVersionOptions, id: \.self) { version in
-                        Text(version).tag(version)
-                    }
-                }
-            } header: {
-                Text("Bible Version")
-            }
         }
         .onAppear {
             guard !hasLoaded, let user = users.first else { return }
@@ -89,7 +78,6 @@ struct ProfileEditView: View {
             birthYear = user.birthYear
             gender = user.gender
             timezone = user.timezone
-            bibleVersion = user.bibleVersion
             hasLoaded = true
         }
         .onChange(of: name) { saveProfile() }
@@ -97,7 +85,6 @@ struct ProfileEditView: View {
         .onChange(of: birthYear) { saveProfile() }
         .onChange(of: gender) { saveProfile() }
         .onChange(of: timezone) { saveProfile() }
-        .onChange(of: bibleVersion) { saveProfile() }
     }
 
     private func saveProfile() {
@@ -107,7 +94,6 @@ struct ProfileEditView: View {
         user.birthYear = birthYear
         user.gender = gender
         user.timezone = timezone
-        user.bibleVersion = bibleVersion
         user.modifiedAt = Date()
     }
 }

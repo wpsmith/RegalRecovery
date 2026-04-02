@@ -9,7 +9,7 @@ ENDPOINT_URL="http://localhost:4566"
 echo "Seeding test data for Alex..."
 
 # User profile item
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "USER#u_alex"},
@@ -37,7 +37,7 @@ awslocal dynamodb put-item \
 echo "✓ Created user profile for Alex"
 
 # User settings
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "USER#u_alex"},
@@ -51,7 +51,7 @@ awslocal dynamodb put-item \
 echo "✓ Created user settings for Alex"
 
 # Sex Addiction (SA) record
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "USER#u_alex"},
@@ -69,7 +69,7 @@ awslocal dynamodb put-item \
 echo "✓ Created Sex Addiction record"
 
 # Pornography addiction record
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "USER#u_alex"},
@@ -87,7 +87,7 @@ awslocal dynamodb put-item \
 echo "✓ Created Pornography addiction record"
 
 # Current streak
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "USER#u_alex"},
@@ -106,7 +106,7 @@ awslocal dynamodb put-item \
 echo "✓ Created streak record (270 days)"
 
 # Feature flag: tracking enabled
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "FLAGS"},
@@ -123,7 +123,7 @@ awslocal dynamodb put-item \
 echo "✓ Created feature flag: feature.tracking"
 
 # Feature flag: activities enabled
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "FLAGS"},
@@ -140,7 +140,7 @@ awslocal dynamodb put-item \
 echo "✓ Created feature flag: feature.activities"
 
 # Feature flag: recovery-agent (partially rolled out)
-awslocal dynamodb put-item \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb put-item \
   --table-name "$TABLE_NAME" \
   --item '{
     "PK": {"S": "FLAGS"},

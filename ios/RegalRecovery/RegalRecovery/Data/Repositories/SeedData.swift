@@ -87,6 +87,8 @@ enum SeedData {
         try seedFeatureFlags(context: context)
         seedDevotionalProgress(context: context, userId: userId)
         seedAffirmationFavorites(context: context, userId: userId)
+        seedRecoveryPlan(context: context, userId: userId)
+        seedDailyScores(context: context, userId: userId)
 
         try context.save()
         markSeeded()
@@ -115,9 +117,10 @@ enum SeedData {
 
         let saAddiction = RRAddiction(
             id: saId,
-            name: "Sex Addiction (SA)",
+            name: "Sex",
             sobrietyDate: sobrietyDate,
             userId: userId,
+            sortOrder: 0,
             createdAt: daysAgo(270)
         )
         saAddiction.user = user
@@ -128,6 +131,7 @@ enum SeedData {
             name: "Pornography",
             sobrietyDate: sobrietyDate,
             userId: userId,
+            sortOrder: 1,
             createdAt: daysAgo(270)
         )
         pornAddiction.user = user
@@ -609,7 +613,6 @@ enum SeedData {
             // P0 Features
             ("feature.onboarding", true, "Onboarding flow"),
             ("feature.profile-management", true, "Profile management"),
-            ("feature.tracking", true, "Tracking system"),
             ("feature.content-resources", true, "Content and resources"),
             ("feature.commitments", true, "Commitments"),
             ("feature.dark-mode", true, "Light / Dark mode"),
@@ -662,6 +665,10 @@ enum SeedData {
             ("activity.prayer", true, "Prayer"),
             ("activity.integrity-inventory", false, "Integrity inventory"),
             ("activity.pci", false, "PCI"),
+            // App Architecture
+            ("feature.today-view", false, "Today view replaces Home dashboard"),
+            ("feature.work-tab", true, "Work tab replaces Activities catalog"),
+            ("feature.urge-surfing-timer", true, "Urge Surfing Timer on FAB tap"),
             // Assessments
             ("assessment.sast-r", false, "SAST-R"),
             ("assessment.family-impact", false, "Family impact"),
@@ -714,6 +721,103 @@ enum SeedData {
                 createdAt: daysAgo(Int.random(in: 10...200))
             )
             context.insert(fav)
+        }
+    }
+
+    // MARK: - Recovery Plan (Example 1: 14-activity intensive plan)
+
+    private static func seedRecoveryPlan(context: ModelContext, userId: UUID) {
+        let planId = UUID()
+        let plan = RRRecoveryPlan(
+            id: planId,
+            userId: userId,
+            isActive: true,
+            isPaused: false,
+            createdAt: daysAgo(30),
+            modifiedAt: daysAgo(0)
+        )
+        context.insert(plan)
+
+        // (activityType, hour, minute, instanceIndex)
+        let items: [(String, Int, Int, Int)] = [
+            // Morning Block — 7:00 AM
+            (ActivityType.sobrietyCommitment.rawValue, 7, 0, 0),
+            (ActivityType.affirmationLog.rawValue, 7, 0, 0),
+            (ActivityType.journal.rawValue, 7, 0, 0),
+            ("devotional", 7, 0, 0),
+            (ActivityType.prayer.rawValue, 7, 0, 0),
+            // Exercise — 8:00 AM
+            (ActivityType.exercise.rawValue, 8, 0, 0),
+            // Midday — 12:00 PM
+            (ActivityType.phoneCalls.rawValue, 12, 0, 0),
+            // Afternoon — 5:00 PM
+            (ActivityType.phoneCalls.rawValue, 17, 0, 1),
+            // Evening Block — 8:00-9:00 PM
+            (ActivityType.meetingsAttended.rawValue, 20, 0, 0),
+            (ActivityType.spouseCheckIn.rawValue, 21, 0, 0),
+            (ActivityType.gratitude.rawValue, 21, 0, 0),
+            ("pci", 21, 0, 0),
+            (ActivityType.fasterScale.rawValue, 21, 0, 0),
+            (ActivityType.recoveryCheckIn.rawValue, 21, 0, 0),
+        ]
+
+        for (sortOrder, (activityType, hour, minute, instanceIndex)) in items.enumerated() {
+            let item = RRDailyPlanItem(
+                planId: planId,
+                activityType: activityType,
+                scheduledHour: hour,
+                scheduledMinute: minute,
+                instanceIndex: instanceIndex,
+                daysOfWeek: [],
+                isEnabled: true,
+                sortOrder: sortOrder,
+                createdAt: daysAgo(30),
+                modifiedAt: daysAgo(0)
+            )
+            item.plan = plan
+            context.insert(item)
+        }
+    }
+
+    // MARK: - Daily Scores (30 days of historical data)
+
+    private static func seedDailyScores(context: ModelContext, userId: UUID) {
+        // Trending upward from ~65 to ~95 over 30 days, with a couple dips
+        let baseScores: [Int] = [
+            65, 68, 72, 70, 74, 76, 73, 78, 80, 77,
+            82, 84, 79, 85, 83, 87, 86, 88, 84, 90,
+            88, 91, 67, 72, 89, 92, 93, 91, 95, 94,
+        ]
+
+        for i in 0..<30 {
+            let dayOffset = 29 - i
+            let score = baseScores[i]
+            let totalPlanned = 14
+            // Derive completed count from score using the formula:
+            // score = (morning ? 20 : 0) + (completed_others / 13) * 80
+            let morningDone = score >= 20
+            let otherScore = morningDone ? score - 20 : score
+            let otherCompleted = min(13, Int(round(Double(otherScore) * 13.0 / 80.0)))
+            let totalCompleted = (morningDone ? 1 : 0) + otherCompleted
+
+            // Build a simple breakdown payload
+            let breakdown = JSONPayload([
+                "morningCommitment": .bool(morningDone),
+                "otherCompleted": .int(otherCompleted),
+                "otherTotal": .int(13),
+            ])
+
+            let dailyScore = RRDailyScore(
+                userId: userId,
+                date: daysAgo(dayOffset, hour: 23, minute: 59),
+                score: score,
+                totalPlanned: totalPlanned,
+                totalCompleted: totalCompleted,
+                morningCommitmentCompleted: morningDone,
+                breakdown: breakdown,
+                createdAt: daysAgo(dayOffset, hour: 23, minute: 59)
+            )
+            context.insert(dailyScore)
         }
     }
 }

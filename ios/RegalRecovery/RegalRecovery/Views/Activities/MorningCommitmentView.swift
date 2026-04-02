@@ -3,6 +3,7 @@ import SwiftData
 
 struct MorningCommitmentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
@@ -44,19 +45,21 @@ struct MorningCommitmentView: View {
                         }
 
                         ForEach(Array(Self.questionTexts.enumerated()), id: \.offset) { index, question in
-                            HStack(alignment: .top, spacing: 12) {
-                                Button {
-                                    toggles[index].toggle()
-                                } label: {
+                            Button {
+                                toggles[index].toggle()
+                            } label: {
+                                HStack(alignment: .top, spacing: 12) {
                                     Image(systemName: toggles[index] ? "checkmark.circle.fill" : "circle")
                                         .foregroundStyle(toggles[index] ? Color.rrSuccess : Color.rrTextSecondary)
                                         .font(.title3)
-                                }
 
-                                Text(question)
-                                    .font(RRFont.body)
-                                    .foregroundStyle(Color.rrText)
+                                    Text(question)
+                                        .font(RRFont.body)
+                                        .foregroundStyle(Color.rrText)
+                                        .multilineTextAlignment(.leading)
+                                }
                             }
+                            .buttonStyle(.plain)
                         }
 
                         if latestMorning == nil {
@@ -103,6 +106,7 @@ struct MorningCommitmentView: View {
             ])
         )
         modelContext.insert(commitment)
+        dismiss()
     }
 }
 

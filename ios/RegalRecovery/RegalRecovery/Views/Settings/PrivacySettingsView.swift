@@ -52,9 +52,10 @@ struct PrivacySettingsView: View {
                                     .frame(width: 90, alignment: .leading)
 
                                     ForEach(columns, id: \.self) { col in
-                                        Text(hasAccess(role: contact.role, category: col) ? "\u{2713}" : "\u{2014}")
+                                        let granted = contact.permissions.contains(col)
+                                        Text(granted ? "\u{2713}" : "\u{2014}")
                                             .font(.body)
-                                            .foregroundStyle(hasAccess(role: contact.role, category: col) ? Color.rrSuccess : Color.rrTextSecondary.opacity(0.4))
+                                            .foregroundStyle(granted ? Color.rrSuccess : Color.rrTextSecondary.opacity(0.4))
                                             .frame(width: 64)
                                     }
                                 }
@@ -117,17 +118,6 @@ struct PrivacySettingsView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This will permanently delete your account after 30 days.")
-        }
-    }
-
-    private func hasAccess(role: String, category: String) -> Bool {
-        switch role {
-        case "spouse", "counselor":
-            return true
-        case "sponsor", "accountabilityPartner":
-            return category != "Journal" && category != "Financial"
-        default:
-            return false
         }
     }
 

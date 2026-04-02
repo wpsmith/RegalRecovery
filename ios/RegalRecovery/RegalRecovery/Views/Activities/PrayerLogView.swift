@@ -6,10 +6,48 @@ struct PrayerLogView: View {
     @Query(sort: \RRPrayerLog.date, order: .reverse) private var entries: [RRPrayerLog]
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
-    @State private var duration: Double = 12
-    @State private var prayerType = "Morning"
+    @State private var now = Date()
+    @State private var cooldownTimer: Timer?
 
-    private let prayerTypes = ["Morning", "Evening", "Intercessory", "Meditative", "Free"]
+    private let onceDailyPrayers: Set<String> = ["Morning Prayer", "Evening Prayer"]
+
+    private var todayEntries: [RRPrayerLog] {
+        entries.filter { Calendar.current.isDateInToday($0.date) }
+    }
+
+    private var pastEntries: [RRPrayerLog] {
+        entries.filter { !Calendar.current.isDateInToday($0.date) }
+    }
+
+    private var completedTodayTitles: Set<String> {
+        Set(todayEntries.map(\.prayerType))
+    }
+
+    /// Any prayer done today gets a checkmark
+    private func isDoneToday(_ prayer: PrayerItem) -> Bool {
+        completedTodayTitles.contains(prayer.title)
+    }
+
+    /// Once-daily prayers (Morning/Evening) are fully locked after done
+    private func isOnceDailyLocked(_ prayer: PrayerItem) -> Bool {
+        onceDailyPrayers.contains(prayer.title) && completedTodayTitles.contains(prayer.title)
+    }
+
+    private func isOnCooldown(_ prayer: PrayerItem) -> Bool {
+        let cutoff = now.addingTimeInterval(-120)
+        return entries.contains { $0.prayerType == prayer.title && $0.date > cutoff }
+    }
+
+    /// 0.0 = just logged, 1.0 = cooldown expired
+    private func cooldownProgress(for prayer: PrayerItem) -> Double {
+        guard let lastLog = entries.first(where: { $0.prayerType == prayer.title }),
+              lastLog.date > now.addingTimeInterval(-120) else { return 1.0 }
+        return min(1.0, now.timeIntervalSince(lastLog.date) / 120.0)
+    }
+
+    private var anyCooldownActive: Bool {
+        entries.contains { $0.date > now.addingTimeInterval(-120) }
+    }
 
     private func relativeDay(_ date: Date) -> String {
         let cal = Calendar.current
@@ -23,80 +61,138 @@ struct PrayerLogView: View {
         return "\(days) days ago"
     }
 
+    private func startCooldownTimerIfNeeded() {
+        cooldownTimer?.invalidate()
+        cooldownTimer = nil
+        guard anyCooldownActive else { return }
+        cooldownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            now = Date()
+            if !anyCooldownActive {
+                cooldownTimer?.invalidate()
+                cooldownTimer = nil
+            }
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+                // Recovery prayers
                 RRCard {
-                    VStack(alignment: .leading, spacing: 16) {
-                        RRSectionHeader(title: "New Prayer Entry")
+                    VStack(alignment: .leading, spacing: 12) {
+                        RRSectionHeader(title: "Recovery Prayers")
 
-                        // Duration
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Text("Duration")
-                                    .font(RRFont.subheadline)
-                                    .foregroundStyle(Color.rrText)
-                                Spacer()
-                                Text("\(Int(duration)) min")
-                                    .font(RRFont.headline)
-                                    .foregroundStyle(Color.rrPrimary)
-                            }
-                            Slider(value: $duration, in: 1...120, step: 1)
-                                .tint(Color.rrPrimary)
-                        }
+                        ForEach(ContentData.prayers) { prayer in
+                            let locked = isOnceDailyLocked(prayer)
+                            let cooldown = !locked && isOnCooldown(prayer)
+                            let done = isDoneToday(prayer)
+                            let disabled = locked || cooldown
 
-                        Divider()
+                            NavigationLink {
+                                PrayersView(
+                                    prayer: prayer,
+                                    isCompletedToday: locked,
+                                    isOnCooldown: cooldown
+                                )
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: prayer.icon)
+                                        .font(.title3)
+                                        .foregroundStyle(disabled ? Color.rrTextSecondary : Color.rrPrimary)
+                                        .frame(width: 28)
 
-                        // Type
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Prayer Type")
-                                .font(RRFont.subheadline)
-                                .foregroundStyle(Color.rrText)
-                            Picker("Type", selection: $prayerType) {
-                                ForEach(prayerTypes, id: \.self) { type in
-                                    Text(type).tag(type)
+                                    Text(prayer.title)
+                                        .font(RRFont.body)
+                                        .foregroundStyle(disabled ? Color.rrTextSecondary : Color.rrText)
+
+                                    Spacer()
+
+                                    // Checkmark if done today (always, regardless of type)
+                                    if done {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .foregroundStyle(Color.rrSuccess)
+                                            .font(.body)
+                                    }
+
+                                    if locked {
+                                        Text("Done today")
+                                            .font(RRFont.caption2)
+                                            .foregroundStyle(Color.rrTextSecondary)
+                                    } else {
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption2)
+                                            .foregroundStyle(Color.rrTextSecondary)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                                .clipShape(Rectangle())
+                                .overlay(alignment: .trailing) {
+                                    // Cooldown: gray overlay that shrinks from right to left
+                                    if cooldown {
+                                        GeometryReader { geo in
+                                            Rectangle()
+                                                .fill(Color.gray.opacity(0.15))
+                                                .frame(width: geo.size.width * (1.0 - cooldownProgress(for: prayer)))
+                                                .animation(.linear(duration: 1), value: now)
+                                        }
+                                        .allowsHitTesting(false)
+                                    }
                                 }
                             }
-                            .pickerStyle(.segmented)
-                        }
+                            .buttonStyle(.plain)
+                            .disabled(disabled)
 
-                        RRButton("Start Timer", icon: "timer")
-                        RRButton("Log Prayer", icon: "hands.and.sparkles.fill") {
-                            submitPrayer()
+                            if prayer.id != ContentData.prayers.last?.id {
+                                Divider()
+                            }
                         }
                     }
                 }
                 .padding(.horizontal)
 
+                // Today
+                if !todayEntries.isEmpty {
+                    RRCard {
+                        VStack(alignment: .leading, spacing: 16) {
+                            RRSectionHeader(title: "Today")
+
+                            ForEach(todayEntries) { entry in
+                                historyRow(entry)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            modelContext.delete(entry)
+                                            startCooldownTimerIfNeeded()
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                if entry.id != todayEntries.last?.id {
+                                    Divider()
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                }
+
                 // History
-                if !entries.isEmpty {
+                if !pastEntries.isEmpty {
                     RRCard {
                         VStack(alignment: .leading, spacing: 16) {
                             RRSectionHeader(title: "History")
 
-                            ForEach(entries) { entry in
-                                HStack {
-                                    Image(systemName: "hands.and.sparkles.fill")
-                                        .foregroundStyle(Color.rrPrimary)
-                                        .frame(width: 28)
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(relativeDay(entry.date))
-                                            .font(RRFont.subheadline)
-                                            .foregroundStyle(Color.rrText)
-                                        Text(entry.prayerType.capitalized)
-                                            .font(RRFont.caption)
-                                            .foregroundStyle(Color.rrTextSecondary)
+                            ForEach(pastEntries) { entry in
+                                historyRow(entry)
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            modelContext.delete(entry)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
                                     }
-
-                                    Spacer()
-
-                                    Text("\(entry.durationMinutes) min")
-                                        .font(RRFont.subheadline)
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(Color.rrPrimary)
+                                if entry.id != pastEntries.last?.id {
+                                    Divider()
                                 }
-                                Divider()
                             }
                         }
                     }
@@ -106,17 +202,35 @@ struct PrayerLogView: View {
             .padding(.vertical)
         }
         .background(Color.rrBackground)
+        .navigationTitle("Prayer")
+        .onAppear { startCooldownTimerIfNeeded() }
+        .onDisappear {
+            cooldownTimer?.invalidate()
+            cooldownTimer = nil
+        }
+        .onChange(of: entries.count) { _, _ in
+            startCooldownTimerIfNeeded()
+        }
     }
 
-    private func submitPrayer() {
-        let userId = users.first?.id ?? UUID()
-        let entry = RRPrayerLog(
-            userId: userId,
-            date: Date(),
-            durationMinutes: Int(duration),
-            prayerType: prayerType.lowercased()
-        )
-        modelContext.insert(entry)
+    private func historyRow(_ entry: RRPrayerLog) -> some View {
+        HStack(alignment: .top) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(Color.rrSuccess)
+                .frame(width: 28)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(entry.prayerType)
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrText)
+
+                Text(relativeDay(entry.date))
+                    .font(RRFont.subheadline)
+                    .foregroundStyle(Color.rrTextSecondary)
+            }
+
+            Spacer()
+        }
     }
 }
 

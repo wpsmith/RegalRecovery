@@ -144,6 +144,7 @@ final class RRAddiction {
     var name: String
     var sobrietyDate: Date
     var userId: UUID
+    var sortOrder: Int = 0
     var createdAt: Date
     var modifiedAt: Date
 
@@ -163,6 +164,7 @@ final class RRAddiction {
         name: String,
         sobrietyDate: Date,
         userId: UUID,
+        sortOrder: Int = 0,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
@@ -170,6 +172,7 @@ final class RRAddiction {
         self.name = name
         self.sobrietyDate = sobrietyDate
         self.userId = userId
+        self.sortOrder = sortOrder
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }
@@ -1102,6 +1105,126 @@ final class RRSyncQueueItem {
     }
 }
 
+// MARK: - Recovery Plan
+
+@Model
+final class RRRecoveryPlan {
+
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var isActive: Bool
+    var isPaused: Bool
+    var pauseEndDate: Date?
+
+    @Relationship(deleteRule: .cascade, inverse: \RRDailyPlanItem.plan)
+    var items: [RRDailyPlanItem]?
+
+    var createdAt: Date
+    var modifiedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        userId: UUID,
+        isActive: Bool = true,
+        isPaused: Bool = false,
+        pauseEndDate: Date? = nil,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.userId = userId
+        self.isActive = isActive
+        self.isPaused = isPaused
+        self.pauseEndDate = pauseEndDate
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+// MARK: - Daily Plan Item
+
+@Model
+final class RRDailyPlanItem {
+
+    @Attribute(.unique) var id: UUID
+    var planId: UUID
+    var activityType: String
+    var scheduledHour: Int
+    var scheduledMinute: Int
+    var instanceIndex: Int
+    var daysOfWeek: [Int]
+    var isEnabled: Bool
+    var sortOrder: Int = 0
+    var createdAt: Date
+    var modifiedAt: Date
+
+    var plan: RRRecoveryPlan?
+
+    init(
+        id: UUID = UUID(),
+        planId: UUID,
+        activityType: String,
+        scheduledHour: Int,
+        scheduledMinute: Int,
+        instanceIndex: Int = 0,
+        daysOfWeek: [Int] = [],
+        isEnabled: Bool = true,
+        sortOrder: Int = 0,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.planId = planId
+        self.activityType = activityType
+        self.scheduledHour = scheduledHour
+        self.scheduledMinute = scheduledMinute
+        self.instanceIndex = instanceIndex
+        self.daysOfWeek = daysOfWeek
+        self.isEnabled = isEnabled
+        self.sortOrder = sortOrder
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+// MARK: - Daily Score
+
+@Model
+final class RRDailyScore {
+
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var date: Date
+    var score: Int
+    var totalPlanned: Int
+    var totalCompleted: Int
+    var morningCommitmentCompleted: Bool
+    var breakdown: JSONPayload
+    var createdAt: Date
+
+    init(
+        id: UUID = UUID(),
+        userId: UUID,
+        date: Date,
+        score: Int,
+        totalPlanned: Int,
+        totalCompleted: Int,
+        morningCommitmentCompleted: Bool,
+        breakdown: JSONPayload = JSONPayload(),
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.userId = userId
+        self.date = date
+        self.score = score
+        self.totalPlanned = totalPlanned
+        self.totalCompleted = totalCompleted
+        self.morningCommitmentCompleted = morningCommitmentCompleted
+        self.breakdown = breakdown
+        self.createdAt = createdAt
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1133,6 +1256,9 @@ enum RRModelConfiguration {
         RRAffirmationFavorite.self,
         RRDevotionalProgress.self,
         RRSyncQueueItem.self,
+        RRRecoveryPlan.self,
+        RRDailyPlanItem.self,
+        RRDailyScore.self,
     ]
 
     static var schema: Schema {

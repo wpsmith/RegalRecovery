@@ -93,7 +93,6 @@ class FeatureFlagViewModel {
     static let defaultFeatures: [FeatureFlag] = [
         FeatureFlag(key: "feature.onboarding", label: "Onboarding", enabled: true),
         FeatureFlag(key: "feature.profile-management", label: "Profile Management", enabled: true),
-        FeatureFlag(key: "feature.tracking", label: "Tracking System", enabled: true),
         FeatureFlag(key: "feature.content-resources", label: "Content / Resources", enabled: true),
         FeatureFlag(key: "feature.commitments", label: "Commitments", enabled: true),
         FeatureFlag(key: "feature.dark-mode", label: "Light / Dark Mode", enabled: true),

@@ -4,14 +4,21 @@ import SwiftData
 struct EmergencyOverlayView: View {
     @Binding var isPresented: Bool
 
+    @Environment(\.modelContext) private var modelContext
+
+    @Query private var users: [RRUser]
+
     @Query(filter: #Predicate<RRSupportContact> { $0.role == "sponsor" })
     private var sponsors: [RRSupportContact]
 
     @Query private var streaks: [RRStreak]
 
+    @State private var showUrgeSurfingTimer = false
     @State private var showUrgeSheet = false
     @State private var showPanicSheet = false
     @State private var showBreathingSheet = false
+    @State private var autoLoggedUrgeId: UUID?
+    @State private var showAutoLogDismiss = false
 
     // Urge logging state
     @State private var urgeStep = 1
@@ -23,6 +30,7 @@ struct EmergencyOverlayView: View {
 
     private var sponsor: RRSupportContact? { sponsors.first }
     private var currentStreakDays: Int { streaks.first?.currentDays ?? 0 }
+    private var userId: UUID { users.first?.id ?? UUID() }
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -38,6 +46,16 @@ struct EmergencyOverlayView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, 56)
                         .padding(.bottom, 8)
+
+                    // 0. Urge Surfing Timer
+                    emergencyCard(
+                        icon: "water.waves",
+                        iconColor: .rrPrimary,
+                        title: "Urge Surfing Timer",
+                        subtitle: "Ride the wave for 20 minutes"
+                    ) {
+                        showUrgeSurfingTimer = true
+                    }
 
                     // 1. Log Urge
                     emergencyCard(
@@ -122,6 +140,79 @@ struct EmergencyOverlayView: View {
         }
         .sheet(isPresented: $showBreathingSheet) {
             BreathingExerciseView()
+        }
+        .fullScreenCover(isPresented: $showUrgeSurfingTimer) {
+            UrgeSurfingTimerView(isPresented: $showUrgeSurfingTimer)
+        }
+        .overlay(alignment: .top) {
+            if showAutoLogDismiss {
+                Button {
+                    dismissAutoLog()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundStyle(.orange)
+                        Text("Urge logged. Tap to undo if accidental.")
+                            .font(RRFont.caption)
+                            .foregroundStyle(.white)
+                        Spacer()
+                        Image(systemName: "xmark")
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.5))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.15))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .padding(.horizontal)
+                .padding(.top, 60)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.easeInOut, value: showAutoLogDismiss)
+        .onAppear {
+            autoLogUrge()
+        }
+    }
+
+    // MARK: - Auto-Logging
+
+    private func autoLogUrge() {
+        let urgeId = UUID()
+        let urgeLog = RRUrgeLog(
+            id: urgeId,
+            userId: userId,
+            date: Date(),
+            intensity: 0,
+            triggers: [],
+            notes: "Emergency overlay activated",
+            resolution: ""
+        )
+        modelContext.insert(urgeLog)
+        try? modelContext.save()
+        autoLoggedUrgeId = urgeId
+        showAutoLogDismiss = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            withAnimation {
+                showAutoLogDismiss = false
+            }
+        }
+    }
+
+    private func dismissAutoLog() {
+        guard let urgeId = autoLoggedUrgeId else { return }
+        let descriptor = FetchDescriptor<RRUrgeLog>(
+            predicate: #Predicate { $0.id == urgeId }
+        )
+        if let urgeLog = try? modelContext.fetch(descriptor).first {
+            modelContext.delete(urgeLog)
+            try? modelContext.save()
+        }
+        autoLoggedUrgeId = nil
+        withAnimation {
+            showAutoLogDismiss = false
         }
     }
 

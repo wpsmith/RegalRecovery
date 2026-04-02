@@ -188,6 +188,12 @@ struct ActivitiesListView: View {
         return "\(days) days ago"
     }
 
+    // MARK: - Feature Flag Helpers
+
+    private func isFlagEnabled(_ key: String) -> Bool {
+        FeatureFlagStore.shared.isEnabled(key)
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -273,15 +279,17 @@ struct ActivitiesListView: View {
                         )
                     }
 
-                    NavigationLink {
-                        PostMortemView()
-                    } label: {
-                        RRActivityRow(
-                            icon: ActivityType.postMortem.icon,
-                            iconColor: ActivityType.postMortem.iconColor,
-                            title: "Post-Mortem",
-                            subtitle: "142 days ago"
-                        )
+                    if isFlagEnabled("feature.post-mortem") {
+                        NavigationLink {
+                            PostMortemView()
+                        } label: {
+                            RRActivityRow(
+                                icon: ActivityType.postMortem.icon,
+                                iconColor: ActivityType.postMortem.iconColor,
+                                title: "Post-Mortem",
+                                subtitle: "142 days ago"
+                            )
+                        }
                     }
                 } header: {
                     Text(ActivitySection.journalingReflection.rawValue)
@@ -417,15 +425,17 @@ struct ActivitiesListView: View {
                         )
                     }
 
-                    NavigationLink {
-                        ThreeCirclesView()
-                    } label: {
-                        RRActivityRow(
-                            icon: "circles.hexagongrid",
-                            iconColor: .rrPrimary,
-                            title: "3 Circles",
-                            subtitle: "Boundary Tool"
-                        )
+                    if isFlagEnabled("feature.3circles") {
+                        NavigationLink {
+                            ThreeCirclesView()
+                        } label: {
+                            RRActivityRow(
+                                icon: "circles.hexagongrid",
+                                iconColor: .rrPrimary,
+                                title: "3 Circles",
+                                subtitle: "Boundary Tool"
+                            )
+                        }
                     }
 
                     RRActivityRow(

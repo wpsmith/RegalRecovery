@@ -331,6 +331,7 @@ struct DevotionalDay: Identifiable {
     let scriptureText: String
     let reflection: String
     let isComplete: Bool
+    var completedAt: Date?
 }
 
 // MARK: - Prayer
@@ -447,4 +448,411 @@ enum OnboardingStep: Int, CaseIterable {
     case account
     case recovery
     case permissions
+}
+
+// MARK: - Daily Plan Activity State
+
+enum DailyPlanActivityState: String {
+    case completed
+    case pending
+    case upcoming
+    case overdue
+    case skipped
+
+    var icon: String {
+        switch self {
+        case .completed: return "checkmark.circle.fill"
+        case .pending: return "circle"
+        case .upcoming: return "circle"
+        case .overdue: return "exclamationmark.triangle.fill"
+        case .skipped: return "xmark.circle"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .completed: return .rrSuccess
+        case .pending: return .rrText
+        case .upcoming: return .rrTextSecondary
+        case .overdue: return .orange
+        case .skipped: return .rrTextSecondary
+        }
+    }
+}
+
+// MARK: - Daily Score Level
+
+enum DailyScoreLevel: String {
+    case excellent
+    case strong
+    case moderate
+    case low
+    case minimal
+
+    var range: ClosedRange<Int> {
+        switch self {
+        case .excellent: return 90...100
+        case .strong: return 70...89
+        case .moderate: return 50...69
+        case .low: return 25...49
+        case .minimal: return 0...24
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .excellent: return .rrSuccess
+        case .strong: return .blue
+        case .moderate: return .yellow
+        case .low: return .orange
+        case .minimal: return .rrDestructive
+        }
+    }
+
+    var label: String {
+        switch self {
+        case .excellent: return "Excellent"
+        case .strong: return "Strong"
+        case .moderate: return "Moderate"
+        case .low: return "Low"
+        case .minimal: return "Minimal"
+        }
+    }
+
+    static func level(for score: Int) -> DailyScoreLevel {
+        let clamped = max(0, min(100, score))
+        switch clamped {
+        case 90...100: return .excellent
+        case 70...89: return .strong
+        case 50...69: return .moderate
+        case 25...49: return .low
+        default: return .minimal
+        }
+    }
+}
+
+// MARK: - Daily Eligible Activity
+
+struct DailyEligibleActivity {
+    let activityType: String
+    let displayName: String
+    let icon: String
+    let multiplePerDay: Bool
+    let maxPerDay: Int
+    let defaultEnabled: Bool
+    let typicalHour: Int
+    let typicalMinute: Int
+    let typicalBlock: String
+    let featureFlagKey: String
+    let section: ActivitySection
+
+    /// Activities filtered by feature flags (reactive via FeatureFlagStore)
+    static var enabled: [DailyEligibleActivity] {
+        all.filter { activity in
+            FeatureFlagStore.shared.isEnabled(activity.featureFlagKey)
+        }
+    }
+
+    static let all: [DailyEligibleActivity] = [
+        DailyEligibleActivity(
+            activityType: ActivityType.sobrietyCommitment.rawValue,
+            displayName: "Morning Commitment",
+            icon: "sun.max.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: true,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.sobriety-commitment"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.affirmationLog.rawValue,
+            displayName: "Christian Affirmations",
+            icon: "text.quote",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.affirmations"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.journal.rawValue,
+            displayName: "Journaling / Jotting",
+            icon: "note.text",
+            multiplePerDay: true,
+            maxPerDay: 10,
+            defaultEnabled: false,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.journaling"
+        ),
+        DailyEligibleActivity(
+            activityType: "devotional",
+            displayName: "Devotional",
+            icon: "book.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.devotionals"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.prayer.rawValue,
+            displayName: "Prayer",
+            icon: "hands.and.sparkles.fill",
+            multiplePerDay: true,
+            maxPerDay: 5,
+            defaultEnabled: false,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.prayer"
+        ),
+        DailyEligibleActivity(
+            activityType: "memoryVerseReview",
+            displayName: "Memory Verse Review",
+            icon: "text.book.closed.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.memory-verse"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.emotionalJournal.rawValue,
+            displayName: "Emotional Journaling",
+            icon: "heart.circle.fill",
+            multiplePerDay: true,
+            maxPerDay: 5,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Midday",
+            featureFlagKey: "activity.emotional-journaling"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.mood.rawValue,
+            displayName: "Mood Rating",
+            icon: "face.smiling",
+            multiplePerDay: true,
+            maxPerDay: 5,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Midday",
+            featureFlagKey: "activity.mood"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.gratitude.rawValue,
+            displayName: "Gratitude List",
+            icon: "leaf.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.gratitude"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.phoneCalls.rawValue,
+            displayName: "Phone Calls",
+            icon: "phone.fill",
+            multiplePerDay: true,
+            maxPerDay: 10,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Midday",
+            featureFlagKey: "activity.phone-calls"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.exercise.rawValue,
+            displayName: "Exercise / Physical Activity",
+            icon: "figure.run",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 8,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.exercise"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.meetingsAttended.rawValue,
+            displayName: "Meetings Attended",
+            icon: "person.3.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 20,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.meetings"
+        ),
+        DailyEligibleActivity(
+            activityType: "personCheckInSpouse",
+            displayName: "Person Check-in -- Spouse",
+            icon: "heart.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.person-check-ins"
+        ),
+        DailyEligibleActivity(
+            activityType: "personCheckInSponsor",
+            displayName: "Person Check-in -- Sponsor",
+            icon: "person.fill.checkmark",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Midday",
+            featureFlagKey: "activity.person-check-ins"
+        ),
+        DailyEligibleActivity(
+            activityType: "personCheckInCounselor",
+            displayName: "Person Check-in -- Counselor/Coach",
+            icon: "stethoscope",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Midday",
+            featureFlagKey: "activity.person-check-ins"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.spouseCheckIn.rawValue,
+            displayName: "Spouse Check-in Preparation",
+            icon: "heart.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.spouse-checkin-prep"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.recoveryCheckIn.rawValue,
+            displayName: "Recovery Check-in",
+            icon: "heart.text.clipboard",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.check-ins"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.fasterScale.rawValue,
+            displayName: "FASTER Scale",
+            icon: "gauge.with.needle",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.faster-scale"
+        ),
+        DailyEligibleActivity(
+            activityType: "pci",
+            displayName: "PCI",
+            icon: "checklist",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.pci"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.weeklyGoals.rawValue,
+            displayName: "Weekly/Daily Goals Review",
+            icon: "target",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.goals"
+        ),
+        DailyEligibleActivity(
+            activityType: "nutrition",
+            displayName: "Nutrition (Meal Logging)",
+            icon: "fork.knife",
+            multiplePerDay: true,
+            maxPerDay: 5,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Midday",
+            featureFlagKey: "activity.nutrition"
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.timeJournal.rawValue,
+            displayName: "T30/60 Journaling",
+            icon: "clock.fill",
+            multiplePerDay: true,
+            maxPerDay: 24,
+            defaultEnabled: false,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.time-journal"
+        ),
+        DailyEligibleActivity(
+            activityType: "actingInBehaviors",
+            displayName: "Acting In Behaviors Check-in",
+            icon: "shield.lefthalf.filled",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.acting-in-behaviors"
+        ),
+        DailyEligibleActivity(
+            activityType: "voiceJournal",
+            displayName: "Voice Journal",
+            icon: "mic.fill",
+            multiplePerDay: true,
+            maxPerDay: 10,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Midday",
+            featureFlagKey: "activity.voice-journal"
+        ),
+        DailyEligibleActivity(
+            activityType: "bookReading",
+            displayName: "Book Reading",
+            icon: "book.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 21,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.book-reading"
+        ),
+    ]
 }

@@ -8,7 +8,7 @@ ENDPOINT_URL="http://localhost:4566"
 
 echo "Creating DynamoDB table: $TABLE_NAME"
 
-awslocal dynamodb create-table \
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb create-table \
   --table-name "$TABLE_NAME" \
   --attribute-definitions \
     AttributeName=PK,AttributeType=S \
@@ -54,6 +54,6 @@ echo "Table $TABLE_NAME created successfully"
 
 # Wait for table to be active
 echo "Waiting for table to become active..."
-awslocal dynamodb wait table-exists --table-name "$TABLE_NAME"
+aws --endpoint-url "$ENDPOINT_URL" --region us-east-1 --no-cli-pager dynamodb wait table-exists --table-name "$TABLE_NAME"
 
 echo "Table is now active"

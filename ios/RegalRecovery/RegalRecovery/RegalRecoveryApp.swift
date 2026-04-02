@@ -7,6 +7,7 @@ struct RegalRecoveryApp: App {
     @AppStorage("appearanceMode") private var appearanceMode = AppearanceMode.system.rawValue
     @AppStorage("biometricLockEnabled") private var biometricLockEnabled = false
     @State private var showEmergencyOverlay = false
+    @State private var showUrgeSurfingTimer = false
     @State private var selectedTab = 0
     @State private var isUnlocked = true
 
@@ -35,6 +36,7 @@ struct RegalRecoveryApp: App {
             .task {
                 let context = ModelContext(services.modelContainer)
                 try? SeedData.seedDatabase(context: context)
+                await reschedulePlanNotifications(context: context)
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
                 handleForeground()
@@ -45,12 +47,12 @@ struct RegalRecoveryApp: App {
     private var mainTabView: some View {
         ZStack(alignment: .bottomTrailing) {
             TabView(selection: $selectedTab) {
-                HomeView()
-                    .tabItem { Label("Home", systemImage: "house.fill") }
+                TodayView()
+                    .tabItem { Label("Today", systemImage: "sun.max.fill") }
                     .tag(0)
 
-                ActivitiesListView()
-                    .tabItem { Label("Activities", systemImage: "list.bullet.clipboard.fill") }
+                RecoveryWorkView()
+                    .tabItem { Label("Work", systemImage: "briefcase.fill") }
                     .tag(1)
 
                 RecoveryProgressView()
@@ -67,14 +69,18 @@ struct RegalRecoveryApp: App {
             }
             .tint(Color.rrPrimary)
 
-            EmergencyFABButton {
-                showEmergencyOverlay = true
-            }
+            EmergencyFABButton(
+                onTap: { showUrgeSurfingTimer = true },
+                onLongPress: { showEmergencyOverlay = true }
+            )
             .padding(.trailing, 16)
             .padding(.bottom, 60)
         }
         .fullScreenCover(isPresented: $showEmergencyOverlay) {
             EmergencyOverlayView(isPresented: $showEmergencyOverlay)
+        }
+        .fullScreenCover(isPresented: $showUrgeSurfingTimer) {
+            UrgeSurfingTimerView(isPresented: $showUrgeSurfingTimer)
         }
     }
 
@@ -124,7 +130,29 @@ struct RegalRecoveryApp: App {
 
         Task {
             await services.onForeground()
+            let context = ModelContext(services.modelContainer)
+            await reschedulePlanNotifications(context: context)
         }
+    }
+
+    /// Reschedule plan-aware notifications from the active recovery plan.
+    private func reschedulePlanNotifications(context: ModelContext) async {
+        let scheduler = PlanNotificationScheduler()
+
+        let planDescriptor = FetchDescriptor<RRRecoveryPlan>(
+            predicate: #Predicate { $0.isActive == true }
+        )
+        guard let plan = try? context.fetch(planDescriptor).first,
+              let items = plan.items else { return }
+
+        let enabledItems = items.filter(\.isEnabled)
+
+        // Load user first name for personalized notifications
+        let userDescriptor = FetchDescriptor<RRUser>()
+        let userName = (try? context.fetch(userDescriptor).first)?
+            .name.components(separatedBy: " ").first ?? "friend"
+
+        await scheduler.scheduleFromPlan(items: enabledItems, userName: userName)
     }
 
     private func authenticateWithBiometrics() {

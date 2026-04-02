@@ -1,10 +1,22 @@
 import SwiftUI
 
 struct GlossaryView: View {
+    @State private var searchText = ""
+
+    private var filteredGlossary: [GlossaryTerm] {
+        if searchText.isEmpty {
+            return ContentData.glossary
+        }
+        return ContentData.glossary.filter { item in
+            item.term.localizedCaseInsensitiveContains(searchText) ||
+            item.definition.localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                ForEach(ContentData.glossary) { item in
+                ForEach(filteredGlossary) { item in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(item.term)
                             .font(RRFont.headline)
@@ -18,7 +30,7 @@ struct GlossaryView: View {
                     .padding(.vertical, 12)
                     .padding(.horizontal, 16)
 
-                    if item.id != ContentData.glossary.last?.id {
+                    if item.id != filteredGlossary.last?.id {
                         Divider()
                             .padding(.horizontal, 16)
                     }
@@ -30,6 +42,8 @@ struct GlossaryView: View {
             .padding()
         }
         .background(Color.rrBackground)
+        .navigationTitle("Glossary")
+        .searchable(text: $searchText, prompt: "Search terms")
     }
 }
 

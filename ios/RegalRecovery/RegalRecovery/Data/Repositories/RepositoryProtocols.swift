@@ -194,6 +194,25 @@ protocol DevotionalRepository: Sendable {
     func getCompletedDayCount(for userId: UUID) async throws -> Int
 }
 
+// MARK: - Recovery Plan Repository
+
+protocol RecoveryPlanRepository: Sendable {
+    func getActivePlan(userId: UUID) async throws -> RRRecoveryPlan?
+    func createPlan(_ plan: RRRecoveryPlan) async throws
+    func addPlanItem(_ item: RRDailyPlanItem) async throws
+    func updatePlanItem(_ item: RRDailyPlanItem) async throws
+    func deletePlanItem(_ item: RRDailyPlanItem) async throws
+    func getPlanItems(planId: UUID, dayOfWeek: Int?) async throws -> [RRDailyPlanItem]
+}
+
+// MARK: - Daily Score Repository
+
+protocol DailyScoreRepository: Sendable {
+    func getScore(userId: UUID, date: Date) async throws -> RRDailyScore?
+    func saveScore(_ score: RRDailyScore) async throws
+    func getScores(userId: UUID, from: Date, to: Date) async throws -> [RRDailyScore]
+}
+
 // MARK: - Sync Queue Repository
 
 protocol SyncQueueRepository: Sendable {

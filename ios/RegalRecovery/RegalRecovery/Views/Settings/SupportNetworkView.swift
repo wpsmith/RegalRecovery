@@ -1,5 +1,44 @@
+import Contacts
+import ContactsUI
 import SwiftData
 import SwiftUI
+
+// MARK: - Contact Picker (UIViewControllerRepresentable)
+
+// Note: Ensure NSContactsUsageDescription is set in Info.plist.
+// CNContactPickerViewController runs in a separate process and does not require
+// an explicit CNContactStore.requestAccess call.
+
+struct ContactPicker: UIViewControllerRepresentable {
+    let onSelect: (String, String) -> Void
+    let onCancel: () -> Void
+
+    func makeUIViewController(context: Context) -> CNContactPickerViewController {
+        let picker = CNContactPickerViewController()
+        picker.delegate = context.coordinator
+        picker.predicateForEnablingContact = NSPredicate(format: "phoneNumbers.@count > 0")
+        return picker
+    }
+
+    func updateUIViewController(_: CNContactPickerViewController, context _: Context) {}
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    class Coordinator: NSObject, CNContactPickerDelegate {
+        let parent: ContactPicker
+        init(_ parent: ContactPicker) { self.parent = parent }
+
+        func contactPicker(_: CNContactPickerViewController, didSelect contact: CNContact) {
+            let name = CNContactFormatter.string(from: contact, style: .fullName) ?? ""
+            let phone = contact.phoneNumbers.first?.value.stringValue ?? ""
+            parent.onSelect(name, phone)
+        }
+
+        func contactPickerDidCancel(_: CNContactPickerViewController) {
+            parent.onCancel()
+        }
+    }
+}
 
 struct SupportNetworkView: View {
     @Query private var contacts: [RRSupportContact]
@@ -7,6 +46,10 @@ struct SupportNetworkView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var showAddSheet = false
+    @State private var showContactSourcePicker = false
+    @State private var showContactPicker = false
+    @State private var prefillName = ""
+    @State private var prefillPhone = ""
     @State private var editingContact: RRSupportContact?
 
     private let dataCategories = ["Sobriety", "Check-ins", "Activities", "Journal", "Financial"]
@@ -88,7 +131,9 @@ struct SupportNetworkView: View {
 
             Section {
                 Button {
-                    showAddSheet = true
+                    prefillName = ""
+                    prefillPhone = ""
+                    showContactSourcePicker = true
                 } label: {
                     HStack {
                         Image(systemName: "plus.circle.fill")
@@ -100,8 +145,29 @@ struct SupportNetworkView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .navigationTitle("Support Network")
+        .confirmationDialog("Add Contact", isPresented: $showContactSourcePicker) {
+            Button("From Contacts") { showContactPicker = true }
+            Button("Enter Manually") { showAddSheet = true }
+            Button("Cancel", role: .cancel) { }
+        }
+        .sheet(isPresented: $showContactPicker) {
+            ContactPicker(
+                onSelect: { name, phone in
+                    prefillName = name
+                    prefillPhone = phone
+                    showContactPicker = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showAddSheet = true
+                    }
+                },
+                onCancel: {
+                    showContactPicker = false
+                }
+            )
+        }
         .sheet(isPresented: $showAddSheet) {
-            AddContactSheet(onSave: addContact)
+            AddContactSheet(prefillName: prefillName, prefillPhone: prefillPhone, onSave: addContact)
         }
         .sheet(item: $editingContact) { contact in
             EditContactSheet(contact: contact, onSave: { updateContact(contact) })
@@ -167,9 +233,15 @@ struct AddContactSheet: View {
     @Environment(\.dismiss) private var dismiss
     let onSave: (String, String, String) -> Void
 
-    @State private var name = ""
+    @State private var name: String
     @State private var role = "sponsor"
-    @State private var phone = ""
+    @State private var phone: String
+
+    init(prefillName: String = "", prefillPhone: String = "", onSave: @escaping (String, String, String) -> Void) {
+        _name = State(initialValue: prefillName)
+        _phone = State(initialValue: prefillPhone)
+        self.onSave = onSave
+    }
 
     private let roles = [
         ("sponsor", "Sponsor"),

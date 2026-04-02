@@ -31,6 +31,11 @@
 		10000021 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000021 /* SyncEngine.swift */; };
 		10000022 /* ServiceContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000022 /* ServiceContainer.swift */; };
 		10000023 /* FeatureFlagService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000023 /* FeatureFlagService.swift */; };
+		10000213 /* FeatureFlagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000213 /* FeatureFlagStore.swift */; };
+		10000204 /* PlanNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000204 /* PlanNotificationScheduler.swift */; };
+		10000205 /* RecoveryPlanSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000205 /* RecoveryPlanSetupView.swift */; };
+		10000206 /* PlanActivityRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000206 /* PlanActivityRowView.swift */; };
+		10000207 /* RecoveryPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000207 /* RecoveryPlanViewModel.swift */; };
 		10000024 /* ActivityError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000024 /* ActivityError.swift */; };
 		10000025 /* ActivityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000025 /* ActivityViewModel.swift */; };
 		10000026 /* AffirmationsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000026 /* AffirmationsViewModel.swift */; };
@@ -91,6 +96,8 @@
 		10000081 /* BreathingExerciseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000081 /* BreathingExerciseView.swift */; };
 		10000082 /* EmergencyFABButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000082 /* EmergencyFABButton.swift */; };
 		10000083 /* EmergencyOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000083 /* EmergencyOverlayView.swift */; };
+		10000202 /* UrgeSurfingTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000202 /* UrgeSurfingTimerView.swift */; };
+		10000203 /* UrgeSurfingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000203 /* UrgeSurfingViewModel.swift */; };
 		10000084 /* CommitmentsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000084 /* CommitmentsCard.swift */; };
 		10000085 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000085 /* HomeView.swift */; };
 		10000086 /* MilestoneBadgesRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000086 /* MilestoneBadgesRow.swift */; };
@@ -119,6 +126,20 @@
 		10000109 /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000109 /* ToolsView.swift */; };
 		10000110 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000116 /* ContentData.swift */; };
 		10000200 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000200 /* Assets.xcassets */; };
+		10000208 /* RecoveryWorkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000208 /* RecoveryWorkView.swift */; };
+		10000209 /* RecoveryWorkItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000209 /* RecoveryWorkItemRow.swift */; };
+		10000210 /* RecoveryWorkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000210 /* RecoveryWorkViewModel.swift */; };
+		10000211 /* RecoveryFoundationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000211 /* RecoveryFoundationView.swift */; };
+		10000212 /* TestingModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000212 /* TestingModeView.swift */; };
+		10000300 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000300 /* TodayView.swift */; };
+		10000301 /* TodayTimeBlockSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000301 /* TodayTimeBlockSection.swift */; };
+		10000302 /* TodayActivityRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000302 /* TodayActivityRow.swift */; };
+		10000303 /* RecoveryScoreSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000303 /* RecoveryScoreSummaryView.swift */; };
+		10000304 /* RecoveryScoreDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000304 /* RecoveryScoreDetailView.swift */; };
+		10000305 /* RecoveryWorkCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000305 /* RecoveryWorkCardView.swift */; };
+		10000308 /* SobrietyModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000308 /* SobrietyModuleView.swift */; };
+		10000306 /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000306 /* TodayViewModel.swift */; };
+		10000307 /* DailyScoreCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000307 /* DailyScoreCalculator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -147,6 +168,20 @@
 		20000021 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
 		20000022 /* ServiceContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceContainer.swift; sourceTree = "<group>"; };
 		20000023 /* FeatureFlagService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagService.swift; sourceTree = "<group>"; };
+		20000213 /* FeatureFlagStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagStore.swift; sourceTree = "<group>"; };
+		20000204 /* PlanNotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanNotificationScheduler.swift; sourceTree = "<group>"; };
+		20000205 /* RecoveryPlanSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanSetupView.swift; sourceTree = "<group>"; };
+		20000206 /* PlanActivityRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanActivityRowView.swift; sourceTree = "<group>"; };
+		20000207 /* RecoveryPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanViewModel.swift; sourceTree = "<group>"; };
+		20000300 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		20000301 /* TodayTimeBlockSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayTimeBlockSection.swift; sourceTree = "<group>"; };
+		20000302 /* TodayActivityRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayActivityRow.swift; sourceTree = "<group>"; };
+		20000303 /* RecoveryScoreSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryScoreSummaryView.swift; sourceTree = "<group>"; };
+		20000304 /* RecoveryScoreDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryScoreDetailView.swift; sourceTree = "<group>"; };
+		20000305 /* RecoveryWorkCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkCardView.swift; sourceTree = "<group>"; };
+		20000308 /* SobrietyModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SobrietyModuleView.swift; sourceTree = "<group>"; };
+		20000306 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
+		20000307 /* DailyScoreCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyScoreCalculator.swift; sourceTree = "<group>"; };
 		20000024 /* ActivityError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityError.swift; sourceTree = "<group>"; };
 		20000025 /* ActivityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityViewModel.swift; sourceTree = "<group>"; };
 		20000026 /* AffirmationsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsViewModel.swift; sourceTree = "<group>"; };
@@ -176,6 +211,7 @@
 		20000050 /* ThreeCirclesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesViewModel.swift; sourceTree = "<group>"; };
 		20000051 /* TimeJournalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalViewModel.swift; sourceTree = "<group>"; };
 		20000052 /* UrgeLogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModel.swift; sourceTree = "<group>"; };
+		20000203 /* UrgeSurfingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeSurfingViewModel.swift; sourceTree = "<group>"; };
 		20000053 /* ActivitiesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesListView.swift; sourceTree = "<group>"; };
 		20000054 /* AffirmationLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationLogView.swift; sourceTree = "<group>"; };
 		20000055 /* EmotionalJournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalJournalView.swift; sourceTree = "<group>"; };
@@ -207,6 +243,7 @@
 		20000081 /* BreathingExerciseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreathingExerciseView.swift; sourceTree = "<group>"; };
 		20000082 /* EmergencyFABButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyFABButton.swift; sourceTree = "<group>"; };
 		20000083 /* EmergencyOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyOverlayView.swift; sourceTree = "<group>"; };
+		20000202 /* UrgeSurfingTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeSurfingTimerView.swift; sourceTree = "<group>"; };
 		20000084 /* CommitmentsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentsCard.swift; sourceTree = "<group>"; };
 		20000085 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		20000086 /* MilestoneBadgesRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilestoneBadgesRow.swift; sourceTree = "<group>"; };
@@ -242,6 +279,11 @@
 		20000116 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
 		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		20000208 /* RecoveryWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkView.swift; sourceTree = "<group>"; };
+		20000209 /* RecoveryWorkItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkItemRow.swift; sourceTree = "<group>"; };
+		20000210 /* RecoveryWorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkViewModel.swift; sourceTree = "<group>"; };
+		20000211 /* RecoveryFoundationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFoundationView.swift; sourceTree = "<group>"; };
+		20000212 /* TestingModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingModeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -351,8 +393,10 @@
 				50000021 /* API */,
 				50000022 /* Auth */,
 				50000023 /* Sync */,
+				20000204 /* PlanNotificationScheduler.swift */,
 				20000022 /* ServiceContainer.swift */,
 				20000023 /* FeatureFlagService.swift */,
+				20000213 /* FeatureFlagStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -420,6 +464,11 @@
 				20000050 /* ThreeCirclesViewModel.swift */,
 				20000051 /* TimeJournalViewModel.swift */,
 				20000052 /* UrgeLogViewModel.swift */,
+				20000203 /* UrgeSurfingViewModel.swift */,
+				20000207 /* RecoveryPlanViewModel.swift */,
+				20000210 /* RecoveryWorkViewModel.swift */,
+				20000306 /* TodayViewModel.swift */,
+				20000307 /* DailyScoreCalculator.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -434,6 +483,8 @@
 				50000045 /* Onboarding */,
 				50000046 /* Settings */,
 				50000047 /* Tools */,
+				50000300 /* Today */,
+				50000100 /* Work */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -486,6 +537,7 @@
 				20000081 /* BreathingExerciseView.swift */,
 				20000082 /* EmergencyFABButton.swift */,
 				20000083 /* EmergencyOverlayView.swift */,
+				20000202 /* UrgeSurfingTimerView.swift */,
 			);
 			path = Emergency;
 			sourceTree = "<group>";
@@ -528,8 +580,35 @@
 				20000102 /* ProfileEditView.swift */,
 				20000103 /* SettingsView.swift */,
 				20000104 /* SupportNetworkView.swift */,
+				20000205 /* RecoveryPlanSetupView.swift */,
+				20000206 /* PlanActivityRowView.swift */,
+				20000211 /* RecoveryFoundationView.swift */,
+				20000212 /* TestingModeView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		50000300 /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				20000300 /* TodayView.swift */,
+				20000301 /* TodayTimeBlockSection.swift */,
+				20000302 /* TodayActivityRow.swift */,
+				20000303 /* RecoveryScoreSummaryView.swift */,
+				20000304 /* RecoveryScoreDetailView.swift */,
+				20000305 /* RecoveryWorkCardView.swift */,
+				20000308 /* SobrietyModuleView.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		50000100 /* Work */ = {
+			isa = PBXGroup;
+			children = (
+				20000208 /* RecoveryWorkView.swift */,
+				20000209 /* RecoveryWorkItemRow.swift */,
+			);
+			path = Work;
 			sourceTree = "<group>";
 		};
 		50000047 /* Tools */ = {
@@ -646,8 +725,27 @@
 				10000019 /* KeychainHelper.swift in Sources */,
 				10000020 /* NetworkMonitor.swift in Sources */,
 				10000021 /* SyncEngine.swift in Sources */,
+				10000204 /* PlanNotificationScheduler.swift in Sources */,
+				10000205 /* RecoveryPlanSetupView.swift in Sources */,
+				10000206 /* PlanActivityRowView.swift in Sources */,
+				10000207 /* RecoveryPlanViewModel.swift in Sources */,
+				10000208 /* RecoveryWorkView.swift in Sources */,
+				10000209 /* RecoveryWorkItemRow.swift in Sources */,
+				10000210 /* RecoveryWorkViewModel.swift in Sources */,
+				10000211 /* RecoveryFoundationView.swift in Sources */,
+				10000212 /* TestingModeView.swift in Sources */,
+				10000300 /* TodayView.swift in Sources */,
+				10000301 /* TodayTimeBlockSection.swift in Sources */,
+				10000302 /* TodayActivityRow.swift in Sources */,
+				10000303 /* RecoveryScoreSummaryView.swift in Sources */,
+				10000304 /* RecoveryScoreDetailView.swift in Sources */,
+				10000305 /* RecoveryWorkCardView.swift in Sources */,
+				10000308 /* SobrietyModuleView.swift in Sources */,
+				10000306 /* TodayViewModel.swift in Sources */,
+				10000307 /* DailyScoreCalculator.swift in Sources */,
 				10000022 /* ServiceContainer.swift in Sources */,
 				10000023 /* FeatureFlagService.swift in Sources */,
+				10000213 /* FeatureFlagStore.swift in Sources */,
 				10000024 /* ActivityError.swift in Sources */,
 				10000025 /* ActivityViewModel.swift in Sources */,
 				10000026 /* AffirmationsViewModel.swift in Sources */,
@@ -708,6 +806,8 @@
 				10000081 /* BreathingExerciseView.swift in Sources */,
 				10000082 /* EmergencyFABButton.swift in Sources */,
 				10000083 /* EmergencyOverlayView.swift in Sources */,
+				10000202 /* UrgeSurfingTimerView.swift in Sources */,
+				10000203 /* UrgeSurfingViewModel.swift in Sources */,
 				10000084 /* CommitmentsCard.swift in Sources */,
 				10000085 /* HomeView.swift in Sources */,
 				10000086 /* MilestoneBadgesRow.swift in Sources */,

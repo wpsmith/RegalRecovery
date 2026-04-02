@@ -9,6 +9,7 @@ struct ExerciseLogView: View {
     @State private var duration: Double = 30
     @State private var activityType = "Run"
     @State private var notes = ""
+    @State private var showSelectedLabel = false
 
     private let activityTypes = ["Run", "Walk", "Weights", "Yoga", "Swimming", "Other"]
 
@@ -53,12 +54,36 @@ struct ExerciseLogView: View {
                             Text("Activity")
                                 .font(RRFont.subheadline)
                                 .foregroundStyle(Color.rrText)
-                            Picker("Activity", selection: $activityType) {
+                            HStack(spacing: 0) {
                                 ForEach(activityTypes, id: \.self) { type in
-                                    Text(type).tag(type)
+                                    Button {
+                                        if activityType == type {
+                                            showSelectedLabel.toggle()
+                                        } else {
+                                            activityType = type
+                                            showSelectedLabel = true
+                                        }
+                                    } label: {
+                                        VStack(spacing: 4) {
+                                            Image(systemName: exerciseIcon(for: type))
+                                                .font(.title2)
+                                                .foregroundStyle(activityType == type ? Color.blue : Color.rrTextSecondary)
+                                            if activityType == type && showSelectedLabel {
+                                                Text(type)
+                                                    .font(RRFont.caption2)
+                                                    .foregroundStyle(Color.blue)
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            RoundedRectangle(cornerRadius: 8)
+                                                .fill(activityType == type ? Color.blue.opacity(0.1) : Color.clear)
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
                                 }
                             }
-                            .pickerStyle(.segmented)
                         }
 
                         Divider()
@@ -89,7 +114,7 @@ struct ExerciseLogView: View {
 
                             ForEach(entries) { entry in
                                 HStack {
-                                    Image(systemName: "figure.run")
+                                    Image(systemName: exerciseIcon(for: entry.exerciseType.capitalized))
                                         .foregroundStyle(.blue)
                                         .frame(width: 28)
 
@@ -122,6 +147,17 @@ struct ExerciseLogView: View {
             .padding(.vertical)
         }
         .background(Color.rrBackground)
+    }
+
+    private func exerciseIcon(for type: String) -> String {
+        switch type {
+        case "Run": return "figure.run"
+        case "Walk": return "figure.walk"
+        case "Weights": return "dumbbell.fill"
+        case "Yoga": return "figure.yoga"
+        case "Swimming": return "figure.pool.swim"
+        default: return "figure.mixed.cardio"
+        }
     }
 
     private func submitExercise() {

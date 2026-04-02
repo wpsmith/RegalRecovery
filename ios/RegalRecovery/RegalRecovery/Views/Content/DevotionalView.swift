@@ -20,7 +20,7 @@ struct DevotionalView: View {
 
     /// Merge static content with user progress
     private var days: [DevotionalDay] {
-        let completed = completedDays
+        let progressMap = Dictionary(uniqueKeysWithValues: devotionalProgress.map { ($0.day, $0) })
         return ContentData.devotionalDays.map { day in
             DevotionalDay(
                 day: day.day,
@@ -28,24 +28,83 @@ struct DevotionalView: View {
                 scripture: day.scripture,
                 scriptureText: day.scriptureText,
                 reflection: day.reflection,
-                isComplete: completed.contains(day.day)
+                isComplete: progressMap[day.day]?.completedAt != nil,
+                completedAt: progressMap[day.day]?.completedAt
             )
         }
     }
 
+    private var todayDays: [DevotionalDay] {
+        days.filter { $0.day == currentDay }
+    }
+
+    private var upcomingDays: [DevotionalDay] {
+        days.filter { $0.day != currentDay && !$0.isComplete }
+            .sorted { $0.day < $1.day }
+    }
+
+    private var completedDaysList: [DevotionalDay] {
+        days.filter { $0.day != currentDay && $0.isComplete }
+            .sorted { ($0.completedAt ?? .distantPast) > ($1.completedAt ?? .distantPast) }
+    }
+
+    private static let completedDateFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMM d, h:mm a"
+        return f
+    }()
+
     var body: some View {
         List {
-            ForEach(days) { day in
-                Button {
-                    selectedDay = day
-                } label: {
-                    dayRow(day)
+            // MARK: - Today
+            Section {
+                ForEach(todayDays) { day in
+                    Button {
+                        selectedDay = day
+                    } label: {
+                        dayRow(day)
+                    }
+                    .listRowBackground(Color.rrPrimary.opacity(0.08))
                 }
-                .listRowBackground(day.day == currentDay ? Color.rrPrimary.opacity(0.08) : Color.rrSurface)
+            } header: {
+                Text("Today")
+            }
+
+            // MARK: - Upcoming
+            if !upcomingDays.isEmpty {
+                Section {
+                    ForEach(upcomingDays) { day in
+                        Button {
+                            selectedDay = day
+                        } label: {
+                            dayRow(day)
+                        }
+                        .listRowBackground(Color.rrSurface)
+                    }
+                } header: {
+                    Text("Upcoming")
+                }
+            }
+
+            // MARK: - Completed
+            if !completedDaysList.isEmpty {
+                Section {
+                    ForEach(completedDaysList) { day in
+                        Button {
+                            selectedDay = day
+                        } label: {
+                            dayRow(day)
+                        }
+                        .listRowBackground(Color.rrSurface)
+                    }
+                } header: {
+                    Text("Completed")
+                }
             }
         }
         .listStyle(.plain)
         .background(Color.rrBackground)
+        .navigationTitle("Devotional")
         .sheet(item: $selectedDay) { day in
             DevotionalDetailSheet(day: day) { completedDay in
                 markComplete(day: completedDay)
@@ -76,8 +135,15 @@ struct DevotionalView: View {
             Spacer()
 
             if day.isComplete {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(Color.rrSuccess)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Color.rrSuccess)
+                    if let completedAt = day.completedAt {
+                        Text("Completed \(Self.completedDateFormatter.string(from: completedAt))")
+                            .font(RRFont.caption2)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                }
             } else if day.day == currentDay {
                 RRBadge(text: "Today", color: .rrPrimary)
             }

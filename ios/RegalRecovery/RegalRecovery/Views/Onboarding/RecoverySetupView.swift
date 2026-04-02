@@ -141,8 +141,8 @@ struct RecoverySetupView: View {
         )
         modelContext.insert(user)
 
-        for addiction in selectedAddictions {
-            let a = RRAddiction(name: addiction, sobrietyDate: sobrietyDate, userId: user.id)
+        for (index, addiction) in selectedAddictions.enumerated() {
+            let a = RRAddiction(name: addiction, sobrietyDate: sobrietyDate, userId: user.id, sortOrder: index)
             modelContext.insert(a)
 
             let streak = RRStreak(addictionId: a.id)

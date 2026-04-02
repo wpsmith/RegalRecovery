@@ -807,6 +807,82 @@ actor SwiftDataDevotionalRepository: DevotionalRepository {
     }
 }
 
+// MARK: - Recovery Plan Repository
+
+@ModelActor
+actor SwiftDataRecoveryPlanRepository: RecoveryPlanRepository {
+    func getActivePlan(userId: UUID) async throws -> RRRecoveryPlan? {
+        let descriptor = FetchDescriptor<RRRecoveryPlan>(
+            predicate: #Predicate { $0.userId == userId && $0.isActive == true },
+            sortBy: [SortDescriptor(\.createdAt, order: .reverse)]
+        )
+        return try modelContext.fetch(descriptor).first
+    }
+
+    func createPlan(_ plan: RRRecoveryPlan) async throws {
+        modelContext.insert(plan)
+        try modelContext.save()
+    }
+
+    func addPlanItem(_ item: RRDailyPlanItem) async throws {
+        modelContext.insert(item)
+        try modelContext.save()
+    }
+
+    func updatePlanItem(_ item: RRDailyPlanItem) async throws {
+        item.modifiedAt = Date()
+        try modelContext.save()
+    }
+
+    func deletePlanItem(_ item: RRDailyPlanItem) async throws {
+        modelContext.delete(item)
+        try modelContext.save()
+    }
+
+    func getPlanItems(planId: UUID, dayOfWeek: Int?) async throws -> [RRDailyPlanItem] {
+        let descriptor = FetchDescriptor<RRDailyPlanItem>(
+            predicate: #Predicate { $0.planId == planId && $0.isEnabled == true },
+            sortBy: [SortDescriptor(\.scheduledHour), SortDescriptor(\.scheduledMinute), SortDescriptor(\.instanceIndex)]
+        )
+        let allItems = try modelContext.fetch(descriptor)
+
+        guard let dayOfWeek else { return allItems }
+
+        return allItems.filter { item in
+            item.daysOfWeek.isEmpty || item.daysOfWeek.contains(dayOfWeek)
+        }
+    }
+}
+
+// MARK: - Daily Score Repository
+
+@ModelActor
+actor SwiftDataDailyScoreRepository: DailyScoreRepository {
+    func getScore(userId: UUID, date: Date) async throws -> RRDailyScore? {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: date)
+        guard let end = calendar.date(byAdding: .day, value: 1, to: start) else { return nil }
+
+        let descriptor = FetchDescriptor<RRDailyScore>(
+            predicate: #Predicate { $0.userId == userId && $0.date >= start && $0.date < end }
+        )
+        return try modelContext.fetch(descriptor).first
+    }
+
+    func saveScore(_ score: RRDailyScore) async throws {
+        modelContext.insert(score)
+        try modelContext.save()
+    }
+
+    func getScores(userId: UUID, from startDate: Date, to endDate: Date) async throws -> [RRDailyScore] {
+        let descriptor = FetchDescriptor<RRDailyScore>(
+            predicate: #Predicate { $0.userId == userId && $0.date >= startDate && $0.date <= endDate },
+            sortBy: [SortDescriptor(\.date)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+}
+
 // MARK: - Sync Queue Repository
 
 @ModelActor

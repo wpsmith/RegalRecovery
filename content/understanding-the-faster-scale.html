@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Understanding the FASTER Scale</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --restoration: #2D6A4F;
+    --f-color: #7B9E3D;
+    --a-color: #C9A227;
+    --s-color: #D4802A;
+    --t-color: #C95D2E;
+    --e-color: #A63D40;
+    --r-color: #6B2737;
+    --bg: #FAF7F2;
+    --text: #2C2321;
+    --text-soft: #5C4F4A;
+    --text-muted: #8A7E79;
+    --border: #E5DDD6;
+    --card-bg: #FFFFFF;
+    --highlight: #FFF8E7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 17px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* — HERO — */
+  .hero {
+    background: linear-gradient(165deg, #2D3B2D 0%, #1A2520 55%, #0F1A15 100%);
+    color: #F5F0E8;
+    padding: 80px 24px 70px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(45,106,79,0.15) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(201,162,39,0.3) 50%, transparent 100%);
+  }
+  .hero-inner { max-width: 720px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+  .hero h1 {
+    font-family: 'Lora', serif;
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: 600;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: #C9A227;
+  }
+  .hero-sub {
+    font-size: 18px;
+    line-height: 1.6;
+    color: rgba(245,240,232,0.7);
+    max-width: 580px;
+  }
+
+  /* — MAIN CONTENT — */
+  .content { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+  /* — SECTION INTRO — */
+  .section-intro {
+    padding: 56px 0 40px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-intro h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .section-intro p, .prose p {
+    color: var(--text-soft);
+    margin-bottom: 16px;
+  }
+  .prose p:last-child { margin-bottom: 0; }
+
+  .callout {
+    background: var(--highlight);
+    border-left: 3px solid #C9A227;
+    padding: 20px 24px;
+    margin: 28px 0;
+    border-radius: 0 8px 8px 0;
+  }
+  .callout p {
+    color: var(--text-soft);
+    font-size: 16px;
+    margin: 0;
+  }
+  .callout strong { color: var(--text); }
+
+  /* — SCALE CARDS — */
+  .scale-section {
+    padding: 48px 0 20px;
+  }
+  .scale-section h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .scale-section > p {
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    font-size: 16px;
+  }
+
+  .stage-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+  }
+  .stage-card:hover {
+    box-shadow: 0 4px 20px rgba(44,35,33,0.06);
+  }
+
+  .stage-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 24px;
+    cursor: pointer;
+    user-select: none;
+    gap: 16px;
+  }
+  .stage-header:hover { background: rgba(0,0,0,0.01); }
+
+  .stage-letter {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lora', serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    letter-spacing: -0.5px;
+  }
+
+  .stage-title-group { flex: 1; min-width: 0; }
+  .stage-title {
+    font-family: 'Lora', serif;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .stage-subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .stage-toggle {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+  .stage-card.open .stage-toggle { transform: rotate(180deg); }
+
+  .stage-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .stage-card.open .stage-body { max-height: 2000px; }
+
+  .stage-content {
+    padding: 0 24px 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .perspective-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .perspective-tab {
+    flex: 1;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--text-muted);
+    border: none;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .perspective-tab.active {
+    background: var(--text);
+    color: var(--card-bg);
+  }
+
+  .perspective-content { display: none; }
+  .perspective-content.active { display: block; }
+
+  .stage-content h4 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .stage-content p {
+    color: var(--text-soft);
+    margin-bottom: 14px;
+    font-size: 16px;
+  }
+  .indicator-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .indicator {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--text-soft);
+    font-weight: 500;
+  }
+
+  .spouse-note {
+    background: #F7F3EE;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+  .spouse-note p {
+    font-size: 15px;
+    color: var(--text-soft);
+    margin: 0;
+  }
+  .spouse-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  /* — RESTORATION CARD (special) — */
+  .restoration-card {
+    background: linear-gradient(135deg, #2D6A4F 0%, #1B4332 100%);
+    border: none;
+    color: #F5F0E8;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 28px;
+  }
+  .restoration-card h3 {
+    font-family: 'Lora', serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .restoration-card h3 span {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .restoration-card p {
+    color: rgba(245,240,232,0.8);
+    font-size: 16px;
+    line-height: 1.65;
+    margin-bottom: 12px;
+  }
+  .restoration-card p:last-child { margin-bottom: 0; }
+  .restoration-indicators {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .restoration-indicators .indicator {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.15);
+    color: rgba(245,240,232,0.8);
+  }
+
+  /* — RULES SECTION — */
+  .rules-section {
+    padding: 48px 0 20px;
+    border-top: 1px solid var(--border);
+  }
+  .rules-section h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .rule-card {
+    display: flex;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .rule-card:last-child { border-bottom: none; }
+  .rule-number {
+    width: 40px;
+    height: 40px;
+    background: var(--text);
+    color: var(--card-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .rule-text h3 {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .rule-text p {
+    color: var(--text-soft);
+    font-size: 16px;
+  }
+
+  /* — ADVANTAGES/DISADVANTAGES — */
+  .benefits-section {
+    padding: 48px 0 20px;
+    border-top: 1px solid var(--border);
+  }
+  .benefits-section h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .benefits-section > p.section-desc {
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    font-size: 16px;
+  }
+
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+  @media (min-width: 640px) {
+    .benefits-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  .benefit-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .benefit-card.advantage { border-top: 3px solid var(--restoration); }
+  .benefit-card.disadvantage { border-top: 3px solid var(--e-color); }
+
+  .benefit-card h3 {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .benefit-card p {
+    color: var(--text-soft);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .misuse-section {
+    padding: 40px 0 20px;
+  }
+  .misuse-section h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .misuse-section > p {
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    font-size: 16px;
+  }
+
+  .misuse-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--e-color);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+  }
+  .misuse-item h4 {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .misuse-item p {
+    color: var(--text-soft);
+    font-size: 15px;
+  }
+
+  /* — CLOSING — */
+  .closing {
+    padding: 48px 0 80px;
+    border-top: 1px solid var(--border);
+  }
+  .closing h2 {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+  .closing p {
+    color: var(--text-soft);
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+  .closing-card {
+    background: linear-gradient(135deg, #2D3B2D 0%, #1A2520 100%);
+    color: #F5F0E8;
+    border-radius: 12px;
+    padding: 28px;
+    margin-top: 28px;
+  }
+  .closing-card p {
+    color: rgba(245,240,232,0.8);
+    font-size: 16px;
+    margin-bottom: 12px;
+    line-height: 1.65;
+  }
+  .closing-card p:last-child { margin-bottom: 0; }
+  .closing-card strong { color: #F5F0E8; }
+
+  /* — FOOTER — */
+  .footer {
+    text-align: center;
+    padding: 32px 24px;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+  .footer a { color: var(--text-soft); }
+
+  /* — ANIMATIONS — */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in {
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-label animate-in">Recovery Education</div>
+    <h1 class="animate-in delay-1">Understanding the FASTER Scale: <em>the map you didn't know you needed</em></h1>
+    <p class="hero-sub animate-in delay-2">A plain-language guide for people in recovery and the partners walking beside them. Learn why relapse is never sudden — and how to see it coming weeks before it arrives.</p>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- INTRO -->
+  <div class="section-intro animate-in delay-3">
+    <h2>What is the FASTER Scale?</h2>
+    <div class="prose">
+      <p>The FASTER Scale is a self-awareness tool created by addiction counselor Michael Dye as part of the Genesis Process. It maps the predictable emotional and behavioral descent that happens <em>before</em> someone relapses — often weeks before the actual event.</p>
+      <p>Here's the single most important idea: <strong>relapse is not a moment. It's a process.</strong> Nobody wakes up one morning in a healthy state and falls off a cliff by lunchtime. There's a slow, invisible slide — through anxiety, busyness, anger, and exhaustion — that erodes a person's coping capacity until the addictive behavior feels like the only option left.</p>
+      <p>The FASTER Scale gives that invisible slide a name, a shape, and — most importantly — a set of warning signs you can actually spot.</p>
+    </div>
+    <div class="callout">
+      <p><strong>For spouses and partners:</strong> This tool isn't about policing your loved one. It's about learning a shared vocabulary so you can have honest conversations without guessing, accusing, or walking on eggshells. When both of you understand the stages, you can say "I think you're in Speeding Up" — and it means something specific, not a vague accusation.</p>
+    </div>
+  </div>
+
+  <!-- THE SCALE -->
+  <div class="scale-section">
+    <h2>The six stages (and where it all starts)</h2>
+    <p>The scale reads top-to-bottom: from healthy living (Restoration) down through six progressively dangerous stages. Each letter in F-A-S-T-E-R names one stage of the descent.</p>
+
+    <!-- RESTORATION -->
+    <div class="restoration-card">
+      <h3><span>✦</span> Restoration — the starting line</h3>
+      <p>This is where recovery lives. Not perfection — you're not pretending life is easy. But you're being honest, staying connected, keeping your commitments, and dealing with problems as they come up instead of avoiding them.</p>
+      <p>Restoration means no current secrets. You're attending meetings, you're talking to your accountability partner, you're present with your family. When something hard happens, you process it with another person rather than stuffing it down.</p>
+      <div class="restoration-indicators">
+        <span class="indicator">No active secrets</span>
+        <span class="indicator">Keeping commitments</span>
+        <span class="indicator">Honest relationships</span>
+        <span class="indicator">Attending meetings</span>
+        <span class="indicator">Processing pain openly</span>
+        <span class="indicator">Growing in connection</span>
+      </div>
+    </div>
+
+    <!-- F -->
+    <div class="stage-card" id="stage-f">
+      <div class="stage-header" onclick="toggleCard('stage-f')">
+        <div class="stage-letter" style="background:var(--f-color)">F</div>
+        <div class="stage-title-group">
+          <div class="stage-title">Forgetting Priorities</div>
+          <div class="stage-subtitle">The quiet drift — weeks before danger</div>
+        </div>
+        <div class="stage-toggle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="stage-body">
+        <div class="stage-content">
+          <div class="perspective-tabs">
+            <button class="perspective-tab active" onclick="switchTab(this, 'f-person')">If this is you</button>
+            <button class="perspective-tab" onclick="switchTab(this, 'f-spouse')">If this is your partner</button>
+          </div>
+          <div id="f-person" class="perspective-content active">
+            <p>This is the most subtle stage and the easiest to dismiss. You start drifting from the things that keep you healthy — but it doesn't feel dramatic. You skip a meeting because you're tired. You stop calling your accountability partner because things are "going well." You spend more evenings scrolling your phone than talking to your family.</p>
+            <p>Overconfidence is the hallmark. You start thinking, <em>"I've got this handled. I don't need all that structure anymore."</em> Small secrets begin — not about the addiction itself, but about how you're spending your time, your money, your emotional energy. Sarcasm replaces sincerity. Procrastination quietly takes hold.</p>
+            <p>This stage can begin <strong>weeks before anything visible happens</strong>. It's the most important stage to catch precisely because it feels like nothing is wrong.</p>
+            <h4>Common signs</h4>
+            <div class="indicator-list">
+              <span class="indicator">Skipping meetings</span>
+              <span class="indicator">Isolating</span>
+              <span class="indicator">Keeping small secrets</span>
+              <span class="indicator">Sarcasm and cynicism</span>
+              <span class="indicator">Overconfidence</span>
+              <span class="indicator">Procrastinating</span>
+              <span class="indicator">Losing interest in growth</span>
+              <span class="indicator">Entertainment as escape</span>
+            </div>
+          </div>
+          <div id="f-spouse" class="perspective-content">
+            <div class="spouse-note">
+              <div class="spouse-label">What you might notice</div>
+              <p>They're physically present but emotionally checked out. They stop bringing up recovery on their own. The phone becomes a constant companion. They seem to have "outgrown" their group or counselor. You may hear things like "I'm fine" more often than before, with less eye contact behind it. Trust your instinct: if the connection feels like it's thinning, it probably is. This isn't the time to accuse — it's the time to gently name what you see: <em>"I've noticed you haven't talked about your group lately. How are you really doing?"</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A -->
+    <div class="stage-card" id="stage-a">
+      <div class="stage-header" onclick="toggleCard('stage-a')">
+        <div class="stage-letter" style="background:var(--a-color)">A</div>
+        <div class="stage-title-group">
+          <div class="stage-title">Anxiety</div>
+          <div class="stage-subtitle">The background noise gets louder</div>
+        </div>
+        <div class="stage-toggle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="stage-body">
+        <div class="stage-content">
+          <div class="perspective-tabs">
+            <button class="perspective-tab active" onclick="switchTab(this, 'a-person')">If this is you</button>
+            <button class="perspective-tab" onclick="switchTab(this, 'a-spouse')">If this is your partner</button>
+          </div>
+          <div id="a-person" class="perspective-content active">
+            <p>A growing sense of unease moves in — not always about anything specific. Old negative thoughts start replaying: <em>"You'll never change. They'll find out who you really are. You don't deserve this."</em> Your brain is picking up on the drift that started in the Forgetting stage and tagging it as danger, which generates anxiety — but you may not connect the two.</p>
+            <p>You start worrying about things you can't control. Sleep gets worse. You become more judgmental of other people, which is really anxiety turned outward. You might start flirting — not because you've decided to act out, but because anxiety craves reassurance and novelty provides a temporary hit of relief.</p>
+            <p>Neurochemically, your limbic system is now in alert mode. Past trauma gets activated: current situations that are only mildly stressful start feeling catastrophic because your brain is connecting them to old, unresolved pain.</p>
+            <h4>Common signs</h4>
+            <div class="indicator-list">
+              <span class="indicator">Vague worry or dread</span>
+              <span class="indicator">Negative self-talk replaying</span>
+              <span class="indicator">Sleep problems</span>
+              <span class="indicator">Perfectionism</span>
+              <span class="indicator">Judging others harshly</span>
+              <span class="indicator">People-pleasing</span>
+              <span class="indicator">Flirting for reassurance</span>
+              <span class="indicator">Unrealistic to-do lists</span>
+            </div>
+          </div>
+          <div id="a-spouse" class="perspective-content">
+            <div class="spouse-note">
+              <div class="spouse-label">What you might notice</div>
+              <p>They seem on edge but can't explain why. They're pickier than usual — criticizing things that didn't bother them before. You might notice them obsessively checking things, making lists they never follow, or sleeping poorly. They may become people-pleasers at work while being distant at home. If they're snapping at the kids over small things or picking fights with you, this may be anxiety wearing the costume of irritability. Resist the urge to say "you're being anxious" as a diagnosis. Instead: <em>"You seem stressed lately. What's weighing on you?"</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S -->
+    <div class="stage-card" id="stage-s">
+      <div class="stage-header" onclick="toggleCard('stage-s')">
+        <div class="stage-letter" style="background:var(--s-color)">S</div>
+        <div class="stage-title-group">
+          <div class="stage-title">Speeding Up</div>
+          <div class="stage-subtitle">Running from the pain you won't name</div>
+        </div>
+        <div class="stage-toggle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="stage-body">
+        <div class="stage-content">
+          <div class="perspective-tabs">
+            <button class="perspective-tab active" onclick="switchTab(this, 's-person')">If this is you</button>
+            <button class="perspective-tab" onclick="switchTab(this, 's-spouse')">If this is your partner</button>
+          </div>
+          <div id="s-person" class="perspective-content active">
+            <p>You can't outrun anxiety, but you're going to try. This stage is about relentless busyness — staying so occupied that you never have to sit with the feelings building inside you. More hours at work. Extra projects. Constant activity. If someone asks how you're doing, you say "busy" and somehow feel proud about it.</p>
+            <p>This is one of the most deceptive stages because <strong>our culture rewards it</strong>. Churches praise it. Bosses promote it. Your spouse might even appreciate that you're "so productive." But underneath the busyness is a person who is terrified to slow down, because slowing down means feeling things they don't know how to handle.</p>
+            <p>You're skipping meals, drinking too much coffee, over-exercising, and your mind won't turn off at night. Dye identifies this as the first real sign of depression — not the sadness kind, but the frantic kind that masks it.</p>
+            <h4>Common signs</h4>
+            <div class="indicator-list">
+              <span class="indicator">Workaholic behavior</span>
+              <span class="indicator">Can't relax or sit still</span>
+              <span class="indicator">Skipping meals</span>
+              <span class="indicator">Excessive caffeine</span>
+              <span class="indicator">Over-exercising</span>
+              <span class="indicator">Racing thoughts at night</span>
+              <span class="indicator">Overspending</span>
+              <span class="indicator">Constant device use</span>
+            </div>
+          </div>
+          <div id="s-spouse" class="perspective-content">
+            <div class="spouse-note">
+              <div class="spouse-label">What you might notice</div>
+              <p>This stage is confusing because your partner may look like they're thriving. They're productive, energetic, getting things done. But watch for the quality of presence, not the quantity of output. Are they <em>with</em> you when they're home, or just in the same room? Can they sit through a meal without checking their phone? Can they do nothing for 30 minutes without getting agitated? If the answer is no, speed has become their anesthetic. This is actually a critical moment: the gentlest intervention now can prevent the much harder stages ahead. Try: <em>"I miss you. Can we take a slow evening together?"</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- T -->
+    <div class="stage-card" id="stage-t">
+      <div class="stage-header" onclick="toggleCard('stage-t')">
+        <div class="stage-letter" style="background:var(--t-color)">T</div>
+        <div class="stage-title-group">
+          <div class="stage-title">Ticked Off</div>
+          <div class="stage-subtitle">Anger takes the wheel</div>
+        </div>
+        <div class="stage-toggle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="stage-body">
+        <div class="stage-content">
+          <div class="perspective-tabs">
+            <button class="perspective-tab active" onclick="switchTab(this, 't-person')">If this is you</button>
+            <button class="perspective-tab" onclick="switchTab(this, 't-spouse')">If this is your partner</button>
+          </div>
+          <div id="t-person" class="perspective-content active">
+            <p>You're now deep enough in the descent that anger has become your primary coping mechanism. And here's the thing about anger: <strong>it works</strong> — temporarily. Anger provides an adrenaline rush that temporarily masks the pain underneath. It makes you feel powerful instead of helpless. It gives you someone to blame instead of something to feel.</p>
+            <p>Black-and-white thinking takes over. People are either for you or against you. You're keeping score of every slight. Road rage flares up. You use sarcasm as a weapon. You can't take any criticism without becoming defensive. Self-pity shows up too: <em>"Nobody understands what I'm going through. Nobody cares."</em></p>
+            <p>Many people in faith communities have learned to hide anger, so it shows up in disguise — as resentment, passive-aggressiveness, silent treatment, or a general sourness that makes everyone around you feel like they're walking on eggshells. Watch for the cousins of anger even more than anger itself.</p>
+            <h4>Common signs</h4>
+            <div class="indicator-list">
+              <span class="indicator">Resentment and bitterness</span>
+              <span class="indicator">Black-and-white thinking</span>
+              <span class="indicator">Blaming everyone else</span>
+              <span class="indicator">Defensiveness</span>
+              <span class="indicator">Road rage</span>
+              <span class="indicator">Self-pity</span>
+              <span class="indicator">Silent treatment</span>
+              <span class="indicator">Intimidation</span>
+            </div>
+          </div>
+          <div id="t-spouse" class="perspective-content">
+            <div class="spouse-note">
+              <div class="spouse-label">What you might notice</div>
+              <p>This is often the stage where you feel it most as a partner. The atmosphere at home shifts. You find yourself choosing your words carefully, avoiding certain topics, managing their mood. If you bring up a concern, it gets turned back on you. If something goes wrong, it's never their fault. You may feel angry yourself — and that's legitimate. But here's what's critical to understand: this anger isn't really about you. It's a chemical coping mechanism for unprocessed pain. That doesn't make it acceptable — you deserve to be treated with respect. But it does help explain it. This is the stage where professional intervention becomes important. Say what you see: <em>"I've noticed a lot of anger lately and it's affecting us. I think it's time to talk to your counselor."</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E -->
+    <div class="stage-card" id="stage-e">
+      <div class="stage-header" onclick="toggleCard('stage-e')">
+        <div class="stage-letter" style="background:var(--e-color)">E</div>
+        <div class="stage-title-group">
+          <div class="stage-title">Exhausted</div>
+          <div class="stage-subtitle">The crash — coping capacity is gone</div>
+        </div>
+        <div class="stage-toggle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="stage-body">
+        <div class="stage-content">
+          <div class="perspective-tabs">
+            <button class="perspective-tab active" onclick="switchTab(this, 'e-person')">If this is you</button>
+            <button class="perspective-tab" onclick="switchTab(this, 'e-spouse')">If this is your partner</button>
+          </div>
+          <div id="e-person" class="perspective-content active">
+            <p>The adrenaline from anger has run out. Your neurochemistry is depleted. And now the pain you've been avoiding for days or weeks arrives — and there's nothing left to fight it with.</p>
+            <p>This stage feels like a heavy fog. Depression, hopelessness, confusion, emotional numbness. You might cry for no apparent reason. You feel disconnected from God, from your family, from yourself. Getting through the day takes everything you have. Cravings become overwhelming because your brain is desperately searching for <em>anything</em> that will make you feel normal again.</p>
+            <p><strong>This is the danger zone.</strong> If a crisis hits while you're in this stage — a fight with your spouse, a bad day at work, a triggering situation — you have almost no capacity to cope. The addictive behavior offers itself as the fastest path back to feeling something other than empty.</p>
+            <h4>Common signs</h4>
+            <div class="indicator-list">
+              <span class="indicator">Emotional numbness</span>
+              <span class="indicator">Hopelessness</span>
+              <span class="indicator">Spontaneous crying</span>
+              <span class="indicator">Intense cravings</span>
+              <span class="indicator">Survival mode</span>
+              <span class="indicator">Missing work or obligations</span>
+              <span class="indicator">Confusion and poor decisions</span>
+              <span class="indicator">Thoughts of self-harm</span>
+            </div>
+          </div>
+          <div id="e-spouse" class="perspective-content">
+            <div class="spouse-note">
+              <div class="spouse-label">What you might notice</div>
+              <p>The anger may suddenly disappear — but what replaces it isn't peace, it's emptiness. They seem flat, absent, like a light has gone out. They may stop arguing entirely, which can feel like improvement but is actually the opposite. They're not at peace; they've run out of fight. This is a moment where your involvement can be literally life-changing. Don't wait for them to ask for help — they can't. Reach out to their counselor, group leader, or accountability partner yourself if needed. Say clearly and without accusation: <em>"I'm worried about you. I love you. I need you to call [counselor/partner] today. I'll sit with you while you do."</em> If they express thoughts of self-harm, treat it as the emergency it is.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- R -->
+    <div class="stage-card" id="stage-r">
+      <div class="stage-header" onclick="toggleCard('stage-r')">
+        <div class="stage-letter" style="background:var(--r-color)">R</div>
+        <div class="stage-title-group">
+          <div class="stage-title">Relapse</div>
+          <div class="stage-subtitle">The behavior returns — and the cycle restarts</div>
+        </div>
+        <div class="stage-toggle"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+      </div>
+      <div class="stage-body">
+        <div class="stage-content">
+          <div class="perspective-tabs">
+            <button class="perspective-tab active" onclick="switchTab(this, 'r-person')">If this is you</button>
+            <button class="perspective-tab" onclick="switchTab(this, 'r-spouse')">If this is your partner</button>
+          </div>
+          <div id="r-person" class="perspective-content active">
+            <p>The behavior you swore you would never repeat happens again. And immediately afterward, the shame arrives — heavy, familiar, suffocating. <em>"What is wrong with me? I'll never change. Everyone would be better off without me."</em></p>
+            <p>Here is the cruelest part of the cycle: the shame, guilt, and self-condemnation that follow relapse are the exact emotions that <strong>restart the FASTER descent</strong>. Shame drives isolation (Forgetting Priorities). Isolation breeds anxiety. Anxiety triggers busyness. And the cycle begins again.</p>
+            <p>This is why relapse without understanding the FASTER Scale often becomes a repeating loop. The behavior is the visible part, but the real problem was everything that happened <em>before</em> it — the slow erosion of connection, honesty, and emotional health that made the behavior feel inevitable.</p>
+            <p><strong>Relapse is not the end of recovery.</strong> It is information. Used honestly with the FASTER Scale, it becomes a map of exactly where the process went wrong and where earlier intervention could have changed the outcome.</p>
+          </div>
+          <div id="r-spouse" class="perspective-content">
+            <div class="spouse-note">
+              <div class="spouse-label">What you might notice — and what you need to hear</div>
+              <p>If you've discovered a relapse, your pain is real and it deserves space. You did not cause this. You could not have prevented it. You are not responsible for their choices. Allow yourself to feel whatever you feel without editing it.</p>
+              <p>When you're ready — and only then — the FASTER Scale can help both of you understand what happened beneath the surface. Not to excuse the behavior, but to create an honest, shared understanding of the pattern so it can be interrupted earlier next time. Many couples in recovery say the FASTER Scale became the tool that finally let them talk about hard things without it devolving into blame, because it gives specific language for what's happening inside.</p>
+              <p>Your healing matters too. If you're not already connected with a support group for partners (like a betrayal trauma group), this is the time.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THREE RULES -->
+  <div class="rules-section">
+    <h2>Three rules that govern the scale</h2>
+    <div class="rule-card">
+      <div class="rule-number">1</div>
+      <div class="rule-text">
+        <h3>You can only go down, never back up</h3>
+        <p>Once you've moved from Restoration into the descent, you can't climb back up through the stages. You have to "get off" the scale entirely by addressing the underlying issue — the pain, the conflict, the unspoken need — that started the slide. This usually requires honest conversation with another person: a counselor, accountability partner, or spouse.</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-number">2</div>
+      <div class="rule-text">
+        <h3>Stages stack — you carry all the ones above you</h3>
+        <p>If you're in Speeding Up, you're also in Anxiety and Forgetting Priorities simultaneously. The indicators accumulate. This is why someone deep in the scale looks overwhelmed from every direction — because they are. They're not just angry (T); they're also anxious (A), drifting from their priorities (F), and running on empty from constant busyness (S).</p>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-number">3</div>
+      <div class="rule-text">
+        <h3>No stages can be skipped</h3>
+        <p>Everyone moves through the stages in order. The speed varies — some people slide from F to R in days, others in months — but the sequence is always the same. This predictability is what makes the scale so useful: once you know where you are, you know what's coming next if nothing changes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENEFITS -->
+  <div class="benefits-section">
+    <h2>What happens when you use it consistently</h2>
+    <p class="section-desc">The FASTER Scale's value compounds over time. Here's what regular, honest use makes possible.</p>
+
+    <div class="benefits-grid">
+      <div class="benefit-card advantage">
+        <h3>🔭 Early warning system</h3>
+        <p>Dye claims the scale can predict a relapse a minimum of two weeks in advance when used consistently. Even if that timeline varies, regular check-ins train you to catch the Forgetting and Anxiety stages — when intervention is easiest and least painful.</p>
+      </div>
+      <div class="benefit-card advantage">
+        <h3>💬 Shared vocabulary</h3>
+        <p>Couples and accountability partners stop guessing. Instead of "something feels off," you can say "I think I'm in Speeding Up" — and the other person knows exactly what that means, what led there, and what might help.</p>
+      </div>
+      <div class="benefit-card advantage">
+        <h3>🧠 Pattern recognition</h3>
+        <p>Over weeks and months of check-ins, you start to see your personal patterns: which triggers push you from Restoration into Forgetting, which emotions send you from Anxiety into Speeding Up. This self-knowledge is irreplaceable — no counselor can give it to you. You build it by honest, repeated observation.</p>
+      </div>
+      <div class="benefit-card advantage">
+        <h3>🤝 Depth in accountability</h3>
+        <p>Without a framework, accountability conversations often stay shallow: "Did you act out this week? No? Great, see you next Tuesday." The FASTER Scale pushes below behavior to emotion, and below emotion to the unresolved pain driving the whole cycle. It turns accountability from a behavior report into genuine connection.</p>
+      </div>
+      <div class="benefit-card advantage">
+        <h3>🔄 Relapse becomes data, not failure</h3>
+        <p>When a relapse does happen, the FASTER Scale transforms it from an identity-crushing event into analyzable information. You can trace back through the stages and identify exactly where earlier action could have changed the trajectory. This reduces shame and builds agency.</p>
+      </div>
+      <div class="benefit-card advantage">
+        <h3>👫 Bridges the gap between partners</h3>
+        <p>For spouses, the scale provides something recovery tools rarely offer: a way to understand your partner's inner world without needing them to articulate it perfectly. When they can't explain what's happening, the FASTER stages give both of you a framework to explore it together.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISUSE / DISADVANTAGES -->
+  <div class="misuse-section">
+    <h2>When it goes wrong: the risks of misuse</h2>
+    <p>The FASTER Scale is a powerful tool — but powerful tools cause harm when used carelessly. These are the most common ways it breaks down.</p>
+
+    <div class="misuse-item">
+      <h4>Weaponizing it against your partner</h4>
+      <p>When a spouse uses the FASTER Scale as a surveillance system — "You're clearly in Ticked Off, so you must be about to relapse" — it becomes a tool of control instead of connection. The scale is meant for self-assessment first. It works between partners only when it's offered as an observation, not a verdict, and when the person in recovery retains ownership of their own assessment.</p>
+    </div>
+    <div class="misuse-item">
+      <h4>Performing it without honesty</h4>
+      <p>The most common failure mode: going through the motions. Checking "Restoration" every week because that's what your group expects. Filling out the indicators without pausing to ask if they're true. The FASTER Scale is only as accurate as the honesty you bring to it. A dishonest check-in is worse than no check-in — it creates a false sense of safety.</p>
+    </div>
+    <div class="misuse-item">
+      <h4>Using it in isolation</h4>
+      <p>The scale was designed to be shared — with a group, a partner, a counselor. Completing it privately in your head without ever voicing the results defeats its purpose. The act of telling another person "I'm in Anxiety this week" is where the power lives. Self-awareness without vulnerability is just rumination.</p>
+    </div>
+    <div class="misuse-item">
+      <h4>Treating it as a diagnostic tool it isn't</h4>
+      <p>The FASTER Scale has no formal peer-reviewed validation as a psychometric instrument. It is a self-awareness framework, not a clinical diagnosis. It should not replace professional therapy or be used to label someone with a condition. It's a conversation starter, not a conversation ender.</p>
+    </div>
+    <div class="misuse-item">
+      <h4>Shame spiraling after a low score</h4>
+      <p>If checking in at Ticked Off or Exhausted triggers intense shame — <em>"I should be doing better by now"</em> — the tool becomes part of the problem. Remember: the purpose of identifying your stage is not to judge yourself. It's to take action. Being honest about being in a hard stage is itself an act of courage, not a confession of failure.</p>
+    </div>
+    <div class="misuse-item">
+      <h4>Ignoring the "getting off the scale" requirement</h4>
+      <p>Some people identify their stage accurately but then do nothing about it — treating the check-in as the intervention rather than as the starting point. Knowing you're in Speeding Up and continuing to speed up anyway is not progress. The check-in must be followed by action: calling someone, changing your schedule, being honest about what you're avoiding.</p>
+    </div>
+  </div>
+
+  <!-- CLOSING -->
+  <div class="closing">
+    <h2>A tool for the long road</h2>
+    <div class="prose">
+      <p>Recovery is not a straight line. It's not a destination you arrive at and stay. It's a daily practice of honesty, connection, and the willingness to see yourself clearly — even when what you see is uncomfortable.</p>
+      <p>The FASTER Scale doesn't promise you won't struggle. It promises that when you do, you won't be blindsided. You'll know the terrain. You'll recognize the early turns in the road that lead toward danger. And you'll have language to ask for help before you're too far gone to reach for it.</p>
+    </div>
+    <div class="closing-card">
+      <p><strong>For the person in recovery:</strong> Use this tool honestly, consistently, and out loud. Not because it's magic — but because the habit of checking in with yourself and sharing what you find is the single most protective thing you can do. The FASTER Scale works when you work it.</p>
+      <p><strong>For the spouse or partner:</strong> Your role is not to monitor the scale for them. Your role is to learn it alongside them, so when they say "I'm struggling," you both know what that means. Your own healing matters as much as theirs. Find your own support. And know that learning this tool together is itself an act of rebuilding trust — slowly, honestly, one conversation at a time.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <p>The FASTER Scale was created by Michael Dye as part of the Genesis Process. This content is educational and does not replace professional counseling. If you or someone you know is in crisis, please contact the <strong>988 Suicide & Crisis Lifeline</strong> (call or text 988).</p>
+</div>
+
+<script>
+function toggleCard(id) {
+  const card = document.getElementById(id);
+  card.classList.toggle('open');
+}
+
+function switchTab(btn, contentId) {
+  const card = btn.closest('.stage-content');
+  card.querySelectorAll('.perspective-tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.perspective-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(contentId).classList.add('active');
+}
+</script>
+
+</body>
+</html>

@@ -68,7 +68,6 @@ final class FeatureFlagService {
         // Features - P0
         flags["feature.onboarding"] = true
         flags["feature.profile-management"] = true
-        flags["feature.tracking"] = true
         flags["feature.content-resources"] = true
         flags["feature.commitments"] = true
         flags["feature.dark-mode"] = true
@@ -127,6 +126,18 @@ final class FeatureFlagService {
         flags["activity.prayer"] = true
         flags["activity.integrity-inventory"] = false
         flags["activity.pci"] = false
+
+        // App Architecture
+        flags["feature.today-view"] = false
+        flags["feature.work-tab"] = true
+        flags["feature.urge-surfing-timer"] = true
+
+        // Recovery Work & Tools
+        flags["feature.3circles"] = false
+        flags["feature.vision"] = false
+        flags["feature.partners.redemptiveliving.backbone"] = false
+        flags["feature.relapse-prevention-plan"] = false
+        flags["feature.post-mortem"] = true
 
         // Assessments
         flags["assessment.sast-r"] = false

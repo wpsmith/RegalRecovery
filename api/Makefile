@@ -89,10 +89,13 @@ build-single:            ## Build a single Lambda: make build-single NAME=tracki
 local-up:                ## Start LocalStack + Valkey for local development
 	docker compose up -d
 	@echo "Waiting for LocalStack to be ready..."
-	@until docker compose exec localstack awslocal sts get-caller-identity > /dev/null 2>&1; do sleep 1; done
+	@until docker compose exec localstack aws --endpoint-url http://localhost:4566 --region us-east-1 sts get-caller-identity > /dev/null 2>&1; do sleep 1; done
 	@echo "Creating local DynamoDB table..."
 	@./scripts/create-local-tables.sh
 	@echo "Local environment ready."
+
+dev-api:                 ## Start local API server with hot reload
+	go run ./cmd/local/
 
 local-down:              ## Stop local services
 	docker compose down

@@ -5,9 +5,12 @@ struct SettingsView: View {
     @Query private var users: [RRUser]
     @Query private var streaks: [RRStreak]
     @Query private var supportContacts: [RRSupportContact]
+    @Query(filter: #Predicate<RRDailyPlanItem> { $0.isEnabled == true })
+    private var enabledPlanItems: [RRDailyPlanItem]
     @State private var showExportAlert = false
     @State private var showDeleteAlert = false
     @State private var ephemeralMode = false
+    @State private var expandedSections: Set<String> = ["Profile", "Support Network", "My Recovery Foundation", "Preferences", "Privacy & Data", "Debug"]
 
     private var user: RRUser? { users.first }
 
@@ -21,125 +24,180 @@ struct SettingsView: View {
             List {
                 // MARK: - Profile Section
                 Section {
-                    // Profile header
-                    HStack(spacing: 14) {
-                        Circle()
-                            .fill(Color.rrPrimary)
-                            .frame(width: 60, height: 60)
-                            .overlay(
-                                Text(user?.avatarInitial ?? "?")
-                                    .font(.title2.weight(.bold))
-                                    .foregroundStyle(.white)
-                            )
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(user?.name ?? "Set up profile")
-                                .font(RRFont.headline)
-                                .foregroundStyle(Color.rrText)
-                            RRBadge(text: "\(currentDays) days", color: .rrSuccess)
-                            Text(user?.email ?? "")
-                                .font(RRFont.caption)
-                                .foregroundStyle(Color.rrTextSecondary)
+                    if expandedSections.contains("Profile") {
+                        // Profile header
+                        HStack(spacing: 14) {
+                            Circle()
+                                .fill(Color.rrPrimary)
+                                .frame(width: 60, height: 60)
+                                .overlay(
+                                    Text(user?.avatarInitial ?? "?")
+                                        .font(.title2.weight(.bold))
+                                        .foregroundStyle(.white)
+                                )
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(user?.name ?? "Set up profile")
+                                    .font(RRFont.headline)
+                                    .foregroundStyle(Color.rrText)
+                                RRBadge(text: "\(currentDays) days", color: .rrSuccess)
+                                Text(user?.email ?? "")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+
+                        NavigationLink("Edit Profile") {
+                            ProfileEditView()
+                        }
+
+                        NavigationLink("Addictions") {
+                            AddictionManagementView()
                         }
                     }
-                    .padding(.vertical, 4)
-
-                    NavigationLink("Edit Profile") {
-                        ProfileEditView()
-                    }
-
-                    NavigationLink("Addiction Management") {
-                        AddictionManagementView()
-                    }
+                } header: {
+                    sectionHeader("Profile")
                 }
 
                 // MARK: - Support Network Section
                 Section {
-                    if supportContacts.isEmpty {
-                        Text("No support contacts yet")
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrTextSecondary)
-                    } else {
-                        ForEach(supportContacts) { contact in
-                            NavigationLink {
-                                SupportNetworkView()
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(contact.name)
-                                            .font(RRFont.body)
-                                            .foregroundStyle(Color.rrText)
-                                        Text(contact.permissions.joined(separator: ", "))
-                                            .font(RRFont.caption)
-                                            .foregroundStyle(Color.rrTextSecondary)
+                    if expandedSections.contains("Support Network") {
+                        if supportContacts.isEmpty {
+                            Text("No support contacts yet")
+                                .font(RRFont.body)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        } else {
+                            ForEach(supportContacts) { contact in
+                                NavigationLink {
+                                    SupportNetworkView()
+                                } label: {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(contact.name)
+                                                .font(RRFont.body)
+                                                .foregroundStyle(Color.rrText)
+                                            Text(contact.permissions.joined(separator: ", "))
+                                                .font(RRFont.caption)
+                                                .foregroundStyle(Color.rrTextSecondary)
+                                        }
+                                        Spacer()
+                                        RRBadge(text: contact.role.capitalized, color: contactRoleColor(contact.role))
                                     }
-                                    Spacer()
-                                    RRBadge(text: contact.role.capitalized, color: contactRoleColor(contact.role))
                                 }
                             }
                         }
                     }
                 } header: {
-                    Text("Support Network")
+                    sectionHeader("Support Network")
+                }
+
+                // MARK: - My Recovery Foundation
+                Section {
+                    if expandedSections.contains("My Recovery Foundation") {
+                        NavigationLink {
+                            RecoveryFoundationView()
+                        } label: {
+                            HStack {
+                                Image(systemName: "shield.checkered")
+                                    .foregroundStyle(Color.rrPrimary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("My Recovery Foundation")
+                                        .font(RRFont.body)
+                                    Text("3 Circles, RPP, Vision, Support Network")
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                }
+                            }
+                        }
+
+                        NavigationLink {
+                            RecoveryPlanSetupView()
+                        } label: {
+                            HStack {
+                                Image(systemName: "calendar.badge.clock")
+                                    .foregroundStyle(Color.rrPrimary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("My Recovery Plan")
+                                        .font(RRFont.body)
+                                    Text("\(enabledPlanItems.count) daily activities configured")
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    sectionHeader("My Recovery Foundation")
                 }
 
                 // MARK: - Preferences Section
                 Section {
-                    NavigationLink("Notifications") {
-                        NotificationSettingsView()
-                    }
-                    NavigationLink("Appearance") {
-                        AppearanceSettingsView()
+                    if expandedSections.contains("Preferences") {
+                        NavigationLink("Notifications") {
+                            NotificationSettingsView()
+                        }
+                        NavigationLink("Appearance") {
+                            AppearanceSettingsView()
+                        }
                     }
                 } header: {
-                    Text("Preferences")
+                    sectionHeader("Preferences")
                 }
 
                 // MARK: - Privacy & Data Section
                 Section {
-                    NavigationLink("Privacy & Data Sharing") {
-                        PrivacySettingsView()
-                    }
+                    if expandedSections.contains("Privacy & Data") {
+                        NavigationLink("Privacy & Data Sharing") {
+                            PrivacySettingsView()
+                        }
 
-                    Button("Export My Data") {
-                        showExportAlert = true
-                    }
+                        Button("Export My Data") {
+                            showExportAlert = true
+                        }
 
-                    Button("Delete My Account", role: .destructive) {
-                        showDeleteAlert = true
-                    }
+                        Button("Delete My Account", role: .destructive) {
+                            showDeleteAlert = true
+                        }
 
-                    Toggle(isOn: $ephemeralMode) {
-                        Text("Ephemeral Mode")
+                        Toggle(isOn: $ephemeralMode) {
+                            Text("Ephemeral Mode")
+                        }
                     }
                 } header: {
-                    Text("Privacy & Data")
+                    sectionHeader("Privacy & Data")
                 } footer: {
                     Text("Auto-delete journal entries after 30 days. Ephemeral entries are never included in backups.")
                 }
 
-                // MARK: - About Section
-                Section {
-                    NavigationLink("About") {
-                        AboutView()
-                    }
-                }
-
                 // MARK: - Debug
                 Section {
-                    NavigationLink {
-                        DebugFlagsView()
-                    } label: {
-                        HStack {
-                            Image(systemName: "flag.fill")
-                                .foregroundStyle(.orange)
-                            Text("Feature Flags")
-                                .foregroundStyle(Color.rrText)
+                    if expandedSections.contains("Debug") {
+                        NavigationLink {
+                            DebugFlagsView()
+                        } label: {
+                            HStack {
+                                Image(systemName: "flag.fill")
+                                    .foregroundStyle(.orange)
+                                Text("Feature Flags")
+                                    .foregroundStyle(Color.rrText)
+                            }
+                        }
+
+                        NavigationLink {
+                            TestingModeView()
+                        } label: {
+                            HStack {
+                                Image(systemName: "testtube.2")
+                                    .foregroundStyle(.orange)
+                                Text("Testing Mode")
+                                    .foregroundStyle(Color.rrText)
+                            }
                         }
                     }
                 } header: {
-                    Text("Debug")
+                    sectionHeader("Debug")
                 } footer: {
-                    Text("Toggle feature flags for development and testing.")
+                    Text("Toggle feature flags and testing tools for development.")
                 }
             }
             .listStyle(.insetGrouped)
@@ -155,6 +213,27 @@ struct SettingsView: View {
                 Button("Cancel", role: .cancel) { }
             } message: {
                 Text("This will permanently delete your account after 30 days.")
+            }
+        }
+    }
+
+    private func sectionHeader(_ title: String) -> some View {
+        Button {
+            withAnimation {
+                if expandedSections.contains(title) {
+                    expandedSections.remove(title)
+                } else {
+                    expandedSections.insert(title)
+                }
+            }
+        } label: {
+            HStack {
+                Image(systemName: expandedSections.contains(title) ? "chevron.down" : "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(Color.rrTextSecondary)
+                    .frame(width: 12)
+                Text(title)
+                Spacer()
             }
         }
     }
