@@ -104,6 +104,8 @@
 		10000087 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000087 /* ProgressView.swift */; };
 		10000088 /* QuickActionsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000088 /* QuickActionsRow.swift */; };
 		10000089 /* RecentActivityFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000089 /* RecentActivityFeed.swift */; };
+		10000309 /* RecentActivityRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000309 /* RecentActivityRow.swift */; };
+		10000310 /* ActivityHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000310 /* ActivityHistoryView.swift */; };
 		10000090 /* StreakHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000090 /* StreakHeroCard.swift */; };
 		10000091 /* AccountSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000091 /* AccountSetupView.swift */; };
 		10000092 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000092 /* OnboardingFlow.swift */; };
@@ -180,6 +182,7 @@
 		20000304 /* RecoveryScoreDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryScoreDetailView.swift; sourceTree = "<group>"; };
 		20000305 /* RecoveryWorkCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkCardView.swift; sourceTree = "<group>"; };
 		20000308 /* SobrietyModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SobrietyModuleView.swift; sourceTree = "<group>"; };
+		20000310 /* ActivityHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityHistoryView.swift; sourceTree = "<group>"; };
 		20000306 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
 		20000307 /* DailyScoreCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyScoreCalculator.swift; sourceTree = "<group>"; };
 		20000024 /* ActivityError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityError.swift; sourceTree = "<group>"; };
@@ -250,6 +253,7 @@
 		20000087 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		20000088 /* QuickActionsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsRow.swift; sourceTree = "<group>"; };
 		20000089 /* RecentActivityFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentActivityFeed.swift; sourceTree = "<group>"; };
+		20000309 /* RecentActivityRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentActivityRow.swift; sourceTree = "<group>"; };
 		20000090 /* StreakHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakHeroCard.swift; sourceTree = "<group>"; };
 		20000091 /* AccountSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSetupView.swift; sourceTree = "<group>"; };
 		20000092 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
@@ -551,6 +555,7 @@
 				20000087 /* ProgressView.swift */,
 				20000088 /* QuickActionsRow.swift */,
 				20000089 /* RecentActivityFeed.swift */,
+				20000309 /* RecentActivityRow.swift */,
 				20000090 /* StreakHeroCard.swift */,
 			);
 			path = Home;
@@ -598,6 +603,7 @@
 				20000304 /* RecoveryScoreDetailView.swift */,
 				20000305 /* RecoveryWorkCardView.swift */,
 				20000308 /* SobrietyModuleView.swift */,
+				20000310 /* ActivityHistoryView.swift */,
 			);
 			path = Today;
 			sourceTree = "<group>";
@@ -814,6 +820,8 @@
 				10000087 /* ProgressView.swift in Sources */,
 				10000088 /* QuickActionsRow.swift in Sources */,
 				10000089 /* RecentActivityFeed.swift in Sources */,
+				10000309 /* RecentActivityRow.swift in Sources */,
+				10000310 /* ActivityHistoryView.swift in Sources */,
 				10000090 /* StreakHeroCard.swift in Sources */,
 				10000091 /* AccountSetupView.swift in Sources */,
 				10000092 /* OnboardingFlow.swift in Sources */,

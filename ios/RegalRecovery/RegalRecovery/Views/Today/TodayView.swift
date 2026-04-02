@@ -46,6 +46,7 @@ struct TodayView: View {
                 activityListHeader
                 activityList
                 sobrietyModule
+                todayActivityLogSection
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -146,6 +147,46 @@ struct TodayView: View {
                     viewModel.resetSobrietyDate(addictionId: addictionId, newDate: newDate, context: modelContext)
                 }
             )
+        }
+    }
+
+    // MARK: - Today Activity Log
+
+    @ViewBuilder
+    private var todayActivityLogSection: some View {
+        if FeatureFlagStore.shared.isEnabled("feature.activities") {
+            VStack(alignment: .leading, spacing: 12) {
+                RRSectionHeader(title: "Today's Activity Log")
+
+                if viewModel.todayActivityLog.isEmpty {
+                    Text("No activities logged yet today")
+                        .font(RRFont.body)
+                        .foregroundStyle(Color.rrTextSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.todayActivityLog) { activity in
+                            RecentActivityRow(activity: activity)
+
+                            if activity.id != viewModel.todayActivityLog.last?.id {
+                                Divider()
+                                    .padding(.leading, 44)
+                            }
+                        }
+                    }
+                }
+
+                NavigationLink {
+                    ActivityHistoryView()
+                } label: {
+                    Text("View All History")
+                        .font(RRFont.subheadline)
+                        .foregroundStyle(Color.rrPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+            }
         }
     }
 
