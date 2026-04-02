@@ -136,8 +136,10 @@ struct SettingsView: View {
                         NavigationLink("Notifications") {
                             NotificationSettingsView()
                         }
-                        NavigationLink("Appearance") {
-                            AppearanceSettingsView()
+                        if FeatureFlagStore.shared.isEnabled("feature.themes") {
+                            NavigationLink("Appearance") {
+                                AppearanceSettingsView()
+                            }
                         }
                     }
                 } header: {

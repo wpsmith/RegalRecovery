@@ -95,7 +95,7 @@ class FeatureFlagViewModel {
         FeatureFlag(key: "feature.profile-management", label: "Profile Management", enabled: true),
         FeatureFlag(key: "feature.content-resources", label: "Content / Resources", enabled: true),
         FeatureFlag(key: "feature.commitments", label: "Commitments", enabled: true),
-        FeatureFlag(key: "feature.dark-mode", label: "Light / Dark Mode", enabled: true),
+        FeatureFlag(key: "feature.themes", label: "Themes", enabled: true),
         FeatureFlag(key: "feature.offline-first", label: "Offline-First", enabled: true),
         FeatureFlag(key: "feature.dsr", label: "Data Subject Rights", enabled: true),
         FeatureFlag(key: "feature.analytics-dashboard", label: "Analytics Dashboard", enabled: true),

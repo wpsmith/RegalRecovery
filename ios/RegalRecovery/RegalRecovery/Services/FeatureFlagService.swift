@@ -70,7 +70,7 @@ final class FeatureFlagService {
         flags["feature.profile-management"] = true
         flags["feature.content-resources"] = true
         flags["feature.commitments"] = true
-        flags["feature.dark-mode"] = true
+        flags["feature.themes"] = true
         flags["feature.offline-first"] = true
         flags["feature.dsr"] = true
 

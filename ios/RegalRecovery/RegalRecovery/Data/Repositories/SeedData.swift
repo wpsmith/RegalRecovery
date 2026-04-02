@@ -615,7 +615,7 @@ enum SeedData {
             ("feature.profile-management", true, "Profile management"),
             ("feature.content-resources", true, "Content and resources"),
             ("feature.commitments", true, "Commitments"),
-            ("feature.dark-mode", true, "Light / Dark mode"),
+            ("feature.themes", true, "Themes"),
             ("feature.offline-first", true, "Offline-first architecture"),
             ("feature.dsr", true, "Data subject rights"),
             // P1 Features
