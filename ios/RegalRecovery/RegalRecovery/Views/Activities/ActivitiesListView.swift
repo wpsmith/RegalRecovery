@@ -239,32 +239,10 @@ struct ActivitiesListView: View {
                         JournalView()
                     } label: {
                         RRActivityRow(
-                            icon: ActivityType.journal.icon,
+                            icon: "book.fill",
                             iconColor: ActivityType.journal.iconColor,
-                            title: "Journal",
+                            title: "Journaling",
                             subtitle: journalSubtitle
-                        )
-                    }
-
-                    NavigationLink {
-                        EmotionalJournalView()
-                    } label: {
-                        RRActivityRow(
-                            icon: ActivityType.emotionalJournal.icon,
-                            iconColor: ActivityType.emotionalJournal.iconColor,
-                            title: "Emotional Journal",
-                            subtitle: emotionalJournalSubtitle
-                        )
-                    }
-
-                    NavigationLink {
-                        TimeJournalView()
-                    } label: {
-                        RRActivityRow(
-                            icon: ActivityType.timeJournal.icon,
-                            iconColor: ActivityType.timeJournal.iconColor,
-                            title: "Time Journal",
-                            subtitle: timeJournalSubtitle
                         )
                     }
 

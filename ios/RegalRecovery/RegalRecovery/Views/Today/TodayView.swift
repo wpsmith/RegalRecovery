@@ -93,7 +93,7 @@ struct TodayView: View {
                     quickActionCard(icon: "heart.text.clipboard", label: "Check In", color: .rrPrimary) {
                         RecoveryCheckInView()
                     }
-                    quickActionCard(icon: "book.fill", label: "Journal", color: .blue) {
+                    quickActionCard(icon: "book.fill", label: "Journaling", color: .blue) {
                         JournalView()
                     }
                     quickActionCard(icon: "hands.and.sparkles.fill", label: "Pray", color: .purple) {
@@ -281,7 +281,7 @@ struct TodayView: View {
         case ActivityType.journal.rawValue:
             JournalView()
         case ActivityType.emotionalJournal.rawValue:
-            EmotionalJournalView()
+            JournalView()
         case ActivityType.mood.rawValue:
             MoodRatingView()
         case ActivityType.gratitude.rawValue:
@@ -307,7 +307,7 @@ struct TodayView: View {
         case ActivityType.stepWork.rawValue:
             StepWorkView()
         case ActivityType.timeJournal.rawValue:
-            TimeJournalView()
+            JournalView()
         case ActivityType.postMortem.rawValue:
             PostMortemView()
         case ActivityType.urgeLog.rawValue:
