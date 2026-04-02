@@ -110,9 +110,12 @@ type CheckInData struct {
 
 // FASTERData represents FASTER scale assessment data.
 type FASTERData struct {
-	Stage       string `json:"stage"` // F, A, S, T, E, R
-	Description string `json:"description,omitempty"`
-	Notes       string `json:"notes,omitempty"`
+	Stage              string              `json:"stage"`              // "restoration", "F", "A", "S", "T", "E", "R"
+	SelectedIndicators map[string][]string `json:"selectedIndicators"` // stage key → selected indicator strings
+	MoodScore          int                 `json:"moodScore"`          // 1-5
+	JournalInsight     string              `json:"journalInsight"`     // "Ah-ha"
+	JournalWarning     string              `json:"journalWarning"`     // "Uh-oh"
+	JournalFreeText    string              `json:"journalFreeText"`    // optional free-text
 }
 
 // PCIData represents Personal Craziness Index data.
