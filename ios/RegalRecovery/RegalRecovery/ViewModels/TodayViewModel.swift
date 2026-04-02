@@ -60,6 +60,9 @@ class TodayViewModel {
     // Sobriety
     var sobrietyAddictions: [SobrietyAddictionData] = []
 
+    // Activity log
+    var todayActivityLog: [RecentActivity] = []
+
     // MARK: - Load
 
     func load(context: ModelContext) {
@@ -69,6 +72,7 @@ class TodayViewModel {
         loadPlanItems(context: context)
         computeScore()
         loadRecoveryWorkCards(context: context)
+        loadTodayActivityLog(context: context)
     }
 
     // MARK: - Actions
@@ -298,6 +302,171 @@ class TodayViewModel {
         }
 
         recoveryWorkCards = cards
+    }
+
+    // MARK: - Today Activity Log
+
+    private func loadTodayActivityLog(context: ModelContext) {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: Date())
+        let tomorrow = calendar.date(byAdding: .day, value: 1, to: todayStart)!
+
+        let fmt = RelativeDateTimeFormatter()
+        fmt.unitsStyle = .short
+        let now = Date()
+
+        var all: [(date: Date, item: RecentActivity)] = []
+
+        // Commitments
+        let commitmentDesc = FetchDescriptor<RRCommitment>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(commitmentDesc) {
+            for c in results {
+                let label = c.type == "morning" ? "Morning Commitment" : "Evening Review"
+                let icon = c.type == "morning" ? "sunrise.fill" : "moon.stars.fill"
+                let color: Color = c.type == "morning" ? .rrSecondary : .rrPrimary
+                all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: now), icon: icon, iconColor: color)))
+            }
+        }
+
+        // Check-ins
+        let checkInDesc = FetchDescriptor<RRCheckIn>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(checkInDesc) {
+            for ci in results {
+                all.append((ci.date, RecentActivity(title: "Recovery Check-in", detail: "Score: \(ci.score)", time: fmt.localizedString(for: ci.date, relativeTo: now), icon: "heart.text.clipboard", iconColor: .rrPrimary)))
+            }
+        }
+
+        // Mood
+        let moodDesc = FetchDescriptor<RRMoodEntry>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(moodDesc) {
+            for m in results {
+                let emoji = m.score >= 7 ? "\u{1F60A}" : m.score >= 5 ? "\u{1F610}" : "\u{1F61F}"
+                all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: now), icon: "face.smiling", iconColor: .yellow)))
+            }
+        }
+
+        // Prayer
+        let prayerDesc = FetchDescriptor<RRPrayerLog>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(prayerDesc) {
+            for p in results {
+                all.append((p.date, RecentActivity(title: "Prayer", detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: now), icon: "hands.and.sparkles.fill", iconColor: .purple)))
+            }
+        }
+
+        // Exercise
+        let exerciseDesc = FetchDescriptor<RRExerciseLog>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(exerciseDesc) {
+            for e in results {
+                all.append((e.date, RecentActivity(title: "Exercise", detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: now), icon: "figure.run", iconColor: .blue)))
+            }
+        }
+
+        // FASTER Scale
+        let fasterDesc = FetchDescriptor<RRFASTEREntry>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(fasterDesc) {
+            for f in results {
+                let stage = FASTERStage(rawValue: f.stage) ?? .forgettingPriorities
+                all.append((f.date, RecentActivity(title: "FASTER Scale", detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: now), icon: "gauge.with.needle", iconColor: stage.color)))
+            }
+        }
+
+        // Journal
+        let journalDesc = FetchDescriptor<RRJournalEntry>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(journalDesc) {
+            for j in results {
+                let snippet = String(j.content.prefix(40))
+                all.append((j.date, RecentActivity(title: "Journal", detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: now), icon: "note.text", iconColor: .purple)))
+            }
+        }
+
+        // Emotional Journal
+        let emotionalDesc = FetchDescriptor<RREmotionalJournal>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(emotionalDesc) {
+            for ej in results {
+                all.append((ej.date, RecentActivity(title: "Emotional Journal", detail: "\(ej.emotion), \(ej.intensity)/10", time: fmt.localizedString(for: ej.date, relativeTo: now), icon: "heart.circle.fill", iconColor: .pink)))
+            }
+        }
+
+        // Gratitude
+        let gratitudeDesc = FetchDescriptor<RRGratitudeEntry>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(gratitudeDesc) {
+            for g in results {
+                all.append((g.date, RecentActivity(title: "Gratitude", detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: now), icon: "leaf.fill", iconColor: .rrSuccess)))
+            }
+        }
+
+        // Urge Log
+        let urgeDesc = FetchDescriptor<RRUrgeLog>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(urgeDesc) {
+            for u in results {
+                all.append((u.date, RecentActivity(title: "Urge Log", detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: now), icon: "exclamationmark.triangle.fill", iconColor: .orange)))
+            }
+        }
+
+        // Phone Calls
+        let phoneDesc = FetchDescriptor<RRPhoneCallLog>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(phoneDesc) {
+            for pc in results {
+                all.append((pc.date, RecentActivity(title: "Phone Call", detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: now), icon: "phone.fill", iconColor: .green)))
+            }
+        }
+
+        // Meetings
+        let meetingDesc = FetchDescriptor<RRMeetingLog>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(meetingDesc) {
+            for ml in results {
+                all.append((ml.date, RecentActivity(title: "Meeting", detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: now), icon: "person.3.fill", iconColor: .rrPrimary)))
+            }
+        }
+
+        // Spouse Check-ins
+        let spouseDesc = FetchDescriptor<RRSpouseCheckIn>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(spouseDesc) {
+            for sc in results {
+                all.append((sc.date, RecentActivity(title: "Spouse Check-in", detail: sc.framework, time: fmt.localizedString(for: sc.date, relativeTo: now), icon: "heart.fill", iconColor: .pink)))
+            }
+        }
+
+        todayActivityLog = all.sorted { $0.date > $1.date }.map(\.item)
     }
 
     // MARK: - Completion Timestamps (for multi-instance)
