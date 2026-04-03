@@ -6,36 +6,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/regalrecovery/api/internal/domain/tracking"
 )
 
 const (
 	streakKeyPrefix = "streak:"
-	streakTTL       = 5 * time.Minute
 )
 
-// Streak represents a user's streak data.
-// This mirrors the expected structure from the repository package.
-type Streak struct {
-	UserID        string    `json:"userId"`
-	CurrentDays   int       `json:"currentDays"`
-	SobrietyDate  time.Time `json:"sobrietyDate"`
-	LongestStreak int       `json:"longestStreak"`
-	TotalRelapses int       `json:"totalRelapses"`
-}
-
-// StreakCache implements cache-aside pattern for streak data.
-type StreakCache struct {
+// ValkeyStreakCache implements cache-aside pattern for streak data.
+type ValkeyStreakCache struct {
 	client *ValkeyClient
 }
 
-// NewStreakCache creates a new StreakCache with the given Valkey client.
-func NewStreakCache(client *ValkeyClient) *StreakCache {
-	return &StreakCache{client: client}
+// NewValkeyStreakCache creates a new ValkeyStreakCache with the given Valkey client.
+func NewValkeyStreakCache(client *ValkeyClient) *ValkeyStreakCache {
+	return &ValkeyStreakCache{client: client}
 }
 
-// GetStreak retrieves a cached streak. Returns nil if cache miss (key not found).
-func (c *StreakCache) GetStreak(ctx context.Context, userID string) (*Streak, error) {
-	key := streakKeyPrefix + userID
+// Get retrieves a cached streak. Returns nil if cache miss (key not found).
+func (c *ValkeyStreakCache) Get(ctx context.Context, addictionID string) (*tracking.StreakData, error) {
+	key := streakKeyPrefix + addictionID
 
 	val, err := c.client.Get(ctx, key)
 	if err != nil {
@@ -43,36 +34,37 @@ func (c *StreakCache) GetStreak(ctx context.Context, userID string) (*Streak, er
 		return nil, nil
 	}
 
-	var streak Streak
+	var streak tracking.StreakData
 	if err := json.Unmarshal([]byte(val), &streak); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal streak for user %s: %w", userID, err)
+		return nil, fmt.Errorf("failed to unmarshal streak for addiction %s: %w", addictionID, err)
 	}
 
 	return &streak, nil
 }
 
-// SetStreak caches a streak with a 5-minute TTL.
-func (c *StreakCache) SetStreak(ctx context.Context, userID string, streak *Streak) error {
-	key := streakKeyPrefix + userID
+// Set caches a streak with the specified TTL in seconds.
+func (c *ValkeyStreakCache) Set(ctx context.Context, addictionID string, streak *tracking.StreakData, ttl int) error {
+	key := streakKeyPrefix + addictionID
 
 	data, err := json.Marshal(streak)
 	if err != nil {
-		return fmt.Errorf("failed to marshal streak for user %s: %w", userID, err)
+		return fmt.Errorf("failed to marshal streak for addiction %s: %w", addictionID, err)
 	}
 
-	if err := c.client.Set(ctx, key, string(data), streakTTL); err != nil {
-		return fmt.Errorf("failed to cache streak for user %s: %w", userID, err)
+	ttlDuration := time.Duration(ttl) * time.Second
+	if err := c.client.Set(ctx, key, string(data), ttlDuration); err != nil {
+		return fmt.Errorf("failed to cache streak for addiction %s: %w", addictionID, err)
 	}
 
 	return nil
 }
 
-// InvalidateStreak removes a cached streak.
-func (c *StreakCache) InvalidateStreak(ctx context.Context, userID string) error {
-	key := streakKeyPrefix + userID
+// Invalidate removes a cached streak.
+func (c *ValkeyStreakCache) Invalidate(ctx context.Context, addictionID string) error {
+	key := streakKeyPrefix + addictionID
 
 	if err := c.client.Delete(ctx, key); err != nil {
-		return fmt.Errorf("failed to invalidate streak for user %s: %w", userID, err)
+		return fmt.Errorf("failed to invalidate streak for addiction %s: %w", addictionID, err)
 	}
 
 	return nil

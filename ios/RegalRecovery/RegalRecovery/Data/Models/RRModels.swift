@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import UIKit
 
 // MARK: - Codable Helpers
 
@@ -378,6 +379,7 @@ final class RRJournalEntry {
     var date: Date
     var mode: String  // "jotting", "freeform", "prompted", "structured"
     var content: String
+    var richContent: String?
     var prompt: String?
     var isEphemeral: Bool
     var ephemeralExpiresAt: Date?
@@ -390,6 +392,7 @@ final class RRJournalEntry {
         date: Date,
         mode: String,
         content: String,
+        richContent: String? = nil,
         prompt: String? = nil,
         isEphemeral: Bool = false,
         ephemeralExpiresAt: Date? = nil,
@@ -401,11 +404,31 @@ final class RRJournalEntry {
         self.date = date
         self.mode = mode
         self.content = content
+        self.richContent = richContent
         self.prompt = prompt
         self.isEphemeral = isEphemeral
         self.ephemeralExpiresAt = ephemeralExpiresAt
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
+    }
+}
+
+extension RRJournalEntry {
+    var attributedContent: NSAttributedString? {
+        guard let data = richContent?.data(using: .utf8) else { return nil }
+        return try? NSAttributedString(
+            data: data,
+            options: [.documentType: NSAttributedString.DocumentType.rtf],
+            documentAttributes: nil
+        )
+    }
+
+    func setRichContent(from attributedString: NSAttributedString) {
+        let range = NSRange(location: 0, length: attributedString.length)
+        if let rtfData = try? attributedString.data(from: range, documentAttributes: [.documentType: NSAttributedString.DocumentType.rtf]) {
+            richContent = String(data: rtfData, encoding: .utf8)
+        }
+        content = attributedString.string
     }
 }
 
@@ -555,6 +578,24 @@ final class RRFASTEREntry {
     var createdAt: Date
     var modifiedAt: Date
 
+    /// Decoded selected indicators from JSON storage.
+    var selectedIndicators: [String] {
+        get {
+            guard let json = selectedIndicatorsJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([String].self, from: data) else {
+                return []
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                selectedIndicatorsJSON = json
+            }
+        }
+    }
+
     init(
         id: UUID = UUID(),
         userId: UUID,
@@ -579,6 +620,14 @@ final class RRFASTEREntry {
         self.journalFreeText = journalFreeText
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
+
+        // Encode selectedIndicators to JSON
+        if let data = try? JSONEncoder().encode(selectedIndicators),
+           let json = String(data: data, encoding: .utf8) {
+            self.selectedIndicatorsJSON = json
+        } else {
+            self.selectedIndicatorsJSON = "[]"
+        }
     }
 }
 

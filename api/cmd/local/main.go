@@ -10,8 +10,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/config"
-
 	appconfig "github.com/regalrecovery/api/internal/config"
 	"github.com/regalrecovery/api/internal/middleware"
 	"github.com/regalrecovery/api/internal/repository"
@@ -30,23 +28,25 @@ func main() {
 	cfg := appconfig.Load()
 	slog.Info("Configuration loaded",
 		slog.String("environment", cfg.Environment),
-		slog.String("aws_region", cfg.AWSRegion),
-		slog.String("dynamodb_table", cfg.DynamoDBTable),
-		slog.String("dynamo_endpoint", cfg.DynamoEndpoint),
+		slog.String("mongodb_uri", cfg.MongoURI),
+		slog.String("mongodb_database", cfg.MongoDatabase),
 		slog.String("valkey_addr", cfg.ValkeyAddr),
 	)
 
-	// Create AWS SDK config
-	awsCfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion(cfg.AWSRegion),
-	)
+	// Create MongoDB client
+	mongoClient, err := repository.NewMongoClient(ctx, cfg.MongoURI, cfg.MongoDatabase)
 	if err != nil {
-		slog.Error("failed to load AWS config", "error", err)
+		slog.Error("failed to connect to MongoDB", "error", err)
 		os.Exit(1)
 	}
+	defer mongoClient.Disconnect(ctx)
 
-	// Create DynamoDB client wrapper
-	dynamoClient := repository.NewDynamoClient(awsCfg, cfg.DynamoDBTable, cfg.DynamoEndpoint)
+	// Create indexes
+	if err := mongoClient.EnsureIndexes(ctx); err != nil {
+		slog.Error("failed to create indexes", "error", err)
+		os.Exit(1)
+	}
+	slog.Info("MongoDB indexes ensured")
 
 	// Create main router
 	mux := http.NewServeMux()
@@ -165,7 +165,7 @@ func main() {
 	)
 
 	// Suppress "declared but not used" errors during development
-	_ = dynamoClient
+	_ = mongoClient
 
 	// Determine port from environment variable or default to 8080
 	port := os.Getenv("PORT")

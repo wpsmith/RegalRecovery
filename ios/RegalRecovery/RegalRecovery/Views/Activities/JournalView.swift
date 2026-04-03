@@ -6,6 +6,7 @@ import UIKit
 
 struct RichTextEditor: UIViewRepresentable {
     @Binding var attributedText: NSAttributedString
+    @Binding var selectedRange: NSRange
     var minHeight: CGFloat = 200
 
     func makeCoordinator() -> Coordinator {
@@ -50,6 +51,10 @@ struct RichTextEditor: UIViewRepresentable {
         func textViewDidChange(_ textView: UITextView) {
             parent.attributedText = textView.attributedText
         }
+
+        func textViewDidChangeSelection(_ textView: UITextView) {
+            parent.selectedRange = textView.selectedRange
+        }
     }
 }
 
@@ -82,7 +87,7 @@ struct FormattingToolbar: View {
                 .italic(trait == .traitItalic)
                 .foregroundStyle(Color.rrText)
                 .frame(width: 36, height: 32)
-                .background(Color.rrBackground)
+                .background(isTraitActive(trait) ? Color.rrPrimary.opacity(0.2) : Color.rrBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
     }
@@ -97,9 +102,30 @@ struct FormattingToolbar: View {
                 .underline()
                 .foregroundStyle(Color.rrText)
                 .frame(width: 36, height: 32)
-                .background(Color.rrBackground)
+                .background(isUnderlineActive ? Color.rrPrimary.opacity(0.2) : Color.rrBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
+    }
+
+    private func isTraitActive(_ trait: UIFontDescriptor.SymbolicTraits) -> Bool {
+        let range = validRange()
+        guard range.length > 0 else { return false }
+        var active = true
+        attributedText.enumerateAttribute(.font, in: range, options: []) { value, _, _ in
+            guard let font = value as? UIFont else { active = false; return }
+            if !font.fontDescriptor.symbolicTraits.contains(trait) { active = false }
+        }
+        return active
+    }
+
+    private var isUnderlineActive: Bool {
+        let range = validRange()
+        guard range.length > 0 else { return false }
+        var active = true
+        attributedText.enumerateAttribute(.underlineStyle, in: range, options: []) { value, _, _ in
+            guard let style = value as? Int, style != 0 else { active = false; return }
+        }
+        return active
     }
 
     private func toggleTrait(_ trait: UIFontDescriptor.SymbolicTraits) {
@@ -231,6 +257,30 @@ struct JournalingInfoView: View {
     }
 }
 
+// MARK: - Journal Mode
+
+enum JournalMode: String, CaseIterable {
+    case jotting = "jotting"
+    case prompted = "prompted"
+    case freeform = "freeform"
+
+    var label: String {
+        switch self {
+        case .jotting: return "Quick Jot"
+        case .prompted: return "Prompted"
+        case .freeform: return "Freeform"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .jotting: return "bolt.fill"
+        case .prompted: return "lightbulb.fill"
+        case .freeform: return "pencil.line"
+        }
+    }
+}
+
 // MARK: - Journal View
 
 struct JournalView: View {
@@ -247,31 +297,32 @@ struct JournalView: View {
     )
     @State private var selectedRange = NSRange(location: 0, length: 0)
     @State private var showPrompt = false
-    @State private var currentPrompt: String?
+    @State private var currentPrompt: PromptItem?
+    @State private var selectedCategory: String? = nil
     @State private var showInfoSheet = false
     @State private var showSavedConfirmation = false
-
-    private let prompts = [
-        "What are you grateful for?",
-        "What triggered you today?",
-        "What did you learn about yourself?",
-        "How did you show up for your recovery?",
-        "What would you tell yourself a year from now?",
-        "Where did you see God at work today?",
-        "What emotion are you avoiding right now?",
-        "How well did you take care of yourself today?",
-        "What truth about yourself became clearer today?",
-        "Write a brief honest letter to God about how your day went.",
-    ]
+    @State private var entryToDelete: RRJournalEntry?
+    @State private var showDeleteConfirmation = false
+    @State private var mode: JournalMode = .prompted
+    @State private var jotText: String = ""
 
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Prompt offering
-                promptSection
+                // Mode selector
+                modeSelector
 
-                // Editor
-                editorSection
+                // Prompt offering (prompted mode only)
+                if mode == .prompted {
+                    promptSection
+                }
+
+                // Editor or Jot section
+                if mode == .jotting {
+                    jotSection
+                } else {
+                    editorSection
+                }
 
                 // History
                 historySection
@@ -301,11 +352,48 @@ struct JournalView: View {
         }
     }
 
+    // MARK: - Mode Selector
+
+    private var modeSelector: some View {
+        HStack(spacing: 8) {
+            ForEach(JournalMode.allCases, id: \.self) { m in
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { mode = m }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: m.icon)
+                            .font(.caption2)
+                        Text(m.label)
+                            .font(RRFont.caption)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundStyle(mode == m ? .white : Color.rrPrimary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 7)
+                    .background(mode == m ? Color.rrPrimary : Color.rrPrimary.opacity(0.08))
+                    .clipShape(Capsule())
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+
     // MARK: - Prompt Section
 
     @ViewBuilder
     private var promptSection: some View {
         VStack(spacing: 12) {
+            // Category pills
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    categoryPill(label: "Any", category: nil)
+                    ForEach(ContentData.promptCategories, id: \.self) { category in
+                        categoryPill(label: category.capitalized, category: category)
+                    }
+                }
+                .padding(.horizontal)
+            }
+
             if let prompt = currentPrompt {
                 // Show the active prompt card
                 RRCard {
@@ -334,14 +422,33 @@ struct JournalView: View {
                             }
                         }
 
-                        Text(prompt)
+                        Text(prompt.text)
                             .font(RRFont.body)
                             .foregroundStyle(Color.rrText)
                             .italic()
 
+                        // Category label and framework tags
+                        HStack(spacing: 6) {
+                            Text(prompt.category.capitalized)
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
+                                .textCase(.uppercase)
+
+                            ForEach(prompt.tags, id: \.self) { tag in
+                                Text(tag)
+                                    .font(RRFont.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(Color.rrPrimary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 2)
+                                    .background(Color.rrPrimary.opacity(0.08))
+                                    .clipShape(Capsule())
+                            }
+                        }
+
                         Button {
                             withAnimation(.easeInOut(duration: 0.2)) {
-                                currentPrompt = prompts.randomElement()
+                                currentPrompt = ContentData.randomPrompt(category: selectedCategory)
                             }
                         } label: {
                             HStack(spacing: 4) {
@@ -360,7 +467,7 @@ struct JournalView: View {
                 // "Need a prompt?" pill
                 Button {
                     withAnimation(.easeInOut(duration: 0.25)) {
-                        currentPrompt = prompts.randomElement()
+                        currentPrompt = ContentData.randomPrompt(category: selectedCategory)
                         showPrompt = true
                     }
                 } label: {
@@ -382,6 +489,27 @@ struct JournalView: View {
         }
     }
 
+    @ViewBuilder
+    private func categoryPill(label: String, category: String?) -> some View {
+        let isSelected = selectedCategory == category
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                selectedCategory = category
+                currentPrompt = ContentData.randomPrompt(category: category)
+                showPrompt = true
+            }
+        } label: {
+            Text(label)
+                .font(RRFont.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(isSelected ? .white : Color.rrPrimary)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(isSelected ? Color.rrPrimary : Color.rrPrimary.opacity(0.08))
+                .clipShape(Capsule())
+        }
+    }
+
     // MARK: - Editor Section
 
     @ViewBuilder
@@ -393,13 +521,33 @@ struct JournalView: View {
                     selectedRange: $selectedRange
                 )
 
-                RichTextEditor(attributedText: $attributedText)
-                    .frame(minHeight: 200)
+                RichTextEditor(attributedText: $attributedText, selectedRange: $selectedRange)
+                    .frame(minHeight: mode == .freeform ? 300 : 200)
                     .background(Color.rrBackground)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                 RRButton("Save Entry", icon: "square.and.arrow.down") {
                     saveEntry()
+                }
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    // MARK: - Jot Section
+
+    @ViewBuilder
+    private var jotSection: some View {
+        RRCard {
+            VStack(alignment: .leading, spacing: 12) {
+                TextField("What's on your mind?", text: $jotText, axis: .vertical)
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrText)
+                    .lineLimit(3...8)
+                    .padding(.vertical, 4)
+
+                RRButton("Jot it down", icon: "bolt.fill") {
+                    saveJot()
                 }
             }
         }
@@ -415,32 +563,75 @@ struct JournalView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     RRSectionHeader(title: "Past Entries")
 
-                    ForEach(entries) { entry in
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(relativeDay(entry.date))
-                                    .font(RRFont.caption)
-                                    .foregroundStyle(Color.rrTextSecondary)
-                                Spacer()
-                                if let prompt = entry.prompt {
-                                    Image(systemName: "lightbulb.fill")
+                    ForEach(entries.prefix(5)) { entry in
+                        NavigationLink(destination: JournalEntryDetailView(entry: entry)) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack {
+                                    Text(relativeDay(entry.date))
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                    Text(entry.mode.capitalized)
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrPrimary.opacity(0.7))
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.rrPrimary.opacity(0.08))
+                                        .clipShape(Capsule())
+                                    Spacer()
+                                    if let prompt = entry.prompt {
+                                        Image(systemName: "lightbulb.fill")
+                                            .font(.caption2)
+                                            .foregroundStyle(.yellow.opacity(0.7))
+                                            .help(prompt)
+                                    }
+                                    Image(systemName: "chevron.right")
                                         .font(.caption2)
-                                        .foregroundStyle(.yellow.opacity(0.7))
-                                        .help(prompt)
+                                        .foregroundStyle(Color.rrTextSecondary.opacity(0.5))
                                 }
+                                Text(entry.content)
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                                    .lineLimit(3)
+                                    .multilineTextAlignment(.leading)
                             }
-                            Text(entry.content)
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                                .lineLimit(3)
                         }
-                        if entry.id != entries.last?.id {
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                entryToDelete = entry
+                                showDeleteConfirmation = true
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                        if entry.id != entries.prefix(5).last?.id {
                             Divider()
+                        }
+                    }
+
+                    if entries.count > 5 {
+                        NavigationLink(destination: JournalHistoryView()) {
+                            HStack {
+                                Text("See all \(entries.count) entries")
+                                    .font(RRFont.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundStyle(Color.rrPrimary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(Color.rrPrimary.opacity(0.5))
+                            }
+                            .padding(.top, 4)
                         }
                     }
                 }
             }
             .padding(.horizontal)
+            .confirmationDialog("Delete this entry?", isPresented: $showDeleteConfirmation, presenting: entryToDelete) { entry in
+                Button("Delete", role: .destructive) {
+                    modelContext.delete(entry)
+                }
+            }
         }
     }
 
@@ -488,10 +679,11 @@ struct JournalView: View {
         let entry = RRJournalEntry(
             userId: userId,
             date: Date(),
-            mode: "journal",
+            mode: mode.rawValue,
             content: plainText,
-            prompt: currentPrompt
+            prompt: currentPrompt?.text
         )
+        entry.setRichContent(from: attributedText)
         modelContext.insert(entry)
 
         // Reset editor
@@ -513,6 +705,27 @@ struct JournalView: View {
             withAnimation(.easeInOut(duration: 0.3)) {
                 showSavedConfirmation = false
             }
+        }
+    }
+
+    private func saveJot() {
+        let text = jotText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+
+        let userId = users.first?.id ?? UUID()
+        let entry = RRJournalEntry(
+            userId: userId,
+            date: Date(),
+            mode: "jotting",
+            content: text,
+            prompt: nil
+        )
+        modelContext.insert(entry)
+        jotText = ""
+
+        withAnimation(.easeInOut(duration: 0.3)) { showSavedConfirmation = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation(.easeInOut(duration: 0.3)) { showSavedConfirmation = false }
         }
     }
 }

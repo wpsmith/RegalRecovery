@@ -4,29 +4,25 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-// FlagRepo implements FlagRepository using DynamoDB.
+// FlagRepo implements FlagRepository using MongoDB.
 type FlagRepo struct {
-	client *DynamoClient
+	client *MongoClient
 }
 
 // NewFlagRepo creates a new FlagRepo.
-func NewFlagRepo(client *DynamoClient) *FlagRepo {
+func NewFlagRepo(client *MongoClient) *FlagRepo {
 	return &FlagRepo{client: client}
 }
 
 // GetFlag retrieves a single feature flag by key.
-// PK: FLAGS, SK: {flagKey}
 func (r *FlagRepo) GetFlag(ctx context.Context, flagKey string) (*Flag, error) {
 	var flag Flag
-	err := r.client.GetItem(ctx, "FLAGS", flagKey, &flag)
+	err := r.client.Collection("flags").FindOne(ctx, bson.M{"flagKey": flagKey}).Decode(&flag)
 	if err != nil {
 		return nil, fmt.Errorf("getting flag %s: %w", flagKey, err)
 	}
@@ -34,39 +30,35 @@ func (r *FlagRepo) GetFlag(ctx context.Context, flagKey string) (*Flag, error) {
 }
 
 // GetAllFlags retrieves all feature flags.
-// PK: FLAGS
 func (r *FlagRepo) GetAllFlags(ctx context.Context) ([]Flag, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: "FLAGS"},
-		},
-	})
+	cursor, err := r.client.Collection("flags").Find(ctx, bson.M{})
 	if err != nil {
 		return nil, fmt.Errorf("listing all flags: %w", err)
 	}
 
 	var flags []Flag
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &flags); err != nil {
-		return nil, fmt.Errorf("unmarshaling flags: %w", err)
+	if err := cursor.All(ctx, &flags); err != nil {
+		return nil, fmt.Errorf("decoding flags: %w", err)
 	}
-
 	return flags, nil
 }
 
-// SetFlag creates or updates a feature flag.
+// SetFlag creates or updates a feature flag using upsert.
 func (r *FlagRepo) SetFlag(ctx context.Context, flag *Flag) error {
-	now := time.Now().UTC().Format(time.RFC3339)
-	if flag.CreatedAt == "" {
+	now := NowUTC()
+	if flag.CreatedAt.IsZero() {
 		flag.CreatedAt = now
 	}
 	flag.ModifiedAt = now
 	flag.UpdatedAt = now
-	flag.EntityType = "FEATURE_FLAG"
 
-	if err := r.client.PutItem(ctx, flag); err != nil {
+	_, err := r.client.Collection("flags").ReplaceOne(ctx,
+		bson.M{"flagKey": flag.FlagKey},
+		flag,
+		options.Replace().SetUpsert(true),
+	)
+	if err != nil {
 		return fmt.Errorf("setting flag: %w", err)
 	}
-
 	return nil
 }

@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go-v2/config"
 
 	appconfig "github.com/regalrecovery/api/internal/config"
 	"github.com/regalrecovery/api/internal/domain/activities"
@@ -17,33 +16,27 @@ import (
 	"github.com/regalrecovery/api/pkg/lambdahttp"
 )
 
+// mongoClient is declared at package level for connection reuse across Lambda invocations.
+var mongoClient *repository.MongoClient
+
+func init() {
+	ctx := context.Background()
+	cfg := appconfig.Load()
+
+	var err error
+	mongoClient, err = repository.NewMongoClient(ctx, cfg.MongoURI, cfg.MongoDatabase)
+	if err != nil {
+		slog.Error("failed to connect to MongoDB", "error", err)
+		os.Exit(1)
+	}
+}
+
 func main() {
 	// Initialize structured logger
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
 	}))
 	slog.SetDefault(logger)
-
-	ctx := context.Background()
-
-	// Load configuration from environment
-	cfg := appconfig.Load()
-
-	// Create AWS SDK config
-	awsCfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion(cfg.AWSRegion),
-	)
-	if err != nil {
-		slog.Error("failed to load AWS config", "error", err)
-		os.Exit(1)
-	}
-
-	// Create DynamoDB client wrapper
-	dynamoClient := repository.NewDynamoClient(awsCfg, cfg.DynamoDBTable, cfg.DynamoEndpoint)
-
-	// Note: Repository and service layers not yet fully implemented.
-	// For now, create a simple HTTP handler that returns 501 Not Implemented.
-	// TODO: Wire up full dependency chain when implementation is complete.
 
 	// Create HTTP router
 	mux := http.NewServeMux()
@@ -74,8 +67,8 @@ func main() {
 	)
 
 	// Suppress "declared but not used" errors during development
-	_ = dynamoClient
-	_ = activities.ActivityTypeCheckIn // Reference package to avoid "imported but not used"
+	_ = mongoClient
+	_ = activities.ActivityTypeCheckIn
 
 	// Create Lambda adapter and start
 	adapter := lambdahttp.NewAdapter(handler)
