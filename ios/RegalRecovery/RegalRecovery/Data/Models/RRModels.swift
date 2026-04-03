@@ -546,7 +546,12 @@ final class RRFASTEREntry {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var date: Date
-    var stage: Int  // 0-5 mapping to FASTERStage
+    var stage: Int  // -1 to 5 mapping to FASTERStage
+    var moodScore: Int  // 1-5 from mood prompt
+    var selectedIndicatorsJSON: String  // JSON-encoded [String: [String]] (stage name → indicator labels)
+    var journalInsight: String?  // "Ah-ha" field
+    var journalWarning: String?  // "Uh-oh" field
+    var journalFreeText: String?  // Optional free-text
     var createdAt: Date
     var modifiedAt: Date
 
@@ -555,6 +560,11 @@ final class RRFASTEREntry {
         userId: UUID,
         date: Date,
         stage: Int,
+        moodScore: Int = 3,
+        selectedIndicatorsJSON: String = "{}",
+        journalInsight: String? = nil,
+        journalWarning: String? = nil,
+        journalFreeText: String? = nil,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
@@ -562,6 +572,11 @@ final class RRFASTEREntry {
         self.userId = userId
         self.date = date
         self.stage = stage
+        self.moodScore = moodScore
+        self.selectedIndicatorsJSON = selectedIndicatorsJSON
+        self.journalInsight = journalInsight
+        self.journalWarning = journalWarning
+        self.journalFreeText = journalFreeText
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }
