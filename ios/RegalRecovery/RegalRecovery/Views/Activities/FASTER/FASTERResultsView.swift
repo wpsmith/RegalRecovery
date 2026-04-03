@@ -3,121 +3,135 @@ import SwiftUI
 struct FASTERResultsView: View {
     let assessedStage: FASTERStage
     let selectedIndicators: [FASTERStage: Set<String>]
-
     @Binding var journalInsight: String
     @Binding var journalWarning: String
     @Binding var journalFreeText: String
-
     let onSave: () -> Void
 
     var body: some View {
         VStack(spacing: 20) {
-            // Header
-            VStack(spacing: 8) {
-                Text("Assessment Complete")
-                    .font(RRFont.title2)
-                    .foregroundStyle(Color.rrText)
-
-                Text("Your FASTER stage: \(assessedStage.name)")
-                    .font(RRFont.headline)
-                    .foregroundStyle(assessedStage.color)
-            }
-
             // Thermometer
-            FASTERThermometerView(currentStage: assessedStage)
-                .frame(height: 200)
-
-            // Selected indicators summary
-            if !allSelectedIndicators.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Selected Indicators")
-                        .font(RRFont.headline)
-                        .foregroundStyle(Color.rrText)
-
-                    ForEach(allSelectedIndicators, id: \.self) { indicator in
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(assessedStage.color)
-                            Text(indicator)
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                        }
-                    }
-                }
-                .padding()
-                .background(Color.rrCardBackground)
-                .cornerRadius(12)
-            }
-
-            // Journal prompts
-            VStack(alignment: .leading, spacing: 16) {
-                Text("Reflection (Optional)")
-                    .font(RRFont.headline)
-                    .foregroundStyle(Color.rrText)
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("What insight or realization do you have?")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-
-                    TextField("", text: $journalInsight, axis: .vertical)
-                        .textFieldStyle(.roundedBorder)
-                        .lineLimit(3...6)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("What warning sign should you watch for?")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-
-                    TextField("", text: $journalWarning, axis: .vertical)
-                        .textFieldStyle(.roundedBorder)
-                        .lineLimit(3...6)
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Additional notes")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-
-                    TextField("", text: $journalFreeText, axis: .vertical)
-                        .textFieldStyle(.roundedBorder)
-                        .lineLimit(3...6)
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    RRSectionHeader(title: "Your Assessment")
+                    FASTERThermometerView(
+                        assessedStage: assessedStage,
+                        selectedIndicators: selectedIndicators
+                    )
                 }
             }
-            .padding()
-            .background(Color.rrCardBackground)
-            .cornerRadius(12)
+
+            // Adaptive content
+            adaptiveContentCard
+
+            // Journal
+            journalSection
 
             // Save button
-            Button(action: onSave) {
-                Text("Save Check-in")
-                    .font(RRFont.headline)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.rrPrimary)
-                    .cornerRadius(12)
+            RRButton("Save Check-In", icon: "checkmark.circle") {
+                onSave()
             }
-            .padding(.top)
         }
     }
 
-    private var allSelectedIndicators: [String] {
-        selectedIndicators.values.flatMap { $0 }.sorted()
+    // MARK: - Adaptive Content
+
+    private var adaptiveContentCard: some View {
+        let content = assessedStage.adaptiveContent
+        return RRCard {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(assessedStage.color)
+                        .frame(width: 10, height: 10)
+                    Text(content.title)
+                        .font(RRFont.headline)
+                        .foregroundStyle(Color.rrText)
+                }
+                Text(content.body)
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrTextSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    // MARK: - Journal
+
+    private var journalSection: some View {
+        RRCard {
+            VStack(alignment: .leading, spacing: 16) {
+                RRSectionHeader(title: "Reflect")
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Ah-ha (insight)")
+                        .font(RRFont.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrTextSecondary)
+                    TextField("Something I noticed about myself today...", text: $journalInsight, axis: .vertical)
+                        .font(RRFont.body)
+                        .lineLimit(3...6)
+                        .textFieldStyle(.plain)
+                        .padding(12)
+                        .background(Color.rrBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .onChange(of: journalInsight) { _, newValue in
+                            if newValue.count > 1000 { journalInsight = String(newValue.prefix(1000)) }
+                        }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Uh-oh (warning sign)")
+                        .font(RRFont.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrTextSecondary)
+                    TextField("Something I need to watch out for...", text: $journalWarning, axis: .vertical)
+                        .font(RRFont.body)
+                        .lineLimit(3...6)
+                        .textFieldStyle(.plain)
+                        .padding(12)
+                        .background(Color.rrBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .onChange(of: journalWarning) { _, newValue in
+                            if newValue.count > 1000 { journalWarning = String(newValue.prefix(1000)) }
+                        }
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Anything else?")
+                        .font(RRFont.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrTextSecondary)
+                    TextField("Optional — whatever is on your mind...", text: $journalFreeText, axis: .vertical)
+                        .font(RRFont.body)
+                        .lineLimit(3...6)
+                        .textFieldStyle(.plain)
+                        .padding(12)
+                        .background(Color.rrBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        .onChange(of: journalFreeText) { _, newValue in
+                            if newValue.count > 1000 { journalFreeText = String(newValue.prefix(1000)) }
+                        }
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    FASTERResultsView(
-        assessedStage: .anxious,
-        selectedIndicators: [
-            .anxious: ["Worry", "Tension"]
-        ],
-        journalInsight: .constant(""),
-        journalWarning: .constant(""),
-        journalFreeText: .constant("")
-    ) {
-        print("Saved")
+    ScrollView {
+        FASTERResultsView(
+            assessedStage: .anxiety,
+            selectedIndicators: [
+                .forgettingPriorities: ["Isolating"],
+                .anxiety: ["Sleep problems", "Vague worry or dread"],
+            ],
+            journalInsight: .constant(""),
+            journalWarning: .constant(""),
+            journalFreeText: .constant(""),
+            onSave: {}
+        )
+        .padding()
     }
+    .background(Color.rrBackground)
 }
