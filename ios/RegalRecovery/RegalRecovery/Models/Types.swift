@@ -338,6 +338,15 @@ struct FASTEREntry: Identifiable {
     let id = UUID()
     let date: Date
     let stage: FASTERStage
+    let moodScore: Int
+    let selectedIndicators: [FASTERStage: Set<String>]
+
+    init(date: Date, stage: FASTERStage, moodScore: Int = 3, selectedIndicators: [FASTERStage: Set<String>] = [:]) {
+        self.date = date
+        self.stage = stage
+        self.moodScore = moodScore
+        self.selectedIndicators = selectedIndicators
+    }
 }
 
 // MARK: - Check-In
