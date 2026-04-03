@@ -4,94 +4,58 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-// SessionRepo implements SessionRepository using DynamoDB.
+// SessionRepo implements SessionRepository using MongoDB.
 type SessionRepo struct {
-	client *DynamoClient
+	client *MongoClient
 }
 
 // NewSessionRepo creates a new SessionRepo.
-func NewSessionRepo(client *DynamoClient) *SessionRepo {
+func NewSessionRepo(client *MongoClient) *SessionRepo {
 	return &SessionRepo{client: client}
 }
 
 // CreateSession creates a new session.
-// PK: USER#{userID}, SK: SESSION#{sessionID}
-// GSI1PK: SESSION#{sessionID}, GSI1SK: META
 func (r *SessionRepo) CreateSession(ctx context.Context, session *Session) error {
-	now := time.Now().UTC().Format(time.RFC3339)
-	session.CreatedAt = now
-	session.ModifiedAt = now
-	session.EntityType = "SESSION"
+	SetBaseDocumentDefaults(&session.BaseDocument)
 
-	if err := r.client.PutItem(ctx, session); err != nil {
+	if _, err := r.client.Collection("sessions").InsertOne(ctx, session); err != nil {
 		return fmt.Errorf("creating session: %w", err)
 	}
-
 	return nil
 }
 
-// GetSessionByID retrieves a session by session ID using GSI1.
-// GSI1PK: SESSION#{sessionID}, GSI1SK: META
+// GetSessionByID retrieves a session by session ID.
 func (r *SessionRepo) GetSessionByID(ctx context.Context, sessionID string) (*Session, error) {
-	result, err := r.client.QueryGSI(ctx, "GSI1", &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("GSI1PK = :sessionPK"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":sessionPK": &types.AttributeValueMemberS{Value: fmt.Sprintf("SESSION#%s", sessionID)},
-		},
-		Limit: aws.Int32(1),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("querying session by ID %s: %w", sessionID, err)
-	}
-
-	if len(result.Items) == 0 {
-		return nil, fmt.Errorf("session not found: %s", sessionID)
-	}
-
 	var session Session
-	if err := attributevalue.UnmarshalMap(result.Items[0], &session); err != nil {
-		return nil, fmt.Errorf("unmarshaling session: %w", err)
+	err := r.client.Collection("sessions").FindOne(ctx, bson.M{"sessionId": sessionID}).Decode(&session)
+	if err != nil {
+		return nil, fmt.Errorf("getting session %s: %w", sessionID, err)
 	}
-
 	return &session, nil
 }
 
-// ListUserSessions lists all active sessions for a user.
-// PK: USER#{userID}, SK begins_with SESSION#
+// ListUserSessions lists all sessions for a user.
 func (r *SessionRepo) ListUserSessions(ctx context.Context, userID string) ([]Session, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("USER#%s", userID)},
-			":sk": &types.AttributeValueMemberS{Value: "SESSION#"},
-		},
-	})
+	cursor, err := r.client.Collection("sessions").Find(ctx, bson.M{"userId": userID})
 	if err != nil {
 		return nil, fmt.Errorf("listing sessions for user %s: %w", userID, err)
 	}
 
 	var sessions []Session
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &sessions); err != nil {
-		return nil, fmt.Errorf("unmarshaling sessions: %w", err)
+	if err := cursor.All(ctx, &sessions); err != nil {
+		return nil, fmt.Errorf("decoding sessions: %w", err)
 	}
-
 	return sessions, nil
 }
 
 // DeleteSession deletes a session.
-// PK: USER#{userID}, SK: SESSION#{sessionID}
 func (r *SessionRepo) DeleteSession(ctx context.Context, userID, sessionID string) error {
-	if err := r.client.DeleteItem(ctx, fmt.Sprintf("USER#%s", userID), fmt.Sprintf("SESSION#%s", sessionID)); err != nil {
+	if _, err := r.client.Collection("sessions").DeleteOne(ctx, bson.M{"userId": userID, "sessionId": sessionID}); err != nil {
 		return fmt.Errorf("deleting session %s for user %s: %w", sessionID, userID, err)
 	}
-
 	return nil
 }

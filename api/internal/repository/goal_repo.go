@@ -4,51 +4,42 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-// GoalRepo implements GoalRepository using DynamoDB.
+// GoalRepo implements GoalRepository using MongoDB.
 type GoalRepo struct {
-	client *DynamoClient
+	client *MongoClient
 }
 
 // NewGoalRepo creates a new GoalRepo.
-func NewGoalRepo(client *DynamoClient) *GoalRepo {
+func NewGoalRepo(client *MongoClient) *GoalRepo {
 	return &GoalRepo{client: client}
 }
 
 // ListGoals lists all goals for a user.
-// PK: USER#{userID}, SK begins_with GOAL#
 func (r *GoalRepo) ListGoals(ctx context.Context, userID string) ([]Goal, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("USER#%s", userID)},
-			":sk": &types.AttributeValueMemberS{Value: "GOAL#"},
-		},
-	})
+	cursor, err := r.client.Collection("goals").Find(ctx, bson.M{"userId": userID})
 	if err != nil {
 		return nil, fmt.Errorf("listing goals for user %s: %w", userID, err)
 	}
 
 	var goals []Goal
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &goals); err != nil {
-		return nil, fmt.Errorf("unmarshaling goals: %w", err)
+	if err := cursor.All(ctx, &goals); err != nil {
+		return nil, fmt.Errorf("decoding goals for user %s: %w", userID, err)
 	}
 
 	return goals, nil
 }
 
 // GetGoal retrieves a specific goal by ID.
-// PK: USER#{userID}, SK: GOAL#{goalID}
 func (r *GoalRepo) GetGoal(ctx context.Context, userID, goalID string) (*Goal, error) {
 	var goal Goal
-	err := r.client.GetItem(ctx, fmt.Sprintf("USER#%s", userID), fmt.Sprintf("GOAL#%s", goalID), &goal)
+	err := r.client.Collection("goals").FindOne(ctx, bson.M{
+		"userId": userID,
+		"goalId": goalID,
+	}).Decode(&goal)
 	if err != nil {
 		return nil, fmt.Errorf("getting goal %s for user %s: %w", goalID, userID, err)
 	}
@@ -57,12 +48,9 @@ func (r *GoalRepo) GetGoal(ctx context.Context, userID, goalID string) (*Goal, e
 
 // CreateGoal creates a new goal.
 func (r *GoalRepo) CreateGoal(ctx context.Context, goal *Goal) error {
-	now := time.Now().UTC().Format(time.RFC3339)
-	goal.CreatedAt = now
-	goal.ModifiedAt = now
-	goal.EntityType = "GOAL"
+	SetBaseDocumentDefaults(&goal.BaseDocument)
 
-	if err := r.client.PutItem(ctx, goal); err != nil {
+	if _, err := r.client.Collection("goals").InsertOne(ctx, goal); err != nil {
 		return fmt.Errorf("creating goal: %w", err)
 	}
 
@@ -71,9 +59,12 @@ func (r *GoalRepo) CreateGoal(ctx context.Context, goal *Goal) error {
 
 // UpdateGoal updates an existing goal.
 func (r *GoalRepo) UpdateGoal(ctx context.Context, goal *Goal) error {
-	goal.ModifiedAt = time.Now().UTC().Format(time.RFC3339)
+	UpdateModified(&goal.BaseDocument)
 
-	if err := r.client.PutItem(ctx, goal); err != nil {
+	if _, err := r.client.Collection("goals").ReplaceOne(ctx, bson.M{
+		"userId": goal.UserID,
+		"goalId": goal.GoalID,
+	}, goal); err != nil {
 		return fmt.Errorf("updating goal: %w", err)
 	}
 

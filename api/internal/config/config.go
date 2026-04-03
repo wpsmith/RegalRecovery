@@ -14,12 +14,12 @@ type Config struct {
 	// AWSRegion is the AWS region for all services
 	AWSRegion string
 
-	// DynamoDBTable is the name of the single DynamoDB table
-	DynamoDBTable string
+	// MongoURI is the MongoDB connection URI
+	// Local: mongodb://localhost:27017, Staging/Prod: DocumentDB Serverless endpoint
+	MongoURI string
 
-	// DynamoEndpoint is the DynamoDB endpoint URL (for LocalStack in local dev)
-	// Empty in production to use the default AWS endpoint
-	DynamoEndpoint string
+	// MongoDatabase is the MongoDB database name
+	MongoDatabase string
 
 	// ValkeyAddr is the Valkey (Redis-compatible) server address
 	ValkeyAddr string
@@ -32,6 +32,21 @@ type Config struct {
 
 	// LogLevel controls the log output level: "debug", "info", "warn", "error"
 	LogLevel string
+
+	// LocalStackEndpoint is the LocalStack endpoint for all AWS service clients in local dev
+	LocalStackEndpoint string
+
+	// OllamaURL is the local LLM endpoint
+	OllamaURL string
+
+	// MailhogSMTP is the SMTP server address for local email
+	MailhogSMTP string
+
+	// SQSQueueURL is the SQS queue URL for event processing
+	SQSQueueURL string
+
+	// S3Bucket is the S3 bucket for content and backups
+	S3Bucket string
 }
 
 // Load reads configuration from environment variables.
@@ -39,14 +54,19 @@ type Config struct {
 // using sensible defaults for local development when variables are not set.
 func Load() Config {
 	return Config{
-		Environment:    getEnv("ENVIRONMENT", "local"),
-		AWSRegion:      getEnv("AWS_REGION", "us-east-1"),
-		DynamoDBTable:  getEnv("DYNAMODB_TABLE", "regal-recovery"),
-		DynamoEndpoint: getEnv("DYNAMO_ENDPOINT", "http://localhost:4566"),
-		ValkeyAddr:     getEnv("VALKEY_ADDR", "localhost:6380"),
-		SNSTopicARN:    getEnv("SNS_TOPIC_ARN", ""),
-		CognitoPoolID:  getEnv("COGNITO_POOL_ID", ""),
-		LogLevel:       getEnv("LOG_LEVEL", "info"),
+		Environment:        getEnv("ENVIRONMENT", "local"),
+		AWSRegion:          getEnv("AWS_REGION", "us-east-1"),
+		MongoURI:           getEnv("MONGODB_URI", "mongodb://localhost:27017"),
+		MongoDatabase:      getEnv("MONGODB_DATABASE", "regal-recovery"),
+		ValkeyAddr:         getEnv("VALKEY_ADDR", "localhost:6380"),
+		SNSTopicARN:        getEnv("SNS_TOPIC_ARN", ""),
+		CognitoPoolID:      getEnv("COGNITO_POOL_ID", ""),
+		LogLevel:           getEnv("LOG_LEVEL", "info"),
+		LocalStackEndpoint: getEnv("LOCALSTACK_ENDPOINT", "http://localhost:4566"),
+		OllamaURL:          getEnv("OLLAMA_URL", "http://localhost:11434"),
+		MailhogSMTP:        getEnv("MAILHOG_SMTP", "localhost:1025"),
+		SQSQueueURL:        getEnv("SQS_QUEUE_URL", ""),
+		S3Bucket:           getEnv("S3_BUCKET", "regal-recovery-local"),
 	}
 }
 
