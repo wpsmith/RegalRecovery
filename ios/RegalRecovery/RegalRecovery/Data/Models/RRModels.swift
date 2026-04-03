@@ -547,8 +547,8 @@ final class RRFASTEREntry {
     var userId: UUID
     var date: Date
     var stage: Int  // -1 to 5 mapping to FASTERStage
-    var moodScore: Int  // 1-5 from mood prompt
-    var selectedIndicatorsJSON: String  // JSON-encoded [String: [String]] (stage name → indicator labels)
+    var moodScore: Int?  // 1-5 from mood prompt (optional for migration compatibility)
+    var selectedIndicatorsJSON: String?  // JSON-encoded [String: [String]] (stage name → indicator labels)
     var journalInsight: String?  // "Ah-ha" field
     var journalWarning: String?  // "Uh-oh" field
     var journalFreeText: String?  // Optional free-text
@@ -560,8 +560,8 @@ final class RRFASTEREntry {
         userId: UUID,
         date: Date,
         stage: Int,
-        moodScore: Int = 3,
-        selectedIndicatorsJSON: String = "{}",
+        moodScore: Int? = nil,
+        selectedIndicatorsJSON: String? = nil,
         journalInsight: String? = nil,
         journalWarning: String? = nil,
         journalFreeText: String? = nil,
