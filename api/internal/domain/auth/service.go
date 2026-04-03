@@ -30,17 +30,19 @@ var (
 
 // AuthService handles authentication business logic.
 type AuthService struct {
-	userRepo    UserRepository
-	sessionRepo SessionRepository
-	tokenSvc    TokenService
+	userRepo     UserRepository
+	sessionRepo  SessionRepository
+	tokenSvc     TokenService
+	sessionCache SessionCache
 }
 
 // NewAuthService creates a new AuthService with required dependencies.
-func NewAuthService(userRepo UserRepository, sessionRepo SessionRepository, tokenSvc TokenService) *AuthService {
+func NewAuthService(userRepo UserRepository, sessionRepo SessionRepository, tokenSvc TokenService, sessionCache SessionCache) *AuthService {
 	return &AuthService{
-		userRepo:    userRepo,
-		sessionRepo: sessionRepo,
-		tokenSvc:    tokenSvc,
+		userRepo:     userRepo,
+		sessionRepo:  sessionRepo,
+		tokenSvc:     tokenSvc,
+		sessionCache: sessionCache,
 	}
 }
 
@@ -115,7 +117,22 @@ func (s *AuthService) GetSession(ctx context.Context) (*Session, error) {
 		return nil, ErrSessionNotFound
 	}
 
-	session, err := s.sessionRepo.GetSession(ctx, sessionID)
+	// Try cache first.
+	session, err := s.sessionCache.GetSession(ctx, sessionID)
+	if err != nil {
+		return nil, fmt.Errorf("checking cache for session: %w", err)
+	}
+
+	// Cache hit: validate and return.
+	if session != nil {
+		if time.Now().After(session.ExpiresAt) {
+			return nil, ErrSessionExpired
+		}
+		return session, nil
+	}
+
+	// Cache miss: fetch from repository.
+	session, err = s.sessionRepo.GetSession(ctx, sessionID)
 	if err != nil {
 		return nil, fmt.Errorf("retrieving session: %w", err)
 	}
@@ -123,6 +140,13 @@ func (s *AuthService) GetSession(ctx context.Context) (*Session, error) {
 	// Check if session is expired.
 	if time.Now().After(session.ExpiresAt) {
 		return nil, ErrSessionExpired
+	}
+
+	// Store in cache for next time.
+	if err := s.sessionCache.SetSession(ctx, sessionID, session); err != nil {
+		// Log cache error but don't fail the request.
+		// In production, this should use structured logging.
+		_ = err
 	}
 
 	return session, nil
@@ -173,6 +197,13 @@ func (s *AuthService) CreateSession(ctx context.Context, userID, deviceID, devic
 		return nil, fmt.Errorf("creating session: %w", err)
 	}
 
+	// Cache the newly created session.
+	if err := s.sessionCache.SetSession(ctx, session.SessionID, session); err != nil {
+		// Log cache error but don't fail the request.
+		// In production, this should use structured logging.
+		_ = err
+	}
+
 	return session, nil
 }
 
@@ -184,6 +215,13 @@ func (s *AuthService) RevokeSession(ctx context.Context, sessionID string) error
 
 	if err := s.sessionRepo.DeleteSession(ctx, sessionID); err != nil {
 		return fmt.Errorf("revoking session: %w", err)
+	}
+
+	// Invalidate cache after deleting from repository.
+	if err := s.sessionCache.InvalidateSession(ctx, sessionID); err != nil {
+		// Log cache error but don't fail the request.
+		// In production, this should use structured logging.
+		_ = err
 	}
 
 	return nil
