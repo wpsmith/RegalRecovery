@@ -14,6 +14,13 @@
 		10000005 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000005 /* Components.swift */; };
 		10000006 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000006 /* MockData.swift */; };
 		10000117 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000117 /* ContentData.swift */; };
+		10000118 /* FASTERMoodPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000118 /* FASTERMoodPromptView.swift */; };
+		10000400 /* FASTERCheckInFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000400 /* FASTERCheckInFlowView.swift */; };
+		10000401 /* FASTERIndicatorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000401 /* FASTERIndicatorSelectionView.swift */; };
+		10000402 /* FASTERThermometerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000402 /* FASTERThermometerView.swift */; };
+		10000403 /* FASTERCheckInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000403 /* FASTERCheckInViewModel.swift */; };
+		10000404 /* FASTERResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000119 /* FASTERResultsView.swift */; };
+
 		10000007 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000007 /* Types.swift */; };
 		10000008 /* RRModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000008 /* RRModels.swift */; };
 		10000009 /* RepositoryProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000009 /* RepositoryProtocols.swift */; };
@@ -106,6 +113,7 @@
 		10000089 /* RecentActivityFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000089 /* RecentActivityFeed.swift */; };
 		10000309 /* RecentActivityRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000309 /* RecentActivityRow.swift */; };
 		10000310 /* ActivityHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000310 /* ActivityHistoryView.swift */; };
+		10000311 /* ActivityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000311 /* ActivityDetailView.swift */; };
 		10000090 /* StreakHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000090 /* StreakHeroCard.swift */; };
 		10000091 /* AccountSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000091 /* AccountSetupView.swift */; };
 		10000092 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000092 /* OnboardingFlow.swift */; };
@@ -129,7 +137,6 @@
 		10000110 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000116 /* ContentData.swift */; };
 		10000200 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000200 /* Assets.xcassets */; };
 		10000208 /* RecoveryWorkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000208 /* RecoveryWorkView.swift */; };
-		10000209 /* RecoveryWorkItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000209 /* RecoveryWorkItemRow.swift */; };
 		10000210 /* RecoveryWorkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000210 /* RecoveryWorkViewModel.swift */; };
 		10000211 /* RecoveryFoundationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000211 /* RecoveryFoundationView.swift */; };
 		10000212 /* TestingModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000212 /* TestingModeView.swift */; };
@@ -153,6 +160,13 @@
 		20000005 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		20000006 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
 		20000117 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
+		20000118 /* FASTERMoodPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERMoodPromptView.swift; sourceTree = "<group>"; };
+		20000119 /* FASTERResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERResultsView.swift; sourceTree = "<group>"; };
+		20000400 /* FASTERCheckInFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERCheckInFlowView.swift; sourceTree = "<group>"; };
+		20000401 /* FASTERIndicatorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERIndicatorSelectionView.swift; sourceTree = "<group>"; };
+		20000402 /* FASTERThermometerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERThermometerView.swift; sourceTree = "<group>"; };
+		20000403 /* FASTERCheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERCheckInViewModel.swift; sourceTree = "<group>"; };
+
 		20000007 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
 		20000008 /* RRModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRModels.swift; sourceTree = "<group>"; };
 		20000009 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
@@ -183,6 +197,7 @@
 		20000305 /* RecoveryWorkCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkCardView.swift; sourceTree = "<group>"; };
 		20000308 /* SobrietyModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SobrietyModuleView.swift; sourceTree = "<group>"; };
 		20000310 /* ActivityHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityHistoryView.swift; sourceTree = "<group>"; };
+		20000311 /* ActivityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetailView.swift; sourceTree = "<group>"; };
 		20000306 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
 		20000307 /* DailyScoreCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyScoreCalculator.swift; sourceTree = "<group>"; };
 		20000024 /* ActivityError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityError.swift; sourceTree = "<group>"; };
@@ -284,7 +299,6 @@
 		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20000208 /* RecoveryWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkView.swift; sourceTree = "<group>"; };
-		20000209 /* RecoveryWorkItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkItemRow.swift; sourceTree = "<group>"; };
 		20000210 /* RecoveryWorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkViewModel.swift; sourceTree = "<group>"; };
 		20000211 /* RecoveryFoundationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFoundationView.swift; sourceTree = "<group>"; };
 		20000212 /* TestingModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingModeView.swift; sourceTree = "<group>"; };
@@ -471,6 +485,7 @@
 				20000203 /* UrgeSurfingViewModel.swift */,
 				20000207 /* RecoveryPlanViewModel.swift */,
 				20000210 /* RecoveryWorkViewModel.swift */,
+				20000403 /* FASTERCheckInViewModel.swift */,
 				20000306 /* TodayViewModel.swift */,
 				20000307 /* DailyScoreCalculator.swift */,
 			);
@@ -493,6 +508,18 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		50000301 /* FASTER */ = {
+			isa = PBXGroup;
+			children = (
+				20000400 /* FASTERCheckInFlowView.swift */,
+				20000401 /* FASTERIndicatorSelectionView.swift */,
+				20000118 /* FASTERMoodPromptView.swift */,
+				20000119 /* FASTERResultsView.swift */,
+				20000402 /* FASTERThermometerView.swift */,
+			);
+			path = FASTER;
+			sourceTree = "<group>";
+		};
 		50000041 /* Activities */ = {
 			isa = PBXGroup;
 			children = (
@@ -501,6 +528,7 @@
 				20000055 /* EmotionalJournalView.swift */,
 				20000056 /* EveningReviewView.swift */,
 				20000057 /* ExerciseLogView.swift */,
+				50000301 /* FASTER */,
 				20000058 /* FASTERScaleView.swift */,
 				20000059 /* GratitudeListView.swift */,
 				20000060 /* JournalView.swift */,
@@ -604,6 +632,7 @@
 				20000305 /* RecoveryWorkCardView.swift */,
 				20000308 /* SobrietyModuleView.swift */,
 				20000310 /* ActivityHistoryView.swift */,
+				20000311 /* ActivityDetailView.swift */,
 			);
 			path = Today;
 			sourceTree = "<group>";
@@ -612,7 +641,6 @@
 			isa = PBXGroup;
 			children = (
 				20000208 /* RecoveryWorkView.swift */,
-				20000209 /* RecoveryWorkItemRow.swift */,
 			);
 			path = Work;
 			sourceTree = "<group>";
@@ -716,6 +744,13 @@
 				10000005 /* Components.swift in Sources */,
 				10000006 /* MockData.swift in Sources */,
 				10000117 /* ContentData.swift in Sources */,
+				10000118 /* FASTERMoodPromptView.swift in Sources */,
+				10000400 /* FASTERCheckInFlowView.swift in Sources */,
+				10000401 /* FASTERIndicatorSelectionView.swift in Sources */,
+				10000402 /* FASTERThermometerView.swift in Sources */,
+				10000403 /* FASTERCheckInViewModel.swift in Sources */,
+				10000404 /* FASTERResultsView.swift in Sources */,
+
 				10000007 /* Types.swift in Sources */,
 				10000008 /* RRModels.swift in Sources */,
 				10000009 /* RepositoryProtocols.swift in Sources */,
@@ -736,7 +771,6 @@
 				10000206 /* PlanActivityRowView.swift in Sources */,
 				10000207 /* RecoveryPlanViewModel.swift in Sources */,
 				10000208 /* RecoveryWorkView.swift in Sources */,
-				10000209 /* RecoveryWorkItemRow.swift in Sources */,
 				10000210 /* RecoveryWorkViewModel.swift in Sources */,
 				10000211 /* RecoveryFoundationView.swift in Sources */,
 				10000212 /* TestingModeView.swift in Sources */,
@@ -822,6 +856,7 @@
 				10000089 /* RecentActivityFeed.swift in Sources */,
 				10000309 /* RecentActivityRow.swift in Sources */,
 				10000310 /* ActivityHistoryView.swift in Sources */,
+				10000311 /* ActivityDetailView.swift in Sources */,
 				10000090 /* StreakHeroCard.swift in Sources */,
 				10000091 /* AccountSetupView.swift in Sources */,
 				10000092 /* OnboardingFlow.swift in Sources */,
