@@ -5,83 +5,61 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-// ContentRepo implements ContentRepository using DynamoDB.
+// ContentRepo implements ContentRepository using MongoDB.
 type ContentRepo struct {
-	client *DynamoClient
+	client *MongoClient
 }
 
 // NewContentRepo creates a new ContentRepo.
-func NewContentRepo(client *DynamoClient) *ContentRepo {
+func NewContentRepo(client *MongoClient) *ContentRepo {
 	return &ContentRepo{client: client}
 }
 
 // GetAffirmationPack retrieves an affirmation pack by ID.
-// PK: PACK#{packID}, SK: META
 func (r *ContentRepo) GetAffirmationPack(ctx context.Context, packID string) (*AffirmationPack, error) {
 	var pack AffirmationPack
-	err := r.client.GetItem(ctx, fmt.Sprintf("PACK#%s", packID), "META", &pack)
+	err := r.client.Collection("affirmation_packs").FindOne(ctx, bson.M{"packId": packID}).Decode(&pack)
 	if err != nil {
 		return nil, fmt.Errorf("getting affirmation pack %s: %w", packID, err)
 	}
 	return &pack, nil
 }
 
-// GetAffirmationPacks retrieves all affirmation packs (pack metadata only).
-// This requires a scan with filter for EntityType=AFFIRMATION_PACK and SK=META.
-// For production, consider maintaining a catalog index or separate item for listing.
+// GetAffirmationPacks retrieves all affirmation packs.
 func (r *ContentRepo) GetAffirmationPacks(ctx context.Context) ([]AffirmationPack, error) {
-	result, err := r.client.Scan(ctx, &dynamodb.ScanInput{
-		FilterExpression: aws.String("EntityType = :type AND SK = :sk"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":type": &types.AttributeValueMemberS{Value: "AFFIRMATION_PACK"},
-			":sk":   &types.AttributeValueMemberS{Value: "META"},
-		},
-	})
+	cursor, err := r.client.Collection("affirmation_packs").Find(ctx, bson.M{})
 	if err != nil {
 		return nil, fmt.Errorf("listing affirmation packs: %w", err)
 	}
 
 	var packs []AffirmationPack
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &packs); err != nil {
-		return nil, fmt.Errorf("unmarshaling affirmation packs: %w", err)
+	if err := cursor.All(ctx, &packs); err != nil {
+		return nil, fmt.Errorf("decoding affirmation packs: %w", err)
 	}
-
 	return packs, nil
 }
 
 // GetAffirmationsInPack retrieves all affirmations within a pack.
-// PK: PACK#{packID}, SK begins_with AFFIRMATION#
 func (r *ContentRepo) GetAffirmationsInPack(ctx context.Context, packID string) ([]Affirmation, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("PACK#%s", packID)},
-			":sk": &types.AttributeValueMemberS{Value: "AFFIRMATION#"},
-		},
-	})
+	cursor, err := r.client.Collection("affirmations").Find(ctx, bson.M{"packId": packID})
 	if err != nil {
 		return nil, fmt.Errorf("listing affirmations for pack %s: %w", packID, err)
 	}
 
 	var affirmations []Affirmation
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &affirmations); err != nil {
-		return nil, fmt.Errorf("unmarshaling affirmations: %w", err)
+	if err := cursor.All(ctx, &affirmations); err != nil {
+		return nil, fmt.Errorf("decoding affirmations: %w", err)
 	}
-
 	return affirmations, nil
 }
 
 // GetDevotional retrieves a devotional by day number.
-// PK: CONTENT#devotional, SK: DAY#{day}
 func (r *ContentRepo) GetDevotional(ctx context.Context, day int) (*DevotionalDay, error) {
 	var devotional DevotionalDay
-	err := r.client.GetItem(ctx, "CONTENT#devotional", fmt.Sprintf("DAY#%d", day), &devotional)
+	err := r.client.Collection("devotionals").FindOne(ctx, bson.M{"day": day}).Decode(&devotional)
 	if err != nil {
 		return nil, fmt.Errorf("getting devotional day %d: %w", day, err)
 	}
@@ -89,36 +67,28 @@ func (r *ContentRepo) GetDevotional(ctx context.Context, day int) (*DevotionalDa
 }
 
 // GetPrompts retrieves all prompts, optionally filtered by category.
-// PK: CONTENT#prompts, SK begins_with PROMPT# (or PROMPT#{category}# if filtered)
 func (r *ContentRepo) GetPrompts(ctx context.Context, category string) ([]Prompt, error) {
-	skPrefix := "PROMPT#"
+	filter := bson.M{}
 	if category != "" {
-		skPrefix = fmt.Sprintf("PROMPT#%s#", category)
+		filter["category"] = category
 	}
 
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: "CONTENT#prompts"},
-			":sk": &types.AttributeValueMemberS{Value: skPrefix},
-		},
-	})
+	cursor, err := r.client.Collection("prompts").Find(ctx, filter)
 	if err != nil {
 		return nil, fmt.Errorf("listing prompts: %w", err)
 	}
 
 	var prompts []Prompt
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &prompts); err != nil {
-		return nil, fmt.Errorf("unmarshaling prompts: %w", err)
+	if err := cursor.All(ctx, &prompts); err != nil {
+		return nil, fmt.Errorf("decoding prompts: %w", err)
 	}
 	return prompts, nil
 }
 
 // GetPrompt retrieves a specific prompt by ID.
-// PK: CONTENT#prompts, SK: PROMPT#{promptID}
 func (r *ContentRepo) GetPrompt(ctx context.Context, promptID string) (*Prompt, error) {
 	var prompt Prompt
-	err := r.client.GetItem(ctx, "CONTENT#prompts", fmt.Sprintf("PROMPT#%s", promptID), &prompt)
+	err := r.client.Collection("prompts").FindOne(ctx, bson.M{"promptId": promptID}).Decode(&prompt)
 	if err != nil {
 		return nil, fmt.Errorf("getting prompt %s: %w", promptID, err)
 	}
@@ -126,7 +96,7 @@ func (r *ContentRepo) GetPrompt(ctx context.Context, promptID string) (*Prompt, 
 }
 
 // GetRandomPrompt retrieves a random prompt, optionally filtered by category.
-// Fetches all matching prompts and picks one randomly.
+// Fetches all matching prompts and picks one using a simple time-based selection.
 func (r *ContentRepo) GetRandomPrompt(ctx context.Context, category string) (*Prompt, error) {
 	prompts, err := r.GetPrompts(ctx, category)
 	if err != nil {

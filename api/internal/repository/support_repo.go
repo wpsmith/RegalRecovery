@@ -4,51 +4,42 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-// SupportRepo implements SupportRepository using DynamoDB.
+// SupportRepo implements SupportRepository using MongoDB.
 type SupportRepo struct {
-	client *DynamoClient
+	client *MongoClient
 }
 
 // NewSupportRepo creates a new SupportRepo.
-func NewSupportRepo(client *DynamoClient) *SupportRepo {
+func NewSupportRepo(client *MongoClient) *SupportRepo {
 	return &SupportRepo{client: client}
 }
 
 // ListContacts lists all support contacts for a user.
-// PK: USER#{userID}, SK begins_with CONTACT#
 func (r *SupportRepo) ListContacts(ctx context.Context, userID string) ([]SupportContact, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("USER#%s", userID)},
-			":sk": &types.AttributeValueMemberS{Value: "CONTACT#"},
-		},
-	})
+	cursor, err := r.client.Collection("support_contacts").Find(ctx, bson.M{"userId": userID})
 	if err != nil {
 		return nil, fmt.Errorf("listing contacts for user %s: %w", userID, err)
 	}
 
 	var contacts []SupportContact
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &contacts); err != nil {
-		return nil, fmt.Errorf("unmarshaling contacts: %w", err)
+	if err := cursor.All(ctx, &contacts); err != nil {
+		return nil, fmt.Errorf("decoding contacts for user %s: %w", userID, err)
 	}
 
 	return contacts, nil
 }
 
 // GetContact retrieves a specific contact by ID.
-// PK: USER#{userID}, SK: CONTACT#{contactID}
 func (r *SupportRepo) GetContact(ctx context.Context, userID, contactID string) (*SupportContact, error) {
 	var contact SupportContact
-	err := r.client.GetItem(ctx, fmt.Sprintf("USER#%s", userID), fmt.Sprintf("CONTACT#%s", contactID), &contact)
+	err := r.client.Collection("support_contacts").FindOne(ctx, bson.M{
+		"userId":    userID,
+		"contactId": contactID,
+	}).Decode(&contact)
 	if err != nil {
 		return nil, fmt.Errorf("getting contact %s for user %s: %w", contactID, userID, err)
 	}
@@ -57,12 +48,9 @@ func (r *SupportRepo) GetContact(ctx context.Context, userID, contactID string) 
 
 // CreateContact creates a new support contact.
 func (r *SupportRepo) CreateContact(ctx context.Context, contact *SupportContact) error {
-	now := time.Now().UTC().Format(time.RFC3339)
-	contact.CreatedAt = now
-	contact.ModifiedAt = now
-	contact.EntityType = "CONTACT"
+	SetBaseDocumentDefaults(&contact.BaseDocument)
 
-	if err := r.client.PutItem(ctx, contact); err != nil {
+	if _, err := r.client.Collection("support_contacts").InsertOne(ctx, contact); err != nil {
 		return fmt.Errorf("creating contact: %w", err)
 	}
 
@@ -71,9 +59,12 @@ func (r *SupportRepo) CreateContact(ctx context.Context, contact *SupportContact
 
 // UpdateContact updates an existing support contact.
 func (r *SupportRepo) UpdateContact(ctx context.Context, contact *SupportContact) error {
-	contact.ModifiedAt = time.Now().UTC().Format(time.RFC3339)
+	UpdateModified(&contact.BaseDocument)
 
-	if err := r.client.PutItem(ctx, contact); err != nil {
+	if _, err := r.client.Collection("support_contacts").ReplaceOne(ctx, bson.M{
+		"userId":    contact.UserID,
+		"contactId": contact.ContactID,
+	}, contact); err != nil {
 		return fmt.Errorf("updating contact: %w", err)
 	}
 
@@ -81,54 +72,46 @@ func (r *SupportRepo) UpdateContact(ctx context.Context, contact *SupportContact
 }
 
 // ListPermissions lists all permissions for a user.
-// PK: USER#{userID}, SK begins_with PERMISSION#
 func (r *SupportRepo) ListPermissions(ctx context.Context, userID string) ([]Permission, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("USER#%s", userID)},
-			":sk": &types.AttributeValueMemberS{Value: "PERMISSION#"},
-		},
-	})
+	cursor, err := r.client.Collection("permissions").Find(ctx, bson.M{"userId": userID})
 	if err != nil {
 		return nil, fmt.Errorf("listing permissions for user %s: %w", userID, err)
 	}
 
 	var permissions []Permission
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &permissions); err != nil {
-		return nil, fmt.Errorf("unmarshaling permissions: %w", err)
+	if err := cursor.All(ctx, &permissions); err != nil {
+		return nil, fmt.Errorf("decoding permissions for user %s: %w", userID, err)
 	}
 
 	return permissions, nil
 }
 
 // GetPermissionsForContact lists permissions for a specific contact.
-// PK: USER#{userID}, SK begins_with PERMISSION#{contactID}#
 func (r *SupportRepo) GetPermissionsForContact(ctx context.Context, userID, contactID string) ([]Permission, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("USER#%s", userID)},
-			":sk": &types.AttributeValueMemberS{Value: fmt.Sprintf("PERMISSION#%s#", contactID)},
-		},
+	cursor, err := r.client.Collection("permissions").Find(ctx, bson.M{
+		"userId":    userID,
+		"contactId": contactID,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("listing permissions for user %s contact %s: %w", userID, contactID, err)
 	}
 
 	var permissions []Permission
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &permissions); err != nil {
-		return nil, fmt.Errorf("unmarshaling permissions: %w", err)
+	if err := cursor.All(ctx, &permissions); err != nil {
+		return nil, fmt.Errorf("decoding permissions for user %s contact %s: %w", userID, contactID, err)
 	}
 
 	return permissions, nil
 }
 
 // CheckPermission checks if a specific permission exists.
-// PK: USER#{userID}, SK: PERMISSION#{contactID}#{dataCategory}
 func (r *SupportRepo) CheckPermission(ctx context.Context, userID, contactID, dataCategory string) (*Permission, error) {
 	var permission Permission
-	err := r.client.GetItem(ctx, fmt.Sprintf("USER#%s", userID), fmt.Sprintf("PERMISSION#%s#%s", contactID, dataCategory), &permission)
+	err := r.client.Collection("permissions").FindOne(ctx, bson.M{
+		"userId":       userID,
+		"contactId":    contactID,
+		"dataCategory": dataCategory,
+	}).Decode(&permission)
 	if err != nil {
 		return nil, fmt.Errorf("checking permission for user %s contact %s category %s: %w", userID, contactID, dataCategory, err)
 	}
@@ -137,12 +120,9 @@ func (r *SupportRepo) CheckPermission(ctx context.Context, userID, contactID, da
 
 // GrantPermission grants a permission to a contact.
 func (r *SupportRepo) GrantPermission(ctx context.Context, permission *Permission) error {
-	now := time.Now().UTC().Format(time.RFC3339)
-	permission.CreatedAt = now
-	permission.ModifiedAt = now
-	permission.EntityType = "PERMISSION"
+	SetBaseDocumentDefaults(&permission.BaseDocument)
 
-	if err := r.client.PutItem(ctx, permission); err != nil {
+	if _, err := r.client.Collection("permissions").InsertOne(ctx, permission); err != nil {
 		return fmt.Errorf("granting permission: %w", err)
 	}
 
@@ -151,7 +131,11 @@ func (r *SupportRepo) GrantPermission(ctx context.Context, permission *Permissio
 
 // RevokePermission revokes a permission.
 func (r *SupportRepo) RevokePermission(ctx context.Context, userID, contactID, dataCategory string) error {
-	if err := r.client.DeleteItem(ctx, fmt.Sprintf("USER#%s", userID), fmt.Sprintf("PERMISSION#%s#%s", contactID, dataCategory)); err != nil {
+	if _, err := r.client.Collection("permissions").DeleteOne(ctx, bson.M{
+		"userId":       userID,
+		"contactId":    contactID,
+		"dataCategory": dataCategory,
+	}); err != nil {
 		return fmt.Errorf("revoking permission for user %s contact %s category %s: %w", userID, contactID, dataCategory, err)
 	}
 
