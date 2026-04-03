@@ -1,6 +1,6 @@
 # Regal Recovery Domain Services
 
-This directory contains the domain service layer for the Regal Recovery backend. Domain services implement business logic and have NO knowledge of HTTP, Lambda, or DynamoDB. They accept and return domain types and depend on repository interfaces defined locally.
+This directory contains the domain service layer for the Regal Recovery backend. Domain services implement business logic and have NO knowledge of HTTP, Lambda, or MongoDB. They accept and return domain types and depend on repository interfaces defined locally.
 
 ## Architecture Principles
 
@@ -224,7 +224,7 @@ Domain services are highly testable:
 
 To implement HTTP handlers or Lambda handlers:
 1. Import domain service packages
-2. Implement repository interfaces (DynamoDB adapters)
+2. Implement repository interfaces (MongoDB adapters)
 3. Wire dependencies via constructors
 4. Format domain responses into Siemens envelopes
 5. Add correlation IDs, API versioning headers
@@ -234,4 +234,4 @@ To implement HTTP handlers or Lambda handlers:
 - Standard library (`context`, `time`, `errors`, `fmt`, `crypto/sha256`)
 - `github.com/hashicorp/go-version` (semver comparison for flags)
 
-No HTTP, Lambda, or DynamoDB dependencies in domain layer.
+No HTTP, Lambda, or MongoDB dependencies in domain layer.
