@@ -77,7 +77,7 @@ struct ActivitiesListView: View {
     private var fasterSubtitle: String {
         if let latest = fasterEntries.first {
             let dayLabel = Calendar.current.isDateInToday(latest.date) ? "Today" : relativeDay(latest.date)
-            let stage = FASTERStage(rawValue: latest.stage) ?? .forgettingPriorities
+            let stage = FASTERStage(rawValue: latest.assessedStage) ?? .restoration
             return "\(dayLabel), \(stage.name)"
         }
         return "No entries"
