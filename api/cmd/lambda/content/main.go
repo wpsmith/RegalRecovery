@@ -17,6 +17,7 @@ import (
 
 // mongoClient is declared at package level for connection reuse across Lambda invocations.
 var mongoClient *repository.MongoClient
+var contentClient *repository.ContentClient
 
 func init() {
 	ctx := context.Background()
@@ -28,6 +29,9 @@ func init() {
 		slog.Error("failed to connect to MongoDB", "error", err)
 		os.Exit(1)
 	}
+
+	// Create content database client using the same underlying connection
+	contentClient = repository.NewContentClient(mongoClient.Client(), cfg.MongoContentDatabase)
 }
 
 func main() {
@@ -36,6 +40,9 @@ func main() {
 		Level: slog.LevelInfo,
 	}))
 	slog.SetDefault(logger)
+
+	// Create content repository
+	_ = repository.NewContentRepo(contentClient)
 
 	// Create HTTP router
 	mux := http.NewServeMux()
@@ -64,9 +71,6 @@ func main() {
 		middleware.AuthMiddleware,
 		middleware.TenantMiddleware,
 	)
-
-	// Suppress "declared but not used" errors during development
-	_ = mongoClient
 
 	// Create Lambda adapter and start
 	adapter := lambdahttp.NewAdapter(handler)
