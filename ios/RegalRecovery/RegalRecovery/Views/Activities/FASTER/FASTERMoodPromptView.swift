@@ -3,49 +3,66 @@ import SwiftUI
 struct FASTERMoodPromptView: View {
     let onSelect: (Int) -> Void
 
-    var body: some View {
-        VStack(spacing: 20) {
-            Text("How are you feeling overall?")
-                .font(RRFont.title2)
-                .foregroundStyle(Color.rrText)
+    private let moods: [(score: Int, icon: String, label: String)] = [
+        (1, "face.smiling.inverse", "Great"),
+        (2, "face.smiling", "Good"),
+        (3, "minus.circle", "Okay"),
+        (4, "cloud", "Struggling"),
+        (5, "cloud.rain", "Rough"),
+    ]
 
-            Text("This helps us understand your current state before assessing specific indicators.")
-                .font(RRFont.body)
-                .foregroundStyle(Color.rrTextSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
+    var body: some View {
+        VStack(spacing: 32) {
+            Spacer()
 
             VStack(spacing: 12) {
-                ForEach([
-                    (score: 5, label: "Great", emoji: "😊", color: Color.rrSuccess),
-                    (score: 4, label: "Good", emoji: "🙂", color: Color.rrPrimary),
-                    (score: 3, label: "Okay", emoji: "😐", color: Color.yellow),
-                    (score: 2, label: "Struggling", emoji: "😟", color: Color.orange),
-                    (score: 1, label: "Very Difficult", emoji: "😰", color: Color.rrDestructive)
-                ], id: \.score) { item in
+                Text("How are you doing right now?")
+                    .font(RRFont.title)
+                    .foregroundStyle(Color.rrText)
+                    .multilineTextAlignment(.center)
+
+                Text("Just a quick gut check before we begin.")
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrTextSecondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal)
+
+            HStack(spacing: 16) {
+                ForEach(moods, id: \.score) { mood in
                     Button {
-                        onSelect(item.score)
+                        onSelect(mood.score)
                     } label: {
-                        HStack {
-                            Text(item.emoji)
-                                .font(.title)
-
-                            Text(item.label)
-                                .font(RRFont.headline)
-                                .foregroundStyle(Color.rrText)
-
-                            Spacer()
+                        VStack(spacing: 8) {
+                            Image(systemName: mood.icon)
+                                .font(.system(size: 36))
+                                .foregroundStyle(moodColor(mood.score))
+                            Text(mood.label)
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
                         }
-                        .padding()
-                        .background(item.color.opacity(0.1))
-                        .cornerRadius(12)
+                        .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("\(mood.label), mood \(mood.score) of 5")
                 }
             }
             .padding(.horizontal)
+
+            Spacer()
+            Spacer()
         }
-        .padding(.vertical)
+    }
+
+    private func moodColor(_ score: Int) -> Color {
+        switch score {
+        case 1: return Color(red: 0.176, green: 0.416, blue: 0.310)  // restoration green
+        case 2: return Color(red: 0.482, green: 0.620, blue: 0.239)  // olive green
+        case 3: return Color(red: 0.788, green: 0.635, blue: 0.153)  // amber
+        case 4: return Color(red: 0.831, green: 0.502, blue: 0.165)  // orange
+        case 5: return Color(red: 0.651, green: 0.239, blue: 0.251)  // crimson
+        default: return Color.rrTextSecondary
+        }
     }
 }
 
@@ -53,4 +70,5 @@ struct FASTERMoodPromptView: View {
     FASTERMoodPromptView { score in
         print("Selected mood: \(score)")
     }
+    .background(Color.rrBackground)
 }
