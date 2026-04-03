@@ -21,6 +21,9 @@ type Config struct {
 	// MongoDatabase is the MongoDB database name
 	MongoDatabase string
 
+	// MongoContentDatabase is the MongoDB content database name
+	MongoContentDatabase string
+
 	// ValkeyAddr is the Valkey (Redis-compatible) server address
 	ValkeyAddr string
 
@@ -54,11 +57,12 @@ type Config struct {
 // using sensible defaults for local development when variables are not set.
 func Load() Config {
 	return Config{
-		Environment:        getEnv("ENVIRONMENT", "local"),
-		AWSRegion:          getEnv("AWS_REGION", "us-east-1"),
-		MongoURI:           getEnv("MONGODB_URI", "mongodb://localhost:27017"),
-		MongoDatabase:      getEnv("MONGODB_DATABASE", "regal-recovery"),
-		ValkeyAddr:         getEnv("VALKEY_ADDR", "localhost:6380"),
+		Environment:          getEnv("ENVIRONMENT", "local"),
+		AWSRegion:            getEnv("AWS_REGION", "us-east-1"),
+		MongoURI:             getEnv("MONGODB_URI", "mongodb://localhost:27017"),
+		MongoDatabase:        getEnv("MONGODB_DATABASE", "regal-recovery"),
+		MongoContentDatabase: getEnv("MONGODB_CONTENT_DATABASE", "regal-recovery-content"),
+		ValkeyAddr:           getEnv("VALKEY_ADDR", "localhost:6380"),
 		SNSTopicARN:        getEnv("SNS_TOPIC_ARN", ""),
 		CognitoPoolID:      getEnv("COGNITO_POOL_ID", ""),
 		LogLevel:           getEnv("LOG_LEVEL", "info"),

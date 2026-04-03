@@ -42,6 +42,11 @@ func (m *MongoClient) Collection(name string) *mongo.Collection {
 	return m.database.Collection(name)
 }
 
+// Client returns the underlying MongoDB client.
+func (m *MongoClient) Client() *mongo.Client {
+	return m.client
+}
+
 // Disconnect closes the MongoDB connection.
 func (m *MongoClient) Disconnect(ctx context.Context) error {
 	return m.client.Disconnect(ctx)
