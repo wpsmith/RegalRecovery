@@ -116,17 +116,47 @@ type FlagRepository interface {
 
 // ContentRepository defines the interface for content operations.
 type ContentRepository interface {
-	// GetAffirmationPack retrieves an affirmation pack by ID.
-	GetAffirmationPack(ctx context.Context, packID string) (*AffirmationPack, error)
+	// Feature Abouts
+	GetFeatureAbout(ctx context.Context, slug string) (*FeatureAbout, error)
+	ListFeatureAbouts(ctx context.Context) ([]FeatureAbout, error)
+	ListFeatureAboutsByCategory(ctx context.Context, category string) ([]FeatureAbout, error)
 
-	// GetAffirmationPacks retrieves all affirmation packs (pack metadata only).
-	GetAffirmationPacks(ctx context.Context) ([]AffirmationPack, error)
+	// Affirmation Packs
+	GetAffirmationPack(ctx context.Context, packID string) (*ContentAffirmationPack, error)
+	ListAffirmationPacks(ctx context.Context) ([]ContentAffirmationPack, error)
+	ListAffirmationsInPack(ctx context.Context, packID string) ([]ContentAffirmation, error)
 
-	// GetAffirmationsInPack retrieves all affirmations within a pack.
-	GetAffirmationsInPack(ctx context.Context, packID string) ([]Affirmation, error)
+	// Devotional Packs
+	GetDevotionalPack(ctx context.Context, packID string) (*DevotionalPack, error)
+	ListDevotionalPacks(ctx context.Context) ([]DevotionalPack, error)
+	GetDevotional(ctx context.Context, packID string, day int) (*ContentDevotional, error)
+	ListDevotionalsInPack(ctx context.Context, packID string) ([]ContentDevotional, error)
 
-	// GetDevotional retrieves a devotional by day number.
-	GetDevotional(ctx context.Context, day int) (*DevotionalDay, error)
+	// Journal Prompts
+	GetJournalPrompt(ctx context.Context, promptID string) (*JournalPrompt, error)
+	ListJournalPrompts(ctx context.Context, category string) ([]JournalPrompt, error)
+	ListJournalPromptsByTag(ctx context.Context, tag string) ([]JournalPrompt, error)
+
+	// Glossary
+	ListGlossaryTerms(ctx context.Context) ([]GlossaryTerm, error)
+
+	// Evening Review
+	ListEveningReviewQuestions(ctx context.Context, dimension string) ([]EveningReviewQuestion, error)
+
+	// Acting-In
+	ListActingInBehaviors(ctx context.Context) ([]ActingInBehavior, error)
+
+	// Needs
+	ListNeeds(ctx context.Context) ([]Need, error)
+
+	// Sobriety Reset
+	ListSobrietyResetMessages(ctx context.Context) ([]SobrietyResetMessage, error)
+	GetRandomSobrietyResetMessage(ctx context.Context) (*SobrietyResetMessage, error)
+
+	// Themes
+	ListThemes(ctx context.Context) ([]Theme, error)
+	ListThemesByTier(ctx context.Context, tier string) ([]Theme, error)
+	GetTheme(ctx context.Context, themeID string) (*Theme, error)
 }
 
 // SupportRepository defines the interface for support network operations.
