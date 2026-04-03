@@ -546,24 +546,63 @@ final class RRFASTEREntry {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var date: Date
-    var stage: Int  // 0-5 mapping to FASTERStage
+    var assessedStage: Int  // 0-6 mapping to FASTERStage (0=restoration, 1=F, ..., 6=R)
+    var moodScore: Int      // 1-5 opening mood prompt
+    var selectedIndicatorsJSON: String  // JSON-encoded [String] of all selected indicators
+    var journalInsight: String   // "Ah-ha" field
+    var journalWarning: String   // "Uh-oh" field
+    var journalFreeText: String  // optional free-text
     var createdAt: Date
     var modifiedAt: Date
+
+    /// Decoded selected indicators from JSON storage.
+    var selectedIndicators: [String] {
+        get {
+            guard let data = selectedIndicatorsJSON.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([String].self, from: data) else {
+                return []
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                selectedIndicatorsJSON = json
+            }
+        }
+    }
 
     init(
         id: UUID = UUID(),
         userId: UUID,
         date: Date,
-        stage: Int,
+        assessedStage: Int,
+        moodScore: Int = 3,
+        selectedIndicators: [String] = [],
+        journalInsight: String = "",
+        journalWarning: String = "",
+        journalFreeText: String = "",
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
         self.id = id
         self.userId = userId
         self.date = date
-        self.stage = stage
+        self.assessedStage = assessedStage
+        self.moodScore = moodScore
+        self.journalInsight = journalInsight
+        self.journalWarning = journalWarning
+        self.journalFreeText = journalFreeText
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
+
+        // Encode selectedIndicators to JSON
+        if let data = try? JSONEncoder().encode(selectedIndicators),
+           let json = String(data: data, encoding: .utf8) {
+            self.selectedIndicatorsJSON = json
+        } else {
+            self.selectedIndicatorsJSON = "[]"
+        }
     }
 }
 

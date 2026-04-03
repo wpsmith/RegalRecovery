@@ -164,7 +164,8 @@ enum ActivitySection: String, CaseIterable {
 // MARK: - FASTER Scale
 
 enum FASTERStage: Int, CaseIterable, Identifiable {
-    case forgettingPriorities = 0
+    case restoration = 0
+    case forgettingPriorities
     case anxiety
     case speedingUp
     case tickedOff
@@ -175,6 +176,7 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
 
     var name: String {
         switch self {
+        case .restoration: return "Restoration"
         case .forgettingPriorities: return "Forgetting Priorities"
         case .anxiety: return "Anxiety"
         case .speedingUp: return "Speeding Up"
@@ -185,36 +187,176 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
     }
 
     var letter: String {
-        String(name.prefix(1))
+        switch self {
+        case .restoration: return "✦"
+        case .forgettingPriorities: return "F"
+        case .anxiety: return "A"
+        case .speedingUp: return "S"
+        case .tickedOff: return "T"
+        case .exhausted: return "E"
+        case .relapse: return "R"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .restoration: return "The starting line"
+        case .forgettingPriorities: return "The quiet drift"
+        case .anxiety: return "The background noise gets louder"
+        case .speedingUp: return "Running from the pain you won't name"
+        case .tickedOff: return "Anger takes the wheel"
+        case .exhausted: return "The crash"
+        case .relapse: return "The cycle restarts"
+        }
     }
 
     var description: String {
         switch self {
-        case .forgettingPriorities: return "Losing focus on recovery priorities, skipping routines, drifting from commitments."
-        case .anxiety: return "Worry, restlessness, difficulty concentrating, feeling overwhelmed by daily pressures."
-        case .speedingUp: return "Taking on too much, staying busy to avoid feelings, rushing through the day."
-        case .tickedOff: return "Irritability, resentment, blaming others, feeling entitled or self-righteous."
-        case .exhausted: return "Physical and emotional depletion, isolation, feeling hopeless or burned out."
-        case .relapse: return "Acting out on addictive behaviors, breaking sobriety commitment."
+        case .restoration:
+            return "You're being honest, staying connected, keeping your commitments, and dealing with problems as they come up. No current secrets. This is where recovery lives — not perfection, but presence."
+        case .forgettingPriorities:
+            return "The most subtle stage. You start drifting from the things that keep you healthy — skipping a meeting, losing touch with your partner, spending more time scrolling than connecting. Overconfidence is the hallmark."
+        case .anxiety:
+            return "A growing sense of unease moves in. Old negative thoughts replay. Your brain picks up on the drift and tags it as danger. Sleep gets worse, you become more judgmental, and current stresses start feeling catastrophic."
+        case .speedingUp:
+            return "You can't outrun anxiety, but you're going to try. Relentless busyness — staying so occupied you never sit with your feelings. Deceptive because culture rewards it. Underneath is someone terrified to slow down."
+        case .tickedOff:
+            return "Anger has become your primary coping mechanism. It works temporarily — provides adrenaline, makes you feel powerful, gives you someone to blame. Black-and-white thinking, keeping score, defensiveness, self-pity."
+        case .exhausted:
+            return "The adrenaline from anger has run out. Heavy fog — depression, hopelessness, emotional numbness. Cravings become overwhelming because your brain is desperately searching for anything that feels normal. This is the danger zone."
+        case .relapse:
+            return "The behavior returns. And immediately, the shame arrives. The cruelest part: shame drives isolation, which restarts the entire FASTER descent. Relapse is not the end of recovery — it is information."
         }
     }
 
     var color: Color {
         switch self {
-        case .forgettingPriorities: return .rrSuccess
-        case .anxiety: return .yellow
-        case .speedingUp: return .orange
-        case .tickedOff: return .orange
-        case .exhausted: return .rrDestructive
-        case .relapse: return .rrDestructive
+        case .restoration: return Color(red: 0.176, green: 0.416, blue: 0.310)       // #2D6A4F
+        case .forgettingPriorities: return Color(red: 0.482, green: 0.620, blue: 0.239) // #7B9E3D
+        case .anxiety: return Color(red: 0.788, green: 0.635, blue: 0.153)             // #C9A227
+        case .speedingUp: return Color(red: 0.831, green: 0.502, blue: 0.165)          // #D4802A
+        case .tickedOff: return Color(red: 0.788, green: 0.365, blue: 0.180)           // #C95D2E
+        case .exhausted: return Color(red: 0.651, green: 0.239, blue: 0.251)           // #A63D40
+        case .relapse: return Color(red: 0.420, green: 0.153, blue: 0.216)             // #6B2737
+        }
+    }
+
+    var indicators: [String] {
+        switch self {
+        case .restoration:
+            return [
+                "No active secrets",
+                "Keeping commitments",
+                "Honest relationships",
+                "Attending meetings",
+                "Processing pain openly",
+                "Growing in connection",
+            ]
+        case .forgettingPriorities:
+            return [
+                "Skipping meetings",
+                "Isolating",
+                "Keeping small secrets",
+                "Sarcasm and cynicism",
+                "Overconfidence",
+                "Procrastinating",
+                "Losing interest in growth",
+                "Entertainment as escape",
+            ]
+        case .anxiety:
+            return [
+                "Vague worry or dread",
+                "Negative self-talk replaying",
+                "Sleep problems",
+                "Perfectionism",
+                "Judging others harshly",
+                "People-pleasing",
+                "Flirting for reassurance",
+                "Unrealistic to-do lists",
+            ]
+        case .speedingUp:
+            return [
+                "Workaholic behavior",
+                "Can't relax or sit still",
+                "Skipping meals",
+                "Excessive caffeine",
+                "Over-exercising",
+                "Racing thoughts at night",
+                "Overspending",
+                "Constant device use",
+            ]
+        case .tickedOff:
+            return [
+                "Resentment and bitterness",
+                "Black-and-white thinking",
+                "Blaming everyone else",
+                "Defensiveness",
+                "Road rage",
+                "Self-pity",
+                "Silent treatment",
+                "Intimidation",
+            ]
+        case .exhausted:
+            return [
+                "Emotional numbness",
+                "Hopelessness",
+                "Spontaneous crying",
+                "Intense cravings",
+                "Survival mode",
+                "Missing work or obligations",
+                "Confusion and poor decisions",
+                "Thoughts of self-harm",
+            ]
+        case .relapse:
+            return [
+                "Acting out on addictive behavior",
+                "Breaking sobriety commitment",
+            ]
+        }
+    }
+
+    /// Adaptive content shown after assessment for this stage.
+    var adaptiveContent: (title: String, body: String) {
+        switch self {
+        case .restoration:
+            return ("You're in Restoration", "Keep doing what you're doing. Stay connected, keep your commitments, and continue processing life honestly with the people around you. Recovery lives in the daily practice.")
+        case .forgettingPriorities:
+            return ("Priority Check", "Take a moment to review your commitments. Are you attending your meetings? Have you called your accountability partner this week? Are there small secrets forming? Reconnect with one priority today.")
+        case .anxiety:
+            return ("Ground Yourself", "Try the 5-4-3-2-1 grounding exercise: Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste. Take three slow breaths. The anxiety is a signal — not a verdict.")
+        case .speedingUp:
+            return ("Slow Down", "Your busyness is a shield against feeling. Challenge: take 10 minutes right now to do absolutely nothing. No phone, no tasks. Just sit. Notice what feelings come up when you stop running.")
+        case .tickedOff:
+            return ("Name What's Underneath", "Anger feels powerful, but it's masking something. What are you really feeling beneath the irritation? Try naming the emotion without judging it. Consider reaching out to your counselor or accountability partner today.")
+        case .exhausted:
+            return ("You Need Support Now", "You're running on empty and your coping capacity is depleted. This is not the time to push through alone. Please reach out to your accountability partner, sponsor, or counselor today. You don't have to explain everything — just say you're struggling.")
+        case .relapse:
+            return ("This Is Not the End", "Relapse is painful, but it is not your identity. The shame you're feeling right now is the exact force that restarts the cycle — don't let it drive you into isolation. Call your accountability partner or sponsor. If you're in crisis, contact the 988 Suicide & Crisis Lifeline (call or text 988).")
         }
     }
 }
 
+/// Check-in phase for the multi-step FASTER Scale flow.
+enum CheckInPhase {
+    case mood
+    case scale
+    case results
+}
+
 struct FASTEREntry: Identifiable {
-    let id = UUID()
+    let id: UUID
     let date: Date
     let stage: FASTERStage
+    let moodScore: Int
+    let selectedIndicators: [String]
+
+    init(id: UUID = UUID(), date: Date, stage: FASTERStage, moodScore: Int = 3, selectedIndicators: [String] = []) {
+        self.id = id
+        self.date = date
+        self.stage = stage
+        self.moodScore = moodScore
+        self.selectedIndicators = selectedIndicators
+    }
 }
 
 // MARK: - Check-In
