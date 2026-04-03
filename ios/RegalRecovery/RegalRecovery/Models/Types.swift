@@ -164,6 +164,7 @@ enum ActivitySection: String, CaseIterable {
 // MARK: - FASTER Scale
 
 enum FASTERStage: Int, CaseIterable, Identifiable {
+    case restoration = -1
     case forgettingPriorities = 0
     case anxiety
     case speedingUp
@@ -175,6 +176,7 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
 
     var name: String {
         switch self {
+        case .restoration: return "Restoration"
         case .forgettingPriorities: return "Forgetting Priorities"
         case .anxiety: return "Anxiety"
         case .speedingUp: return "Speeding Up"
@@ -185,11 +187,15 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
     }
 
     var letter: String {
-        String(name.prefix(1))
+        switch self {
+        case .restoration: return "R+"
+        default: return String(name.prefix(1))
+        }
     }
 
     var description: String {
         switch self {
+        case .restoration: return "Actively engaged in recovery, maintaining healthy routines, connected to support."
         case .forgettingPriorities: return "Losing focus on recovery priorities, skipping routines, drifting from commitments."
         case .anxiety: return "Worry, restlessness, difficulty concentrating, feeling overwhelmed by daily pressures."
         case .speedingUp: return "Taking on too much, staying busy to avoid feelings, rushing through the day."
@@ -201,12 +207,129 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
 
     var color: Color {
         switch self {
+        case .restoration: return Color(red: 0.176, green: 0.416, blue: 0.310)
         case .forgettingPriorities: return .rrSuccess
         case .anxiety: return .yellow
         case .speedingUp: return .orange
         case .tickedOff: return .orange
         case .exhausted: return .rrDestructive
         case .relapse: return .rrDestructive
+        }
+    }
+
+    var indicators: [String] {
+        switch self {
+        case .restoration:
+            return [
+                "Attending meetings regularly",
+                "Maintaining daily devotional",
+                "Honest with accountability partner",
+                "Keeping commitments",
+                "Healthy sleep schedule",
+                "Exercising regularly",
+                "Connected to support network",
+            ]
+        case .forgettingPriorities:
+            return [
+                "Isolating from others",
+                "Keeping minor secrets",
+                "Sarcastic or cynical attitude",
+                "Procrastinating on recovery work",
+                "Breaking small commitments",
+                "Overconfidence in recovery",
+                "Preoccupied with entertainment",
+                "Skipping meetings or quiet time",
+            ]
+        case .anxiety:
+            return [
+                "Sleep problems or insomnia",
+                "Vague worry or dread",
+                "Difficulty concentrating",
+                "Nervous energy or fidgeting",
+                "Avoiding specific people or places",
+                "Increased caffeine or sugar intake",
+                "Obsessing over things I can't control",
+            ]
+        case .speedingUp:
+            return [
+                "Taking on too many tasks",
+                "Staying constantly busy",
+                "Difficulty sitting still",
+                "Rushing through conversations",
+                "Skipping meals or self-care",
+                "Working excessive hours",
+                "Saying yes to everything",
+                "Neglecting relationships",
+            ]
+        case .tickedOff:
+            return [
+                "Irritable over small things",
+                "Resentment toward someone",
+                "Blaming others for problems",
+                "Feeling entitled or self-righteous",
+                "Road rage or short temper",
+                "Keeping score in relationships",
+                "Sarcasm that cuts",
+            ]
+        case .exhausted:
+            return [
+                "Physically drained constantly",
+                "Emotionally numb or flat",
+                "Withdrawing from everyone",
+                "Feeling hopeless about recovery",
+                "Can't see a way forward",
+                "Fantasizing about acting out",
+                "Stopped caring about consequences",
+            ]
+        case .relapse:
+            return [
+                "Acted out on addictive behavior",
+                "Broke sobriety commitment",
+                "Lying to cover up behavior",
+                "Bingeing or escalating behavior",
+                "Planning next opportunity to act out",
+                "Complete disconnect from support",
+            ]
+        }
+    }
+
+    var adaptiveContent: (title: String, body: String) {
+        switch self {
+        case .restoration:
+            return (
+                "You're in Restoration",
+                "Keep up the great work. Stay connected to your support network, maintain your routines, and remember — consistency is what got you here. Consider encouraging someone else in their recovery today."
+            )
+        case .forgettingPriorities:
+            return (
+                "Priority Check",
+                "You may be drifting from your recovery foundations. Review your commitments: Are you attending meetings? Keeping your quiet time? Being honest with your accountability partner? Small course corrections now prevent bigger problems later."
+            )
+        case .anxiety:
+            return (
+                "Grounding Exercise",
+                "Anxiety is a signal, not a sentence. Try the 5-4-3-2-1 technique: notice 5 things you see, 4 you can touch, 3 you hear, 2 you smell, 1 you taste. Then take three slow breaths. You don't have to figure everything out right now."
+            )
+        case .speedingUp:
+            return (
+                "Slow Down Challenge",
+                "Busyness is a way of avoiding what's underneath. Your challenge: take 10 minutes right now to do absolutely nothing. No phone, no tasks. Just be still. What feelings come up when you stop?"
+            )
+        case .tickedOff:
+            return (
+                "Name the Feeling",
+                "Anger often masks hurt, fear, or shame. Before reacting, ask: What am I really feeling beneath the irritation? Who am I really angry at? Consider reaching out to your accountability partner to talk it through."
+            )
+        case .exhausted:
+            return (
+                "You Need Support Right Now",
+                "You're in a critical place. This is not the time to isolate. Please reach out to your accountability partner, sponsor, or counselor today — not tomorrow. You don't have to have the words; just make the call."
+            )
+        case .relapse:
+            return (
+                "You Are Not Beyond Recovery",
+                "A relapse is not the end of your story. Right now, the most important thing is to be honest with someone safe. Contact your accountability partner or sponsor. If you're in crisis, use the SOS button. Grace is real, and so is your next step forward."
+            )
         }
     }
 }
@@ -389,6 +512,23 @@ struct CommitmentStatus {
 
 // MARK: - Recent Activity
 
+enum HistoryItemType: String {
+    case morningCommitment
+    case eveningReview
+    case recoveryCheckIn
+    case journal
+    case emotionalJournal
+    case fasterScale
+    case urgeLog
+    case mood
+    case gratitude
+    case prayer
+    case exercise
+    case phoneCall
+    case meeting
+    case spouseCheckIn
+}
+
 struct RecentActivity: Identifiable {
     let id = UUID()
     let title: String
@@ -396,6 +536,8 @@ struct RecentActivity: Identifiable {
     let time: String
     let icon: String
     let iconColor: Color
+    var sourceType: HistoryItemType?
+    var sourceId: UUID?
 }
 
 // MARK: - Glossary
