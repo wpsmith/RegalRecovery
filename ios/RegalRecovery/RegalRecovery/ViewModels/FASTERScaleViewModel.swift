@@ -49,7 +49,7 @@ class FASTERScaleViewModel {
     var zoneLabel: String {
         guard let stage = currentStage else { return "Green" }
         switch stage {
-        case .forgettingPriorities:
+        case .restoration, .forgettingPriorities:
             return "Green"
         case .anxiety, .speedingUp:
             return "Yellow"
