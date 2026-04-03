@@ -141,9 +141,10 @@ func ExampleContentRepo_GetDevotional() {
 	ctx := context.Background()
 	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
 	defer client.Disconnect(ctx)
-	contentRepo := repository.NewContentRepo(client)
+	contentClient := repository.NewContentClient(client.Client(), "regal-recovery-content")
+	contentRepo := repository.NewContentRepo(contentClient)
 
-	devotional, err := contentRepo.GetDevotional(ctx, 1)
+	devotional, err := contentRepo.GetDevotional(ctx, "dpack_foundations", 1)
 	if err != nil {
 		log.Fatal(err)
 	}
