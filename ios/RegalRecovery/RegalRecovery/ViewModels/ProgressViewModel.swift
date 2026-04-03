@@ -62,7 +62,7 @@ class ProgressViewModel {
         let fasterDescriptor = FetchDescriptor<RRFASTEREntry>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         let fasterEntries = try context.fetch(fasterDescriptor)
         if let latest = fasterEntries.first {
-            switch latest.stage {
+            switch latest.assessedStage {
             case 0:
                 fasterScaleMode = "Green"
             case 1, 2:

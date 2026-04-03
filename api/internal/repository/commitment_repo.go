@@ -4,51 +4,42 @@ package repository
 import (
 	"context"
 	"fmt"
-	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-// CommitmentRepo implements CommitmentRepository using DynamoDB.
+// CommitmentRepo implements CommitmentRepository using MongoDB.
 type CommitmentRepo struct {
-	client *DynamoClient
+	client *MongoClient
 }
 
 // NewCommitmentRepo creates a new CommitmentRepo.
-func NewCommitmentRepo(client *DynamoClient) *CommitmentRepo {
+func NewCommitmentRepo(client *MongoClient) *CommitmentRepo {
 	return &CommitmentRepo{client: client}
 }
 
 // ListCommitments lists all commitments for a user.
-// PK: USER#{userID}, SK begins_with COMMITMENT#
 func (r *CommitmentRepo) ListCommitments(ctx context.Context, userID string) ([]Commitment, error) {
-	result, err := r.client.Query(ctx, &dynamodb.QueryInput{
-		KeyConditionExpression: aws.String("PK = :pk AND begins_with(SK, :sk)"),
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":pk": &types.AttributeValueMemberS{Value: fmt.Sprintf("USER#%s", userID)},
-			":sk": &types.AttributeValueMemberS{Value: "COMMITMENT#"},
-		},
-	})
+	cursor, err := r.client.Collection("commitments").Find(ctx, bson.M{"userId": userID})
 	if err != nil {
 		return nil, fmt.Errorf("listing commitments for user %s: %w", userID, err)
 	}
 
 	var commitments []Commitment
-	if err := attributevalue.UnmarshalListOfMaps(result.Items, &commitments); err != nil {
-		return nil, fmt.Errorf("unmarshaling commitments: %w", err)
+	if err := cursor.All(ctx, &commitments); err != nil {
+		return nil, fmt.Errorf("decoding commitments for user %s: %w", userID, err)
 	}
 
 	return commitments, nil
 }
 
 // GetCommitment retrieves a specific commitment by ID.
-// PK: USER#{userID}, SK: COMMITMENT#{commitmentID}
 func (r *CommitmentRepo) GetCommitment(ctx context.Context, userID, commitmentID string) (*Commitment, error) {
 	var commitment Commitment
-	err := r.client.GetItem(ctx, fmt.Sprintf("USER#%s", userID), fmt.Sprintf("COMMITMENT#%s", commitmentID), &commitment)
+	err := r.client.Collection("commitments").FindOne(ctx, bson.M{
+		"userId":       userID,
+		"commitmentId": commitmentID,
+	}).Decode(&commitment)
 	if err != nil {
 		return nil, fmt.Errorf("getting commitment %s for user %s: %w", commitmentID, userID, err)
 	}
@@ -57,12 +48,9 @@ func (r *CommitmentRepo) GetCommitment(ctx context.Context, userID, commitmentID
 
 // CreateCommitment creates a new commitment.
 func (r *CommitmentRepo) CreateCommitment(ctx context.Context, commitment *Commitment) error {
-	now := time.Now().UTC().Format(time.RFC3339)
-	commitment.CreatedAt = now
-	commitment.ModifiedAt = now
-	commitment.EntityType = "COMMITMENT"
+	SetBaseDocumentDefaults(&commitment.BaseDocument)
 
-	if err := r.client.PutItem(ctx, commitment); err != nil {
+	if _, err := r.client.Collection("commitments").InsertOne(ctx, commitment); err != nil {
 		return fmt.Errorf("creating commitment: %w", err)
 	}
 
@@ -71,9 +59,12 @@ func (r *CommitmentRepo) CreateCommitment(ctx context.Context, commitment *Commi
 
 // UpdateCommitment updates an existing commitment.
 func (r *CommitmentRepo) UpdateCommitment(ctx context.Context, commitment *Commitment) error {
-	commitment.ModifiedAt = time.Now().UTC().Format(time.RFC3339)
+	UpdateModified(&commitment.BaseDocument)
 
-	if err := r.client.PutItem(ctx, commitment); err != nil {
+	if _, err := r.client.Collection("commitments").ReplaceOne(ctx, bson.M{
+		"userId":       commitment.UserID,
+		"commitmentId": commitment.CommitmentID,
+	}, commitment); err != nil {
 		return fmt.Errorf("updating commitment: %w", err)
 	}
 

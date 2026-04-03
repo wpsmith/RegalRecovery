@@ -1,319 +1,324 @@
 // internal/repository/models.go
 package repository
 
-import "time"
+import (
+	"time"
 
-// BaseItem contains common attributes present on all DynamoDB items.
-type BaseItem struct {
-	PK         string `dynamodbav:"PK"`
-	SK         string `dynamodbav:"SK"`
-	EntityType string `dynamodbav:"EntityType"`
-	CreatedAt  string `dynamodbav:"CreatedAt"`
-	ModifiedAt string `dynamodbav:"ModifiedAt"`
-	TenantID   string `dynamodbav:"TenantId"`
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
+
+// BaseDocument contains common attributes present on all MongoDB documents.
+type BaseDocument struct {
+	ID         bson.ObjectID `bson:"_id,omitempty"`
+	CreatedAt  time.Time     `bson:"createdAt"`
+	ModifiedAt time.Time     `bson:"modifiedAt"`
+	TenantID   string        `bson:"tenantId"`
 }
 
-// OptionalGSI contains optional GSI attributes for items that need reverse lookups or tenant queries.
-type OptionalGSI struct {
-	GSI1PK *string `dynamodbav:"GSI1PK,omitempty"`
-	GSI1SK *string `dynamodbav:"GSI1SK,omitempty"`
-	GSI2PK *string `dynamodbav:"GSI2PK,omitempty"`
-	GSI2SK *string `dynamodbav:"GSI2SK,omitempty"`
-}
-
-// OptionalTTL contains the TTL attribute for ephemeral items.
-type OptionalTTL struct {
-	ExpiresAt *int64 `dynamodbav:"expiresAt,omitempty"`
-}
-
-// User represents a user profile in DynamoDB.
+// User represents a user profile.
 type User struct {
-	BaseItem
-	OptionalGSI
+	BaseDocument
 
-	Email                 string `dynamodbav:"email"`
-	DisplayName           string `dynamodbav:"displayName"`
-	Role                  string `dynamodbav:"role"`
-	PrimaryAddictionID    string `dynamodbav:"primaryAddictionId"`
-	PreferredLanguage     string `dynamodbav:"preferredLanguage"`
-	PreferredBibleVersion string `dynamodbav:"preferredBibleVersion"`
-	BirthYear             int    `dynamodbav:"birthYear,omitempty"`
-	Gender                string `dynamodbav:"gender,omitempty"`
-	MaritalStatus         string `dynamodbav:"maritalStatus,omitempty"`
-	TimeZone              string `dynamodbav:"timeZone"`
-	EmailVerified         bool   `dynamodbav:"emailVerified"`
-	BiometricEnabled      bool   `dynamodbav:"biometricEnabled"`
-	RegionID              string `dynamodbav:"regionId"`
-	SubscriptionTier      string `dynamodbav:"subscriptionTier"`
-	SubscriptionExpiresAt string `dynamodbav:"subscriptionExpiresAt,omitempty"`
+	UserID                string     `bson:"userId"`
+	Email                 string     `bson:"email"`
+	DisplayName           string     `bson:"displayName"`
+	Role                  string     `bson:"role"`
+	PrimaryAddictionID    string     `bson:"primaryAddictionId"`
+	PreferredLanguage     string     `bson:"preferredLanguage"`
+	PreferredBibleVersion string     `bson:"preferredBibleVersion"`
+	BirthYear             int        `bson:"birthYear,omitempty"`
+	Gender                string     `bson:"gender,omitempty"`
+	MaritalStatus         string     `bson:"maritalStatus,omitempty"`
+	TimeZone              string     `bson:"timeZone"`
+	EmailVerified         bool       `bson:"emailVerified"`
+	BiometricEnabled      bool       `bson:"biometricEnabled"`
+	RegionID              string     `bson:"regionId"`
+	SubscriptionTier      string     `bson:"subscriptionTier"`
+	SubscriptionExpiresAt *time.Time `bson:"subscriptionExpiresAt,omitempty"`
 }
 
 // UserSettings represents user preferences and configuration.
 type UserSettings struct {
-	BaseItem
+	BaseDocument
 
-	NotificationPreferences map[string]interface{} `dynamodbav:"notificationPreferences"`
-	PrivacySettings         map[string]interface{} `dynamodbav:"privacySettings"`
-	DisplaySettings         map[string]interface{} `dynamodbav:"displaySettings"`
-	SecuritySettings        map[string]interface{} `dynamodbav:"securitySettings"`
+	UserID                  string                 `bson:"userId"`
+	NotificationPreferences map[string]interface{} `bson:"notificationPreferences"`
+	PrivacySettings         map[string]interface{} `bson:"privacySettings"`
+	DisplaySettings         map[string]interface{} `bson:"displaySettings"`
+	SecuritySettings        map[string]interface{} `bson:"securitySettings"`
 }
 
 // Addiction represents a tracked addiction with sobriety start date.
 type Addiction struct {
-	BaseItem
+	BaseDocument
 
-	AddictionID       string `dynamodbav:"addictionId"`
-	Type              string `dynamodbav:"type"`
-	SobrietyStartDate string `dynamodbav:"sobrietyStartDate"`
-	IsPrimary         bool   `dynamodbav:"isPrimary"`
+	UserID            string `bson:"userId"`
+	AddictionID       string `bson:"addictionId"`
+	Type              string `bson:"type"`
+	SobrietyStartDate string `bson:"sobrietyStartDate"`
+	IsPrimary         bool   `bson:"isPrimary"`
 }
 
 // Streak represents current and longest sobriety streak per addiction.
 type Streak struct {
-	BaseItem
+	BaseDocument
 
-	AddictionID       string  `dynamodbav:"addictionId"`
-	CurrentStreakDays int     `dynamodbav:"currentStreakDays"`
-	LongestStreakDays int     `dynamodbav:"longestStreakDays"`
-	SobrietyStartDate string  `dynamodbav:"sobrietyStartDate"`
-	LastRelapseDate   *string `dynamodbav:"lastRelapseDate,omitempty"`
-	TotalSoberDays    int     `dynamodbav:"totalSoberDays"`
+	UserID            string     `bson:"userId"`
+	AddictionID       string     `bson:"addictionId"`
+	CurrentStreakDays int        `bson:"currentStreakDays"`
+	LongestStreakDays int        `bson:"longestStreakDays"`
+	SobrietyStartDate string    `bson:"sobrietyStartDate"`
+	LastRelapseDate   *time.Time `bson:"lastRelapseDate,omitempty"`
+	TotalSoberDays    int        `bson:"totalSoberDays"`
 }
 
 // Milestone represents a sobriety milestone achievement.
 type Milestone struct {
-	BaseItem
+	BaseDocument
 
-	MilestoneID  string `dynamodbav:"milestoneId"`
-	AddictionID  string `dynamodbav:"addictionId"`
-	Type         string `dynamodbav:"type"`
-	Days         int    `dynamodbav:"days"`
-	AchievedAt   string `dynamodbav:"achievedAt"`
-	Celebrated   bool   `dynamodbav:"celebrated"`
-	CoinImageURL string `dynamodbav:"coinImageUrl,omitempty"`
+	UserID       string    `bson:"userId"`
+	MilestoneID  string    `bson:"milestoneId"`
+	AddictionID  string    `bson:"addictionId"`
+	Type         string    `bson:"type"`
+	Days         int       `bson:"days"`
+	AchievedAt   time.Time `bson:"achievedAt"`
+	Celebrated   bool      `bson:"celebrated"`
+	CoinImageURL string    `bson:"coinImageUrl,omitempty"`
 }
 
 // Relapse represents a relapse event.
 type Relapse struct {
-	BaseItem
+	BaseDocument
 
-	RelapseID           string `dynamodbav:"relapseId"`
-	AddictionID         string `dynamodbav:"addictionId"`
-	Timestamp           string `dynamodbav:"timestamp"`
-	PreviousStreakDays  int    `dynamodbav:"previousStreakDays"`
-	Notes               string `dynamodbav:"notes,omitempty"`
-	PostMortemCompleted bool   `dynamodbav:"postMortemCompleted"`
+	UserID              string    `bson:"userId"`
+	RelapseID           string    `bson:"relapseId"`
+	AddictionID         string    `bson:"addictionId"`
+	Timestamp           time.Time `bson:"timestamp"`
+	PreviousStreakDays  int       `bson:"previousStreakDays"`
+	Notes               string    `bson:"notes,omitempty"`
+	PostMortemCompleted bool      `bson:"postMortemCompleted"`
 }
 
 // CheckIn represents a daily/evening check-in entry.
 type CheckIn struct {
-	BaseItem
-	OptionalGSI
+	BaseDocument
 
-	CheckInID string                 `dynamodbav:"checkInId"`
-	Type      string                 `dynamodbav:"type"`
-	Responses map[string]interface{} `dynamodbav:"responses"`
-	Score     int                    `dynamodbav:"score"`
-	ColorCode string                 `dynamodbav:"colorCode"`
+	UserID    string                 `bson:"userId"`
+	CheckInID string                 `bson:"checkInId"`
+	Type      string                 `bson:"type"`
+	Responses map[string]interface{} `bson:"responses"`
+	Score     int                    `bson:"score"`
+	ColorCode string                 `bson:"colorCode"`
 }
 
 // Urge represents an urge log entry.
 type Urge struct {
-	BaseItem
+	BaseDocument
 
-	UrgeID             string   `dynamodbav:"urgeId"`
-	AddictionID        string   `dynamodbav:"addictionId"`
-	Intensity          int      `dynamodbav:"intensity"`
-	Triggers           []string `dynamodbav:"triggers"`
-	Notes              string   `dynamodbav:"notes,omitempty"`
-	SobrietyMaintained bool     `dynamodbav:"sobrietyMaintained"`
-	DurationMinutes    int      `dynamodbav:"durationMinutes,omitempty"`
+	UserID             string   `bson:"userId"`
+	UrgeID             string   `bson:"urgeId"`
+	AddictionID        string   `bson:"addictionId"`
+	Intensity          int      `bson:"intensity"`
+	Triggers           []string `bson:"triggers"`
+	Notes              string   `bson:"notes,omitempty"`
+	SobrietyMaintained bool     `bson:"sobrietyMaintained"`
+	DurationMinutes    int      `bson:"durationMinutes,omitempty"`
 }
 
 // Journal represents a journal entry.
 type Journal struct {
-	BaseItem
-	OptionalTTL
+	BaseDocument
 
-	EntryID           string   `dynamodbav:"entryId"`
-	Mode              string   `dynamodbav:"mode"`
-	Content           string   `dynamodbav:"content"`
-	EmotionalTags     []string `dynamodbav:"emotionalTags,omitempty"`
-	Prompt            string   `dynamodbav:"prompt,omitempty"`
-	IsEphemeral       bool     `dynamodbav:"isEphemeral"`
-	EphemeralDeleteAt *string  `dynamodbav:"ephemeralDeleteAt,omitempty"`
+	UserID            string     `bson:"userId"`
+	EntryID           string     `bson:"entryId"`
+	Mode              string     `bson:"mode"`
+	Content           string     `bson:"content"`
+	EmotionalTags     []string   `bson:"emotionalTags,omitempty"`
+	Prompt            string     `bson:"prompt,omitempty"`
+	IsEphemeral       bool       `bson:"isEphemeral"`
+	EphemeralDeleteAt *time.Time `bson:"ephemeralDeleteAt,omitempty"`
+	ExpiresAt         *time.Time `bson:"expiresAt,omitempty"`
 }
 
 // Meeting represents a meeting attendance log.
 type Meeting struct {
-	BaseItem
+	BaseDocument
 
-	MeetingID       string `dynamodbav:"meetingId"`
-	MeetingType     string `dynamodbav:"meetingType"`
-	Name            string `dynamodbav:"name"`
-	Location        string `dynamodbav:"location,omitempty"`
-	Notes           string `dynamodbav:"notes,omitempty"`
-	DurationMinutes int    `dynamodbav:"durationMinutes"`
+	UserID          string `bson:"userId"`
+	MeetingID       string `bson:"meetingId"`
+	MeetingType     string `bson:"meetingType"`
+	Name            string `bson:"name"`
+	Location        string `bson:"location,omitempty"`
+	Notes           string `bson:"notes,omitempty"`
+	DurationMinutes int    `bson:"durationMinutes"`
 }
 
 // Prayer represents a prayer log entry.
 type Prayer struct {
-	BaseItem
-	OptionalTTL
+	BaseDocument
 
-	PrayerID        string `dynamodbav:"prayerId"`
-	PrayerType      string `dynamodbav:"prayerType"`
-	Content         string `dynamodbav:"content"`
-	DurationMinutes int    `dynamodbav:"durationMinutes"`
-	IsEphemeral     bool   `dynamodbav:"isEphemeral"`
+	UserID          string     `bson:"userId"`
+	PrayerID        string     `bson:"prayerId"`
+	PrayerType      string     `bson:"prayerType"`
+	Content         string     `bson:"content"`
+	DurationMinutes int        `bson:"durationMinutes"`
+	IsEphemeral     bool       `bson:"isEphemeral"`
+	ExpiresAt       *time.Time `bson:"expiresAt,omitempty"`
 }
 
 // Exercise represents an exercise log entry.
 type Exercise struct {
-	BaseItem
+	BaseDocument
 
-	ExerciseID      string `dynamodbav:"exerciseId"`
-	Type            string `dynamodbav:"type"`
-	DurationMinutes int    `dynamodbav:"durationMinutes"`
-	Calories        int    `dynamodbav:"calories,omitempty"`
-	Source          string `dynamodbav:"source"`
+	UserID          string `bson:"userId"`
+	ExerciseID      string `bson:"exerciseId"`
+	Type            string `bson:"type"`
+	DurationMinutes int    `bson:"durationMinutes"`
+	Calories        int    `bson:"calories,omitempty"`
+	Source          string `bson:"source"`
 }
 
-// Activity represents a calendar activity entry (denormalized view).
+// Activity represents a calendar activity entry.
 type Activity struct {
-	BaseItem
+	BaseDocument
 
-	ActivityType string                 `dynamodbav:"activityType"`
-	Summary      map[string]interface{} `dynamodbav:"summary"`
-	SourceKey    string                 `dynamodbav:"sourceKey"`
-	Date         string                 `dynamodbav:"-"` // Extracted from SK for convenience
-	Timestamp    time.Time              `dynamodbav:"-"` // Extracted from SK for convenience
+	UserID       string                 `bson:"userId"`
+	ActivityType string                 `bson:"activityType"`
+	Summary      map[string]interface{} `bson:"summary"`
+	SourceKey    string                 `bson:"sourceKey"`
+	Date         string                 `bson:"date"`
+	Timestamp    time.Time              `bson:"timestamp"`
 }
 
 // SupportContact represents a support network contact.
 type SupportContact struct {
-	BaseItem
-	OptionalGSI
+	BaseDocument
 
-	ContactID     string `dynamodbav:"contactId"`
-	ContactUserID string `dynamodbav:"contactUserId"`
-	Role          string `dynamodbav:"role"`
-	DisplayName   string `dynamodbav:"displayName"`
-	Email         string `dynamodbav:"email,omitempty"`
-	Status        string `dynamodbav:"status"`
-	InvitedAt     string `dynamodbav:"invitedAt"`
-	AcceptedAt    string `dynamodbav:"acceptedAt,omitempty"`
+	UserID        string     `bson:"userId"`
+	ContactID     string     `bson:"contactId"`
+	ContactUserID string     `bson:"contactUserId"`
+	Role          string     `bson:"role"`
+	DisplayName   string     `bson:"displayName"`
+	Email         string     `bson:"email,omitempty"`
+	Status        string     `bson:"status"`
+	InvitedAt     time.Time  `bson:"invitedAt"`
+	AcceptedAt    *time.Time `bson:"acceptedAt,omitempty"`
 }
 
 // Permission represents a granular data permission for a contact.
 type Permission struct {
-	BaseItem
+	BaseDocument
 
-	PermissionID  string `dynamodbav:"permissionId"`
-	ContactID     string `dynamodbav:"contactId"`
-	ContactUserID string `dynamodbav:"contactUserId"`
-	DataCategory  string `dynamodbav:"dataCategory"`
-	AccessLevel   string `dynamodbav:"accessLevel"`
-	GrantedAt     string `dynamodbav:"grantedAt"`
+	UserID        string    `bson:"userId"`
+	PermissionID  string    `bson:"permissionId"`
+	ContactID     string    `bson:"contactId"`
+	ContactUserID string    `bson:"contactUserId"`
+	DataCategory  string    `bson:"dataCategory"`
+	AccessLevel   string    `bson:"accessLevel"`
+	GrantedAt     time.Time `bson:"grantedAt"`
 }
 
 // Flag represents a feature flag.
 type Flag struct {
-	BaseItem
+	BaseDocument
 
-	Enabled           bool     `dynamodbav:"enabled"`
-	RolloutPercentage int      `dynamodbav:"rolloutPercentage"`
-	Tiers             []string `dynamodbav:"tiers,omitempty"`
-	Tenants           []string `dynamodbav:"tenants,omitempty"`
-	Platforms         []string `dynamodbav:"platforms,omitempty"`
-	MinAppVersion     string   `dynamodbav:"minAppVersion,omitempty"`
-	Description       string   `dynamodbav:"description"`
-	UpdatedAt         string   `dynamodbav:"updatedAt"`
-	UpdatedBy         string   `dynamodbav:"updatedBy"`
+	FlagKey           string    `bson:"flagKey"`
+	Enabled           bool      `bson:"enabled"`
+	RolloutPercentage int       `bson:"rolloutPercentage"`
+	Tiers             []string  `bson:"tiers,omitempty"`
+	Tenants           []string  `bson:"tenants,omitempty"`
+	Platforms         []string  `bson:"platforms,omitempty"`
+	MinAppVersion     string    `bson:"minAppVersion,omitempty"`
+	Description       string    `bson:"description"`
+	UpdatedAt         time.Time `bson:"updatedAt"`
+	UpdatedBy         string    `bson:"updatedBy"`
 }
 
 // AffirmationPack represents metadata for an affirmation pack.
 type AffirmationPack struct {
-	BaseItem
+	BaseDocument
 
-	PackID           string `dynamodbav:"packId"`
-	Name             string `dynamodbav:"name"`
-	Description      string `dynamodbav:"description"`
-	Tier             string `dynamodbav:"tier"`
-	Price            int    `dynamodbav:"price"`
-	AffirmationCount int    `dynamodbav:"affirmationCount"`
-	Category         string `dynamodbav:"category"`
+	PackID           string `bson:"packId"`
+	Name             string `bson:"name"`
+	Description      string `bson:"description"`
+	Tier             string `bson:"tier"`
+	Price            int    `bson:"price"`
+	AffirmationCount int    `bson:"affirmationCount"`
+	Category         string `bson:"category"`
 }
 
 // Affirmation represents an affirmation within a pack.
 type Affirmation struct {
-	BaseItem
+	BaseDocument
 
-	AffirmationID      string `dynamodbav:"affirmationId"`
-	Statement          string `dynamodbav:"statement"`
-	ScriptureReference string `dynamodbav:"scriptureReference,omitempty"`
-	Category           string `dynamodbav:"category"`
-	Language           string `dynamodbav:"language"`
+	AffirmationID      string `bson:"affirmationId"`
+	PackID             string `bson:"packId"`
+	Statement          string `bson:"statement"`
+	ScriptureReference string `bson:"scriptureReference,omitempty"`
+	Category           string `bson:"category"`
+	Language           string `bson:"language"`
 }
 
 // DevotionalDay represents a single day's devotional content.
 type DevotionalDay struct {
-	BaseItem
+	BaseDocument
 
-	Day           int    `dynamodbav:"day"`
-	Title         string `dynamodbav:"title"`
-	Scripture     string `dynamodbav:"scripture"`
-	ScriptureText string `dynamodbav:"scriptureText"`
-	Reflection    string `dynamodbav:"reflection"`
+	Day           int    `bson:"day"`
+	Title         string `bson:"title"`
+	Scripture     string `bson:"scripture"`
+	ScriptureText string `bson:"scriptureText"`
+	Reflection    string `bson:"reflection"`
 }
 
 // Prompt represents a journal prompt for recovery reflection.
 type Prompt struct {
-	BaseItem
+	BaseDocument
 
-	PromptID string   `dynamodbav:"promptId"`
-	Text     string   `dynamodbav:"text"`
-	Category string   `dynamodbav:"category"` // daily, sobriety, emotional, relationships, spiritual, shame, triggers, amends, gratitude, deep
-	Tags     []string `dynamodbav:"tags"`      // FASTER, 3 Circles, 12-Step, FANOS/FITNAP, PCI, Arousal Template
-	Order    int      `dynamodbav:"order"`
+	PromptID string   `bson:"promptId"`
+	Text     string   `bson:"text"`
+	Category string   `bson:"category"` // daily, sobriety, emotional, relationships, spiritual, shame, triggers, amends, gratitude, deep
+	Tags     []string `bson:"tags"`     // FASTER, 3 Circles, 12-Step, FANOS/FITNAP, PCI, Arousal Template
+	Order    int      `bson:"order"`
 }
 
 // Commitment represents a user commitment (e.g., "Call sponsor daily").
 type Commitment struct {
-	BaseItem
+	BaseDocument
 
-	CommitmentID      string `dynamodbav:"commitmentId"`
-	Title             string `dynamodbav:"title"`
-	Frequency         string `dynamodbav:"frequency"`
-	Category          string `dynamodbav:"category"`
-	IsActive          bool   `dynamodbav:"isActive"`
-	CurrentStreakDays int    `dynamodbav:"currentStreakDays"`
-	LastCompletedAt   string `dynamodbav:"lastCompletedAt,omitempty"`
-	TotalCompletions  int    `dynamodbav:"totalCompletions"`
+	UserID            string     `bson:"userId"`
+	CommitmentID      string     `bson:"commitmentId"`
+	Title             string     `bson:"title"`
+	Frequency         string     `bson:"frequency"`
+	Category          string     `bson:"category"`
+	IsActive          bool       `bson:"isActive"`
+	CurrentStreakDays int        `bson:"currentStreakDays"`
+	LastCompletedAt   *time.Time `bson:"lastCompletedAt,omitempty"`
+	TotalCompletions  int        `bson:"totalCompletions"`
 }
 
 // Goal represents a recovery goal.
 type Goal struct {
-	BaseItem
+	BaseDocument
 
-	GoalID          string                   `dynamodbav:"goalId"`
-	Title           string                   `dynamodbav:"title"`
-	Description     string                   `dynamodbav:"description"`
-	TargetDate      string                   `dynamodbav:"targetDate"`
-	Category        string                   `dynamodbav:"category"`
-	Status          string                   `dynamodbav:"status"`
-	ProgressPercent int                      `dynamodbav:"progressPercent"`
-	Milestones      []map[string]interface{} `dynamodbav:"milestones,omitempty"`
+	UserID          string                   `bson:"userId"`
+	GoalID          string                   `bson:"goalId"`
+	Title           string                   `bson:"title"`
+	Description     string                   `bson:"description"`
+	TargetDate      string                   `bson:"targetDate"`
+	Category        string                   `bson:"category"`
+	Status          string                   `bson:"status"`
+	ProgressPercent int                      `bson:"progressPercent"`
+	Milestones      []map[string]interface{} `bson:"milestones,omitempty"`
 }
 
 // Session represents an authentication session.
 type Session struct {
-	BaseItem
-	OptionalGSI
-	OptionalTTL
+	BaseDocument
 
-	SessionID string `dynamodbav:"sessionId"`
-	DeviceID  string `dynamodbav:"deviceId"`
-	IPAddress string `dynamodbav:"ipAddress"`
-	UserAgent string `dynamodbav:"userAgent"`
+	UserID    string     `bson:"userId"`
+	SessionID string     `bson:"sessionId"`
+	DeviceID  string     `bson:"deviceId"`
+	IPAddress string     `bson:"ipAddress"`
+	UserAgent string     `bson:"userAgent"`
+	ExpiresAt *time.Time `bson:"expiresAt,omitempty"`
 }

@@ -4,7 +4,7 @@ This document shows how to use the domain services in your application.
 
 ## Service Initialization
 
-Domain services accept repository interfaces as constructor parameters. The actual implementations (e.g., DynamoDB adapters) are provided by the infrastructure layer.
+Domain services accept repository interfaces as constructor parameters. The actual implementations (e.g., MongoDB adapters) are provided by the infrastructure layer.
 
 ```go
 package main
@@ -17,14 +17,14 @@ import (
     "github.com/regalrecovery/api/internal/domain/content"
 
     // Your repository implementations
-    "github.com/regalrecovery/api/internal/repository/dynamodb"
+    "github.com/regalrecovery/api/internal/repository"
     "github.com/regalrecovery/api/internal/cache/valkey"
 )
 
 func main() {
-    // Initialize repositories (DynamoDB adapters)
-    userRepo := dynamodb.NewUserRepository(dynamoClient)
-    sessionRepo := dynamodb.NewSessionRepository(dynamoClient)
+    // Initialize repositories (MongoDB adapters)
+    userRepo := repository.NewUserRepo(mongoClient)
+    sessionRepo := repository.NewSessionRepo(mongoClient)
     tokenSvc := auth.NewCognitoTokenService(cognitoClient)
 
     // Initialize caches (Valkey adapters)

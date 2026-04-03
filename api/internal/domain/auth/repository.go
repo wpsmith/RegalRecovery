@@ -60,3 +60,15 @@ type TokenService interface {
 	// RevokeRefreshToken invalidates a refresh token.
 	RevokeRefreshToken(ctx context.Context, token string) error
 }
+
+// SessionCache defines the interface for session caching.
+type SessionCache interface {
+	// GetSession retrieves a session from cache.
+	GetSession(ctx context.Context, sessionID string) (*Session, error)
+
+	// SetSession stores a session in cache.
+	SetSession(ctx context.Context, sessionID string, session *Session) error
+
+	// InvalidateSession removes a session from cache.
+	InvalidateSession(ctx context.Context, sessionID string) error
+}

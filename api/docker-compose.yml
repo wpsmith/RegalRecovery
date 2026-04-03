@@ -1,21 +1,76 @@
 services:
-  localstack:
-    image: localstack/localstack:latest
+  # MongoDB - Primary database
+  mongodb:
+    image: mongo:latest
     ports:
-      - "4566:4566"        # LocalStack gateway
-    environment:
-      - SERVICES=dynamodb,s3,sqs,sns,ssm,sts
-      - DEFAULT_REGION=us-east-1
-      - EAGER_SERVICE_LOADING=1
-      - LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT=1
+      - "27017:27017"
     volumes:
-      - localstack-data:/var/lib/localstack
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand({ping:1})"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
+  # Valkey - Redis-compatible cache
   valkey:
     image: valkey/valkey:7-alpine
     ports:
       - "6380:6379"
     command: valkey-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # LocalStack - AWS service emulator (SQS, SNS, S3, Cognito)
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs,sns,s3,cognito-idp
+      - DEBUG=0
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT=1
+    volumes:
+      - localstack-data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Ollama - Local LLM server
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # MailHog - Local SMTP server and email testing UI
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 1025 || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 volumes:
+  mongodb-data:
   localstack-data:
+  ollama-data:

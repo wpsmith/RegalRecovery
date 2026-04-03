@@ -27,7 +27,7 @@ spec-docs:                ## Generate interactive API documentation (Redoc)
 test-unit:                ## Run unit tests
 	go test ./test/unit/... -v -race -count=1
 
-test-integration:         ## Run integration tests (requires LocalStack + Valkey)
+test-integration:         ## Run integration tests (requires MongoDB + Valkey)
 	go test ./test/integration/... -v -race -count=1 -tags=integration
 
 test-e2e:                ## Run end-to-end tests against staging
@@ -86,29 +86,45 @@ build-single:            ## Build a single Lambda: make build-single NAME=tracki
 # Local Development
 # ============================================================================
 
-local-up:                ## Start LocalStack + Valkey for local development
+local-up:                ## Start all local services (MongoDB, LocalStack, Valkey, Ollama, Mailhog)
 	docker compose up -d
-	@echo "Waiting for LocalStack to be ready..."
-	@until docker compose exec localstack aws --endpoint-url http://localhost:4566 --region us-east-1 sts get-caller-identity > /dev/null 2>&1; do sleep 1; done
-	@echo "Creating local DynamoDB table..."
-	@./scripts/create-local-tables.sh
-	@echo "Local environment ready."
+	@echo "Waiting for MongoDB..."
+	@until docker compose exec mongodb mongosh --quiet --eval "db.runCommand({ping:1})" > /dev/null 2>&1; do sleep 1; done
+	@echo "Waiting for LocalStack..."
+	@until curl -sf http://localhost:4566/_localstack/health > /dev/null 2>&1; do sleep 1; done
+	@echo "Waiting for Valkey..."
+	@until docker compose exec valkey valkey-cli ping > /dev/null 2>&1; do sleep 1; done
+	@echo "Creating MongoDB indexes..."
+	@./scripts/init-indexes.sh
+	@echo "Initializing LocalStack resources..."
+	@./scripts/init-localstack.sh
+	@echo "Initializing Ollama (CA certs + model pull)..."
+	@./scripts/init-ollama.sh
+	@echo ""
+	@echo "Local environment ready:"
+	@echo "  MongoDB:    mongodb://localhost:27017"
+	@echo "  Valkey:     localhost:6380"
+	@echo "  LocalStack: http://localhost:4566"
+	@echo "  Ollama:     http://localhost:11434"
+	@echo "  Mailhog UI: http://localhost:8025"
 
 dev-api:                 ## Start local API server with hot reload
 	go run ./cmd/local/
 
-local-down:              ## Stop local services
+local-down:              ## Stop all local services
 	docker compose down
 
-local-reset:             ## Stop, remove volumes, and restart local services
+local-reset:             ## Stop, remove volumes, and restart with fresh data
 	docker compose down -v
 	$(MAKE) local-up
+	$(MAKE) local-seed
 
-local-seed:              ## Seed local database with test data
+local-seed:              ## Seed local MongoDB with test data (Alex persona)
 	@./scripts/seed-local-data.sh
+	@./scripts/init-indexes.sh
 
-local-logs:              ## Tail LocalStack logs
-	docker compose logs -f localstack
+local-logs:              ## Tail logs from all local services
+	docker compose logs -f
 
 # ============================================================================
 # Deployment
