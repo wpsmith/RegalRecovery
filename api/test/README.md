@@ -6,10 +6,10 @@ This directory contains the test framework for the Regal Recovery Go backend.
 
 ```
 test/
-├── helpers/          # Test utilities (DynamoDB, auth, assertions)
+├── helpers/          # Test utilities (MongoDB, auth, assertions)
 ├── fixtures/         # Test data (users, activities)
 ├── unit/             # Unit tests (pure functions, business logic)
-└── integration/      # Integration tests (LocalStack, database)
+└── integration/      # Integration tests (MongoDB, Valkey)
 ```
 
 ## Test Naming Convention
@@ -47,28 +47,28 @@ go test ./test/unit/... -race
 
 ### Integration Tests
 
-Integration tests require LocalStack to be running.
+Integration tests require MongoDB and Valkey to be running.
 
 ```bash
-# Start LocalStack
-docker-compose up -d localstack
+# Start local services
+make local-up
 
 # Run integration tests
-go test ./test/integration/... -v
+go test ./test/integration/... -v -tags=integration
 
-# Stop LocalStack
-docker-compose down
+# Stop local services
+make local-down
 ```
 
 ## Test Helpers
 
-### DynamoDB Helper (`helpers/dynamo_helper.go`)
+### MongoDB Helper (`helpers/mongo_helper.go`)
 
-Provides utilities for setting up LocalStack DynamoDB:
+Provides utilities for setting up test MongoDB:
 
-- `SetupLocalDynamo(t *testing.T) *dynamodb.Client` - Creates DynamoDB client pointing to localhost:4566
-- `CreateTestTable(t *testing.T, client *dynamodb.Client)` - Creates the regal-recovery table with GSI1 and GSI2
-- `CleanupTable(t *testing.T, client *dynamodb.Client)` - Deletes all items from the table
+- `SetupTestMongo(t *testing.T) *repository.MongoClient` - Creates MongoDB client pointing to localhost:27017
+- `SeedTestData(t *testing.T, client *repository.MongoClient)` - Seeds test fixtures into the database
+- `CleanupDatabase(t *testing.T, client *repository.MongoClient)` - Drops the test database
 
 ### Auth Helper (`helpers/auth_helper.go`)
 
@@ -126,13 +126,12 @@ func TestFeature_AcceptanceCriteria_Scenario(t *testing.T) {
 ### Integration Test Example
 
 ```go
-// +build integration
+//go:build integration
 
 func TestRepository_GetUser_ReturnsUser(t *testing.T) {
-	// Given - LocalStack DynamoDB
-	client := helpers.SetupLocalDynamo(t)
-	helpers.CreateTestTable(t, client)
-	defer helpers.CleanupTable(t, client)
+	// Given - MongoDB
+	client := helpers.SetupTestMongo(t)
+	defer helpers.CleanupDatabase(t, client)
 
 	// Seed test data
 	// ...

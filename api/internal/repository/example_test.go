@@ -5,51 +5,38 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/regalrecovery/api/internal/repository"
 )
 
-// ExampleNewDynamoClient demonstrates how to initialize the DynamoDB client.
-func ExampleNewDynamoClient() {
+// ExampleNewMongoClient demonstrates how to initialize the MongoDB client.
+func ExampleNewMongoClient() {
 	ctx := context.Background()
 
-	// Load AWS config
-	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion("us-east-1"))
+	// Create MongoDB client for local development
+	client, err := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer client.Disconnect(ctx)
 
-	// Create DynamoDB client for production
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
-
-	// Or for local development with LocalStack
-	_ = repository.NewDynamoClient(cfg, "regal-recovery", "http://localhost:4566")
-
-	fmt.Printf("DynamoDB client initialized: %v\n", client != nil)
-	// Output: DynamoDB client initialized: true
+	fmt.Printf("MongoDB client initialized: %v\n", client != nil)
+	// Output: MongoDB client initialized: true
 }
 
 // ExampleUserRepo_CreateUser demonstrates how to create a user.
 func ExampleUserRepo_CreateUser() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	userRepo := repository.NewUserRepo(client)
 
 	user := &repository.User{
-		BaseItem: repository.BaseItem{
-			PK:       "USER#u_12345",
-			SK:       "PROFILE",
+		BaseDocument: repository.BaseDocument{
 			TenantID: "DEFAULT",
 		},
-		OptionalGSI: repository.OptionalGSI{
-			GSI1PK: aws.String("EMAIL#john@example.com"),
-			GSI1SK: aws.String("USER#u_12345"),
-			GSI2PK: aws.String("TENANT#DEFAULT"),
-			GSI2SK: aws.String("USER#u_12345"),
-		},
+		UserID:                "u_12345",
 		Email:                 "john@example.com",
 		DisplayName:           "John",
 		Role:                  "User",
@@ -73,8 +60,8 @@ func ExampleUserRepo_CreateUser() {
 // ExampleUserRepo_GetUserByEmail demonstrates how to look up a user by email.
 func ExampleUserRepo_GetUserByEmail() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	userRepo := repository.NewUserRepo(client)
 
 	user, err := userRepo.GetUserByEmail(ctx, "john@example.com")
@@ -88,14 +75,12 @@ func ExampleUserRepo_GetUserByEmail() {
 // ExampleActivityRepo_CreateCheckIn demonstrates how to create a check-in.
 func ExampleActivityRepo_CreateCheckIn() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	activityRepo := repository.NewActivityRepo(client)
 
 	checkIn := &repository.CheckIn{
-		BaseItem: repository.BaseItem{
-			PK:       "USER#u_12345",
-			SK:       "CHECKIN#2026-03-28T21:00:00Z",
+		BaseDocument: repository.BaseDocument{
 			TenantID: "DEFAULT",
 		},
 		CheckInID: "c_55555",
@@ -124,8 +109,8 @@ func ExampleActivityRepo_CreateCheckIn() {
 // ExampleTrackingRepo_GetStreak demonstrates how to retrieve a sobriety streak.
 func ExampleTrackingRepo_GetStreak() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	trackingRepo := repository.NewTrackingRepo(client)
 
 	streak, err := trackingRepo.GetStreak(ctx, "u_12345", "a_67890")
@@ -139,8 +124,8 @@ func ExampleTrackingRepo_GetStreak() {
 // ExampleFlagRepo_GetAllFlags demonstrates how to retrieve all feature flags.
 func ExampleFlagRepo_GetAllFlags() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	flagRepo := repository.NewFlagRepo(client)
 
 	flags, err := flagRepo.GetAllFlags(ctx)
@@ -154,8 +139,8 @@ func ExampleFlagRepo_GetAllFlags() {
 // ExampleContentRepo_GetDevotional demonstrates how to retrieve a devotional.
 func ExampleContentRepo_GetDevotional() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	contentRepo := repository.NewContentRepo(client)
 
 	devotional, err := contentRepo.GetDevotional(ctx, 1)
@@ -169,22 +154,21 @@ func ExampleContentRepo_GetDevotional() {
 // ExampleSupportRepo_GrantPermission demonstrates how to grant a permission.
 func ExampleSupportRepo_GrantPermission() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	supportRepo := repository.NewSupportRepo(client)
 
 	permission := &repository.Permission{
-		BaseItem: repository.BaseItem{
-			PK:       "USER#u_12345",
-			SK:       "PERMISSION#c_99999#streaks",
+		BaseDocument: repository.BaseDocument{
 			TenantID: "DEFAULT",
 		},
+		UserID:        "u_12345",
 		PermissionID:  "p_11111",
 		ContactID:     "c_99999",
 		ContactUserID: "u_54321",
 		DataCategory:  "streaks",
 		AccessLevel:   "read",
-		GrantedAt:     repository.NowISO8601(),
+		GrantedAt:     time.Now().UTC(),
 	}
 
 	err := supportRepo.GrantPermission(ctx, permission)
@@ -198,11 +182,10 @@ func ExampleSupportRepo_GrantPermission() {
 // ExampleActivityRepo_GetActivitiesByDate demonstrates calendar day view.
 func ExampleActivityRepo_GetActivitiesByDate() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	activityRepo := repository.NewActivityRepo(client)
 
-	// Get all activities for a specific day
 	activities, err := activityRepo.GetActivitiesByDate(ctx, "u_12345", "2026-03-28")
 	if err != nil {
 		log.Fatal(err)
@@ -214,29 +197,14 @@ func ExampleActivityRepo_GetActivitiesByDate() {
 // ExampleActivityRepo_GetActivitiesByDateRange demonstrates calendar month view.
 func ExampleActivityRepo_GetActivitiesByDateRange() {
 	ctx := context.Background()
-	cfg, _ := config.LoadDefaultConfig(ctx)
-	client := repository.NewDynamoClient(cfg, "regal-recovery", "")
+	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
+	defer client.Disconnect(ctx)
 	activityRepo := repository.NewActivityRepo(client)
 
-	// Get all activities for a month
 	activities, err := activityRepo.GetActivitiesByDateRange(ctx, "u_12345", "2026-03-01", "2026-03-31")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Printf("Found %d activities for March 2026\n", len(activities))
-}
-
-// ExampleFormatPK demonstrates helper function usage.
-func ExampleFormatPK() {
-	pk := repository.FormatPK("USER", "u_12345")
-	fmt.Println(pk)
-	// Output: USER#u_12345
-}
-
-// ExampleBuildActivitySK demonstrates building a composite sort key.
-func ExampleBuildActivitySK() {
-	sk := repository.BuildActivitySK("2026-03-28", "CHECKIN", "2026-03-28T21:00:00Z")
-	fmt.Println(sk)
-	// Output: ACTIVITY#2026-03-28#CHECKIN#2026-03-28T21:00:00Z
 }
