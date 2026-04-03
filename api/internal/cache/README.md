@@ -17,7 +17,7 @@ Low-level Valkey client wrapper using `github.com/valkey-io/valkey-go`:
 
 **Usage:**
 ```go
-client, err := cache.NewValkeyClient("localhost:6379")
+client, err := cache.NewValkeyClient("localhost:6380")
 if err != nil {
     log.Fatal(err)
 }
@@ -36,7 +36,7 @@ err = client.Delete(ctx, "user:123")
 ### Streak Cache (`streak_cache.go`)
 
 Cache-aside pattern for streak data:
-- 5-minute TTL
+- 60-second TTL
 - JSON serialization
 - Cache miss returns `nil` (no error) -- caller should fall back to DB
 
@@ -53,7 +53,7 @@ type Streak struct {
 
 **Usage:**
 ```go
-valkeyClient, _ := cache.NewValkeyClient("localhost:6379")
+valkeyClient, _ := cache.NewValkeyClient("localhost:6380")
 streakCache := cache.NewStreakCache(valkeyClient)
 
 // Try cache first
@@ -72,9 +72,23 @@ if streak == nil {
 streakCache.InvalidateStreak(ctx, userID)
 ```
 
+### Flag Cache (`flag_cache.go`)
+
+Cache-aside pattern for feature flag data:
+- Caller-specified TTL (60-second default in flag service)
+- Supports caching individual flags by key and the full flag set
+- JSON serialization
+
+### Session Cache (`session_cache.go`)
+
+Cache-aside pattern for session data:
+- 10-minute TTL
+- JSON serialization
+- Used to store and retrieve user sessions by session ID
+
 ## Cache Key Naming Convention
 
-- Prefix with entity type: `streak:{userID}`
+- Prefix with entity type: `streak:{userID}`, `flag:{key}`, `flags:all`, `session:{sessionID}`
 - Use colon `:` as delimiter for readability
 - Keep keys concise but descriptive
 
@@ -82,8 +96,10 @@ streakCache.InvalidateStreak(ctx, userID)
 
 | Data Type | TTL | Rationale |
 |-----------|-----|-----------|
-| Streak | 5 minutes | Real-time updates for active users; balance freshness vs. DB load |
-| Dashboard | 5 minutes | TBD (future implementation) |
+| Streak | 60 seconds | Matches tracking service usage; balance freshness vs. DB load |
+| Flags (individual) | Caller-specified (60s default) | Per-flag lookup; default set in flag service |
+| Flags (all) | Caller-specified (60s default) | Full flag set; default set in flag service |
+| Session | 10 minutes | Long enough to avoid repeated lookups during active use |
 
 ## Local Development
 
@@ -92,7 +108,7 @@ Start Valkey via Docker Compose:
 make local-up
 ```
 
-Valkey will be available at `localhost:6379` with:
+Valkey will be available at `localhost:6380` with:
 - 64 MB memory limit
 - `allkeys-lru` eviction policy
 
@@ -110,8 +126,13 @@ Valkey will be available at `localhost:6379` with:
 2. **Write-behind**: Update cache, async DB write (future optimization)
 3. **Event-driven**: Listen to domain events and invalidate affected caches
 
+## File Listing
+
+- `valkey.go` -- low-level Valkey client wrapper
+- `streak_cache.go` -- streak cache-aside implementation
+- `flag_cache.go` -- feature flag cache-aside implementation
+- `session_cache.go` -- session cache-aside implementation
+
 ## Future Extensions
 
-- Dashboard cache (`dashboard_cache.go`)
 - Rate limiting cache (per-user request counts)
-- Session cache (if needed)

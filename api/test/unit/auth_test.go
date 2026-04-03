@@ -115,6 +115,35 @@ func (m *MockSessionRepository) DeleteUserSessions(ctx context.Context, userID s
 	return nil
 }
 
+// MockSessionCache is a test double for the session cache.
+type MockSessionCache struct {
+	sessions map[string]*auth.Session
+}
+
+func NewMockSessionCache() *MockSessionCache {
+	return &MockSessionCache{
+		sessions: make(map[string]*auth.Session),
+	}
+}
+
+func (m *MockSessionCache) GetSession(ctx context.Context, sessionID string) (*auth.Session, error) {
+	session, exists := m.sessions[sessionID]
+	if !exists {
+		return nil, nil
+	}
+	return session, nil
+}
+
+func (m *MockSessionCache) SetSession(ctx context.Context, sessionID string, session *auth.Session) error {
+	m.sessions[sessionID] = session
+	return nil
+}
+
+func (m *MockSessionCache) InvalidateSession(ctx context.Context, sessionID string) error {
+	delete(m.sessions, sessionID)
+	return nil
+}
+
 // MockTokenService is a test double for token generation.
 type MockTokenService struct{}
 
@@ -148,7 +177,8 @@ func TestRegister_ValidInput_CreatesUser(t *testing.T) {
 	userRepo := NewMockUserRepository()
 	sessionRepo := NewMockSessionRepository()
 	tokenSvc := &MockTokenService{}
-	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	sessionCache := NewMockSessionCache()
+	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc, sessionCache)
 
 	req := auth.RegisterRequest{
 		Email:             "alex@example.com",
@@ -194,7 +224,8 @@ func TestRegister_MissingEmail_ReturnsError(t *testing.T) {
 	userRepo := NewMockUserRepository()
 	sessionRepo := NewMockSessionRepository()
 	tokenSvc := &MockTokenService{}
-	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	sessionCache := NewMockSessionCache()
+	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc, sessionCache)
 
 	req := auth.RegisterRequest{
 		Email:             "", // Missing
@@ -228,7 +259,8 @@ func TestRegister_MissingSobrietyDate_ReturnsError(t *testing.T) {
 	userRepo := NewMockUserRepository()
 	sessionRepo := NewMockSessionRepository()
 	tokenSvc := &MockTokenService{}
-	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	sessionCache := NewMockSessionCache()
+	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc, sessionCache)
 
 	req := auth.RegisterRequest{
 		Email:             "alex@example.com",
@@ -262,7 +294,8 @@ func TestRegister_FutureSobrietyDate_ReturnsError(t *testing.T) {
 	userRepo := NewMockUserRepository()
 	sessionRepo := NewMockSessionRepository()
 	tokenSvc := &MockTokenService{}
-	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	sessionCache := NewMockSessionCache()
+	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc, sessionCache)
 
 	tomorrow := time.Now().AddDate(0, 0, 1).Format("2006-01-02")
 
@@ -298,7 +331,8 @@ func TestRegister_InvalidEmail_ReturnsError(t *testing.T) {
 	userRepo := NewMockUserRepository()
 	sessionRepo := NewMockSessionRepository()
 	tokenSvc := &MockTokenService{}
-	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	sessionCache := NewMockSessionCache()
+	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc, sessionCache)
 
 	// Note: Current implementation only checks for empty email
 	// This test validates that behavior
@@ -334,7 +368,8 @@ func TestRegister_DuplicateEmail_ReturnsError(t *testing.T) {
 	userRepo := NewMockUserRepository()
 	sessionRepo := NewMockSessionRepository()
 	tokenSvc := &MockTokenService{}
-	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc)
+	sessionCache := NewMockSessionCache()
+	service := auth.NewAuthService(userRepo, sessionRepo, tokenSvc, sessionCache)
 
 	ctx := context.Background()
 
