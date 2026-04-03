@@ -7,33 +7,55 @@ import (
 	"strings"
 	"sync"
 
-	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // ContentResolver resolves a locale to the appropriate ContentClient
 // using a fallback chain: full locale -> language only -> default.
+// It fetches the list of available databases once and matches against it.
 type ContentResolver struct {
 	client     *mongo.Client
 	baseDBName string
 	cache      map[string]*ContentClient
+	databases  map[string]bool // set of database names that exist
 	mu         sync.RWMutex
 }
 
 // NewContentResolver creates a new ContentResolver.
+// Call LoadDatabases before first use to populate the available database list.
 func NewContentResolver(client *mongo.Client, baseDBName string) *ContentResolver {
 	return &ContentResolver{
 		client:     client,
 		baseDBName: baseDBName,
 		cache:      make(map[string]*ContentClient),
+		databases:  make(map[string]bool),
 	}
 }
 
+// LoadDatabases fetches the list of all databases from MongoDB and caches it.
+// Call this once at startup (Lambda init). The list is used for all subsequent
+// Resolve calls without additional database queries.
+func (r *ContentResolver) LoadDatabases(ctx context.Context) error {
+	names, err := r.client.ListDatabaseNames(ctx, map[string]interface{}{})
+	if err != nil {
+		return fmt.Errorf("listing databases: %w", err)
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.databases = make(map[string]bool, len(names))
+	for _, name := range names {
+		r.databases[name] = true
+	}
+
+	return nil
+}
+
 // Resolve returns a ContentClient for the given locale.
-// It tries databases in order: base-{locale}, base-{language}, base.
+// It matches the fallback chain against the pre-loaded database list.
 // Results are cached so each locale is resolved at most once.
-func (r *ContentResolver) Resolve(ctx context.Context, locale string) *ContentClient {
-	// Normalize locale
+func (r *ContentResolver) Resolve(locale string) *ContentClient {
 	locale = strings.TrimSpace(locale)
 
 	// Check cache first
@@ -44,17 +66,18 @@ func (r *ContentResolver) Resolve(ctx context.Context, locale string) *ContentCl
 	}
 	r.mu.RUnlock()
 
-	// Build fallback chain
+	// Build fallback chain and match against known databases
 	candidates := r.buildFallbackChain(locale)
 
-	// Try each candidate
 	var resolved *ContentClient
+	r.mu.RLock()
 	for _, dbName := range candidates {
-		if r.databaseExists(ctx, dbName) {
+		if r.databases[dbName] {
 			resolved = NewContentClient(r.client, dbName)
 			break
 		}
 	}
+	r.mu.RUnlock()
 
 	// Always fall back to default
 	if resolved == nil {
@@ -103,14 +126,4 @@ func (r *ContentResolver) buildFallbackChain(locale string) []string {
 	chain = append(chain, r.baseDBName)
 
 	return chain
-}
-
-// databaseExists checks if a database has any collections.
-func (r *ContentResolver) databaseExists(ctx context.Context, dbName string) bool {
-	db := r.client.Database(dbName)
-	collections, err := db.ListCollectionNames(ctx, bson.M{})
-	if err != nil {
-		return false
-	}
-	return len(collections) > 0
 }
