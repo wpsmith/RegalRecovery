@@ -1,0 +1,144 @@
+// internal/repository/mongo.go
+package repository
+
+import (
+	"context"
+	"fmt"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+// MongoClient wraps the MongoDB client with database and collection helpers.
+type MongoClient struct {
+	client   *mongo.Client
+	database *mongo.Database
+}
+
+// NewMongoClient creates a new MongoDB client wrapper.
+// The uri parameter should be a MongoDB connection string (e.g., "mongodb://localhost:27017").
+// The databaseName parameter specifies which database to use.
+func NewMongoClient(ctx context.Context, uri string, databaseName string) (*MongoClient, error) {
+	clientOptions := options.Client().ApplyURI(uri)
+	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
+	}
+
+	// Verify connection
+	if err := client.Ping(ctx, nil); err != nil {
+		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
+	}
+
+	return &MongoClient{
+		client:   client,
+		database: client.Database(databaseName),
+	}, nil
+}
+
+// Close closes the MongoDB client connection.
+func (m *MongoClient) Close(ctx context.Context) error {
+	if err := m.client.Disconnect(ctx); err != nil {
+		return fmt.Errorf("failed to disconnect from MongoDB: %w", err)
+	}
+	return nil
+}
+
+// Collection returns a MongoDB collection handle.
+func (m *MongoClient) Collection(name string) *mongo.Collection {
+	return m.database.Collection(name)
+}
+
+// InsertOne inserts a single document into the specified collection.
+func (m *MongoClient) InsertOne(ctx context.Context, collectionName string, document interface{}) (*mongo.InsertOneResult, error) {
+	coll := m.database.Collection(collectionName)
+	result, err := coll.InsertOne(ctx, document)
+	if err != nil {
+		return nil, fmt.Errorf("failed to insert document: %w", err)
+	}
+	return result, nil
+}
+
+// FindOne retrieves a single document matching the filter.
+func (m *MongoClient) FindOne(ctx context.Context, collectionName string, filter interface{}, result interface{}) error {
+	coll := m.database.Collection(collectionName)
+	err := coll.FindOne(ctx, filter).Decode(result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return fmt.Errorf("document not found")
+		}
+		return fmt.Errorf("failed to find document: %w", err)
+	}
+	return nil
+}
+
+// Find retrieves multiple documents matching the filter.
+func (m *MongoClient) Find(ctx context.Context, collectionName string, filter interface{}, opts ...*options.FindOptions) (*mongo.Cursor, error) {
+	coll := m.database.Collection(collectionName)
+	cursor, err := coll.Find(ctx, filter, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find documents: %w", err)
+	}
+	return cursor, nil
+}
+
+// UpdateOne updates a single document matching the filter.
+func (m *MongoClient) UpdateOne(ctx context.Context, collectionName string, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	coll := m.database.Collection(collectionName)
+	result, err := coll.UpdateOne(ctx, filter, update, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update document: %w", err)
+	}
+	return result, nil
+}
+
+// DeleteOne deletes a single document matching the filter.
+func (m *MongoClient) DeleteOne(ctx context.Context, collectionName string, filter interface{}) (*mongo.DeleteResult, error) {
+	coll := m.database.Collection(collectionName)
+	result, err := coll.DeleteOne(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete document: %w", err)
+	}
+	return result, nil
+}
+
+// DeleteMany deletes all documents matching the filter.
+func (m *MongoClient) DeleteMany(ctx context.Context, collectionName string, filter interface{}) (*mongo.DeleteResult, error) {
+	coll := m.database.Collection(collectionName)
+	result, err := coll.DeleteMany(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete documents: %w", err)
+	}
+	return result, nil
+}
+
+// CountDocuments counts documents matching the filter.
+func (m *MongoClient) CountDocuments(ctx context.Context, collectionName string, filter interface{}) (int64, error) {
+	coll := m.database.Collection(collectionName)
+	count, err := coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count documents: %w", err)
+	}
+	return count, nil
+}
+
+// Aggregate executes an aggregation pipeline.
+func (m *MongoClient) Aggregate(ctx context.Context, collectionName string, pipeline interface{}, opts ...*options.AggregateOptions) (*mongo.Cursor, error) {
+	coll := m.database.Collection(collectionName)
+	cursor, err := coll.Aggregate(ctx, pipeline, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute aggregation: %w", err)
+	}
+	return cursor, nil
+}
+
+// BuildFilter is a helper to construct MongoDB filters using BSON.
+func BuildFilter(key string, value interface{}) bson.M {
+	return bson.M{key: value}
+}
+
+// BuildUpdate is a helper to construct MongoDB update documents.
+func BuildUpdate(updates bson.M) bson.M {
+	return bson.M{"$set": updates}
+}

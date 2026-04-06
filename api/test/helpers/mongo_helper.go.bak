@@ -1,0 +1,126 @@
+// test/helpers/mongo_helper.go
+package helpers
+
+import (
+	"context"
+	"testing"
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+// SetupLocalMongo creates a MongoDB client pointing to localhost:27017.
+// It configures the client with test credentials for local testing.
+func SetupLocalMongo(t *testing.T) *mongo.Client {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	client, err := mongo.Connect(ctx, clientOptions)
+	if err != nil {
+		t.Fatalf("failed to connect to MongoDB: %v", err)
+	}
+
+	// Verify connection
+	if err := client.Ping(ctx, nil); err != nil {
+		t.Fatalf("failed to ping MongoDB: %v", err)
+	}
+
+	return client
+}
+
+// CreateTestIndexes creates indexes for the regal-recovery database.
+// This mirrors the production index design for efficient querying.
+func CreateTestIndexes(t *testing.T, client *mongo.Client) {
+	t.Helper()
+
+	ctx := context.Background()
+	database := client.Database("regal-recovery-test")
+
+	collections := []string{
+		"users",
+		"tracking",
+		"activities",
+		"content",
+		"flags",
+		"goals",
+		"commitments",
+		"support",
+		"sessions",
+	}
+
+	for _, collName := range collections {
+		coll := database.Collection(collName)
+
+		// Create indexes for PK and SK (compound primary key)
+		_, err := coll.Indexes().CreateMany(ctx, []mongo.IndexModel{
+			{
+				Keys: bson.D{{Key: "PK", Value: 1}, {Key: "SK", Value: 1}},
+				Options: options.Index().SetUnique(true).SetName("pk_sk_unique"),
+			},
+			{
+				Keys: bson.D{{Key: "GSI1PK", Value: 1}, {Key: "GSI1SK", Value: 1}},
+				Options: options.Index().SetName("gsi1_index"),
+			},
+			{
+				Keys: bson.D{{Key: "GSI2PK", Value: 1}, {Key: "GSI2SK", Value: 1}},
+				Options: options.Index().SetName("gsi2_index"),
+			},
+			{
+				Keys: bson.D{{Key: "EntityType", Value: 1}},
+				Options: options.Index().SetName("entity_type_index"),
+			},
+			{
+				Keys: bson.D{{Key: "TenantId", Value: 1}},
+				Options: options.Index().SetName("tenant_id_index"),
+			},
+		})
+		if err != nil {
+			t.Fatalf("failed to create indexes for collection %s: %v", collName, err)
+		}
+	}
+}
+
+// CleanupDatabase deletes all documents from all collections in the test database.
+func CleanupDatabase(t *testing.T, client *mongo.Client) {
+	t.Helper()
+
+	ctx := context.Background()
+	database := client.Database("regal-recovery-test")
+
+	collections := []string{
+		"users",
+		"tracking",
+		"activities",
+		"content",
+		"flags",
+		"goals",
+		"commitments",
+		"support",
+		"sessions",
+	}
+
+	for _, collName := range collections {
+		coll := database.Collection(collName)
+		_, err := coll.DeleteMany(ctx, bson.M{})
+		if err != nil {
+			t.Fatalf("failed to cleanup collection %s: %v", collName, err)
+		}
+	}
+}
+
+// CloseMongoClient closes the MongoDB client connection.
+func CloseMongoClient(t *testing.T, client *mongo.Client) {
+	t.Helper()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Disconnect(ctx); err != nil {
+		t.Fatalf("failed to disconnect from MongoDB: %v", err)
+	}
+}

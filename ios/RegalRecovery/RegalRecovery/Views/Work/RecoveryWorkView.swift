@@ -1,6 +1,8 @@
+import SwiftData
 import SwiftUI
 
 struct RecoveryWorkView: View {
+    @Environment(\.modelContext) private var modelContext
     @State private var viewModel = RecoveryWorkViewModel()
     @State private var showCompleted = false
 
@@ -97,9 +99,21 @@ struct RecoveryWorkView: View {
             }
             .navigationTitle("Recovery Work")
             .onAppear {
+                viewModel.timeJournalInPlan = isTimeJournalInPlan()
                 viewModel.load()
             }
         }
+    }
+
+    private func isTimeJournalInPlan() -> Bool {
+        let descriptor = FetchDescriptor<RRRecoveryPlan>(
+            predicate: #Predicate { $0.isActive == true }
+        )
+        guard let plan = try? modelContext.fetch(descriptor).first,
+              let items = plan.items else {
+            return false
+        }
+        return items.contains { $0.activityType == ActivityType.timeJournal.rawValue && $0.isEnabled }
     }
 }
 

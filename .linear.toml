@@ -1,0 +1,6 @@
+# linear cli
+# https://github.com/schpet/linear-cli
+
+workspace = "travissmith"
+team_id = "RR"
+issue_sort = "priority"
