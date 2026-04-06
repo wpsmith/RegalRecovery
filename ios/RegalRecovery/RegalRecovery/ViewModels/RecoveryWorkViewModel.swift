@@ -88,6 +88,8 @@ class RecoveryWorkViewModel {
     var timeJournalTotalSlots: Int = 24
     var timeJournalDayStatus: TimeJournalDayStatus = .inProgress
     var timeJournalLastUpdated: Date? = nil
+    /// Set to true only when Time Journal is in the user's active recovery plan.
+    var timeJournalInPlan: Bool = false
 
     private let calendar = Calendar.current
 
@@ -121,32 +123,34 @@ class RecoveryWorkViewModel {
         let rppDueDate = calendar.date(byAdding: .day, value: 14, to: now)!
         let backboneDueDate = calendar.date(byAdding: .day, value: 5, to: now)!
 
-        // Time Journal work item (TJ-069-076)
-        let timeJournalTriggerReason: String = {
-            switch timeJournalDayStatus {
-            case .inProgress:
-                return "\(timeJournalFilledCount) of \(timeJournalTotalSlots) slots filled today"
-            case .overdue:
-                return "Some time slots have passed without entries"
-            case .completed:
-                return "All time slots filled for today"
-            }
-        }()
+        // Time Journal work item (TJ-069-076) — only if user added it to their plan
+        var timeJournalItems: [RecoveryWorkItem] = []
+        if timeJournalInPlan {
+            let timeJournalTriggerReason: String = {
+                switch timeJournalDayStatus {
+                case .inProgress:
+                    return "\(timeJournalFilledCount) of \(timeJournalTotalSlots) slots filled today"
+                case .overdue:
+                    return "Some time slots have passed without entries"
+                case .completed:
+                    return "All time slots filled for today"
+                }
+            }()
 
-        let timeJournalItem = RecoveryWorkItem(
-            activityType: "timeJournal",
-            title: "Time Journal",
-            triggerReason: timeJournalTriggerReason,
-            dueDate: calendar.startOfDay(for: now).addingTimeInterval(24 * 60 * 60 - 1),
-            priority: .high,
-            status: timeJournalDayStatus.workStatus,
-            icon: "clock.fill",
-            iconColor: .purple
-        )
+            timeJournalItems.append(RecoveryWorkItem(
+                activityType: "timeJournal",
+                title: "Time Journal",
+                triggerReason: timeJournalTriggerReason,
+                dueDate: calendar.startOfDay(for: now).addingTimeInterval(24 * 60 * 60 - 1),
+                priority: .high,
+                status: timeJournalDayStatus.workStatus,
+                icon: "clock.fill",
+                iconColor: .purple
+            ))
+        }
 
-        // Due Now: 3 Circles Review (overdue by days criteria) + Time Journal
-        dueNow = [
-            timeJournalItem,
+        // Due Now: 3 Circles Review (overdue by days criteria) + Time Journal (if in plan)
+        dueNow = timeJournalItems + [
             RecoveryWorkItem(
                 activityType: "threeCirclesReview",
                 title: "3 Circles Review",

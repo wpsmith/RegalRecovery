@@ -283,7 +283,7 @@ struct TodayView: View {
 
             if viewModel.recoveryWorkCards.count > 3 {
                 NavigationLink {
-                    RecoveryWorkView()
+                    ActivitiesListView()
                 } label: {
                     Text("View all recovery work")
                         .font(RRFont.subheadline)
