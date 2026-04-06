@@ -135,6 +135,33 @@ class FASTERScaleViewModel {
         isLoading = false
     }
 
+    // MARK: - Convenience Computed
+
+    /// The most recent stage logged, or nil if no history
+    var currentStage: FASTERStage? {
+        history.first?.stage
+    }
+
+    /// Human-readable summary of the current FASTER state
+    var statusLabel: String {
+        guard let stage = currentStage else { return "Not assessed" }
+        return stage.name
+    }
+
+    /// Color zone: "Green", "Yellow", or "Red"
+    var zoneLabel: String {
+        guard let stage = currentStage else { return "Green" }
+        switch stage {
+        case .restoration, .forgettingPriorities:
+            return "Green"
+        case .anxiety, .speedingUp:
+            return "Yellow"
+        case .tickedOff, .exhausted, .relapse:
+            return "Red"
+        }
+    }
+
+
     // MARK: - Private
 
     private func loadFromMockData() async throws {

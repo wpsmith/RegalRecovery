@@ -61,7 +61,7 @@ struct FASTERScaleToolView: View {
 
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 10), spacing: 6) {
                                 ForEach(last30Entries.reversed()) { entry in
-                                    let stage = FASTERStage(rawValue: entry.assessedStage) ?? .restoration
+                                    let stage = FASTERStage(rawValue: entry.stage) ?? .restoration
                                     Button {
                                         selectedEntry = entry
                                     } label: {
@@ -167,7 +167,7 @@ struct FASTERScaleToolView: View {
     // MARK: - Entry Detail Sheet
 
     private func entryDetailSheet(_ entry: RRFASTEREntry) -> some View {
-        let stage = FASTERStage(rawValue: entry.assessedStage) ?? .restoration
+        let stage = FASTERStage(rawValue: entry.stage) ?? .restoration
 
         return NavigationStack {
             ScrollView {
@@ -196,7 +196,7 @@ struct FASTERScaleToolView: View {
                         Text("Mood:")
                             .font(RRFont.caption)
                             .foregroundStyle(Color.rrTextSecondary)
-                        Text("\(entry.moodScore)/5")
+                        Text("\(entry.moodScore ?? 0)/5")
                             .font(RRFont.caption)
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.rrText)
@@ -225,14 +225,14 @@ struct FASTERScaleToolView: View {
                     }
 
                     // Journal
-                    if !entry.journalInsight.isEmpty {
-                        journalField("Ah-ha", entry.journalInsight)
+                    if let insight = entry.journalInsight, !insight.isEmpty {
+                        journalField("Ah-ha", insight)
                     }
-                    if !entry.journalWarning.isEmpty {
-                        journalField("Uh-oh", entry.journalWarning)
+                    if let warning = entry.journalWarning, !warning.isEmpty {
+                        journalField("Uh-oh", warning)
                     }
-                    if !entry.journalFreeText.isEmpty {
-                        journalField("Notes", entry.journalFreeText)
+                    if let freeText = entry.journalFreeText, !freeText.isEmpty {
+                        journalField("Notes", freeText)
                     }
                 }
                 .padding()
@@ -257,7 +257,7 @@ struct FASTERScaleToolView: View {
     }
 }
 
-extension RRFASTEREntry: @retroactive Identifiable {}
+extension RRFASTEREntry: Identifiable {}
 
 #Preview {
     NavigationStack {

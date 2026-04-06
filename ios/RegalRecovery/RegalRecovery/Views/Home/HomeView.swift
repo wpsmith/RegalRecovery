@@ -80,7 +80,7 @@ struct HomeView: View {
             all.append((e.date, RecentActivity(title: "Exercise", detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: "figure.run", iconColor: .blue)))
         }
         for f in fasterEntries.prefix(3) {
-            let stage = FASTERStage(rawValue: f.assessedStage) ?? .restoration
+            let stage = FASTERStage(rawValue: f.stage) ?? .restoration
             all.append((f.date, RecentActivity(title: "FASTER Scale", detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: "gauge.with.needle", iconColor: stage.color)))
         }
         for j in journals.prefix(3) {

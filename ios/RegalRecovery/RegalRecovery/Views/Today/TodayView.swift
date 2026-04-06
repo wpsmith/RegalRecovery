@@ -7,6 +7,33 @@ struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = TodayViewModel()
     @State private var hideCompleted = false
+    @State private var showFASTERMood = false
+
+    // Time Journal SwiftData query for today's entries
+    @Query private var allTimeJournalEntries: [RRTimeJournalEntry]
+
+    private var todayTimeJournalEntries: [RRTimeJournalEntry] {
+        allTimeJournalEntries.filter { Calendar.current.isDateInToday($0.date) }
+    }
+
+    private var timeJournalMode: TimeJournalMode {
+        if let first = todayTimeJournalEntries.first {
+            return TimeJournalMode(rawValue: first.mode) ?? .t60
+        }
+        return .t60
+    }
+
+    private var timeJournalDayStatus: TimeJournalDayStatus {
+        TimeJournalDayStatus.evaluate(
+            entries: todayTimeJournalEntries,
+            mode: timeJournalMode,
+            forDate: Date()
+        )
+    }
+
+    private var timeJournalLastUpdated: Date? {
+        todayTimeJournalEntries.max(by: { $0.modifiedAt < $1.modifiedAt })?.modifiedAt
+    }
 
     var body: some View {
         NavigationStack {
@@ -31,6 +58,9 @@ struct TodayView: View {
             .onAppear {
                 viewModel.load(context: modelContext)
             }
+            .fullScreenCover(isPresented: $showFASTERMood) {
+                FASTERCheckInFlowView()
+            }
         }
     }
 
@@ -42,6 +72,7 @@ struct TodayView: View {
                 greetingHeader
                 scoreSummary
                 quickActions
+                timeJournalCard
                 recoveryWorkCards
                 activityListHeader
                 activityList
@@ -88,6 +119,32 @@ struct TodayView: View {
         if FeatureFlagStore.shared.isEnabled("feature.quick-actions") {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
+                    Button { showFASTERMood = true } label: {
+                        VStack(spacing: 6) {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "gauge.with.dots.needle.33percent")
+                                    .font(.title3)
+                                    .foregroundStyle(.orange)
+                                Text("NEW")
+                                    .font(.system(size: 7, weight: .bold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 3)
+                                    .padding(.vertical, 1)
+                                    .background(Color.rrSecondary)
+                                    .clipShape(Capsule())
+                                    .offset(x: 8, y: -6)
+                            }
+                            Text("FASTER")
+                                .font(RRFont.caption2)
+                                .foregroundStyle(Color.rrText)
+                        }
+                        .frame(width: 72, height: 64)
+                        .background(Color.rrSurface)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
+                    }
+                    .buttonStyle(.plain)
+
                     quickActionCard(icon: "flame.fill", label: "Log Urge", color: .orange) {
                         UrgeLogView()
                     }
@@ -102,9 +159,6 @@ struct TodayView: View {
                     }
                     quickActionCard(icon: "phone.fill", label: "Call Someone", color: .green) {
                         PhoneCallLogView()
-                    }
-                    quickActionCard(icon: "gauge.with.dots.needle.67percent", label: "FASTER", color: .orange) {
-                        FASTERScaleView()
                     }
                 }
             }
@@ -134,6 +188,26 @@ struct TodayView: View {
             .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Time Journal Card
+
+    @ViewBuilder
+    private var timeJournalCard: some View {
+        if FeatureFlagStore.shared.isEnabled("activity.time-journal") {
+            NavigationLink {
+                TimeJournalDailyView()
+            } label: {
+                TimeJournalTodayCard(
+                    filledCount: todayTimeJournalEntries.count,
+                    totalSlots: timeJournalMode.slotsPerDay,
+                    dayStatus: timeJournalDayStatus,
+                    mode: timeJournalMode,
+                    lastUpdated: timeJournalLastUpdated
+                )
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - Sobriety Module
@@ -348,7 +422,7 @@ struct TodayView: View {
         case ActivityType.stepWork.rawValue:
             StepWorkView()
         case ActivityType.timeJournal.rawValue:
-            JournalView()
+            TimeJournalDailyView()
         case ActivityType.postMortem.rawValue:
             PostMortemView()
         case ActivityType.urgeLog.rawValue:

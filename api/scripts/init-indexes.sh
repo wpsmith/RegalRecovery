@@ -88,6 +88,18 @@ db.sessions.createIndex({ sessionId: 1 }, { unique: true });
 db.sessions.createIndex({ userId: 1 });
 db.sessions.createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+// Time Journal Entries
+db.timeJournalEntries.createIndex({ userId: 1, date: 1 });
+db.timeJournalEntries.createIndex({ userId: 1, date: 1, slotStart: 1 }, { unique: true });
+db.timeJournalEntries.createIndex({ userId: 1, createdAt: -1 });
+db.timeJournalEntries.createIndex({ tenantId: 1, userId: 1 });
+
+// Time Journal Days (daily aggregates)
+db.timeJournalDays.createIndex({ userId: 1, date: -1 }, { unique: true });
+db.timeJournalDays.createIndex({ userId: 1, status: 1, date: -1 });
+db.timeJournalDays.createIndex({ userId: 1, streakEligible: 1, date: -1 });
+db.timeJournalDays.createIndex({ tenantId: 1, userId: 1 });
+
 print("All indexes created successfully");
 '
 

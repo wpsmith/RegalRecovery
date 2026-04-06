@@ -164,8 +164,8 @@ enum ActivitySection: String, CaseIterable {
 // MARK: - FASTER Scale
 
 enum FASTERStage: Int, CaseIterable, Identifiable {
-    case restoration = 0
-    case forgettingPriorities
+    case restoration = -1
+    case forgettingPriorities = 0
     case anxiety
     case speedingUp
     case tickedOff
@@ -188,7 +188,7 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
 
     var letter: String {
         switch self {
-        case .restoration: return "✦"
+        case .restoration: return "R+"
         case .forgettingPriorities: return "F"
         case .anxiety: return "A"
         case .speedingUp: return "S"
@@ -348,9 +348,9 @@ struct FASTEREntry: Identifiable {
     let date: Date
     let stage: FASTERStage
     let moodScore: Int
-    let selectedIndicators: [String]
+    let selectedIndicators: [FASTERStage: Set<String>]
 
-    init(id: UUID = UUID(), date: Date, stage: FASTERStage, moodScore: Int = 3, selectedIndicators: [String] = []) {
+    init(id: UUID = UUID(), date: Date, stage: FASTERStage, moodScore: Int = 3, selectedIndicators: [FASTERStage: Set<String>] = [:]) {
         self.id = id
         self.date = date
         self.stage = stage
@@ -531,6 +531,23 @@ struct CommitmentStatus {
 
 // MARK: - Recent Activity
 
+enum HistoryItemType: String {
+    case morningCommitment
+    case eveningReview
+    case recoveryCheckIn
+    case journal
+    case emotionalJournal
+    case fasterScale
+    case urgeLog
+    case mood
+    case gratitude
+    case prayer
+    case exercise
+    case phoneCall
+    case meeting
+    case spouseCheckIn
+}
+
 struct RecentActivity: Identifiable {
     let id = UUID()
     let title: String
@@ -538,6 +555,8 @@ struct RecentActivity: Identifiable {
     let time: String
     let icon: String
     let iconColor: Color
+    var sourceType: HistoryItemType?
+    var sourceId: UUID?
 }
 
 // MARK: - Glossary

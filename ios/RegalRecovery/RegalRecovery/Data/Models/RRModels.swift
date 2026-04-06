@@ -569,19 +569,20 @@ final class RRFASTEREntry {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var date: Date
-    var assessedStage: Int  // 0-6 mapping to FASTERStage (0=restoration, 1=F, ..., 6=R)
-    var moodScore: Int      // 1-5 opening mood prompt
-    var selectedIndicatorsJSON: String  // JSON-encoded [String] of all selected indicators
-    var journalInsight: String   // "Ah-ha" field
-    var journalWarning: String   // "Uh-oh" field
-    var journalFreeText: String  // optional free-text
+    var stage: Int  // -1 to 5 mapping to FASTERStage
+    var moodScore: Int?  // 1-5 from mood prompt (optional for migration compatibility)
+    var selectedIndicatorsJSON: String?  // JSON-encoded [String: [String]] (stage name → indicator labels)
+    var journalInsight: String?  // "Ah-ha" field
+    var journalWarning: String?  // "Uh-oh" field
+    var journalFreeText: String?  // Optional free-text
     var createdAt: Date
     var modifiedAt: Date
 
     /// Decoded selected indicators from JSON storage.
     var selectedIndicators: [String] {
         get {
-            guard let data = selectedIndicatorsJSON.data(using: .utf8),
+            guard let json = selectedIndicatorsJSON,
+                  let data = json.data(using: .utf8),
                   let decoded = try? JSONDecoder().decode([String].self, from: data) else {
                 return []
             }
@@ -599,20 +600,21 @@ final class RRFASTEREntry {
         id: UUID = UUID(),
         userId: UUID,
         date: Date,
-        assessedStage: Int,
-        moodScore: Int = 3,
-        selectedIndicators: [String] = [],
-        journalInsight: String = "",
-        journalWarning: String = "",
-        journalFreeText: String = "",
+        stage: Int,
+        moodScore: Int? = nil,
+        selectedIndicatorsJSON: String? = nil,
+        journalInsight: String? = nil,
+        journalWarning: String? = nil,
+        journalFreeText: String? = nil,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
         self.id = id
         self.userId = userId
         self.date = date
-        self.assessedStage = assessedStage
+        self.stage = stage
         self.moodScore = moodScore
+        self.selectedIndicatorsJSON = selectedIndicatorsJSON
         self.journalInsight = journalInsight
         self.journalWarning = journalWarning
         self.journalFreeText = journalFreeText
@@ -1301,6 +1303,7 @@ enum RRModelConfiguration {
         RRJournalEntry.self,
         RREmotionalJournal.self,
         RRTimeBlock.self,
+        RRTimeJournalEntry.self,
         RRUrgeLog.self,
         RRFASTEREntry.self,
         RRMoodEntry.self,

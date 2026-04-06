@@ -14,8 +14,23 @@
 		10000005 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000005 /* Components.swift */; };
 		10000006 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000006 /* MockData.swift */; };
 		10000117 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000117 /* ContentData.swift */; };
+		10000118 /* FASTERMoodPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000118 /* FASTERMoodPromptView.swift */; };
+		10000400 /* FASTERCheckInFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000400 /* FASTERCheckInFlowView.swift */; };
+		10000401 /* FASTERIndicatorSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000401 /* FASTERIndicatorSelectionView.swift */; };
+		10000402 /* FASTERThermometerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000402 /* FASTERThermometerView.swift */; };
+		10000403 /* FASTERCheckInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000403 /* FASTERCheckInViewModel.swift */; };
+		10000404 /* FASTERResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000119 /* FASTERResultsView.swift */; };
+
 		10000007 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000007 /* Types.swift */; };
+		10000500 /* TimeJournalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000500 /* TimeJournalTypes.swift */; };
 		10000008 /* RRModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000008 /* RRModels.swift */; };
+		10000501 /* RRTimeJournalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000501 /* RRTimeJournalEntry.swift */; };
+		10000510 /* TimeJournalDailyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000510 /* TimeJournalDailyView.swift */; };
+		10000511 /* TimeJournalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000511 /* TimeJournalHeaderView.swift */; };
+		10000512 /* TimeJournalTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000512 /* TimeJournalTimelineView.swift */; };
+		10000513 /* TimeJournalSlotRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000513 /* TimeJournalSlotRow.swift */; };
+		10000610 /* TimeJournalStreakView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000610 /* TimeJournalStreakView.swift */; };
+		10000611 /* TimeJournalHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000611 /* TimeJournalHeatmapView.swift */; };
 		10000009 /* RepositoryProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000009 /* RepositoryProtocols.swift */; };
 		10000010 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000010 /* SeedData.swift */; };
 		10000011 /* SwiftDataRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000011 /* SwiftDataRepositories.swift */; };
@@ -106,6 +121,8 @@
 		10000089 /* RecentActivityFeed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000089 /* RecentActivityFeed.swift */; };
 		10000309 /* RecentActivityRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000309 /* RecentActivityRow.swift */; };
 		10000310 /* ActivityHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000310 /* ActivityHistoryView.swift */; };
+		10000311 /* ActivityDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000311 /* ActivityDetailView.swift */; };
+		10000312 /* TimeJournalTodayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000312 /* TimeJournalTodayCard.swift */; };
 		10000090 /* StreakHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000090 /* StreakHeroCard.swift */; };
 		10000091 /* AccountSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000091 /* AccountSetupView.swift */; };
 		10000092 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000092 /* OnboardingFlow.swift */; };
@@ -142,6 +159,16 @@
 		10000308 /* SobrietyModuleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000308 /* SobrietyModuleView.swift */; };
 		10000306 /* TodayViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000306 /* TodayViewModel.swift */; };
 		10000307 /* DailyScoreCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000307 /* DailyScoreCalculator.swift */; };
+		10000600 /* TimeJournalEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000600 /* TimeJournalEntryViewModel.swift */; };
+		10000601 /* LocationField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000601 /* LocationField.swift */; };
+		10000602 /* ActivityField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000602 /* ActivityField.swift */; };
+		10000603 /* PeopleField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000603 /* PeopleField.swift */; };
+		10000604 /* EmotionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000604 /* EmotionPicker.swift */; };
+		10000605 /* TimeJournalQuickEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000605 /* TimeJournalQuickEntrySheet.swift */; };
+		10000700 /* TimeJournalReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000700 /* TimeJournalReminderManager.swift */; };
+		10000701 /* FocusStatusMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000701 /* FocusStatusMonitor.swift */; };
+		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
+		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -153,8 +180,23 @@
 		20000005 /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		20000006 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
 		20000117 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
+		20000118 /* FASTERMoodPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERMoodPromptView.swift; sourceTree = "<group>"; };
+		20000119 /* FASTERResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERResultsView.swift; sourceTree = "<group>"; };
+		20000400 /* FASTERCheckInFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERCheckInFlowView.swift; sourceTree = "<group>"; };
+		20000401 /* FASTERIndicatorSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERIndicatorSelectionView.swift; sourceTree = "<group>"; };
+		20000402 /* FASTERThermometerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERThermometerView.swift; sourceTree = "<group>"; };
+		20000403 /* FASTERCheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERCheckInViewModel.swift; sourceTree = "<group>"; };
+
 		20000007 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		20000500 /* TimeJournalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTypes.swift; sourceTree = "<group>"; };
 		20000008 /* RRModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRModels.swift; sourceTree = "<group>"; };
+		20000501 /* RRTimeJournalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTimeJournalEntry.swift; sourceTree = "<group>"; };
+		20000510 /* TimeJournalDailyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalDailyView.swift; sourceTree = "<group>"; };
+		20000511 /* TimeJournalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeaderView.swift; sourceTree = "<group>"; };
+		20000512 /* TimeJournalTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTimelineView.swift; sourceTree = "<group>"; };
+		20000513 /* TimeJournalSlotRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalSlotRow.swift; sourceTree = "<group>"; };
+		20000610 /* TimeJournalStreakView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalStreakView.swift; sourceTree = "<group>"; };
+		20000611 /* TimeJournalHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeatmapView.swift; sourceTree = "<group>"; };
 		20000009 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
 		20000010 /* SeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedData.swift; sourceTree = "<group>"; };
 		20000011 /* SwiftDataRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataRepositories.swift; sourceTree = "<group>"; };
@@ -183,8 +225,20 @@
 		20000305 /* RecoveryWorkCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkCardView.swift; sourceTree = "<group>"; };
 		20000308 /* SobrietyModuleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SobrietyModuleView.swift; sourceTree = "<group>"; };
 		20000310 /* ActivityHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityHistoryView.swift; sourceTree = "<group>"; };
+		20000311 /* ActivityDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDetailView.swift; sourceTree = "<group>"; };
+		20000312 /* TimeJournalTodayCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTodayCard.swift; sourceTree = "<group>"; };
 		20000306 /* TodayViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayViewModel.swift; sourceTree = "<group>"; };
 		20000307 /* DailyScoreCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyScoreCalculator.swift; sourceTree = "<group>"; };
+		20000600 /* TimeJournalEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalEntryViewModel.swift; sourceTree = "<group>"; };
+		20000601 /* LocationField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationField.swift; sourceTree = "<group>"; };
+		20000602 /* ActivityField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityField.swift; sourceTree = "<group>"; };
+		20000603 /* PeopleField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleField.swift; sourceTree = "<group>"; };
+		20000604 /* EmotionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionPicker.swift; sourceTree = "<group>"; };
+		20000605 /* TimeJournalQuickEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalQuickEntrySheet.swift; sourceTree = "<group>"; };
+		20000700 /* TimeJournalReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalReminderManager.swift; sourceTree = "<group>"; };
+		20000701 /* FocusStatusMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStatusMonitor.swift; sourceTree = "<group>"; };
+		20000702 /* JournalEntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntryDetailView.swift; sourceTree = "<group>"; };
+		20000703 /* JournalHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalHistoryView.swift; sourceTree = "<group>"; };
 		20000024 /* ActivityError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityError.swift; sourceTree = "<group>"; };
 		20000025 /* ActivityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityViewModel.swift; sourceTree = "<group>"; };
 		20000026 /* AffirmationsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsViewModel.swift; sourceTree = "<group>"; };
@@ -359,6 +413,7 @@
 				20000116 /* ContentData.swift */,
 				20000117 /* ContentData.swift */,
 				20000006 /* MockData.swift */,
+				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
 			);
 			path = Models;
@@ -377,6 +432,7 @@
 			isa = PBXGroup;
 			children = (
 				20000008 /* RRModels.swift */,
+				20000501 /* RRTimeJournalEntry.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -397,6 +453,8 @@
 				50000021 /* API */,
 				50000022 /* Auth */,
 				50000023 /* Sync */,
+				20000700 /* TimeJournalReminderManager.swift */,
+				20000701 /* FocusStatusMonitor.swift */,
 				20000204 /* PlanNotificationScheduler.swift */,
 				20000022 /* ServiceContainer.swift */,
 				20000023 /* FeatureFlagService.swift */,
@@ -471,8 +529,10 @@
 				20000203 /* UrgeSurfingViewModel.swift */,
 				20000207 /* RecoveryPlanViewModel.swift */,
 				20000210 /* RecoveryWorkViewModel.swift */,
+				20000403 /* FASTERCheckInViewModel.swift */,
 				20000306 /* TodayViewModel.swift */,
 				20000307 /* DailyScoreCalculator.swift */,
+				20000600 /* TimeJournalEntryViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -493,6 +553,36 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		50000302 /* TimeJournal */ = {
+			isa = PBXGroup;
+			children = (
+				20000602 /* ActivityField.swift */,
+				20000604 /* EmotionPicker.swift */,
+				20000601 /* LocationField.swift */,
+				20000603 /* PeopleField.swift */,
+				20000510 /* TimeJournalDailyView.swift */,
+				20000511 /* TimeJournalHeaderView.swift */,
+				20000605 /* TimeJournalQuickEntrySheet.swift */,
+				20000513 /* TimeJournalSlotRow.swift */,
+				20000610 /* TimeJournalStreakView.swift */,
+				20000512 /* TimeJournalTimelineView.swift */,
+				20000611 /* TimeJournalHeatmapView.swift */,
+			);
+			path = TimeJournal;
+			sourceTree = "<group>";
+		};
+		50000301 /* FASTER */ = {
+			isa = PBXGroup;
+			children = (
+				20000400 /* FASTERCheckInFlowView.swift */,
+				20000401 /* FASTERIndicatorSelectionView.swift */,
+				20000118 /* FASTERMoodPromptView.swift */,
+				20000119 /* FASTERResultsView.swift */,
+				20000402 /* FASTERThermometerView.swift */,
+			);
+			path = FASTER;
+			sourceTree = "<group>";
+		};
 		50000041 /* Activities */ = {
 			isa = PBXGroup;
 			children = (
@@ -501,9 +591,12 @@
 				20000055 /* EmotionalJournalView.swift */,
 				20000056 /* EveningReviewView.swift */,
 				20000057 /* ExerciseLogView.swift */,
+				50000301 /* FASTER */,
 				20000058 /* FASTERScaleView.swift */,
 				20000059 /* GratitudeListView.swift */,
 				20000060 /* JournalView.swift */,
+				20000702 /* JournalEntryDetailView.swift */,
+				20000703 /* JournalHistoryView.swift */,
 				20000061 /* MeetingsAttendedView.swift */,
 				20000062 /* MoodRatingView.swift */,
 				20000063 /* MorningCommitmentView.swift */,
@@ -514,6 +607,7 @@
 				20000068 /* SobrietyCommitmentView.swift */,
 				20000069 /* SpouseCheckInPrepView.swift */,
 				20000070 /* StepWorkView.swift */,
+				50000302 /* TimeJournal */,
 				20000071 /* TimeJournalView.swift */,
 				20000072 /* UrgeLogView.swift */,
 				20000073 /* WeeklyGoalsView.swift */,
@@ -604,6 +698,8 @@
 				20000305 /* RecoveryWorkCardView.swift */,
 				20000308 /* SobrietyModuleView.swift */,
 				20000310 /* ActivityHistoryView.swift */,
+				20000311 /* ActivityDetailView.swift */,
+				20000312 /* TimeJournalTodayCard.swift */,
 			);
 			path = Today;
 			sourceTree = "<group>";
@@ -716,8 +812,23 @@
 				10000005 /* Components.swift in Sources */,
 				10000006 /* MockData.swift in Sources */,
 				10000117 /* ContentData.swift in Sources */,
+				10000118 /* FASTERMoodPromptView.swift in Sources */,
+				10000400 /* FASTERCheckInFlowView.swift in Sources */,
+				10000401 /* FASTERIndicatorSelectionView.swift in Sources */,
+				10000402 /* FASTERThermometerView.swift in Sources */,
+				10000403 /* FASTERCheckInViewModel.swift in Sources */,
+				10000404 /* FASTERResultsView.swift in Sources */,
+
 				10000007 /* Types.swift in Sources */,
+				10000500 /* TimeJournalTypes.swift in Sources */,
 				10000008 /* RRModels.swift in Sources */,
+				10000501 /* RRTimeJournalEntry.swift in Sources */,
+				10000510 /* TimeJournalDailyView.swift in Sources */,
+				10000511 /* TimeJournalHeaderView.swift in Sources */,
+				10000512 /* TimeJournalTimelineView.swift in Sources */,
+				10000513 /* TimeJournalSlotRow.swift in Sources */,
+				10000610 /* TimeJournalStreakView.swift in Sources */,
+				10000611 /* TimeJournalHeatmapView.swift in Sources */,
 				10000009 /* RepositoryProtocols.swift in Sources */,
 				10000010 /* SeedData.swift in Sources */,
 				10000011 /* SwiftDataRepositories.swift in Sources */,
@@ -822,6 +933,8 @@
 				10000089 /* RecentActivityFeed.swift in Sources */,
 				10000309 /* RecentActivityRow.swift in Sources */,
 				10000310 /* ActivityHistoryView.swift in Sources */,
+				10000311 /* ActivityDetailView.swift in Sources */,
+				10000312 /* TimeJournalTodayCard.swift in Sources */,
 				10000090 /* StreakHeroCard.swift in Sources */,
 				10000091 /* AccountSetupView.swift in Sources */,
 				10000092 /* OnboardingFlow.swift in Sources */,
@@ -843,6 +956,16 @@
 				10000108 /* ThreeCirclesView.swift in Sources */,
 				10000109 /* ToolsView.swift in Sources */,
 				10000110 /* ContentData.swift in Sources */,
+				10000600 /* TimeJournalEntryViewModel.swift in Sources */,
+				10000601 /* LocationField.swift in Sources */,
+				10000602 /* ActivityField.swift in Sources */,
+				10000603 /* PeopleField.swift in Sources */,
+				10000604 /* EmotionPicker.swift in Sources */,
+				10000605 /* TimeJournalQuickEntrySheet.swift in Sources */,
+				10000700 /* TimeJournalReminderManager.swift in Sources */,
+				10000701 /* FocusStatusMonitor.swift in Sources */,
+				10000702 /* JournalEntryDetailView.swift in Sources */,
+				10000703 /* JournalHistoryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
