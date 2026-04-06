@@ -8,9 +8,9 @@ type TimeJournalMode string
 
 const (
 	// ModeT30 is the 30-minute interval mode (48 slots per day).
-	ModeT30 TimeJournalMode = "T30"
+	ModeT30 TimeJournalMode = "t30"
 	// ModeT60 is the 60-minute interval mode (24 slots per day).
-	ModeT60 TimeJournalMode = "T60"
+	ModeT60 TimeJournalMode = "t60"
 )
 
 // TotalSlots returns the number of slots per day for the mode.
@@ -42,7 +42,7 @@ type DayStatus string
 
 const (
 	// StatusInProgress means the day is still active with future slots remaining.
-	StatusInProgress DayStatus = "in-progress"
+	StatusInProgress DayStatus = "inProgress"
 	// StatusOverdue means one or more elapsed slots are unfilled.
 	StatusOverdue DayStatus = "overdue"
 	// StatusCompleted means all slots are filled and the final slot has elapsed.
