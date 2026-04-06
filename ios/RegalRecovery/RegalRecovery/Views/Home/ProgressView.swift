@@ -50,8 +50,8 @@ struct RecoveryProgressView: View {
 
     private var fasterScaleMode: String {
         guard let latest = fasterEntries.first else { return "Green" }
-        switch latest.assessedStage {
-        case 0: return "Green"
+        switch latest.stage {
+        case -1, 0: return "Green"
         case 1, 2: return "Yellow"
         default: return "Red"
         }

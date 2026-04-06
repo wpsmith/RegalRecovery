@@ -137,6 +137,7 @@
 		10000110 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000116 /* ContentData.swift */; };
 		10000200 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000200 /* Assets.xcassets */; };
 		10000208 /* RecoveryWorkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000208 /* RecoveryWorkView.swift */; };
+		10000209 /* RecoveryWorkItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000209 /* RecoveryWorkItemRow.swift */; };
 		10000210 /* RecoveryWorkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000210 /* RecoveryWorkViewModel.swift */; };
 		10000211 /* RecoveryFoundationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000211 /* RecoveryFoundationView.swift */; };
 		10000212 /* TestingModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000212 /* TestingModeView.swift */; };
@@ -299,6 +300,7 @@
 		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20000208 /* RecoveryWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkView.swift; sourceTree = "<group>"; };
+		20000209 /* RecoveryWorkItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkItemRow.swift; sourceTree = "<group>"; };
 		20000210 /* RecoveryWorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkViewModel.swift; sourceTree = "<group>"; };
 		20000211 /* RecoveryFoundationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFoundationView.swift; sourceTree = "<group>"; };
 		20000212 /* TestingModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingModeView.swift; sourceTree = "<group>"; };
@@ -641,6 +643,7 @@
 			isa = PBXGroup;
 			children = (
 				20000208 /* RecoveryWorkView.swift */,
+				20000209 /* RecoveryWorkItemRow.swift */,
 			);
 			path = Work;
 			sourceTree = "<group>";
@@ -771,6 +774,7 @@
 				10000206 /* PlanActivityRowView.swift in Sources */,
 				10000207 /* RecoveryPlanViewModel.swift in Sources */,
 				10000208 /* RecoveryWorkView.swift in Sources */,
+				10000209 /* RecoveryWorkItemRow.swift in Sources */,
 				10000210 /* RecoveryWorkViewModel.swift in Sources */,
 				10000211 /* RecoveryFoundationView.swift in Sources */,
 				10000212 /* TestingModeView.swift in Sources */,
