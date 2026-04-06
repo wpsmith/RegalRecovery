@@ -79,29 +79,38 @@ struct TimeJournalDailyView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingQuickEntry) {
-            // Placeholder for QuickEntrySheet (Agent 5)
-            NavigationStack {
-                VStack(spacing: 16) {
-                    if let index = selectedSlotIndex {
-                        Text("Quick Entry")
-                            .font(RRFont.title)
-                        Text(viewModel.mode.slotLabel(index: index))
-                            .font(RRFont.body)
-                            .foregroundStyle(.rrTextSecondary)
-                    }
-                    Text("Entry form coming soon")
-                        .font(RRFont.caption)
-                        .foregroundStyle(.rrTextSecondary)
-                }
-                .padding()
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Close") { showingQuickEntry = false }
-                    }
-                }
+        .overlay(alignment: .bottomTrailing) {
+            // Floating Action Button (FAB) — opens quick entry for current slot
+            Button {
+                selectedSlotIndex = viewModel.currentSlotIndex
+                showingQuickEntry = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 56, height: 56)
+                    .background(Color.rrPrimary)
+                    .clipShape(Circle())
+                    .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
             }
-            .presentationDetents([.medium])
+            .padding(.trailing, 20)
+            .padding(.bottom, 20)
+        }
+        .sheet(isPresented: $showingQuickEntry) {
+            if let index = selectedSlotIndex {
+                let entryVM = TimeJournalEntryViewModel(
+                    slotIndex: index,
+                    mode: viewModel.mode,
+                    date: viewModel.currentDate
+                )
+                TimeJournalQuickEntrySheet(
+                    viewModel: entryVM,
+                    onSave: { entry in
+                        Task { await viewModel.saveEntry(entry) }
+                        showingQuickEntry = false
+                    }
+                )
+            }
         }
     }
 }

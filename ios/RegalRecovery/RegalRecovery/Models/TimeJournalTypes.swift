@@ -82,23 +82,20 @@ enum TimeJournalSlotStatus: String, Codable {
     case autoFilled
     case flagged
 
-    /// The color associated with this slot status.
+    /// The color associated with this slot status (per iOS design spec §1.2).
     var color: Color {
         switch self {
-        case .empty: return .rrTextSecondary
-        case .filled: return .rrSuccess
-        case .retroactive: return .rrSecondary
-        case .autoFilled: return .rrPrimary
-        case .flagged: return .rrDestructive
+        case .empty:       return .gray.opacity(0.3)
+        case .filled:      return .rrPrimary
+        case .retroactive: return .rrSecondary.opacity(0.7)
+        case .autoFilled:  return .blue.opacity(0.5)
+        case .flagged:     return .orange
         }
     }
 
-    /// Whether the slot should render with a dashed border.
+    /// Whether the slot should render with a dashed border (per iOS design spec §1.2).
     var useDashedBorder: Bool {
-        switch self {
-        case .retroactive, .autoFilled: return true
-        default: return false
-        }
+        self == .retroactive
     }
 
     /// Accessibility label for VoiceOver.
@@ -130,12 +127,12 @@ enum TimeJournalDayStatus: String {
         }
     }
 
-    /// The color associated with this day status.
+    /// The color associated with this day status (per iOS design spec §1.3).
     var color: Color {
         switch self {
-        case .inProgress: return .rrPrimary
-        case .overdue: return .rrDestructive
-        case .completed: return .rrSuccess
+        case .inProgress: return .blue
+        case .overdue:    return .orange
+        case .completed:  return .rrSuccess
         }
     }
 
