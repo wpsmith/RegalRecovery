@@ -91,7 +91,7 @@ func (s *TimeJournalService) CreateEntry(ctx context.Context, userID string, req
 	}
 
 	// Determine if entry is retroactive (slot has already elapsed).
-	retroactive := isRetroactive(req.Date, req.SlotStart, now)
+	retroactive := isRetroactive(req.Date, req.SlotStart, req.Mode, now)
 	var retroactiveTimestamp *time.Time
 	if retroactive {
 		retroactiveTimestamp = &now
@@ -378,10 +378,12 @@ func calculateSlotEnd(slotStart string, mode TimeJournalMode) (string, error) {
 	return t.Format("15:04:05"), nil
 }
 
-// isRetroactive returns true if the slot has already elapsed at the given time.
-func isRetroactive(date string, slotStart string, now time.Time) bool {
-	slotTime := parseSlotTime(date, slotStart)
-	return now.After(slotTime)
+// isRetroactive returns true if the slot's full time period has elapsed at the given time.
+// A slot is retroactive when now > slotEnd (not slotStart), consistent with TJ-011.
+func isRetroactive(date string, slotStart string, mode TimeJournalMode, now time.Time) bool {
+	slotStartTime := parseSlotTime(date, slotStart)
+	slotEndTime := slotStartTime.Add(time.Duration(mode.SlotDurationMinutes()) * time.Minute)
+	return now.After(slotEndTime)
 }
 
 // parseSlotTime parses date + slotStart into a time.Time in UTC.
