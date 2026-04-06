@@ -1,0 +1,1461 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Time Journal API
+  version: 1.0.0
+  description: |
+    Time Journal (T-30/T-60) API for structured accountability and transparency in sexual addiction recovery.
+
+    The Time Journal is a clinical tool originating from Worthy of Her Trust (Arterburn & Martinkus)
+    and aligned with Dr. Patrick Carnes' 30 Task Model. Users document their day in 30- or 60-minute
+    increments, recording time, location, activity, people present, and emotional state.
+
+    **Core Mechanisms:**
+    - Real-time or retroactive entry of time slots
+    - T-30 (48 slots/day) or T-60 (24 slots/day) modes
+    - Emotion tracking with intensity ratings (1-10)
+    - Proactive sharing with Trust Partners (spouse, counselor, sponsor)
+    - Streak tracking (80% completion threshold per day)
+    - Auto-fill integration with iOS Sleep Focus
+    - 24-hour edit window for entries
+
+    **Clinical Foundation:**
+    The journal combats intimacy aversion, compartmentalization, and unaccounted time—building
+    integrity through daily, meticulous documentation. It is both a spiritual discipline and
+    a relational trust-building tool.
+
+    All entry timestamps are immutable (FR2.7). Entries support optional confidential "redline"
+    notes that are never shared with Trust Partners.
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Entries
+    description: Time journal slot entries (30 or 60 minute intervals)
+  - name: Days
+    description: Daily summaries and completion tracking
+  - name: Streaks
+    description: Consistency streaks and milestone tracking
+  - name: Status
+    description: Today's status engine (In Progress / Overdue / Completed)
+  - name: Sharing
+    description: Trust Partner sharing and permissions
+
+paths:
+  /activities/time-journal/entries:
+    get:
+      operationId: listTimeJournalEntries
+      tags: [Entries]
+      summary: List time journal entries for a date
+      description: |
+        Retrieve all time journal entries for a specific date.
+
+        Returns slots in chronological order with status indicators:
+        - Filled (manually entered)
+        - Retroactive (filled after time period elapsed)
+        - Auto-filled (sleep detection, calendar import)
+        - Empty (not yet filled)
+
+        Supports both T-30 (48 slots) and T-60 (24 slots) modes.
+      parameters:
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Date to retrieve entries for (YYYY-MM-DD)
+          example: "2026-04-03"
+        - name: mode
+          in: query
+          schema:
+            type: string
+            enum: [t30, t60]
+            default: t60
+          description: Time slot mode (T-30 = 30min slots, T-60 = 60min slots)
+      responses:
+        '200':
+          description: OK - Entries retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeJournalEntriesResponse'
+              example:
+                data:
+                  - id: tj_abc123
+                    userId: u_12345
+                    date: "2026-04-03"
+                    slotStart: "08:00:00"
+                    slotEnd: "09:00:00"
+                    mode: t60
+                    location: "@work"
+                    gpsLatitude: 37.7749
+                    gpsLongitude: -122.4194
+                    gpsAddress: "123 Main St, San Francisco, CA 94102"
+                    activity: "Morning standup meeting with engineering team"
+                    people:
+                      - name: "John"
+                        gender: "male"
+                      - name: "Sarah"
+                        gender: "female"
+                    emotions:
+                      - name: "Focused"
+                        intensity: 7
+                        why: "Clear agenda for the meeting"
+                      - name: "Anxious"
+                        intensity: 4
+                        why: "Tight deadline approaching"
+                    extras: null
+                    sleepFlag: false
+                    retroactive: false
+                    retroactiveTimestamp: null
+                    autoFilled: false
+                    autoFillSource: null
+                    redlineNote: null
+                    createdAt: "2026-04-03T08:02:00Z"
+                    modifiedAt: "2026-04-03T08:02:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/activities/time-journal/entries/tj_abc123
+                  - id: tj_abc124
+                    userId: u_12345
+                    date: "2026-04-03"
+                    slotStart: "09:00:00"
+                    slotEnd: "10:00:00"
+                    mode: t60
+                    location: "@work"
+                    gpsLatitude: 37.7749
+                    gpsLongitude: -122.4194
+                    gpsAddress: "123 Main St, San Francisco, CA 94102"
+                    activity: "Code review and implementation planning"
+                    people: []
+                    emotions:
+                      - name: "Competent"
+                        intensity: 8
+                        why: null
+                    extras: null
+                    sleepFlag: false
+                    retroactive: false
+                    retroactiveTimestamp: null
+                    autoFilled: false
+                    autoFillSource: null
+                    redlineNote: null
+                    createdAt: "2026-04-03T09:15:00Z"
+                    modifiedAt: "2026-04-03T09:15:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/activities/time-journal/entries/tj_abc124
+                meta:
+                  date: "2026-04-03"
+                  mode: t60
+                  totalSlots: 24
+                  filledSlots: 12
+                  emptySlots: 12
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/time-journal/entries?date=2026-04-03&mode=t60
+                  day: https://api.regalrecovery.com/v1/activities/time-journal/days/2026-04-03
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createOrUpdateTimeJournalEntry
+      tags: [Entries]
+      summary: Create or update a time slot entry
+      description: |
+        Create or update a time journal entry for a specific time slot.
+
+        **Behavior:**
+        - If entry exists for the time slot, updates it (upsert semantics)
+        - If time period has elapsed, marks as retroactive
+        - Auto-captures GPS location if permission granted
+        - Entries are editable within 24 hours (TJ-017)
+        - After 24 hours, returns 422 Unprocessable Entity
+
+        **Redline Notes:**
+        The optional `redlineNote` field is confidential and never shared with Trust Partners.
+        It allows raw internal honesty as a drafting layer before the shared entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTimeJournalEntryRequest'
+            example:
+              date: "2026-04-03"
+              slotStart: "14:00:00"
+              mode: t60
+              location: "@home"
+              activity: "Lunch with family. Discussed plans for weekend trip."
+              people:
+                - name: "Emily"
+                  gender: "female"
+                - name: "Lucas"
+                  gender: "male"
+              emotions:
+                - name: "Grateful"
+                  intensity: 9
+                  why: "Quality time with loved ones"
+                - name: "Content"
+                  intensity: 8
+                  why: null
+              sleepFlag: false
+      responses:
+        '201':
+          description: Created - Entry recorded successfully
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the created entry
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TimeJournalEntry'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  id: tj_xyz789
+                  userId: u_12345
+                  date: "2026-04-03"
+                  slotStart: "14:00:00"
+                  slotEnd: "15:00:00"
+                  mode: t60
+                  location: "@home"
+                  gpsLatitude: 37.7833
+                  gpsLongitude: -122.4167
+                  gpsAddress: "456 Oak Ave, San Francisco, CA 94110"
+                  activity: "Lunch with family. Discussed plans for weekend trip."
+                  people:
+                    - name: "Emily"
+                      gender: "female"
+                    - name: "Lucas"
+                      gender: "male"
+                  emotions:
+                    - name: "Grateful"
+                      intensity: 9
+                      why: "Quality time with loved ones"
+                    - name: "Content"
+                      intensity: 8
+                      why: null
+                  extras: null
+                  sleepFlag: false
+                  retroactive: false
+                  retroactiveTimestamp: null
+                  autoFilled: false
+                  autoFillSource: null
+                  redlineNote: null
+                  createdAt: "2026-04-03T14:05:00Z"
+                  modifiedAt: "2026-04-03T14:05:00Z"
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/time-journal/entries/tj_xyz789
+                meta:
+                  createdAt: "2026-04-03T14:05:00Z"
+                  sharedWithPartners: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/time-journal/entries/{entryId}:
+    get:
+      operationId: getTimeJournalEntry
+      tags: [Entries]
+      summary: Get a single time journal entry
+      description: |
+        Retrieve a specific time journal entry by ID.
+
+        Returns full entry details including emotions, people, and GPS data.
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tj_[a-zA-Z0-9]+$'
+          example: tj_abc123
+      responses:
+        '200':
+          description: OK - Entry retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TimeJournalEntry'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateTimeJournalEntry
+      tags: [Entries]
+      summary: Update a time journal entry
+      description: |
+        Update a time journal entry using JSON Merge Patch (RFC 7396).
+
+        **Edit Window:** Entries are editable within 24 hours of creation.
+        After 24 hours, returns 422 Unprocessable Entity with error code `rr:0x00000101`.
+
+        **Partial Updates:** Only fields present in the request body are modified.
+        Missing fields are not altered.
+
+        To remove a field, set it to `null`.
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tj_[a-zA-Z0-9]+$'
+          example: tj_abc123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTimeJournalEntryRequest'
+            example:
+              activity: "Lunch with family. Discussed plans for weekend trip. Kids were excited."
+              emotions:
+                - name: "Grateful"
+                  intensity: 10
+                  why: "Meaningful conversation with Emily"
+      responses:
+        '200':
+          description: OK - Entry updated successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TimeJournalEntry'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/time-journal/entries/{entryId}/share:
+    post:
+      operationId: shareTimeJournalEntry
+      tags: [Sharing]
+      summary: Share a time journal entry with Trust Partners
+      description: |
+        Manually trigger sharing of a specific entry with Trust Partners.
+
+        **Automatic Sharing:** New entries are automatically shared with Trust Partners
+        as they are saved (TJ-022). This endpoint allows retroactive sharing or re-sharing
+        after edits.
+
+        **Trust Partner Types:**
+        - Spouse
+        - Counselor / Therapist (CSAT)
+        - Sponsor
+        - Accountability Partner
+
+        **Confidential Fields:** The `redlineNote` field is never shared.
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tj_[a-zA-Z0-9]+$'
+          example: tj_abc123
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                partnerIds:
+                  type: array
+                  items:
+                    type: string
+                    pattern: '^tp_[a-zA-Z0-9]+$'
+                  description: Specific Trust Partner IDs to share with (optional; defaults to all)
+                message:
+                  type: string
+                  maxLength: 500
+                  description: Optional message to include with the share
+            example:
+              partnerIds: ["tp_spouse_123", "tp_counselor_456"]
+              message: "Wanted to share this moment of gratitude with you both."
+      responses:
+        '204':
+          description: No Content - Entry shared successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/time-journal/days/{date}:
+    get:
+      operationId: getTimeJournalDay
+      tags: [Days]
+      summary: Get daily summary for a specific date
+      description: |
+        Retrieve daily summary including completion score, status, and slot overview.
+
+        **Completion Score:** Percentage of time slots filled (0-100%).
+
+        **Status Values:**
+        - `inProgress` — No overdue slots; day not yet complete
+        - `overdue` — At least one elapsed slot is unfilled
+        - `completed` — All slots including final slot are filled
+
+        **Status Rules (TJ-060 through TJ-064):**
+        A slot is not considered overdue until its time period has fully elapsed.
+        Completion of later slots does not resolve earlier gaps.
+        The final slot (T-60: 11 PM; T-30: 11:30 PM) must be filled for `completed` status.
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-04-03"
+      responses:
+        '200':
+          description: OK - Day summary retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TimeJournalDay'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  date: "2026-04-03"
+                  mode: t60
+                  totalSlots: 24
+                  filledSlots: 18
+                  completionScore: 75.0
+                  status: inProgress
+                  overdueSlotCount: 0
+                  lastUpdatedAt: "2026-04-03T18:30:00Z"
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/time-journal/days/2026-04-03
+                    entries: https://api.regalrecovery.com/v1/activities/time-journal/entries?date=2026-04-03
+                meta:
+                  retrievedAt: "2026-04-03T18:35:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/time-journal/days:
+    get:
+      operationId: listTimeJournalDays
+      tags: [Days]
+      summary: List daily summaries for heatmap and streak views
+      description: |
+        Retrieve daily summaries for a date range.
+
+        Used to build heatmap visualizations and weekly/monthly completion views.
+
+        Supports cursor-based pagination for long date ranges.
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Start date (inclusive)
+          example: "2026-03-01"
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: End date (inclusive)
+          example: "2026-03-31"
+        - name: mode
+          in: query
+          schema:
+            type: string
+            enum: [t30, t60]
+          description: Filter by time slot mode
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 31
+          description: Number of days per page
+      responses:
+        '200':
+          description: OK - Days retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeJournalDaysResponse'
+              example:
+                data:
+                  - date: "2026-04-03"
+                    mode: t60
+                    totalSlots: 24
+                    filledSlots: 18
+                    completionScore: 75.0
+                    status: inProgress
+                    overdueSlotCount: 0
+                    lastUpdatedAt: "2026-04-03T18:30:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/activities/time-journal/days/2026-04-03
+                  - date: "2026-04-02"
+                    mode: t60
+                    totalSlots: 24
+                    filledSlots: 24
+                    completionScore: 100.0
+                    status: completed
+                    overdueSlotCount: 0
+                    lastUpdatedAt: "2026-04-02T23:45:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/activities/time-journal/days/2026-04-02
+                  - date: "2026-04-01"
+                    mode: t60
+                    totalSlots: 24
+                    filledSlots: 20
+                    completionScore: 83.3
+                    status: completed
+                    overdueSlotCount: 4
+                    lastUpdatedAt: "2026-04-02T02:15:00Z"
+                    links:
+                      self: https://api.regalrecovery.com/v1/activities/time-journal/days/2026-04-01
+                meta:
+                  startDate: "2026-03-01"
+                  endDate: "2026-03-31"
+                  totalDays: 31
+                  completedDays: 28
+                  averageCompletionScore: 88.5
+                  page:
+                    limit: 31
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/time-journal/days?startDate=2026-03-01&endDate=2026-03-31
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/time-journal/streaks:
+    get:
+      operationId: getTimeJournalStreaks
+      tags: [Streaks]
+      summary: Get streak data
+      description: |
+        Retrieve streak data for consecutive days with ≥80% completion.
+
+        **Streak Definition (TJ-030):**
+        A streak day is any day where at least 80% of time slots are filled.
+        Partially complete days (79% or less) break the streak but are preserved
+        in the completion history.
+
+        **Compassionate Design:**
+        The journal streak is separate from sobriety streaks. A relapse does not
+        reset the journal streak. The discipline of journaling continues even on hard days.
+      responses:
+        '200':
+          description: OK - Streaks retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TimeJournalStreak'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  currentStreakDays: 47
+                  longestStreakDays: 120
+                  thresholdPercent: 80
+                  totalJournalDays: 247
+                  nextMilestone:
+                    days: 60
+                    daysRemaining: 13
+                    label: "2 Months"
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/time-journal/streaks
+                    days: https://api.regalrecovery.com/v1/activities/time-journal/days
+                meta:
+                  retrievedAt: "2026-04-03T18:35:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/time-journal/status:
+    get:
+      operationId: getTimeJournalStatus
+      tags: [Status]
+      summary: Get today's status
+      description: |
+        Retrieve today's Time Journal status for the Today screen and Recovery Work screen.
+
+        **Status Engine (TJ-060 through TJ-064):**
+        Status is evaluated by scanning all time slots from midnight through the current time.
+
+        - **In Progress** — No overdue slots. A slot is not overdue until its time period has fully elapsed.
+        - **Overdue** — At least one elapsed slot is unfilled. Completion of later slots does not resolve the gap.
+        - **Completed** — All slots including the final slot (T-60: 11 PM; T-30: 11:30 PM) are filled.
+
+        **Examples (T-60 mode):**
+        - 11:45 AM — Slots 12-10 AM filled, 11 AM unfilled → `inProgress` (11 AM period not yet elapsed)
+        - 12:01 PM — Slots 12-10 AM filled, 11 AM unfilled → `overdue` (11 AM period elapsed)
+        - 12:01 PM — Slots 12-9 AM filled, 10 AM unfilled, 11 AM filled → `overdue` (10 AM gap remains)
+        - 11:01 PM — All 24 slots filled → `completed`
+      responses:
+        '200':
+          description: OK - Status retrieved successfully
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TimeJournalStatus'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  status: inProgress
+                  filledSlots: 12
+                  totalSlots: 24
+                  overdueSlots: 0
+                  completionPercent: 50.0
+                  lastUpdatedAt: "2026-04-03T12:30:00Z"
+                  triggerReason: "12 of 24 slots filled · Last updated 12:30 PM"
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/time-journal/status
+                    today: https://api.regalrecovery.com/v1/activities/time-journal/days/2026-04-03
+                    entries: https://api.regalrecovery.com/v1/activities/time-journal/entries?date=2026-04-03
+                meta:
+                  evaluatedAt: "2026-04-03T12:35:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    TimeJournalEntriesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeJournalEntry'
+        meta:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+            mode:
+              type: string
+              enum: [t30, t60]
+            totalSlots:
+              type: integer
+              description: Total slots for the day (24 for t60, 48 for t30)
+            filledSlots:
+              type: integer
+              description: Number of filled slots
+            emptySlots:
+              type: integer
+              description: Number of empty slots
+        links:
+          $ref: '#/components/schemas/Links'
+
+    TimeJournalEntry:
+      type: object
+      required:
+        - id
+        - userId
+        - date
+        - slotStart
+        - slotEnd
+        - mode
+        - createdAt
+      properties:
+        id:
+          type: string
+          pattern: '^tj_[a-zA-Z0-9]+$'
+          description: Unique entry identifier
+          example: tj_abc123
+        userId:
+          type: string
+          pattern: '^u_[a-zA-Z0-9]+$'
+          description: User identifier
+          example: u_12345
+        date:
+          type: string
+          format: date
+          description: Date of the time slot (YYYY-MM-DD)
+          example: "2026-04-03"
+        slotStart:
+          type: string
+          pattern: '^\d{2}:\d{2}:\d{2}$'
+          description: Slot start time (HH:MM:SS in user's local timezone)
+          example: "08:00:00"
+        slotEnd:
+          type: string
+          pattern: '^\d{2}:\d{2}:\d{2}$'
+          description: Slot end time (HH:MM:SS in user's local timezone)
+          example: "09:00:00"
+        mode:
+          type: string
+          enum: [t30, t60]
+          description: Time slot mode (t30 = 30 minutes, t60 = 60 minutes)
+          example: t60
+        location:
+          type: string
+          maxLength: 200
+          nullable: true
+          description: Free-text or quick-select location (e.g., @home, @work, @church)
+          example: "@work"
+        gpsLatitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          nullable: true
+          description: GPS latitude coordinate (auto-captured if permission granted)
+          example: 37.7749
+        gpsLongitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          nullable: true
+          description: GPS longitude coordinate (auto-captured if permission granted)
+          example: -122.4194
+        gpsAddress:
+          type: string
+          maxLength: 300
+          nullable: true
+          description: Reverse-geocoded address from GPS (Apple POI functions)
+          example: "123 Main St, San Francisco, CA 94102"
+        activity:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Free-text description of activity (supports multi-line)
+          example: "Morning standup meeting with engineering team"
+        people:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonPresent'
+          description: People present during this time slot
+          default: []
+        emotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Emotion'
+          description: Emotions experienced during this time slot
+          default: []
+        extras:
+          type: object
+          nullable: true
+          description: Optional structured fields (financial transactions, screen-time events, notable interactions)
+          additionalProperties: true
+        sleepFlag:
+          type: boolean
+          description: Mark slot as "sleeping" (intentional gap)
+          default: false
+        retroactive:
+          type: boolean
+          description: True if entry was filled after the time period elapsed
+          default: false
+        retroactiveTimestamp:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when retroactive entry was made (if retroactive = true)
+          example: "2026-04-03T22:15:00Z"
+        autoFilled:
+          type: boolean
+          description: True if entry was auto-filled (sleep detection, calendar import)
+          default: false
+        autoFillSource:
+          type: string
+          nullable: true
+          description: Source of auto-fill (e.g., "sleepFocus", "calendarImport")
+          example: "sleepFocus"
+        redlineNote:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Confidential note (NEVER shared with Trust Partners; for internal honesty)
+          example: "Felt tempted during this hour but called sponsor immediately."
+        createdAt:
+          type: string
+          format: date-time
+          description: Entry creation timestamp (immutable per FR2.7)
+          example: "2026-04-03T08:02:00Z"
+        modifiedAt:
+          type: string
+          format: date-time
+          description: Entry last modification timestamp
+          example: "2026-04-03T08:02:00Z"
+        links:
+          $ref: '#/components/schemas/Links'
+
+    CreateTimeJournalEntryRequest:
+      type: object
+      required:
+        - date
+        - slotStart
+        - mode
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of the time slot (YYYY-MM-DD)
+          example: "2026-04-03"
+        slotStart:
+          type: string
+          pattern: '^\d{2}:\d{2}:\d{2}$'
+          description: Slot start time (HH:MM:SS in user's local timezone)
+          example: "08:00:00"
+        mode:
+          type: string
+          enum: [t30, t60]
+          description: Time slot mode (t30 = 30 minutes, t60 = 60 minutes)
+          example: t60
+        location:
+          type: string
+          maxLength: 200
+          nullable: true
+          description: Free-text or quick-select location
+        activity:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Free-text description of activity
+        people:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonPresent'
+          description: People present during this time slot
+          default: []
+        emotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Emotion'
+          description: Emotions experienced during this time slot
+          default: []
+        extras:
+          type: object
+          nullable: true
+          description: Optional structured fields
+          additionalProperties: true
+        sleepFlag:
+          type: boolean
+          description: Mark slot as "sleeping"
+          default: false
+        redlineNote:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Confidential note (never shared)
+
+    UpdateTimeJournalEntryRequest:
+      type: object
+      description: JSON Merge Patch (RFC 7396) for partial updates. Only fields present are modified.
+      properties:
+        location:
+          type: string
+          maxLength: 200
+          nullable: true
+        activity:
+          type: string
+          maxLength: 2000
+          nullable: true
+        people:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonPresent'
+          nullable: true
+        emotions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Emotion'
+          nullable: true
+        extras:
+          type: object
+          nullable: true
+          additionalProperties: true
+        sleepFlag:
+          type: boolean
+        redlineNote:
+          type: string
+          maxLength: 2000
+          nullable: true
+
+    PersonPresent:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          description: Name of person present
+          example: "John"
+        gender:
+          type: string
+          maxLength: 50
+          nullable: true
+          description: Gender of person (optional; user-defined)
+          example: "male"
+
+    Emotion:
+      type: object
+      required:
+        - name
+        - intensity
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          description: |
+            Name of emotion. Supports extensive emotion library including anger, shame, guilt,
+            loneliness, fear, joy, gratitude, and "the three I's" (insignificance, incompetence, impotence).
+          example: "Grateful"
+        intensity:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Emotion intensity rating (1-10 scale)
+          example: 9
+        why:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: Optional one-line context for the emotion
+          example: "Quality time with loved ones"
+
+    TimeJournalDay:
+      type: object
+      required:
+        - date
+        - mode
+        - totalSlots
+        - filledSlots
+        - completionScore
+        - status
+        - overdueSlotCount
+        - lastUpdatedAt
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of the journal day
+          example: "2026-04-03"
+        mode:
+          type: string
+          enum: [t30, t60]
+          description: Time slot mode for this day
+          example: t60
+        totalSlots:
+          type: integer
+          description: Total slots for the day (24 for t60, 48 for t30)
+          example: 24
+        filledSlots:
+          type: integer
+          description: Number of filled slots
+          example: 18
+        completionScore:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Completion percentage (0-100%)
+          example: 75.0
+        status:
+          type: string
+          enum: [inProgress, overdue, completed]
+          description: |
+            Day status:
+            - inProgress: No overdue slots; day not yet complete
+            - overdue: At least one elapsed slot is unfilled
+            - completed: All slots including final slot are filled
+          example: inProgress
+        overdueSlotCount:
+          type: integer
+          minimum: 0
+          description: Number of overdue (elapsed but unfilled) slots
+          example: 0
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          description: Timestamp of most recent entry for this day
+          example: "2026-04-03T18:30:00Z"
+        links:
+          $ref: '#/components/schemas/Links'
+
+    TimeJournalDaysResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeJournalDay'
+        meta:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+            totalDays:
+              type: integer
+            completedDays:
+              type: integer
+              description: Days with ≥80% completion
+            averageCompletionScore:
+              type: number
+              format: float
+              description: Average completion percentage across all days
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+
+    TimeJournalStreak:
+      type: object
+      required:
+        - currentStreakDays
+        - longestStreakDays
+        - thresholdPercent
+      properties:
+        currentStreakDays:
+          type: integer
+          minimum: 0
+          description: Consecutive days with ≥80% completion
+          example: 47
+        longestStreakDays:
+          type: integer
+          minimum: 0
+          description: Longest streak ever achieved
+          example: 120
+        thresholdPercent:
+          type: integer
+          description: Completion percentage threshold for streak (always 80)
+          example: 80
+        totalJournalDays:
+          type: integer
+          minimum: 0
+          description: Total days with any journal entries
+          example: 247
+        nextMilestone:
+          type: object
+          nullable: true
+          properties:
+            days:
+              type: integer
+              description: Days for next milestone
+              example: 60
+            daysRemaining:
+              type: integer
+              description: Days until milestone achieved
+              example: 13
+            label:
+              type: string
+              description: Human-readable milestone label
+              example: "2 Months"
+        links:
+          $ref: '#/components/schemas/Links'
+
+    TimeJournalStatus:
+      type: object
+      required:
+        - status
+        - filledSlots
+        - totalSlots
+        - overdueSlots
+        - completionPercent
+        - lastUpdatedAt
+        - triggerReason
+      properties:
+        status:
+          type: string
+          enum: [inProgress, overdue, completed]
+          description: Today's status (see status engine rules TJ-060 through TJ-064)
+          example: inProgress
+        filledSlots:
+          type: integer
+          description: Number of filled slots today
+          example: 12
+        totalSlots:
+          type: integer
+          description: Total slots for today (24 for t60, 48 for t30)
+          example: 24
+        overdueSlots:
+          type: integer
+          minimum: 0
+          description: Number of overdue slots
+          example: 0
+        completionPercent:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: Completion percentage
+          example: 50.0
+        lastUpdatedAt:
+          type: string
+          format: date-time
+          description: Timestamp of most recent entry today
+          example: "2026-04-03T12:30:00Z"
+        triggerReason:
+          type: string
+          description: Dynamic summary for Today/Recovery Work screens
+          example: "12 of 24 slots filled · Last updated 12:30 PM"
+        links:
+          $ref: '#/components/schemas/Links'
+
+    Links:
+      type: object
+      description: HATEOAS links related to the resource
+      properties:
+        self:
+          type: string
+          format: uri
+          description: URI of this resource
+      additionalProperties:
+        type: string
+        format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+        first:
+          type: string
+          format: uri
+          nullable: true
+        last:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          description: Resource creation timestamp
+        modifiedAt:
+          type: string
+          format: date-time
+          description: Resource last modification timestamp
+        retrievedAt:
+          type: string
+          format: date-time
+          description: Timestamp when data was retrieved
+        sharedWithPartners:
+          type: boolean
+          description: Whether entry was shared with Trust Partners
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for this error occurrence
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+          description: Application-specific error code
+          example: "rr:0x00000101"
+        status:
+          type: integer
+          description: HTTP status code
+          example: 422
+        title:
+          type: string
+          description: Human-readable summary (stable across occurrences)
+          example: "Entry Edit Window Expired"
+        detail:
+          type: string
+          description: Occurrence-specific description
+          example: "Time journal entries can only be edited within 24 hours of creation. This entry was created 36 hours ago."
+        correlationId:
+          type: string
+          format: uuid
+          description: Correlation ID for distributed tracing
+        source:
+          type: object
+          description: Source of the error (pointer, parameter, header)
+          properties:
+            pointer:
+              type: string
+              description: JSON Pointer (RFC 6901) to the field
+              example: "/entryId"
+            parameter:
+              type: string
+              description: Query parameter that caused the error
+            header:
+              type: string
+              description: Header that caused the error
+        links:
+          type: object
+          description: Links related to the error
+          properties:
+            about:
+              type: string
+              format: uri
+              description: URI for this error occurrence
+            type:
+              type: string
+              format: uri
+              description: URI for error type documentation
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request syntax
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "e3c8e6f0-3f2e-4b5a-9e3c-8e6f03f2e4b5"
+                code: "rr:0x00000001"
+                status: 400
+                title: "Bad Request"
+                detail: "Invalid date format. Expected YYYY-MM-DD."
+                correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                source:
+                  parameter: "date"
+                links:
+                  about: "https://api.regalrecovery.com/errors/date-format"
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+          description: Authentication scheme required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "f4d9e7g1-4g3f-5c6b-0f4d-9e7g14g3f5c6"
+                code: "rr:0x00000002"
+                status: 401
+                title: "Unauthorized"
+                detail: "Missing or invalid JWT token."
+                correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                links:
+                  about: "https://api.regalrecovery.com/errors/unauthorized"
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "g5e0f8h2-5h4g-6d7c-1g5e-0f8h25h4g6d7"
+                code: "rr:0x00000004"
+                status: 404
+                title: "Not Found"
+                detail: "Time journal entry with ID 'tj_abc123' does not exist."
+                correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                source:
+                  parameter: "entryId"
+                links:
+                  about: "https://api.regalrecovery.com/errors/not-found"
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "h6f1g9i3-6i5h-7e8d-2h6f-1g9i36i5h7e8"
+                code: "rr:0x00000101"
+                status: 422
+                title: "Entry Edit Window Expired"
+                detail: "Time journal entries can only be edited within 24 hours of creation. This entry was created 36 hours ago."
+                correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                source:
+                  pointer: "/entryId"
+                links:
+                  about: "https://api.regalrecovery.com/errors/edit-window-expired"
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "i7g2h0j4-7j6i-8f9e-3i7g-2h0j47j6i8f9"
+                code: "rr:0x00000500"
+                status: 500
+                title: "Internal Server Error"
+                detail: "An unexpected error occurred while processing your request."
+                correlationId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                links:
+                  about: "https://api.regalrecovery.com/errors/internal-server-error"

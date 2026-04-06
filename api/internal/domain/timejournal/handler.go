@@ -89,7 +89,7 @@ func (h *Handler) HandleCreateEntry(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if req.Mode != ModeT30 && req.Mode != ModeT60 {
-		writeError(w, http.StatusBadRequest, "rr:0x40010013", "Field 'mode' must be 'T30' or 'T60'")
+		writeError(w, http.StatusBadRequest, "rr:0x40010013", "Field 'mode' must be 't30' or 't60'")
 		return
 	}
 
