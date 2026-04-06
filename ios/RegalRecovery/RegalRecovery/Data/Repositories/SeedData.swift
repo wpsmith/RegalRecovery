@@ -398,7 +398,7 @@ enum SeedData {
             let entry = RRFASTEREntry(
                 userId: userId,
                 date: daysAgo(29 - i, hour: 6, minute: 20),
-                assessedStage: stage,
+                stage: stage,
                 createdAt: daysAgo(29 - i, hour: 6, minute: 20)
             )
             context.insert(entry)
