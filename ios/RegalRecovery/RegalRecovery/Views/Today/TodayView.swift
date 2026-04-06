@@ -9,6 +9,32 @@ struct TodayView: View {
     @State private var hideCompleted = false
     @State private var showFASTERMood = false
 
+    // Time Journal SwiftData query for today's entries
+    @Query private var allTimeJournalEntries: [RRTimeJournalEntry]
+
+    private var todayTimeJournalEntries: [RRTimeJournalEntry] {
+        allTimeJournalEntries.filter { Calendar.current.isDateInToday($0.date) }
+    }
+
+    private var timeJournalMode: TimeJournalMode {
+        if let first = todayTimeJournalEntries.first {
+            return TimeJournalMode(rawValue: first.mode) ?? .t60
+        }
+        return .t60
+    }
+
+    private var timeJournalDayStatus: TimeJournalDayStatus {
+        TimeJournalDayStatus.evaluate(
+            entries: todayTimeJournalEntries,
+            mode: timeJournalMode,
+            forDate: Date()
+        )
+    }
+
+    private var timeJournalLastUpdated: Date? {
+        todayTimeJournalEntries.max(by: { $0.modifiedAt < $1.modifiedAt })?.modifiedAt
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -46,6 +72,7 @@ struct TodayView: View {
                 greetingHeader
                 scoreSummary
                 quickActions
+                timeJournalCard
                 recoveryWorkCards
                 activityListHeader
                 activityList
@@ -161,6 +188,26 @@ struct TodayView: View {
             .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
         }
         .buttonStyle(.plain)
+    }
+
+    // MARK: - Time Journal Card
+
+    @ViewBuilder
+    private var timeJournalCard: some View {
+        if FeatureFlagStore.shared.isEnabled("activity.time-journal") {
+            NavigationLink {
+                TimeJournalDailyView()
+            } label: {
+                TimeJournalTodayCard(
+                    filledCount: todayTimeJournalEntries.count,
+                    totalSlots: timeJournalMode.slotsPerDay,
+                    dayStatus: timeJournalDayStatus,
+                    mode: timeJournalMode,
+                    lastUpdated: timeJournalLastUpdated
+                )
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     // MARK: - Sobriety Module
@@ -375,7 +422,7 @@ struct TodayView: View {
         case ActivityType.stepWork.rawValue:
             StepWorkView()
         case ActivityType.timeJournal.rawValue:
-            JournalView()
+            TimeJournalDailyView()
         case ActivityType.postMortem.rawValue:
             PostMortemView()
         case ActivityType.urgeLog.rawValue:

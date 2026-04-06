@@ -257,6 +257,19 @@ struct ActivitiesListView: View {
                         )
                     }
 
+                    if isFlagEnabled("activity.time-journal") {
+                        NavigationLink {
+                            TimeJournalDailyView()
+                        } label: {
+                            RRActivityRow(
+                                icon: "clock.fill",
+                                iconColor: .purple,
+                                title: "Time Journal",
+                                subtitle: timeJournalSubtitle
+                            )
+                        }
+                    }
+
                     if isFlagEnabled("feature.post-mortem") {
                         NavigationLink {
                             PostMortemView()
