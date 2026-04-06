@@ -9,10 +9,30 @@ struct TimeJournalQuickEntrySheet: View {
     @Bindable var viewModel: TimeJournalEntryViewModel
     var onSave: ((RRTimeJournalEntry) -> Void)?
 
+    // MARK: - Integrity Prompt State
+
+    @State private var integrityPrompt: String?
+    @State private var showIntegrityBanner: Bool = false
+    @State private var showConfirmationAlert: Bool = false
+    @State private var confirmationShownThisSession: Bool = false
+    @State private var showRedlineTooltip: Bool = false
+
+    private static let integrityPrompts: [String] = [
+        "Is there anything you're tempted to leave out?",
+        "Take a breath. Is this the whole picture?",
+        "Recovery lives in the details we'd rather skip.",
+        "Honesty with yourself is the first step.",
+        "What would your accountability partner want to know?",
+    ]
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    if showIntegrityBanner, let prompt = integrityPrompt {
+                        integrityBannerView(prompt: prompt)
+                    }
+
                     header
                     LocationField(locationLabel: $viewModel.locationLabel)
                     ActivityField(activity: $viewModel.activity)
@@ -33,16 +53,27 @@ struct TimeJournalQuickEntrySheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        saveEntry()
+                        handleSaveTapped()
                     }
                     .fontWeight(.semibold)
                     .foregroundStyle(viewModel.isValid ? Color.rrPrimary : Color.rrTextSecondary)
                     .disabled(!viewModel.isValid || viewModel.isSaving)
                 }
             }
+            .alert("Before you save", isPresented: $showConfirmationAlert) {
+                Button("Save As-Is") {
+                    saveEntry()
+                }
+                Button("Edit More", role: .cancel) { }
+            } message: {
+                Text("Are you satisfied this entry reflects the whole truth?")
+            }
         }
         .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
+        .onAppear {
+            rollIntegrityPrompt()
+        }
     }
 
     // MARK: - Header
@@ -94,9 +125,29 @@ struct TimeJournalQuickEntrySheet: View {
 
             // Redline note
             VStack(alignment: .leading, spacing: 4) {
-                Text("Private note (not shared)")
-                    .font(RRFont.caption)
-                    .foregroundStyle(Color.rrDestructive.opacity(0.8))
+                HStack(spacing: 4) {
+                    Image(systemName: "lock.fill")
+                        .font(.caption2)
+                        .foregroundStyle(Color.rrDestructive.opacity(0.7))
+                    Text("Private note (not shared)")
+                        .font(RRFont.caption)
+                        .foregroundStyle(Color.rrDestructive.opacity(0.8))
+                    Button {
+                        showRedlineTooltip.toggle()
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .font(.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                    .buttonStyle(.plain)
+                    .popover(isPresented: $showRedlineTooltip) {
+                        Text("This note stays on your device only. It is never shared with Trust Partners.")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrText)
+                            .padding()
+                            .presentationCompactAdaptation(.popover)
+                    }
+                }
                 TextField("Add a private note...", text: $viewModel.redlineNote, axis: .vertical)
                     .font(RRFont.body)
                     .lineLimit(2...4)
@@ -116,6 +167,54 @@ struct TimeJournalQuickEntrySheet: View {
                     .foregroundStyle(viewModel.isFlagged ? Color.rrDestructive : Color.rrText)
             }
             .tint(.rrDestructive)
+        }
+    }
+
+    // MARK: - Integrity Banner
+
+    private func integrityBannerView(prompt: String) -> some View {
+        HStack {
+            Image(systemName: "heart.text.square")
+                .foregroundStyle(Color.rrPrimary.opacity(0.7))
+            Text(prompt)
+                .font(RRFont.caption)
+                .foregroundStyle(Color.rrText.opacity(0.8))
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer()
+            Button {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    showIntegrityBanner = false
+                }
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.caption2)
+                    .foregroundStyle(Color.rrTextSecondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(12)
+        .background(Color.rrPrimary.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .transition(.opacity.combined(with: .move(edge: .top)))
+    }
+
+    // MARK: - Integrity Helpers
+
+    private func rollIntegrityPrompt() {
+        // 30% chance to show an integrity prompt on open
+        if Double.random(in: 0..<1) < 0.3 {
+            integrityPrompt = Self.integrityPrompts.randomElement()
+            showIntegrityBanner = true
+        }
+    }
+
+    private func handleSaveTapped() {
+        // 50% chance to show confirmation, but only once per session
+        if !confirmationShownThisSession && Double.random(in: 0..<1) < 0.5 {
+            confirmationShownThisSession = true
+            showConfirmationAlert = true
+        } else {
+            saveEntry()
         }
     }
 
