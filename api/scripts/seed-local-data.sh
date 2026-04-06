@@ -1145,9 +1145,380 @@ db.prompts.insertMany([
 ]);
 print("✓ Created 5 journal prompts");
 
+// =============================================================================
+// SECTION 11: TIME JOURNAL (7 days of T-60 entries for Alex)
+// =============================================================================
+
+// Helper: generate ISO dates relative to "today" (2026-04-06)
+var tjBaseDate = new Date("2026-04-06T00:00:00Z");
+function tjDate(daysAgo) {
+  var d = new Date(tjBaseDate);
+  d.setUTCDate(d.getUTCDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+}
+function tjISO(dateStr, timeStr) {
+  return ISODate(dateStr + "T" + timeStr + "Z");
+}
+
+// Day 1 (6 days ago): 100% complete, all 24 slots filled
+var day1Date = tjDate(6);
+var day1Entries = [];
+for (var h = 0; h < 24; h++) {
+  var slot = (h < 10 ? "0" + h : "" + h) + ":00:00";
+  var slotEnd = (h + 1 < 10 ? "0" + (h+1) : "" + (h+1 === 24 ? "00" : h+1)) + ":00:00";
+  var isSleep = (h >= 22 || h < 6);
+  var activity = isSleep ? "Sleeping" : (h < 9 ? "Morning routine" : (h < 12 ? "Work" : (h < 13 ? "Lunch" : (h < 17 ? "Work" : (h < 19 ? "Exercise/Dinner" : "Evening/Family")))));
+  day1Entries.push({
+    entryId: "tj_d1_" + h,
+    userId: "u_alex",
+    tenantId: "DEFAULT",
+    entityType: "TimeJournalEntry",
+    date: day1Date,
+    slotStart: slot,
+    slotEnd: slotEnd,
+    mode: "t60",
+    activity: activity,
+    sleepFlag: isSleep,
+    retroactive: false,
+    autoFilled: isSleep,
+    autoFillSource: isSleep ? "sleep-schedule" : null,
+    createdAt: tjISO(day1Date, slot),
+    modifiedAt: tjISO(day1Date, slot)
+  });
+}
+db.timeJournalEntries.insertMany(day1Entries);
+print("  Created Day 1 (" + day1Date + "): 24/24 slots filled (100%)");
+
+// Day 1 aggregate
+db.timeJournalDays.insertOne({
+  dayId: "tjd_d1",
+  userId: "u_alex",
+  tenantId: "DEFAULT",
+  entityType: "TimeJournalDay",
+  date: day1Date,
+  mode: "t60",
+  totalSlots: 24,
+  filledSlots: 24,
+  completionScore: 1.0,
+  status: "completed",
+  overdueSlotCount: 0,
+  streakEligible: true,
+  lastUpdatedAt: tjISO(day1Date, "23:59:00"),
+  createdAt: tjISO(day1Date, "00:00:00"),
+  modifiedAt: tjISO(day1Date, "23:59:00")
+});
+
+// Day 2 (5 days ago): 92% complete, 22 of 24 slots
+var day2Date = tjDate(5);
+var day2Entries = [];
+for (var h = 0; h < 24; h++) {
+  if (h === 14 || h === 15) continue; // skip 2 afternoon slots
+  var slot = (h < 10 ? "0" + h : "" + h) + ":00:00";
+  var slotEnd = (h + 1 < 10 ? "0" + (h+1) : "" + (h+1 === 24 ? "00" : h+1)) + ":00:00";
+  var isSleep = (h >= 22 || h < 6);
+  day2Entries.push({
+    entryId: "tj_d2_" + h,
+    userId: "u_alex",
+    tenantId: "DEFAULT",
+    entityType: "TimeJournalEntry",
+    date: day2Date,
+    slotStart: slot,
+    slotEnd: slotEnd,
+    mode: "t60",
+    activity: isSleep ? "Sleeping" : "Various activities",
+    sleepFlag: isSleep,
+    retroactive: false,
+    autoFilled: isSleep,
+    autoFillSource: isSleep ? "sleep-schedule" : null,
+    createdAt: tjISO(day2Date, slot),
+    modifiedAt: tjISO(day2Date, slot)
+  });
+}
+db.timeJournalEntries.insertMany(day2Entries);
+print("  Created Day 2 (" + day2Date + "): 22/24 slots filled (92%)");
+
+db.timeJournalDays.insertOne({
+  dayId: "tjd_d2",
+  userId: "u_alex",
+  tenantId: "DEFAULT",
+  entityType: "TimeJournalDay",
+  date: day2Date,
+  mode: "t60",
+  totalSlots: 24,
+  filledSlots: 22,
+  completionScore: 22.0/24.0,
+  status: "completed",
+  overdueSlotCount: 2,
+  streakEligible: true,
+  lastUpdatedAt: tjISO(day2Date, "23:59:00"),
+  createdAt: tjISO(day2Date, "00:00:00"),
+  modifiedAt: tjISO(day2Date, "23:59:00")
+});
+
+// Day 3 (4 days ago): 85% with 2 retroactive entries, 20 of 24 slots
+var day3Date = tjDate(4);
+var day3Entries = [];
+for (var h = 0; h < 24; h++) {
+  if (h === 10 || h === 11 || h === 16 || h === 20) continue; // skip 4 slots
+  var slot = (h < 10 ? "0" + h : "" + h) + ":00:00";
+  var slotEnd = (h + 1 < 10 ? "0" + (h+1) : "" + (h+1 === 24 ? "00" : h+1)) + ":00:00";
+  var isSleep = (h >= 22 || h < 6);
+  var isRetro = (h === 9 || h === 17); // 2 retroactive entries
+  day3Entries.push({
+    entryId: "tj_d3_" + h,
+    userId: "u_alex",
+    tenantId: "DEFAULT",
+    entityType: "TimeJournalEntry",
+    date: day3Date,
+    slotStart: slot,
+    slotEnd: slotEnd,
+    mode: "t60",
+    activity: isSleep ? "Sleeping" : "Various activities",
+    sleepFlag: isSleep,
+    retroactive: isRetro,
+    retroactiveTimestamp: isRetro ? tjISO(day3Date, "22:00:00") : null,
+    autoFilled: isSleep,
+    autoFillSource: isSleep ? "sleep-schedule" : null,
+    createdAt: isRetro ? tjISO(day3Date, "22:00:00") : tjISO(day3Date, slot),
+    modifiedAt: isRetro ? tjISO(day3Date, "22:00:00") : tjISO(day3Date, slot)
+  });
+}
+db.timeJournalEntries.insertMany(day3Entries);
+print("  Created Day 3 (" + day3Date + "): 20/24 slots filled (83%), 2 retroactive");
+
+db.timeJournalDays.insertOne({
+  dayId: "tjd_d3",
+  userId: "u_alex",
+  tenantId: "DEFAULT",
+  entityType: "TimeJournalDay",
+  date: day3Date,
+  mode: "t60",
+  totalSlots: 24,
+  filledSlots: 20,
+  completionScore: 20.0/24.0,
+  status: "completed",
+  overdueSlotCount: 4,
+  streakEligible: true,
+  lastUpdatedAt: tjISO(day3Date, "23:59:00"),
+  createdAt: tjISO(day3Date, "00:00:00"),
+  modifiedAt: tjISO(day3Date, "23:59:00")
+});
+
+// Day 4 (3 days ago): 96% complete, 23 of 24 slots
+var day4Date = tjDate(3);
+var day4Entries = [];
+for (var h = 0; h < 24; h++) {
+  if (h === 13) continue; // skip 1 slot
+  var slot = (h < 10 ? "0" + h : "" + h) + ":00:00";
+  var slotEnd = (h + 1 < 10 ? "0" + (h+1) : "" + (h+1 === 24 ? "00" : h+1)) + ":00:00";
+  var isSleep = (h >= 22 || h < 6);
+  day4Entries.push({
+    entryId: "tj_d4_" + h,
+    userId: "u_alex",
+    tenantId: "DEFAULT",
+    entityType: "TimeJournalEntry",
+    date: day4Date,
+    slotStart: slot,
+    slotEnd: slotEnd,
+    mode: "t60",
+    activity: isSleep ? "Sleeping" : "Various activities",
+    sleepFlag: isSleep,
+    retroactive: false,
+    autoFilled: isSleep,
+    autoFillSource: isSleep ? "sleep-schedule" : null,
+    createdAt: tjISO(day4Date, slot),
+    modifiedAt: tjISO(day4Date, slot)
+  });
+}
+db.timeJournalEntries.insertMany(day4Entries);
+print("  Created Day 4 (" + day4Date + "): 23/24 slots filled (96%)");
+
+db.timeJournalDays.insertOne({
+  dayId: "tjd_d4",
+  userId: "u_alex",
+  tenantId: "DEFAULT",
+  entityType: "TimeJournalDay",
+  date: day4Date,
+  mode: "t60",
+  totalSlots: 24,
+  filledSlots: 23,
+  completionScore: 23.0/24.0,
+  status: "completed",
+  overdueSlotCount: 1,
+  streakEligible: true,
+  lastUpdatedAt: tjISO(day4Date, "23:59:00"),
+  createdAt: tjISO(day4Date, "00:00:00"),
+  modifiedAt: tjISO(day4Date, "23:59:00")
+});
+
+// Day 5 (2 days ago): 100% complete
+var day5Date = tjDate(2);
+var day5Entries = [];
+for (var h = 0; h < 24; h++) {
+  var slot = (h < 10 ? "0" + h : "" + h) + ":00:00";
+  var slotEnd = (h + 1 < 10 ? "0" + (h+1) : "" + (h+1 === 24 ? "00" : h+1)) + ":00:00";
+  var isSleep = (h >= 22 || h < 6);
+  day5Entries.push({
+    entryId: "tj_d5_" + h,
+    userId: "u_alex",
+    tenantId: "DEFAULT",
+    entityType: "TimeJournalEntry",
+    date: day5Date,
+    slotStart: slot,
+    slotEnd: slotEnd,
+    mode: "t60",
+    activity: isSleep ? "Sleeping" : "Various activities",
+    sleepFlag: isSleep,
+    retroactive: false,
+    autoFilled: isSleep,
+    autoFillSource: isSleep ? "sleep-schedule" : null,
+    createdAt: tjISO(day5Date, slot),
+    modifiedAt: tjISO(day5Date, slot)
+  });
+}
+db.timeJournalEntries.insertMany(day5Entries);
+print("  Created Day 5 (" + day5Date + "): 24/24 slots filled (100%)");
+
+db.timeJournalDays.insertOne({
+  dayId: "tjd_d5",
+  userId: "u_alex",
+  tenantId: "DEFAULT",
+  entityType: "TimeJournalDay",
+  date: day5Date,
+  mode: "t60",
+  totalSlots: 24,
+  filledSlots: 24,
+  completionScore: 1.0,
+  status: "completed",
+  overdueSlotCount: 0,
+  streakEligible: true,
+  lastUpdatedAt: tjISO(day5Date, "23:59:00"),
+  createdAt: tjISO(day5Date, "00:00:00"),
+  modifiedAt: tjISO(day5Date, "23:59:00")
+});
+
+// Day 6 (yesterday): 88% complete, 21 of 24 slots
+var day6Date = tjDate(1);
+var day6Entries = [];
+for (var h = 0; h < 24; h++) {
+  if (h === 12 || h === 18 || h === 21) continue; // skip 3 slots
+  var slot = (h < 10 ? "0" + h : "" + h) + ":00:00";
+  var slotEnd = (h + 1 < 10 ? "0" + (h+1) : "" + (h+1 === 24 ? "00" : h+1)) + ":00:00";
+  var isSleep = (h >= 22 || h < 6);
+  day6Entries.push({
+    entryId: "tj_d6_" + h,
+    userId: "u_alex",
+    tenantId: "DEFAULT",
+    entityType: "TimeJournalEntry",
+    date: day6Date,
+    slotStart: slot,
+    slotEnd: slotEnd,
+    mode: "t60",
+    activity: isSleep ? "Sleeping" : "Various activities",
+    sleepFlag: isSleep,
+    retroactive: false,
+    autoFilled: isSleep,
+    autoFillSource: isSleep ? "sleep-schedule" : null,
+    createdAt: tjISO(day6Date, slot),
+    modifiedAt: tjISO(day6Date, slot)
+  });
+}
+db.timeJournalEntries.insertMany(day6Entries);
+print("  Created Day 6 (" + day6Date + "): 21/24 slots filled (88%)");
+
+db.timeJournalDays.insertOne({
+  dayId: "tjd_d6",
+  userId: "u_alex",
+  tenantId: "DEFAULT",
+  entityType: "TimeJournalDay",
+  date: day6Date,
+  mode: "t60",
+  totalSlots: 24,
+  filledSlots: 21,
+  completionScore: 21.0/24.0,
+  status: "completed",
+  overdueSlotCount: 3,
+  streakEligible: true,
+  lastUpdatedAt: tjISO(day6Date, "23:59:00"),
+  createdAt: tjISO(day6Date, "00:00:00"),
+  modifiedAt: tjISO(day6Date, "23:59:00")
+});
+
+// Day 7 (today): in-progress, 8 of 24 filled (sleep + morning hours)
+var day7Date = tjDate(0);
+var day7Entries = [];
+// Sleep slots: 00-05, morning: 06, 07
+for (var h = 0; h < 8; h++) {
+  var slot = (h < 10 ? "0" + h : "" + h) + ":00:00";
+  var slotEnd = (h + 1 < 10 ? "0" + (h+1) : "" + (h+1)) + ":00:00";
+  var isSleep = (h < 6);
+  var activity = isSleep ? "Sleeping" : (h === 6 ? "Morning prayer & devotional" : "Breakfast & check-in");
+  day7Entries.push({
+    entryId: "tj_d7_" + h,
+    userId: "u_alex",
+    tenantId: "DEFAULT",
+    entityType: "TimeJournalEntry",
+    date: day7Date,
+    slotStart: slot,
+    slotEnd: slotEnd,
+    mode: "t60",
+    activity: activity,
+    people: h === 7 ? [{ name: "Sarah", gender: "female" }] : [],
+    emotions: h === 6 ? [{ name: "peaceful", intensity: 7 }, { name: "grateful", intensity: 8 }] : [],
+    sleepFlag: isSleep,
+    retroactive: false,
+    autoFilled: isSleep,
+    autoFillSource: isSleep ? "sleep-schedule" : null,
+    createdAt: tjISO(day7Date, slot),
+    modifiedAt: tjISO(day7Date, slot)
+  });
+}
+db.timeJournalEntries.insertMany(day7Entries);
+print("  Created Day 7 (" + day7Date + "): 8/24 slots filled (in-progress)");
+
+db.timeJournalDays.insertOne({
+  dayId: "tjd_d7",
+  userId: "u_alex",
+  tenantId: "DEFAULT",
+  entityType: "TimeJournalDay",
+  date: day7Date,
+  mode: "t60",
+  totalSlots: 24,
+  filledSlots: 8,
+  completionScore: 8.0/24.0,
+  status: "inProgress",
+  overdueSlotCount: 0,
+  streakEligible: false,
+  lastUpdatedAt: tjISO(day7Date, "08:00:00"),
+  createdAt: tjISO(day7Date, "00:00:00"),
+  modifiedAt: tjISO(day7Date, "08:00:00")
+});
+
+print("  Created 7 time journal day aggregates");
+print("  Total time journal entries: " + db.timeJournalEntries.countDocuments({ userId: "u_alex" }));
+print("  Total time journal days: " + db.timeJournalDays.countDocuments({ userId: "u_alex" }));
+
+// Time Journal feature flag
+db.flags.insertOne({
+  tenantId: "SYSTEM",
+  createdAt: ISODate("2026-04-01T00:00:00Z"),
+  modifiedAt: ISODate("2026-04-06T00:00:00Z"),
+  flagKey: "activity.time-journal",
+  enabled: true,
+  rolloutPercentage: 100,
+  description: "Time Journal (T-60/T-30 time accounting)",
+  tiers: [],
+  tenants: [],
+  platforms: [],
+  minAppVersion: "",
+  updatedAt: ISODate("2026-04-06T00:00:00Z"),
+  updatedBy: "system"
+});
+print("  Created time journal feature flag");
+
 print("");
 print("=============================================================================");
-print("✅ SEED COMPLETE - ALL COLLECTIONS POPULATED");
+print("SEED COMPLETE - ALL COLLECTIONS POPULATED");
 print("=============================================================================");
 print("");
 print("User Profile:");

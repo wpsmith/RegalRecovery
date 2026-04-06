@@ -11,6 +11,7 @@ import (
 
 	appconfig "github.com/regalrecovery/api/internal/config"
 	"github.com/regalrecovery/api/internal/domain/activities"
+	"github.com/regalrecovery/api/internal/domain/timejournal"
 	"github.com/regalrecovery/api/internal/middleware"
 	"github.com/regalrecovery/api/internal/repository"
 	"github.com/regalrecovery/api/pkg/lambdahttp"
@@ -38,8 +39,19 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
+	// Wire Time Journal dependency chain:
+	// MongoClient -> TimeJournalRepo -> TimeJournalService -> Handler
+	tjRepo := repository.NewTimeJournalRepo(mongoClient)
+	tjService := timejournal.NewTimeJournalService(tjRepo)
+	tjHandler := timejournal.NewHandler(tjService)
+
 	// Create HTTP router
 	mux := http.NewServeMux()
+
+	// Register Time Journal routes
+	tjHandler.RegisterRoutes(mux)
+
+	// Generic activity routes (stub — not yet implemented)
 	mux.HandleFunc("POST /v1/activities/{type}", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotImplemented)
@@ -67,7 +79,6 @@ func main() {
 	)
 
 	// Suppress "declared but not used" errors during development
-	_ = mongoClient
 	_ = activities.ActivityTypeCheckIn
 
 	// Create Lambda adapter and start
