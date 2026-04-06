@@ -77,7 +77,7 @@ struct ActivitiesListView: View {
     private var fasterSubtitle: String {
         if let latest = fasterEntries.first {
             let dayLabel = Calendar.current.isDateInToday(latest.date) ? "Today" : relativeDay(latest.date)
-            let stage = FASTERStage(rawValue: latest.assessedStage) ?? .restoration
+            let stage = FASTERStage(rawValue: latest.stage) ?? .restoration
             return "\(dayLabel), \(stage.name)"
         }
         return "No entries"
@@ -255,6 +255,19 @@ struct ActivitiesListView: View {
                             title: "FASTER Scale",
                             subtitle: fasterSubtitle
                         )
+                    }
+
+                    if isFlagEnabled("activity.time-journal") {
+                        NavigationLink {
+                            TimeJournalDailyView()
+                        } label: {
+                            RRActivityRow(
+                                icon: "clock.fill",
+                                iconColor: .purple,
+                                title: "Time Journal",
+                                subtitle: timeJournalSubtitle
+                            )
+                        }
                     }
 
                     if isFlagEnabled("feature.post-mortem") {

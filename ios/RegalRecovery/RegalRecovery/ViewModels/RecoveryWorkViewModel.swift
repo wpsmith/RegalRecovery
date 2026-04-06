@@ -81,6 +81,14 @@ class RecoveryWorkViewModel {
     var thisMonth: [RecoveryWorkItem] = []
     var completed: [RecoveryWorkItem] = []
 
+    // MARK: - Time Journal Configuration (TJ-069 through TJ-076)
+
+    /// Set these properties before calling load() to populate the Time Journal work item.
+    var timeJournalFilledCount: Int = 0
+    var timeJournalTotalSlots: Int = 24
+    var timeJournalDayStatus: TimeJournalDayStatus = .inProgress
+    var timeJournalLastUpdated: Date? = nil
+
     private let calendar = Calendar.current
 
     // MARK: - Feature Flag Gating
@@ -92,6 +100,7 @@ class RecoveryWorkViewModel {
         "relapsePreventionPlan": "feature.relapse-prevention-plan",
         "postMortem": "feature.post-mortem",
         "assessment.sast-r": "assessment.sast-r",
+        "timeJournal": "activity.time-journal",
     ]
 
     private func isWorkItemEnabled(_ item: RecoveryWorkItem) -> Bool {
@@ -112,8 +121,32 @@ class RecoveryWorkViewModel {
         let rppDueDate = calendar.date(byAdding: .day, value: 14, to: now)!
         let backboneDueDate = calendar.date(byAdding: .day, value: 5, to: now)!
 
-        // Due Now: 3 Circles Review (overdue by days criteria)
+        // Time Journal work item (TJ-069-076)
+        let timeJournalTriggerReason: String = {
+            switch timeJournalDayStatus {
+            case .inProgress:
+                return "\(timeJournalFilledCount) of \(timeJournalTotalSlots) slots filled today"
+            case .overdue:
+                return "Some time slots have passed without entries"
+            case .completed:
+                return "All time slots filled for today"
+            }
+        }()
+
+        let timeJournalItem = RecoveryWorkItem(
+            activityType: "timeJournal",
+            title: "Time Journal",
+            triggerReason: timeJournalTriggerReason,
+            dueDate: calendar.startOfDay(for: now).addingTimeInterval(24 * 60 * 60 - 1),
+            priority: .high,
+            status: timeJournalDayStatus.workStatus,
+            icon: "clock.fill",
+            iconColor: .purple
+        )
+
+        // Due Now: 3 Circles Review (overdue by days criteria) + Time Journal
         dueNow = [
+            timeJournalItem,
             RecoveryWorkItem(
                 activityType: "threeCirclesReview",
                 title: "3 Circles Review",
