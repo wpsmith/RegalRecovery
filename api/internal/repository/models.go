@@ -322,3 +322,63 @@ type Session struct {
 	UserAgent string     `bson:"userAgent"`
 	ExpiresAt *time.Time `bson:"expiresAt,omitempty"`
 }
+
+// --- Time Journal document models ---
+
+// PersonPresentDoc represents a person recorded in a time journal slot.
+type PersonPresentDoc struct {
+	Name   string  `bson:"name"`
+	Gender *string `bson:"gender,omitempty"`
+}
+
+// EmotionDoc represents an emotional state recorded in a time journal slot.
+type EmotionDoc struct {
+	Name      string  `bson:"name"`
+	Intensity int     `bson:"intensity"`
+	Why       *string `bson:"why,omitempty"`
+}
+
+// TimeJournalEntryDoc is the MongoDB document for a time journal entry.
+type TimeJournalEntryDoc struct {
+	BaseDocument `bson:",inline"`
+
+	EntryID              string                 `bson:"entryId"`
+	UserID               string                 `bson:"userId"`
+	EntityType           string                 `bson:"entityType"`
+	Date                 string                 `bson:"date"`      // YYYY-MM-DD
+	SlotStart            string                 `bson:"slotStart"` // HH:MM:SS
+	SlotEnd              string                 `bson:"slotEnd"`   // HH:MM:SS
+	Mode                 string                 `bson:"mode"`      // T30 or T60
+	Location             *string                `bson:"location,omitempty"`
+	GPSLatitude          *float64               `bson:"gpsLatitude,omitempty"`
+	GPSLongitude         *float64               `bson:"gpsLongitude,omitempty"`
+	GPSAddress           *string                `bson:"gpsAddress,omitempty"`
+	Activity             *string                `bson:"activity,omitempty"`
+	People               []PersonPresentDoc     `bson:"people,omitempty"`
+	Emotions             []EmotionDoc           `bson:"emotions,omitempty"`
+	Extras               map[string]interface{} `bson:"extras,omitempty"`
+	SleepFlag            bool                   `bson:"sleepFlag"`
+	Retroactive          bool                   `bson:"retroactive"`
+	RetroactiveTimestamp *time.Time             `bson:"retroactiveTimestamp,omitempty"`
+	AutoFilled           bool                   `bson:"autoFilled"`
+	AutoFillSource       *string                `bson:"autoFillSource,omitempty"`
+	RedlineNote          *string                `bson:"redlineNote,omitempty"`
+}
+
+// TimeJournalDayDoc is the MongoDB document for a daily time journal aggregate.
+type TimeJournalDayDoc struct {
+	BaseDocument `bson:",inline"`
+
+	DayID            string    `bson:"dayId"`
+	UserID           string    `bson:"userId"`
+	EntityType       string    `bson:"entityType"`
+	Date             string    `bson:"date"`   // YYYY-MM-DD
+	Mode             string    `bson:"mode"`   // T30 or T60
+	TotalSlots       int       `bson:"totalSlots"`
+	FilledSlots      int       `bson:"filledSlots"`
+	CompletionScore  float64   `bson:"completionScore"`
+	Status           string    `bson:"status"` // in-progress, overdue, completed
+	OverdueSlotCount int       `bson:"overdueSlotCount"`
+	StreakEligible   bool      `bson:"streakEligible"`
+	LastUpdatedAt    time.Time `bson:"lastUpdatedAt"`
+}
