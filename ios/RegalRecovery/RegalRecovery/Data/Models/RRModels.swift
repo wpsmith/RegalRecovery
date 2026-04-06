@@ -1303,6 +1303,7 @@ enum RRModelConfiguration {
         RRJournalEntry.self,
         RREmotionalJournal.self,
         RRTimeBlock.self,
+        RRTimeJournalEntry.self,
         RRUrgeLog.self,
         RRFASTEREntry.self,
         RRMoodEntry.self,

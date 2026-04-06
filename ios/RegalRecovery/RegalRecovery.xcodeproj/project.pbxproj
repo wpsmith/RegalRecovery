@@ -22,7 +22,9 @@
 		10000404 /* FASTERResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000119 /* FASTERResultsView.swift */; };
 
 		10000007 /* Types.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000007 /* Types.swift */; };
+		10000500 /* TimeJournalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000500 /* TimeJournalTypes.swift */; };
 		10000008 /* RRModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000008 /* RRModels.swift */; };
+		10000501 /* RRTimeJournalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000501 /* RRTimeJournalEntry.swift */; };
 		10000009 /* RepositoryProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000009 /* RepositoryProtocols.swift */; };
 		10000010 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000010 /* SeedData.swift */; };
 		10000011 /* SwiftDataRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000011 /* SwiftDataRepositories.swift */; };
@@ -169,7 +171,9 @@
 		20000403 /* FASTERCheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERCheckInViewModel.swift; sourceTree = "<group>"; };
 
 		20000007 /* Types.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Types.swift; sourceTree = "<group>"; };
+		20000500 /* TimeJournalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTypes.swift; sourceTree = "<group>"; };
 		20000008 /* RRModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRModels.swift; sourceTree = "<group>"; };
+		20000501 /* RRTimeJournalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTimeJournalEntry.swift; sourceTree = "<group>"; };
 		20000009 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
 		20000010 /* SeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedData.swift; sourceTree = "<group>"; };
 		20000011 /* SwiftDataRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataRepositories.swift; sourceTree = "<group>"; };
@@ -375,6 +379,7 @@
 				20000116 /* ContentData.swift */,
 				20000117 /* ContentData.swift */,
 				20000006 /* MockData.swift */,
+				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
 			);
 			path = Models;
@@ -393,6 +398,7 @@
 			isa = PBXGroup;
 			children = (
 				20000008 /* RRModels.swift */,
+				20000501 /* RRTimeJournalEntry.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -755,7 +761,9 @@
 				10000404 /* FASTERResultsView.swift in Sources */,
 
 				10000007 /* Types.swift in Sources */,
+				10000500 /* TimeJournalTypes.swift in Sources */,
 				10000008 /* RRModels.swift in Sources */,
+				10000501 /* RRTimeJournalEntry.swift in Sources */,
 				10000009 /* RepositoryProtocols.swift in Sources */,
 				10000010 /* SeedData.swift in Sources */,
 				10000011 /* SwiftDataRepositories.swift in Sources */,
