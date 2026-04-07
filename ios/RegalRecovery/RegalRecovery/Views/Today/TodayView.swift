@@ -73,6 +73,7 @@ struct TodayView: View {
                 scoreSummary
                 quickActions
                 timeJournalCard
+                gratitudeWidgetCard
                 recoveryWorkCards
                 activityListHeader
                 activityList
@@ -207,6 +208,15 @@ struct TodayView: View {
                 )
             }
             .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: - Gratitude Widget Card
+
+    @ViewBuilder
+    private var gratitudeWidgetCard: some View {
+        if FeatureFlagStore.shared.isEnabled("activity.gratitude") {
+            GratitudeWidgetCard()
         }
     }
 
@@ -400,7 +410,7 @@ struct TodayView: View {
         case ActivityType.mood.rawValue:
             MoodRatingView()
         case ActivityType.gratitude.rawValue:
-            GratitudeListView()
+            GratitudeTabView()
         case ActivityType.fasterScale.rawValue:
             FASTERScaleView()
         case "devotional":

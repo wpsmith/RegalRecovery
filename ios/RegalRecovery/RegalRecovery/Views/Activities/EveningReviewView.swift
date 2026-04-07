@@ -5,6 +5,7 @@ struct EveningReviewView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
+    @Query(sort: \RRGratitudeEntry.date, order: .reverse) private var gratitudeEntries: [RRGratitudeEntry]
 
     private static let questionTexts: [String] = [
         "Did I maintain my sobriety commitment today?",
@@ -14,6 +15,14 @@ struct EveningReviewView: View {
     ]
 
     @State private var toggles: [Bool] = Array(repeating: false, count: 4)
+    @State private var gratitudeSkipped: Bool = false
+
+    /// Total gratitude items captured today across all entries.
+    private var todayGratitudeItemCount: Int {
+        gratitudeEntries
+            .filter { Calendar.current.isDateInToday($0.date) }
+            .reduce(0) { $0 + $1.items.count }
+    }
 
     private var latestEvening: RRCommitment? {
         commitments.first { $0.type == "evening" && Calendar.current.isDateInToday($0.date) }
@@ -42,18 +51,26 @@ struct EveningReviewView: View {
                         }
 
                         ForEach(Array(Self.questionTexts.enumerated()), id: \.offset) { index, question in
-                            HStack(alignment: .top, spacing: 12) {
-                                Button {
-                                    toggles[index].toggle()
-                                } label: {
-                                    Image(systemName: toggles[index] ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(toggles[index] ? Color.rrSuccess : Color.rrTextSecondary)
-                                        .font(.title3)
-                                }
+                            // Gratitude cross-reference: show banner before the gratitude question (index 3)
+                            if index == 3 && todayGratitudeItemCount > 0 {
+                                gratitudeCrossReferenceCard
+                            }
 
-                                Text(question)
-                                    .font(RRFont.body)
-                                    .foregroundStyle(Color.rrText)
+                            // Hide the gratitude question row when the user chose to skip
+                            if index != 3 || !gratitudeSkipped {
+                                HStack(alignment: .top, spacing: 12) {
+                                    Button {
+                                        toggles[index].toggle()
+                                    } label: {
+                                        Image(systemName: toggles[index] ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle(toggles[index] ? Color.rrSuccess : Color.rrTextSecondary)
+                                            .font(.title3)
+                                    }
+
+                                    Text(question)
+                                        .font(RRFont.body)
+                                        .foregroundStyle(Color.rrText)
+                                }
                             }
                         }
 
@@ -80,6 +97,51 @@ struct EveningReviewView: View {
                 ]
             }
         }
+    }
+
+    @ViewBuilder
+    private var gratitudeCrossReferenceCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "leaf.fill")
+                    .foregroundStyle(.rrSuccess)
+                Text("You already captured \(todayGratitudeItemCount) gratitude item\(todayGratitudeItemCount == 1 ? "" : "s") today. Would you like to add more or skip this question?")
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrText)
+            }
+
+            HStack(spacing: 12) {
+                NavigationLink {
+                    GratitudeListView()
+                } label: {
+                    Text("Add More")
+                        .font(RRFont.body.bold())
+                        .foregroundStyle(.rrPrimary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.rrPrimary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+
+                Button {
+                    withAnimation {
+                        gratitudeSkipped = true
+                        toggles[3] = true
+                    }
+                } label: {
+                    Text("Skip")
+                        .font(RRFont.body.bold())
+                        .foregroundStyle(.rrTextSecondary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.rrTextSecondary.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+            }
+        }
+        .padding()
+        .background(Color.rrSuccess.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private func submitReview() {

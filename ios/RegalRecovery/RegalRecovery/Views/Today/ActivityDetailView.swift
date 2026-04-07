@@ -436,7 +436,7 @@ struct ActivityDetailView: View {
                                         .font(RRFont.body)
                                         .foregroundStyle(Color.rrTextSecondary)
                                         .frame(width: 24, alignment: .trailing)
-                                    Text(item)
+                                    Text(item.text)
                                         .font(RRFont.body)
                                         .foregroundStyle(Color.rrText)
                                     Spacer()

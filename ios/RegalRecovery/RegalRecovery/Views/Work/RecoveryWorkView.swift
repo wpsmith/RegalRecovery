@@ -149,7 +149,7 @@ struct RecoveryWorkView: View {
         case ActivityType.mood.rawValue:
             MoodRatingView()
         case ActivityType.gratitude.rawValue:
-            GratitudeListView()
+            GratitudeTabView()
         case ActivityType.fasterScale.rawValue:
             FASTERScaleView()
         case "devotional":

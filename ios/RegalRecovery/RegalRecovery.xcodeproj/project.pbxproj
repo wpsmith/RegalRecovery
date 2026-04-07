@@ -166,6 +166,18 @@
 		10000604 /* EmotionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000604 /* EmotionPicker.swift */; };
 		10000605 /* TimeJournalQuickEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000605 /* TimeJournalQuickEntrySheet.swift */; };
 		10000700 /* TimeJournalReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000700 /* TimeJournalReminderManager.swift */; };
+		10000800 /* GratitudePromptService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000800 /* GratitudePromptService.swift */; };
+		10000801 /* gratitude-prompts.json in Resources */ = {isa = PBXBuildFile; fileRef = 20000801 /* gratitude-prompts.json */; };
+		10000900 /* GratitudeTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000900 /* GratitudeTypes.swift */; };
+		10000901 /* GratitudeEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000901 /* GratitudeEntryViewModel.swift */; };
+		10000902 /* GratitudeHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000902 /* GratitudeHistoryViewModel.swift */; };
+		10000903 /* GratitudeTrendsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000903 /* GratitudeTrendsViewModel.swift */; };
+		10000904 /* GratitudeHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000904 /* GratitudeHistoryView.swift */; };
+		10000905 /* GratitudeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000905 /* GratitudeDetailView.swift */; };
+		10000906 /* GratitudeTrendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000906 /* GratitudeTrendsView.swift */; };
+		10000907 /* GratitudeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000907 /* GratitudeTabView.swift */; };
+		10000908 /* GratitudeWidgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000908 /* GratitudeWidgetCard.swift */; };
+		10000909 /* GratitudeSharingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000909 /* GratitudeSharingService.swift */; };
 		10000701 /* FocusStatusMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000701 /* FocusStatusMonitor.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
 		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
@@ -236,6 +248,18 @@
 		20000604 /* EmotionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionPicker.swift; sourceTree = "<group>"; };
 		20000605 /* TimeJournalQuickEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalQuickEntrySheet.swift; sourceTree = "<group>"; };
 		20000700 /* TimeJournalReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalReminderManager.swift; sourceTree = "<group>"; };
+		20000800 /* GratitudePromptService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudePromptService.swift; sourceTree = "<group>"; };
+		20000801 /* gratitude-prompts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "gratitude-prompts.json"; sourceTree = "<group>"; };
+		20000900 /* GratitudeTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeTypes.swift; sourceTree = "<group>"; };
+		20000901 /* GratitudeEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeEntryViewModel.swift; sourceTree = "<group>"; };
+		20000902 /* GratitudeHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeHistoryViewModel.swift; sourceTree = "<group>"; };
+		20000903 /* GratitudeTrendsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeTrendsViewModel.swift; sourceTree = "<group>"; };
+		20000904 /* GratitudeHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeHistoryView.swift; sourceTree = "<group>"; };
+		20000905 /* GratitudeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeDetailView.swift; sourceTree = "<group>"; };
+		20000906 /* GratitudeTrendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeTrendsView.swift; sourceTree = "<group>"; };
+		20000907 /* GratitudeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeTabView.swift; sourceTree = "<group>"; };
+		20000908 /* GratitudeWidgetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeWidgetCard.swift; sourceTree = "<group>"; };
+		20000909 /* GratitudeSharingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeSharingService.swift; sourceTree = "<group>"; };
 		20000701 /* FocusStatusMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStatusMonitor.swift; sourceTree = "<group>"; };
 		20000702 /* JournalEntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntryDetailView.swift; sourceTree = "<group>"; };
 		20000703 /* JournalHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalHistoryView.swift; sourceTree = "<group>"; };
@@ -392,6 +416,7 @@
 				50000030 /* ViewModels */,
 				50000040 /* Views */,
 				50000060 /* Tests */,
+				50000070 /* Resources */,
 			);
 			path = RegalRecovery;
 			sourceTree = "<group>";
@@ -412,6 +437,7 @@
 			children = (
 				20000116 /* ContentData.swift */,
 				20000117 /* ContentData.swift */,
+				20000900 /* GratitudeTypes.swift */,
 				20000006 /* MockData.swift */,
 				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
@@ -459,6 +485,8 @@
 				20000022 /* ServiceContainer.swift */,
 				20000023 /* FeatureFlagService.swift */,
 				20000213 /* FeatureFlagStore.swift */,
+				20000800 /* GratitudePromptService.swift */,
+				20000909 /* GratitudeSharingService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -530,6 +558,9 @@
 				20000207 /* RecoveryPlanViewModel.swift */,
 				20000210 /* RecoveryWorkViewModel.swift */,
 				20000403 /* FASTERCheckInViewModel.swift */,
+				20000901 /* GratitudeEntryViewModel.swift */,
+				20000902 /* GratitudeHistoryViewModel.swift */,
+				20000903 /* GratitudeTrendsViewModel.swift */,
 				20000306 /* TodayViewModel.swift */,
 				20000307 /* DailyScoreCalculator.swift */,
 				20000600 /* TimeJournalEntryViewModel.swift */,
@@ -594,6 +625,10 @@
 				50000301 /* FASTER */,
 				20000058 /* FASTERScaleView.swift */,
 				20000059 /* GratitudeListView.swift */,
+				20000905 /* GratitudeDetailView.swift */,
+				20000904 /* GratitudeHistoryView.swift */,
+				20000907 /* GratitudeTabView.swift */,
+				20000906 /* GratitudeTrendsView.swift */,
 				20000060 /* JournalView.swift */,
 				20000702 /* JournalEntryDetailView.swift */,
 				20000703 /* JournalHistoryView.swift */,
@@ -699,6 +734,7 @@
 				20000308 /* SobrietyModuleView.swift */,
 				20000310 /* ActivityHistoryView.swift */,
 				20000311 /* ActivityDetailView.swift */,
+				20000908 /* GratitudeWidgetCard.swift */,
 				20000312 /* TimeJournalTodayCard.swift */,
 			);
 			path = Today;
@@ -744,6 +780,14 @@
 				20000115 /* UrgeLogViewModelTests.swift */,
 			);
 			path = Unit;
+			sourceTree = "<group>";
+		};
+		50000070 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				20000801 /* gratitude-prompts.json */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -795,6 +839,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				10000200 /* Assets.xcassets in Resources */,
+				10000801 /* gratitude-prompts.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -966,6 +1011,17 @@
 				10000701 /* FocusStatusMonitor.swift in Sources */,
 				10000702 /* JournalEntryDetailView.swift in Sources */,
 				10000703 /* JournalHistoryView.swift in Sources */,
+				10000800 /* GratitudePromptService.swift in Sources */,
+				10000900 /* GratitudeTypes.swift in Sources */,
+				10000901 /* GratitudeEntryViewModel.swift in Sources */,
+				10000902 /* GratitudeHistoryViewModel.swift in Sources */,
+				10000903 /* GratitudeTrendsViewModel.swift in Sources */,
+				10000904 /* GratitudeHistoryView.swift in Sources */,
+				10000905 /* GratitudeDetailView.swift in Sources */,
+				10000906 /* GratitudeTrendsView.swift in Sources */,
+				10000907 /* GratitudeTabView.swift in Sources */,
+				10000908 /* GratitudeWidgetCard.swift in Sources */,
+				10000909 /* GratitudeSharingService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

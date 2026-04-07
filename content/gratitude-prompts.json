@@ -1,0 +1,282 @@
+[
+  {
+    "id": "gp_001",
+    "text": "What is something God has done in your life that you didn't deserve?",
+    "category": "faithGod"
+  },
+  {
+    "id": "gp_002",
+    "text": "How has your faith helped you through a difficult moment recently?",
+    "category": "faithGod"
+  },
+  {
+    "id": "gp_003",
+    "text": "What scripture or truth has been meaningful to you this week?",
+    "category": "faithGod"
+  },
+  {
+    "id": "gp_004",
+    "text": "When did you feel closest to God recently?",
+    "category": "faithGod"
+  },
+  {
+    "id": "gp_005",
+    "text": "What spiritual growth have you noticed in yourself?",
+    "category": "faithGod"
+  },
+  {
+    "id": "gp_006",
+    "text": "What is something a family member did recently that made you smile?",
+    "category": "family"
+  },
+  {
+    "id": "gp_007",
+    "text": "What is a quality in your spouse/partner you're thankful for?",
+    "category": "family"
+  },
+  {
+    "id": "gp_008",
+    "text": "What is a childhood memory that still brings you joy?",
+    "category": "family"
+  },
+  {
+    "id": "gp_009",
+    "text": "How has your family supported your recovery?",
+    "category": "family"
+  },
+  {
+    "id": "gp_010",
+    "text": "What is something your children (or a child in your life) taught you?",
+    "category": "family"
+  },
+  {
+    "id": "gp_011",
+    "text": "Who showed you kindness recently, and how did it make you feel?",
+    "category": "relationships"
+  },
+  {
+    "id": "gp_012",
+    "text": "Who is someone you're glad is in your life, and why?",
+    "category": "relationships"
+  },
+  {
+    "id": "gp_013",
+    "text": "What is a conversation you had recently that meant something to you?",
+    "category": "relationships"
+  },
+  {
+    "id": "gp_014",
+    "text": "How has your sponsor or accountability partner helped you grow?",
+    "category": "relationships"
+  },
+  {
+    "id": "gp_015",
+    "text": "What friend have you been able to count on?",
+    "category": "relationships"
+  },
+  {
+    "id": "gp_016",
+    "text": "What is one thing about your body or health you're grateful for?",
+    "category": "health"
+  },
+  {
+    "id": "gp_017",
+    "text": "How has your physical health improved since starting recovery?",
+    "category": "health"
+  },
+  {
+    "id": "gp_018",
+    "text": "What healthy habit are you proud of maintaining?",
+    "category": "health"
+  },
+  {
+    "id": "gp_019",
+    "text": "What is a meal or food you enjoyed recently?",
+    "category": "health"
+  },
+  {
+    "id": "gp_020",
+    "text": "How did your body serve you well today?",
+    "category": "health"
+  },
+  {
+    "id": "gp_021",
+    "text": "What is something about your recovery journey you're thankful for right now?",
+    "category": "recovery"
+  },
+  {
+    "id": "gp_022",
+    "text": "What tool or practice has been most helpful in your recovery this week?",
+    "category": "recovery"
+  },
+  {
+    "id": "gp_023",
+    "text": "What is a temptation you resisted recently, and how did that feel?",
+    "category": "recovery"
+  },
+  {
+    "id": "gp_024",
+    "text": "What is a mistake or struggle that taught you something valuable?",
+    "category": "recovery"
+  },
+  {
+    "id": "gp_025",
+    "text": "How have you grown since your lowest point?",
+    "category": "recovery"
+  },
+  {
+    "id": "gp_026",
+    "text": "What is one way you've grown in the last 30 days?",
+    "category": "recovery"
+  },
+  {
+    "id": "gp_027",
+    "text": "What is something you accomplished at work that you're proud of?",
+    "category": "workCareer"
+  },
+  {
+    "id": "gp_028",
+    "text": "Who at work has been supportive or encouraging?",
+    "category": "workCareer"
+  },
+  {
+    "id": "gp_029",
+    "text": "What skill or ability do you have that you're thankful for?",
+    "category": "workCareer"
+  },
+  {
+    "id": "gp_030",
+    "text": "What opportunity has come your way recently?",
+    "category": "workCareer"
+  },
+  {
+    "id": "gp_031",
+    "text": "What is something beautiful you noticed today?",
+    "category": "natureBeauty"
+  },
+  {
+    "id": "gp_032",
+    "text": "When did nature bring you peace or joy recently?",
+    "category": "natureBeauty"
+  },
+  {
+    "id": "gp_033",
+    "text": "What season or weather are you enjoying right now?",
+    "category": "natureBeauty"
+  },
+  {
+    "id": "gp_034",
+    "text": "What sound, sight, or smell brought you comfort today?",
+    "category": "natureBeauty"
+  },
+  {
+    "id": "gp_035",
+    "text": "What is one thing about today that surprised you in a good way?",
+    "category": "smallMoments"
+  },
+  {
+    "id": "gp_036",
+    "text": "What is a simple pleasure you experienced today?",
+    "category": "smallMoments"
+  },
+  {
+    "id": "gp_037",
+    "text": "What made you laugh recently?",
+    "category": "smallMoments"
+  },
+  {
+    "id": "gp_038",
+    "text": "What small comfort did you enjoy today?",
+    "category": "smallMoments"
+  },
+  {
+    "id": "gp_039",
+    "text": "What is a routine moment that you usually take for granted but are thankful for?",
+    "category": "smallMoments"
+  },
+  {
+    "id": "gp_040",
+    "text": "What is a hard thing you did recently that you're proud of?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_041",
+    "text": "What is a fear you've faced or are facing with courage?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_042",
+    "text": "How are you different today than you were a year ago?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_043",
+    "text": "What boundary have you set that's protecting your recovery?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_044",
+    "text": "What is something you can do now that you couldn't do 6 months ago?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_045",
+    "text": "If you could only keep three things in your life, what would they be?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_046",
+    "text": "What is something you have that many people wish for?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_047",
+    "text": "What is a lesson you learned the hard way that you're now grateful for?",
+    "category": "recovery"
+  },
+  {
+    "id": "gp_048",
+    "text": "What made today worth living?",
+    "category": "smallMoments"
+  },
+  {
+    "id": "gp_049",
+    "text": "What are you looking forward to?",
+    "category": "growthProgress"
+  },
+  {
+    "id": "gp_050",
+    "text": "What would you miss most if it were gone tomorrow?",
+    "category": "family"
+  },
+  {
+    "id": "gp_051",
+    "text": "What prayer has God answered recently, even in an unexpected way?",
+    "category": "faithGod"
+  },
+  {
+    "id": "gp_052",
+    "text": "What is a tradition or gathering with loved ones you cherish?",
+    "category": "family"
+  },
+  {
+    "id": "gp_053",
+    "text": "Who in your recovery community has inspired you lately?",
+    "category": "relationships"
+  },
+  {
+    "id": "gp_054",
+    "text": "What is one way your mental health has improved recently?",
+    "category": "health"
+  },
+  {
+    "id": "gp_055",
+    "text": "What is a project or task at work that energizes you?",
+    "category": "workCareer"
+  },
+  {
+    "id": "gp_056",
+    "text": "What place in nature feels like a sanctuary to you?",
+    "category": "natureBeauty"
+  }
+]
