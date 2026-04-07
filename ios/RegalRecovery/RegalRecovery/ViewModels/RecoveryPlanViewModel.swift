@@ -13,7 +13,15 @@ struct PlanItemState: Identifiable, Equatable, Hashable {
     var daysOfWeek: Set<Int> // Empty = every day; 1=Sun..7=Sat
     var customTitle: String = "" // User-defined custom name
 
-    static func == (lhs: PlanItemState, rhs: PlanItemState) -> Bool { lhs.id == rhs.id }
+    static func == (lhs: PlanItemState, rhs: PlanItemState) -> Bool {
+        lhs.id == rhs.id
+            && lhs.isEnabled == rhs.isEnabled
+            && lhs.scheduledHour == rhs.scheduledHour
+            && lhs.scheduledMinute == rhs.scheduledMinute
+            && lhs.instanceIndex == rhs.instanceIndex
+            && lhs.daysOfWeek == rhs.daysOfWeek
+            && lhs.customTitle == rhs.customTitle
+    }
     func hash(into hasher: inout Hasher) { hasher.combine(id) }
 
     var scheduledTime: Date {
@@ -53,7 +61,7 @@ class RecoveryPlanViewModel {
     var saveError: String?
     var didSave = false
     var hasUnsavedChanges = false
-    private var originalSnapshot: [UUID] = []
+    private var originalSnapshot: [PlanItemState] = []
 
     var enabledCount: Int { planItems.count }
     var showOverloadWarning: Bool { enabledCount > 20 }
@@ -76,6 +84,12 @@ class RecoveryPlanViewModel {
     }
 
     private func markChanged() { hasUnsavedChanges = true }
+
+    /// Compares current planItems against the loaded snapshot to detect edits
+    /// made via bindings (day toggles, time changes, custom title).
+    func checkForChanges() {
+        hasUnsavedChanges = planItems != originalSnapshot
+    }
 
     // MARK: - Load
 
@@ -118,7 +132,7 @@ class RecoveryPlanViewModel {
         }
 
         planItems = items
-        originalSnapshot = planItems.map(\.id)
+        originalSnapshot = items
         hasUnsavedChanges = false
     }
 
