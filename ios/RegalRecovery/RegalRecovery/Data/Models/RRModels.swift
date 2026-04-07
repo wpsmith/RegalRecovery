@@ -668,15 +668,28 @@ final class RRGratitudeEntry {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var date: Date
-    var items: [String]
+    var items: [GratitudeItem]
+    var moodScore: Int?
+    var photoLocalPath: String?
+    var promptUsed: String?
+    var isFavorite: Bool
     var createdAt: Date
     var modifiedAt: Date
+
+    /// Entry is editable within 24 hours of creation.
+    var isEditable: Bool {
+        Date().timeIntervalSince(createdAt) < 86_400
+    }
 
     init(
         id: UUID = UUID(),
         userId: UUID,
         date: Date,
-        items: [String] = [],
+        items: [GratitudeItem] = [],
+        moodScore: Int? = nil,
+        photoLocalPath: String? = nil,
+        promptUsed: String? = nil,
+        isFavorite: Bool = false,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
@@ -684,6 +697,10 @@ final class RRGratitudeEntry {
         self.userId = userId
         self.date = date
         self.items = items
+        self.moodScore = moodScore
+        self.photoLocalPath = photoLocalPath
+        self.promptUsed = promptUsed
+        self.isFavorite = isFavorite
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }
@@ -1337,6 +1354,19 @@ enum RRModelConfiguration {
             isStoredInMemoryOnly: inMemory,
             allowsSave: true
         )
-        return try ModelContainer(for: schema, configurations: [config])
+        do {
+            return try ModelContainer(for: schema, configurations: [config])
+        } catch {
+            // Schema migration failed (e.g., GratitudeEntry items type changed).
+            // Delete the store and recreate — old data is lost but app doesn't crash.
+            if !inMemory {
+                let fm = FileManager.default
+                let storePath = config.url.path()
+                for suffix in ["", "-wal", "-shm"] {
+                    try? fm.removeItem(atPath: storePath + suffix)
+                }
+            }
+            return try ModelContainer(for: schema, configurations: [config])
+        }
     }
 }

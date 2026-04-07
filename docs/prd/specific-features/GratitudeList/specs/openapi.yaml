@@ -1,0 +1,1392 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Gratitude List API
+  version: 1.0.0
+  description: |
+    Gratitude List activity API for Regal Recovery.
+
+    Supports structured gratitude entries with multiple items per entry, optional category tags,
+    mood scores, photo attachments, and gratitude prompts. Entries are editable within 24 hours
+    of creation, then become read-only to preserve authenticity.
+
+    Key features:
+    - Multiple entries per day (each saved independently)
+    - Items with optional category tags and individual favoriting
+    - Streak tracking (consecutive calendar days with >= 1 entry)
+    - Full-text search across gratitude items
+    - Calendar view with entry indicators
+    - Gratitude prompts (50+ curated, deterministic daily rotation)
+    - Sharing (text-only, excludes mood/category/photo metadata)
+    - Integration with evening commitment review, dashboard widget, and analytics
+
+    All entry timestamps are immutable once recorded (FR2.7).
+    Feature flag: `activity.gratitude`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Gratitude Entries
+    description: CRUD operations for gratitude list entries
+  - name: Gratitude Items
+    description: Operations on individual gratitude items within entries
+  - name: Gratitude Streaks
+    description: Gratitude streak tracking and trends
+  - name: Gratitude Prompts
+    description: Curated gratitude prompt library
+  - name: Gratitude Search
+    description: Full-text search and filtering
+  - name: Gratitude Calendar
+    description: Calendar view with entry indicators
+  - name: Gratitude Sharing
+    description: Share entries with support network or externally
+  - name: Gratitude Widget
+    description: Dashboard widget data
+
+paths:
+  /activities/gratitude:
+    post:
+      operationId: createGratitudeEntry
+      tags: [Gratitude Entries]
+      summary: Create a new gratitude entry
+      description: |
+        Record a new gratitude list entry with one or more items.
+
+        Each item supports optional category tagging and individual favoriting.
+        Multiple entries per day are allowed; each is saved independently.
+
+        Requires feature flag `activity.gratitude` to be enabled.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGratitudeEntryRequest'
+            example:
+              timestamp: "2026-04-07T07:00:00Z"
+              items:
+                - text: "Grateful for 47 days of sobriety"
+                  category: recovery
+                  sortOrder: 0
+                - text: "My sponsor's patience and wisdom"
+                  category: relationships
+                  sortOrder: 1
+                - text: "Morning coffee in the quiet"
+                  category: smallMoments
+                  sortOrder: 2
+              moodScore: 4
+              promptUsed: null
+      responses:
+        '201':
+          description: Created - Gratitude entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the created entry
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeEntryResponse'
+              example:
+                data:
+                  gratitudeId: g_88888
+                  timestamp: "2026-04-07T07:00:00Z"
+                  items:
+                    - itemId: gi_001
+                      text: "Grateful for 47 days of sobriety"
+                      category: recovery
+                      isFavorite: false
+                      sortOrder: 0
+                    - itemId: gi_002
+                      text: "My sponsor's patience and wisdom"
+                      category: relationships
+                      isFavorite: false
+                      sortOrder: 1
+                    - itemId: gi_003
+                      text: "Morning coffee in the quiet"
+                      category: smallMoments
+                      isFavorite: false
+                      sortOrder: 2
+                  moodScore: 4
+                  photoKey: null
+                  promptUsed: null
+                  currentStreak: 12
+                  isEditable: true
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/gratitude/g_88888
+                    history: https://api.regalrecovery.com/v1/activities/gratitude
+                    streaks: https://api.regalrecovery.com/v1/activities/gratitude/streaks
+                meta:
+                  createdAt: "2026-04-07T07:00:00Z"
+                  isFirstEntry: false
+                  warmMessage: "A grateful heart is a guarded heart. Thank you for pausing to notice the good."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found - Feature flag `activity.gratitude` is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listGratitudeEntries
+      tags: [Gratitude Entries]
+      summary: List gratitude entries
+      description: |
+        Retrieve gratitude entries in reverse chronological order.
+
+        Supports filtering by date range, category, mood, and photo presence.
+        Filters are combinable with AND logic.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter entries from this date (inclusive)
+          example: "2026-03-01"
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter entries up to this date (inclusive)
+          example: "2026-04-07"
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum:
+              - faithGod
+              - family
+              - relationships
+              - health
+              - recovery
+              - workCareer
+              - natureBeauty
+              - smallMoments
+              - growthProgress
+              - custom
+          description: Filter by category tag (entries containing items with this category)
+        - name: moodScore
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+          description: Filter by exact mood score
+        - name: hasPhoto
+          in: query
+          schema:
+            type: boolean
+          description: Filter entries with photo attachments
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Pagination cursor from previous response
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Number of entries per page
+      responses:
+        '200':
+          description: OK - Gratitude entries retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeEntryListResponse'
+              example:
+                data:
+                  - gratitudeId: g_88888
+                    timestamp: "2026-04-07T07:00:00Z"
+                    itemCount: 3
+                    previewItems:
+                      - "Grateful for 47 days of sobriety"
+                      - "My sponsor's patience and wisdom"
+                    categories: [recovery, relationships, smallMoments]
+                    moodScore: 4
+                    hasPhoto: false
+                    isEditable: true
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/gratitude
+                  next: https://api.regalrecovery.com/v1/activities/gratitude?cursor=cXdlcnR5
+                meta:
+                  page:
+                    nextCursor: cXdlcnR5
+                    limit: 50
+                  totalEntries: 94
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/{gratitudeId}:
+    get:
+      operationId: getGratitudeEntry
+      tags: [Gratitude Entries]
+      summary: Get a single gratitude entry
+      description: |
+        Retrieve the full detail of a gratitude entry including all items,
+        category tags, mood score, photo key, and favorite status.
+      parameters:
+        - $ref: '#/components/parameters/GratitudeId'
+      responses:
+        '200':
+          description: OK - Entry retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeEntryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateGratitudeEntry
+      tags: [Gratitude Entries]
+      summary: Update a gratitude entry
+      description: |
+        Update a gratitude entry within the 24-hour edit window.
+
+        After 24 hours from createdAt, the entry becomes read-only and this
+        endpoint returns 403 Forbidden. The createdAt timestamp is immutable
+        and cannot be changed (FR2.7).
+      parameters:
+        - $ref: '#/components/parameters/GratitudeId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGratitudeEntryRequest'
+      responses:
+        '200':
+          description: OK - Entry updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeEntryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Entry is past the 24-hour edit window
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - code: "rr:0x47520001"
+                    status: 403
+                    title: Edit Window Expired
+                    detail: "Gratitude entries are read-only after 24 hours to preserve the authenticity of your reflection."
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteGratitudeEntry
+      tags: [Gratitude Entries]
+      summary: Delete a gratitude entry
+      description: |
+        Delete a gratitude entry. Only allowed within the 24-hour edit window.
+      parameters:
+        - $ref: '#/components/parameters/GratitudeId'
+      responses:
+        '204':
+          description: No Content - Entry deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Entry is past the 24-hour edit window
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/{gratitudeId}/items/{itemId}/favorite:
+    patch:
+      operationId: toggleGratitudeItemFavorite
+      tags: [Gratitude Items]
+      summary: Toggle favorite status on a gratitude item
+      description: |
+        Toggle the isFavorite flag on a specific item within a gratitude entry.
+        This is allowed regardless of the 24-hour edit window since favoriting
+        is a personal curation action, not an edit to the original reflection.
+      parameters:
+        - $ref: '#/components/parameters/GratitudeId'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^gi_[a-zA-Z0-9]+$'
+          example: gi_001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isFavorite
+              properties:
+                isFavorite:
+                  type: boolean
+            example:
+              isFavorite: true
+      responses:
+        '200':
+          description: OK - Favorite status updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      itemId:
+                        type: string
+                      isFavorite:
+                        type: boolean
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/favorites:
+    get:
+      operationId: listGratitudeFavorites
+      tags: [Gratitude Items]
+      summary: List all favorited gratitude items
+      description: |
+        Retrieve all individually favorited gratitude items across all entries.
+        Returns items with their parent entry date for context.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Favorite items retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeFavoritesResponse'
+              example:
+                data:
+                  - itemId: gi_002
+                    text: "My sponsor's patience and wisdom"
+                    category: relationships
+                    parentGratitudeId: g_88888
+                    parentDate: "2026-04-07T07:00:00Z"
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/gratitude/favorites
+                meta:
+                  page:
+                    nextCursor: null
+                    limit: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/search:
+    get:
+      operationId: searchGratitudeEntries
+      tags: [Gratitude Search]
+      summary: Full-text search across gratitude items
+      description: |
+        Search across all gratitude item text fields. Returns matching entries
+        with the matching items highlighted. Minimum 2 characters required.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 200
+          description: Search query (full-text across all item text)
+          example: "sobriety"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK - Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeSearchResponse'
+              example:
+                data:
+                  - gratitudeId: g_88888
+                    timestamp: "2026-04-07T07:00:00Z"
+                    matchingItems:
+                      - itemId: gi_001
+                        text: "Grateful for 47 days of sobriety"
+                        category: recovery
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/gratitude/search?q=sobriety
+                meta:
+                  page:
+                    nextCursor: null
+                    limit: 20
+                  totalResults: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/calendar:
+    get:
+      operationId: getGratitudeCalendar
+      tags: [Gratitude Calendar]
+      summary: Get calendar view of gratitude entries
+      description: |
+        Returns an array of dates within a month that have gratitude entries,
+        along with entry count per day. Used to render calendar dot indicators.
+      parameters:
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+          description: Month to retrieve (YYYY-MM format)
+          example: "2026-04"
+      responses:
+        '200':
+          description: OK - Calendar data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeCalendarResponse'
+              example:
+                data:
+                  month: "2026-04"
+                  days:
+                    - date: "2026-04-01"
+                      entryCount: 1
+                    - date: "2026-04-03"
+                      entryCount: 2
+                    - date: "2026-04-07"
+                      entryCount: 1
+                meta:
+                  totalDaysWithEntries: 3
+                  totalEntries: 4
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/streaks:
+    get:
+      operationId: getGratitudeStreaks
+      tags: [Gratitude Streaks]
+      summary: Get gratitude streak data and trends
+      description: |
+        Returns current streak, longest streak, total days, category breakdown,
+        and volume trends. Streak is based on consecutive calendar days
+        (user's local timezone) with at least one gratitude entry.
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [30d, 90d, allTime]
+            default: 30d
+          description: Time period for category breakdown and volume trends
+      responses:
+        '200':
+          description: OK - Streak and trend data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeStreaksResponse'
+              example:
+                data:
+                  currentStreak: 12
+                  longestStreak: 28
+                  totalDaysWithEntries: 94
+                  categoryBreakdown:
+                    - category: family
+                      count: 45
+                      percentage: 34.0
+                    - category: recovery
+                      count: 29
+                      percentage: 22.0
+                    - category: faithGod
+                      count: 24
+                      percentage: 18.0
+                  averageItemsPerEntry: 3.2
+                  daysPerWeek:
+                    - week: "2026-W13"
+                      daysWithEntries: 5
+                    - week: "2026-W14"
+                      daysWithEntries: 7
+                  shift:
+                    topGainer:
+                      category: recovery
+                      changePercent: 15.0
+                    topDecliner:
+                      category: workCareer
+                      changePercent: -8.0
+                    sufficientData: true
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/gratitude/streaks
+                meta:
+                  period: 30d
+                  computedAt: "2026-04-07T12:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/prompts/daily:
+    get:
+      operationId: getDailyGratitudePrompt
+      tags: [Gratitude Prompts]
+      summary: Get daily gratitude prompt
+      description: |
+        Returns the deterministic daily prompt for the authenticated user.
+        The prompt is consistent for the same user on the same day.
+        Supports an offset parameter for "Different prompt" cycling.
+      parameters:
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Offset from daily prompt for cycling (incremented on "Different prompt")
+      responses:
+        '200':
+          description: OK - Prompt retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudePromptResponse'
+              example:
+                data:
+                  promptId: gp_021
+                  text: "What is something about your recovery journey you're thankful for right now?"
+                  category: recovery
+                meta:
+                  totalPrompts: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/widget:
+    get:
+      operationId: getGratitudeWidget
+      tags: [Gratitude Widget]
+      summary: Get dashboard widget data
+      description: |
+        Returns compact data for the Today screen gratitude widget:
+        today's completion status, current streak, and a random past item.
+      responses:
+        '200':
+          description: OK - Widget data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GratitudeWidgetResponse'
+              example:
+                data:
+                  completedToday: true
+                  currentStreak: 12
+                  randomPastItem:
+                    text: "My sponsor's patience and wisdom"
+                    date: "2026-04-05"
+                  links:
+                    entry: https://api.regalrecovery.com/v1/activities/gratitude
+                    history: https://api.regalrecovery.com/v1/activities/gratitude
+                    streaks: https://api.regalrecovery.com/v1/activities/gratitude/streaks
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/gratitude/{gratitudeId}/share:
+    post:
+      operationId: shareGratitudeEntry
+      tags: [Gratitude Sharing]
+      summary: Share a gratitude entry or item
+      description: |
+        Generate shareable content from a gratitude entry. Shared content
+        NEVER includes mood tags, category tags, or photo attachments --
+        only the gratitude text and date.
+
+        Supports sharing to support network contacts (in-app messaging)
+        or generating a styled graphic for external sharing.
+      parameters:
+        - $ref: '#/components/parameters/GratitudeId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShareGratitudeRequest'
+            example:
+              shareType: entry
+              target: supportNetwork
+              contactIds: ["c_99999"]
+      responses:
+        '200':
+          description: OK - Shareable content generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareGratitudeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Community permissions prevent sharing with specified contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  parameters:
+    GratitudeId:
+      name: gratitudeId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^g_[a-zA-Z0-9]+$'
+      example: g_88888
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    # --- Request Schemas ---
+
+    CreateGratitudeEntryRequest:
+      type: object
+      required:
+        - timestamp
+        - items
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the gratitude entry was created (user's local time)
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/GratitudeItemInput'
+          description: Ordered list of gratitude items (minimum 1)
+        moodScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+          description: Optional mood rating at time of entry (1=very low, 5=great)
+        photoKey:
+          type: string
+          nullable: true
+          description: S3 key for attached photo (uploaded separately)
+        promptUsed:
+          type: string
+          nullable: true
+          description: Text of prompt if one was used for inspiration
+
+    UpdateGratitudeEntryRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/GratitudeItemInput'
+        moodScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        photoKey:
+          type: string
+          nullable: true
+        promptUsed:
+          type: string
+          nullable: true
+
+    GratitudeItemInput:
+      type: object
+      required:
+        - text
+        - sortOrder
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 300
+          description: Gratitude item text (max 300 characters)
+        category:
+          $ref: '#/components/schemas/GratitudeCategory'
+        sortOrder:
+          type: integer
+          minimum: 0
+          description: Display order (0-based)
+        isFavorite:
+          type: boolean
+          default: false
+
+    ShareGratitudeRequest:
+      type: object
+      required:
+        - shareType
+        - target
+      properties:
+        shareType:
+          type: string
+          enum: [entry, item]
+          description: Share full entry or a single item
+        itemId:
+          type: string
+          pattern: '^gi_[a-zA-Z0-9]+$'
+          description: Required when shareType is "item"
+        target:
+          type: string
+          enum: [supportNetwork, clipboard, styledGraphic]
+        contactIds:
+          type: array
+          items:
+            type: string
+          description: Required when target is "supportNetwork"
+        graphicOptions:
+          type: object
+          description: Options for styled graphic rendering
+          properties:
+            background:
+              type: string
+              enum: [gradient-warm, gradient-cool, solid-cream, solid-sage, solid-navy]
+              default: gradient-warm
+            font:
+              type: string
+              enum: [serif, sansSerif]
+              default: serif
+            scripture:
+              type: string
+              maxLength: 200
+              nullable: true
+              description: Optional scripture verse to include
+
+    # --- Response Schemas ---
+
+    GratitudeEntryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GratitudeEntry'
+        meta:
+          type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            modifiedAt:
+              type: string
+              format: date-time
+            isFirstEntry:
+              type: boolean
+              description: True when user has no prior gratitude entries (triggers onboarding text)
+            warmMessage:
+              type: string
+              description: Rotating post-save encouragement message
+
+    GratitudeEntryListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GratitudeEntrySummary'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+            totalEntries:
+              type: integer
+
+    GratitudeEntry:
+      type: object
+      properties:
+        gratitudeId:
+          type: string
+          pattern: '^g_[a-zA-Z0-9]+$'
+        timestamp:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/GratitudeItem'
+        moodScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        photoKey:
+          type: string
+          nullable: true
+        promptUsed:
+          type: string
+          nullable: true
+        currentStreak:
+          type: integer
+          minimum: 0
+          description: Current consecutive-day gratitude streak after this entry
+        isEditable:
+          type: boolean
+          description: True if entry is within the 24-hour edit window
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            history:
+              type: string
+              format: uri
+            streaks:
+              type: string
+              format: uri
+
+    GratitudeEntrySummary:
+      type: object
+      properties:
+        gratitudeId:
+          type: string
+          pattern: '^g_[a-zA-Z0-9]+$'
+        timestamp:
+          type: string
+          format: date-time
+        itemCount:
+          type: integer
+          minimum: 1
+        previewItems:
+          type: array
+          maxItems: 2
+          items:
+            type: string
+            maxLength: 100
+          description: First 2 items truncated to 100 characters for preview
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/GratitudeCategory'
+          description: Unique categories across all items in this entry
+        moodScore:
+          type: integer
+          nullable: true
+        hasPhoto:
+          type: boolean
+        isEditable:
+          type: boolean
+
+    GratitudeItem:
+      type: object
+      properties:
+        itemId:
+          type: string
+          pattern: '^gi_[a-zA-Z0-9]+$'
+        text:
+          type: string
+          maxLength: 300
+        category:
+          $ref: '#/components/schemas/GratitudeCategory'
+        isFavorite:
+          type: boolean
+        sortOrder:
+          type: integer
+
+    GratitudeCategory:
+      type: string
+      enum:
+        - faithGod
+        - family
+        - relationships
+        - health
+        - recovery
+        - workCareer
+        - natureBeauty
+        - smallMoments
+        - growthProgress
+        - custom
+      description: |
+        Predefined gratitude categories:
+        - faithGod: Faith / God
+        - family: Family
+        - relationships: Relationships
+        - health: Health
+        - recovery: Recovery
+        - workCareer: Work / Career
+        - natureBeauty: Nature / Beauty
+        - smallMoments: Small Moments
+        - growthProgress: Growth / Progress
+        - custom: Custom (free-text tag stored in item)
+
+    GratitudeFavoritesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId:
+                type: string
+              text:
+                type: string
+              category:
+                $ref: '#/components/schemas/GratitudeCategory'
+              parentGratitudeId:
+                type: string
+              parentDate:
+                type: string
+                format: date-time
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+
+    GratitudeSearchResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              gratitudeId:
+                type: string
+              timestamp:
+                type: string
+                format: date-time
+              matchingItems:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GratitudeItem'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+            totalResults:
+              type: integer
+
+    GratitudeCalendarResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            month:
+              type: string
+              pattern: '^\d{4}-\d{2}$'
+            days:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  entryCount:
+                    type: integer
+                    minimum: 1
+        meta:
+          type: object
+          properties:
+            totalDaysWithEntries:
+              type: integer
+            totalEntries:
+              type: integer
+
+    GratitudeStreaksResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            currentStreak:
+              type: integer
+              minimum: 0
+              description: Consecutive calendar days with >= 1 gratitude entry
+            longestStreak:
+              type: integer
+              minimum: 0
+              description: All-time best consecutive days
+            totalDaysWithEntries:
+              type: integer
+              minimum: 0
+              description: Lifetime unique calendar days with entries
+            categoryBreakdown:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    $ref: '#/components/schemas/GratitudeCategory'
+                  count:
+                    type: integer
+                  percentage:
+                    type: number
+                    format: float
+            averageItemsPerEntry:
+              type: number
+              format: float
+              description: Mean item count across entries in the period
+            daysPerWeek:
+              type: array
+              items:
+                type: object
+                properties:
+                  week:
+                    type: string
+                    description: ISO week identifier (YYYY-Wnn)
+                  daysWithEntries:
+                    type: integer
+                    minimum: 0
+                    maximum: 7
+              description: Rolling weekly entry frequency (8 weeks)
+            shift:
+              type: object
+              nullable: true
+              description: Category shift comparison (null if insufficient data)
+              properties:
+                topGainer:
+                  type: object
+                  properties:
+                    category:
+                      $ref: '#/components/schemas/GratitudeCategory'
+                    changePercent:
+                      type: number
+                      format: float
+                topDecliner:
+                  type: object
+                  properties:
+                    category:
+                      $ref: '#/components/schemas/GratitudeCategory'
+                    changePercent:
+                      type: number
+                      format: float
+                sufficientData:
+                  type: boolean
+                  description: True when >= 10 entries in each 30-day period
+            links:
+              type: object
+              properties:
+                self:
+                  type: string
+                  format: uri
+        meta:
+          type: object
+          properties:
+            period:
+              type: string
+              enum: [30d, 90d, allTime]
+            computedAt:
+              type: string
+              format: date-time
+
+    GratitudePromptResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            promptId:
+              type: string
+              pattern: '^gp_[a-zA-Z0-9]+$'
+            text:
+              type: string
+            category:
+              $ref: '#/components/schemas/GratitudeCategory'
+        meta:
+          type: object
+          properties:
+            totalPrompts:
+              type: integer
+
+    GratitudeWidgetResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            completedToday:
+              type: boolean
+              description: Whether at least one gratitude entry exists for today
+            currentStreak:
+              type: integer
+              minimum: 0
+            randomPastItem:
+              type: object
+              nullable: true
+              description: One random item from a past entry (rotates daily)
+              properties:
+                text:
+                  type: string
+                date:
+                  type: string
+                  format: date
+            links:
+              type: object
+              properties:
+                entry:
+                  type: string
+                  format: uri
+                history:
+                  type: string
+                  format: uri
+                streaks:
+                  type: string
+                  format: uri
+
+    ShareGratitudeResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            sharedText:
+              type: string
+              description: Plain text of shared gratitude (no mood/category/photo)
+            sharedDate:
+              type: string
+              format: date
+            graphicUrl:
+              type: string
+              format: uri
+              nullable: true
+              description: URL of styled graphic (when target is styledGraphic)
+            sentTo:
+              type: array
+              items:
+                type: string
+              nullable: true
+              description: Contact IDs the entry was shared with (when target is supportNetwork)
+
+    # --- Common Schemas ---
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

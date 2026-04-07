@@ -513,16 +513,70 @@ enum SeedData {
     // MARK: - Gratitude Entries
 
     private static func seedGratitude(context: ModelContext, userId: UUID) {
-        for i in 0..<7 {
+        let entries: [(Int, [GratitudeItem], Int?, Bool)] = [
+            // (daysAgo, items, moodScore, isFavorite)
+            (0, [
+                GratitudeItem(text: "Woke up with a clear head and a sense of purpose", category: .recovery, sortOrder: 0),
+                GratitudeItem(text: "Rachel made coffee before I was even up", category: .family, isFavorite: true, sortOrder: 1),
+                GratitudeItem(text: "The sunrise on my morning walk", category: .natureBeauty, sortOrder: 2),
+            ], 4, false),
+            (1, [
+                GratitudeItem(text: "47 days of sobriety — never thought I'd get here", category: .recovery, isFavorite: true, sortOrder: 0),
+                GratitudeItem(text: "My sponsor answered the phone at 11pm without hesitation", category: .relationships, isFavorite: true, sortOrder: 1),
+                GratitudeItem(text: "A good night's sleep for the first time in weeks", category: .health, sortOrder: 2),
+                GratitudeItem(text: "The kids laughing at dinner", category: .family, sortOrder: 3),
+            ], 5, true),
+            (2, [
+                GratitudeItem(text: "God's patience with me when I have none for myself", category: .faithGod, isFavorite: true, sortOrder: 0),
+                GratitudeItem(text: "The courage to be honest in group tonight", category: .recovery, sortOrder: 1),
+                GratitudeItem(text: "A warm meal and a roof over my head", category: .smallMoments, sortOrder: 2),
+            ], 3, false),
+            (3, [
+                GratitudeItem(text: "My job didn't fire me when I told them the truth", category: .workCareer, sortOrder: 0),
+                GratitudeItem(text: "Rachel said she sees the change in me", category: .family, isFavorite: true, sortOrder: 1),
+            ], 4, false),
+            (4, [
+                GratitudeItem(text: "Reading scripture felt real today, not like homework", category: .faithGod, sortOrder: 0),
+                GratitudeItem(text: "Ran a full mile without stopping", category: .health, sortOrder: 1),
+                GratitudeItem(text: "The afternoon light through the kitchen window", category: .natureBeauty, sortOrder: 2),
+                GratitudeItem(text: "Progress in Step 4 — hard but freeing", category: .growthProgress, sortOrder: 3),
+            ], 4, false),
+            (5, [
+                GratitudeItem(text: "A text from my brother I wasn't expecting", category: .relationships, sortOrder: 0),
+                GratitudeItem(text: "The fact that I wanted to call my sponsor instead of acting out", category: .recovery, isFavorite: true, sortOrder: 1),
+                GratitudeItem(text: "Hot shower after a long day", category: .smallMoments, sortOrder: 2),
+            ], 3, false),
+            (6, [
+                GratitudeItem(text: "Another day where I chose recovery", category: .recovery, sortOrder: 0),
+                GratitudeItem(text: "The quiet of early morning prayer", category: .faithGod, sortOrder: 1),
+                GratitudeItem(text: "My counselor's insight about shame vs guilt", category: .growthProgress, isFavorite: true, sortOrder: 2),
+            ], 4, false),
+            (8, [
+                GratitudeItem(text: "Grace. Just grace.", category: .faithGod, isFavorite: true, sortOrder: 0),
+            ], 2, false),
+            (10, [
+                GratitudeItem(text: "The meeting tonight — I needed every word of it", category: .recovery, sortOrder: 0),
+                GratitudeItem(text: "My kids still want to be around me", category: .family, sortOrder: 1),
+                GratitudeItem(text: "A good therapist who doesn't let me deflect", category: .relationships, sortOrder: 2),
+            ], 3, false),
+            (14, [
+                GratitudeItem(text: "30 days clean — a milestone I didn't think was possible", category: .recovery, isFavorite: true, sortOrder: 0),
+                GratitudeItem(text: "Rachel held my hand in church for the first time in months", category: .family, isFavorite: true, sortOrder: 1),
+                GratitudeItem(text: "The view from the park bench where I do my morning reading", category: .natureBeauty, sortOrder: 2),
+                GratitudeItem(text: "Learning that I'm worth fighting for", category: .growthProgress, sortOrder: 3),
+                GratitudeItem(text: "A God who doesn't give up on people like me", category: .faithGod, isFavorite: true, sortOrder: 4),
+            ], 5, true),
+        ]
+
+        for (ago, items, mood, favorite) in entries {
+            let entryDate = daysAgo(ago, hour: 7)
             let entry = RRGratitudeEntry(
                 userId: userId,
-                date: daysAgo(i, hour: 7),
-                items: [
-                    "My recovery journey",
-                    "Support from my sponsor",
-                    "Another day of sobriety",
-                ],
-                createdAt: daysAgo(i, hour: 7)
+                date: entryDate,
+                items: items,
+                moodScore: mood,
+                isFavorite: favorite,
+                createdAt: entryDate
             )
             context.insert(entry)
         }
