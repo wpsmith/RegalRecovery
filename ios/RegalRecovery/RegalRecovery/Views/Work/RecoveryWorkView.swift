@@ -3,120 +3,288 @@ import SwiftUI
 
 struct RecoveryWorkView: View {
     @Environment(\.modelContext) private var modelContext
-    @State private var viewModel = RecoveryWorkViewModel()
-    @State private var showCompleted = false
+
+    // MARK: - Queries for today's status
+    @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
+    @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
+    @Query(sort: \RRJournalEntry.date, order: .reverse) private var journals: [RRJournalEntry]
+    @Query(sort: \RREmotionalJournal.date, order: .reverse) private var emotionalJournals: [RREmotionalJournal]
+    @Query(sort: \RRTimeBlock.date, order: .reverse) private var timeBlocks: [RRTimeBlock]
+    @Query(sort: \RRFASTEREntry.date, order: .reverse) private var fasterEntries: [RRFASTEREntry]
+    @Query(sort: \RRUrgeLog.date, order: .reverse) private var urgeLogs: [RRUrgeLog]
+    @Query(sort: \RRMoodEntry.date, order: .reverse) private var moodEntries: [RRMoodEntry]
+    @Query(sort: \RRGratitudeEntry.date, order: .reverse) private var gratitudeEntries: [RRGratitudeEntry]
+    @Query(sort: \RRPrayerLog.date, order: .reverse) private var prayerLogs: [RRPrayerLog]
+    @Query(sort: \RRExerciseLog.date, order: .reverse) private var exerciseLogs: [RRExerciseLog]
+    @Query(sort: \RRPhoneCallLog.date, order: .reverse) private var phoneCallLogs: [RRPhoneCallLog]
+    @Query(sort: \RRMeetingLog.date, order: .reverse) private var meetingLogs: [RRMeetingLog]
+    @Query(sort: \RRSpouseCheckIn.date, order: .reverse) private var spouseCheckIns: [RRSpouseCheckIn]
+    @Query(sort: \RRStepWork.stepNumber) private var stepWork: [RRStepWork]
+    @Query(sort: \RRGoal.title) private var goals: [RRGoal]
+
+    @State private var showUrgeSurfingTimer = false
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12),
+    ]
 
     var body: some View {
         NavigationStack {
-            List {
-                // MARK: - Due Now
-                if !viewModel.dueNow.isEmpty {
-                    Section {
-                        ForEach(viewModel.dueNow) { item in
-                            RecoveryWorkItemRow(item: item) {
-                                viewModel.startItem(item)
-                            }
-                        }
-                    } header: {
-                        Label("Due Now", systemImage: "exclamationmark.circle.fill")
-                            .foregroundStyle(.orange)
+            ScrollView {
+                VStack(spacing: 24) {
+                    ForEach(WorkTileCategory.allCases, id: \.self) { category in
+                        workSection(for: category)
                     }
                 }
-
-                // MARK: - This Week
-                if !viewModel.thisWeek.isEmpty {
-                    Section {
-                        ForEach(viewModel.thisWeek) { item in
-                            RecoveryWorkItemRow(item: item) {
-                                viewModel.startItem(item)
-                            }
-                        }
-                    } header: {
-                        Text("This Week")
-                    }
-                }
-
-                // MARK: - This Month
-                if !viewModel.thisMonth.isEmpty {
-                    Section {
-                        ForEach(viewModel.thisMonth) { item in
-                            RecoveryWorkItemRow(item: item) {
-                                viewModel.startItem(item)
-                            }
-                        }
-                    } header: {
-                        Text("This Month")
-                    }
-                }
-
-                // MARK: - Completed
-                if !viewModel.completed.isEmpty {
-                    Section(isExpanded: $showCompleted) {
-                        ForEach(viewModel.completed) { item in
-                            RecoveryWorkItemRow(item: item)
-                        }
-                    } header: {
-                        Button {
-                            withAnimation {
-                                showCompleted.toggle()
-                            }
-                        } label: {
-                            HStack {
-                                Text("Completed (\(viewModel.completed.count))")
-                                Spacer()
-                                Image(systemName: showCompleted ? "chevron.up" : "chevron.down")
-                                    .font(.caption)
-                                    .foregroundStyle(Color.rrTextSecondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-
-                // MARK: - Empty State
-                if viewModel.dueNow.isEmpty && viewModel.thisWeek.isEmpty && viewModel.thisMonth.isEmpty {
-                    Section {
-                        VStack(spacing: 12) {
-                            Image(systemName: "checkmark.seal.fill")
-                                .font(.system(size: 40))
-                                .foregroundStyle(Color.rrSuccess)
-                            Text("All caught up!")
-                                .font(RRFont.headline)
-                                .foregroundStyle(Color.rrText)
-                            Text("No recovery work items are pending right now.")
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrTextSecondary)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
-                    }
-                }
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 100)
             }
-            .listStyle(.insetGrouped)
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 80)
-            }
+            .background(Color.rrBackground)
             .navigationTitle("Recovery Work")
-            .onAppear {
-                viewModel.timeJournalInPlan = isTimeJournalInPlan()
-                viewModel.load()
+        }
+        .fullScreenCover(isPresented: $showUrgeSurfingTimer) {
+            UrgeSurfingTimerView(isPresented: $showUrgeSurfingTimer)
+        }
+    }
+
+    // MARK: - Section
+
+    @ViewBuilder
+    private func workSection(for category: WorkTileCategory) -> some View {
+        let tiles = RecoveryWorkViewModel.allTiles.filter { $0.category == category }
+        if !tiles.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Image(systemName: category.icon)
+                        .font(.subheadline)
+                        .foregroundStyle(Color.rrPrimary)
+                    Text(category.rawValue)
+                        .font(RRFont.title3)
+                        .foregroundStyle(Color.rrText)
+                }
+                .padding(.leading, 4)
+
+                LazyVGrid(columns: columns, spacing: 12) {
+                    ForEach(tiles) { tile in
+                        tileContent(for: tile)
+                    }
+                }
             }
         }
     }
 
-    private func isTimeJournalInPlan() -> Bool {
-        let descriptor = FetchDescriptor<RRRecoveryPlan>(
-            predicate: #Predicate { $0.isActive == true }
-        )
-        guard let plan = try? modelContext.fetch(descriptor).first,
-              let items = plan.items else {
-            return false
+    // MARK: - Tile Content
+
+    @ViewBuilder
+    private func tileContent(for tile: WorkTileItem) -> some View {
+        let status = tileStatus(for: tile)
+
+        if tile.implemented && tile.isEnabled {
+            // Clickable tile — navigates or presents
+            if tile.activityTypeKey == "urgeSurfingTimer" {
+                Button {
+                    showUrgeSurfingTimer = true
+                } label: {
+                    WorkTileView(tile: tile, status: status)
+                }
+                .buttonStyle(.plain)
+            } else {
+                NavigationLink {
+                    destinationView(for: tile)
+                } label: {
+                    WorkTileView(tile: tile, status: status)
+                }
+                .buttonStyle(.plain)
+            }
+        } else {
+            // Non-clickable: disabled flag or not implemented
+            WorkTileView(tile: tile, status: .none)
         }
-        return items.contains { $0.activityType == ActivityType.timeJournal.rawValue && $0.isEnabled }
+    }
+
+    // MARK: - Status Lookup
+
+    private func tileStatus(for tile: WorkTileItem) -> TileStatus {
+        RecoveryWorkViewModel.todayStatus(
+            for: tile,
+            commitments: commitments,
+            checkIns: checkIns,
+            journals: journals,
+            emotionalJournals: emotionalJournals,
+            timeBlocks: timeBlocks,
+            fasterEntries: fasterEntries,
+            urgeLogs: urgeLogs,
+            moodEntries: moodEntries,
+            gratitudeEntries: gratitudeEntries,
+            prayerLogs: prayerLogs,
+            exerciseLogs: exerciseLogs,
+            phoneCallLogs: phoneCallLogs,
+            meetingLogs: meetingLogs,
+            spouseCheckIns: spouseCheckIns,
+            stepWork: stepWork,
+            goals: goals
+        )
+    }
+
+    // MARK: - Navigation
+
+    @ViewBuilder
+    private func destinationView(for tile: WorkTileItem) -> some View {
+        switch tile.activityTypeKey {
+        case ActivityType.sobrietyCommitment.rawValue:
+            MorningCommitmentView()
+        case ActivityType.recoveryCheckIn.rawValue:
+            RecoveryCheckInView()
+        case ActivityType.prayer.rawValue:
+            PrayerLogView()
+        case ActivityType.exercise.rawValue:
+            ExerciseLogView()
+        case ActivityType.journal.rawValue:
+            JournalView()
+        case ActivityType.emotionalJournal.rawValue:
+            JournalView()
+        case ActivityType.mood.rawValue:
+            MoodRatingView()
+        case ActivityType.gratitude.rawValue:
+            GratitudeListView()
+        case ActivityType.fasterScale.rawValue:
+            FASTERScaleView()
+        case "devotional":
+            DevotionalView()
+        case ActivityType.affirmationLog.rawValue:
+            AffirmationLogView()
+        case ActivityType.phoneCalls.rawValue:
+            PhoneCallLogView()
+        case ActivityType.meetingsAttended.rawValue:
+            MeetingsAttendedView()
+        case ActivityType.spouseCheckIn.rawValue:
+            SpouseCheckInPrepView()
+        case "personCheckInSpouse":
+            SpouseCheckInPrepView()
+        case ActivityType.weeklyGoals.rawValue:
+            WeeklyGoalsView()
+        case ActivityType.stepWork.rawValue:
+            StepWorkView()
+        case ActivityType.timeJournal.rawValue:
+            TimeJournalDailyView()
+        case ActivityType.postMortem.rawValue:
+            PostMortemView()
+        case ActivityType.urgeLog.rawValue:
+            UrgeLogView()
+        case "threeCircles":
+            ThreeCirclesView()
+        case "meetingFinder":
+            MeetingFinderView()
+        case "analytics":
+            RecoveryProgressView()
+        case "contentResources":
+            ContentTabView()
+        case "pci":
+            Text("PCI - Coming Soon")
+                .font(RRFont.title3)
+                .foregroundStyle(Color.rrTextSecondary)
+        case "integrityInventory":
+            EveningReviewView()
+        case "memoryVerseReview":
+            Text("Memory Verse - Coming Soon")
+                .font(RRFont.title3)
+                .foregroundStyle(Color.rrTextSecondary)
+        default:
+            Text("Coming Soon")
+                .font(RRFont.title3)
+                .foregroundStyle(Color.rrTextSecondary)
+        }
+    }
+}
+
+// MARK: - Work Tile View
+
+private struct WorkTileView: View {
+    let tile: WorkTileItem
+    let status: TileStatus
+
+    var body: some View {
+        VStack(spacing: 6) {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: tile.icon)
+                    .font(.title2)
+                    .foregroundStyle(tileIconColor)
+                    .frame(width: 40, height: 40)
+                    .background(tileIconBackground)
+                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                // Status indicator
+                if status.checkmarkVisible {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.white, Color.rrSuccess)
+                        .offset(x: 4, y: -4)
+                } else if let subtitle = status.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 9, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 1)
+                        .background(tile.iconColor)
+                        .clipShape(Capsule())
+                        .offset(x: 6, y: -6)
+                }
+            }
+
+            Text(tile.title)
+                .font(RRFont.caption)
+                .fontWeight(.medium)
+                .foregroundStyle(tileTitleColor)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .frame(minHeight: 32)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 4)
+        .background(tileBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .strokeBorder(tileBorder, lineWidth: 1)
+        )
+        .opacity(tile.implemented ? 1.0 : 0.5)
+    }
+
+    private var tileIconColor: Color {
+        if !tile.implemented { return .gray }
+        if !tile.isEnabled { return tile.iconColor.opacity(0.4) }
+        return tile.iconColor
+    }
+
+    private var tileIconBackground: Color {
+        if !tile.implemented { return .gray.opacity(0.08) }
+        if !tile.isEnabled { return tile.iconColor.opacity(0.06) }
+        return tile.iconColor.opacity(0.12)
+    }
+
+    private var tileTitleColor: Color {
+        if !tile.implemented { return .rrTextSecondary }
+        if !tile.isEnabled { return .rrTextSecondary }
+        return .rrText
+    }
+
+    private var tileBackground: Color {
+        if !tile.implemented { return Color.rrSurface.opacity(0.6) }
+        return Color.rrSurface
+    }
+
+    private var tileBorder: Color {
+        if !tile.implemented { return .clear }
+        if !tile.isEnabled { return Color.rrTextSecondary.opacity(0.15) }
+        return Color.rrTextSecondary.opacity(0.1)
     }
 }
 
 #Preview {
     RecoveryWorkView()
+        .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
 }

@@ -159,6 +159,9 @@ struct RecoveryPlanSetupView: View {
         .onChange(of: viewModel.didSave) { _, saved in
             if saved { dismiss() }
         }
+        .onChange(of: viewModel.planItems) {
+            viewModel.checkForChanges()
+        }
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 if viewModel.hasUnsavedChanges {

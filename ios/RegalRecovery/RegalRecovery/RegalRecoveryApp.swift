@@ -51,7 +51,7 @@ struct RegalRecoveryApp: App {
                     .tabItem { Label("Today", systemImage: "sun.max.fill") }
                     .tag(0)
 
-                ActivitiesListView()
+                RecoveryWorkView()
                     .tabItem { Label("Work", systemImage: "briefcase.fill") }
                     .tag(1)
 
