@@ -116,6 +116,20 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 		"devotionals": {
 			{Keys: bson.D{{Key: "day", Value: 1}}, Options: options.Index().SetUnique(true)},
 		},
+		// Devotionals Activity (Wave 2) -- system-level content
+		"devotionals_content": {
+			{Keys: bson.D{{Key: "devotionalId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "topic", Value: 1}, {Key: "tier", Value: 1}}},
+			{Keys: bson.D{{Key: "authorName", Value: 1}}},
+			{Keys: bson.D{{Key: "seriesId", Value: 1}, {Key: "seriesDay", Value: 1}}},
+			{Keys: bson.D{{Key: "tier", Value: 1}, {Key: "freemiumRotationDay", Value: 1}}},
+			{Keys: bson.D{{Key: "isPublished", Value: 1}}},
+		},
+		"devotional_series": {
+			{Keys: bson.D{{Key: "seriesId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "tier", Value: 1}, {Key: "isPublished", Value: 1}}},
+			{Keys: bson.D{{Key: "category", Value: 1}}},
+		},
 		"prompts": {
 			{Keys: bson.D{{Key: "category", Value: 1}}},
 		},

@@ -1,0 +1,1339 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Devotionals API
+  version: 1.0.0
+  description: |
+    Devotionals activity API for Regal Recovery.
+
+    Provides access to:
+    - Daily devotionals with scripture, reading, recovery connection, reflection question, and prayer
+    - Devotional series (freemium 30-day rotation and premium 365-day series)
+    - User reflections and mood tags on devotionals
+    - Favorites management
+    - Devotional history with search and filtering
+    - Series progression and reading plan management
+    - Sharing devotionals with support network
+    - Devotional streak tracking
+
+    Feature flag: `activity.devotionals`
+
+    All devotional completion timestamps are immutable once recorded.
+    Completions support offline creation with sync on reconnection.
+  contact:
+    name: Regal Recovery Platform Team
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Devotional Content
+    description: Devotional content retrieval and browsing
+  - name: Devotional Completions
+    description: Recording and reviewing devotional completions with reflections
+  - name: Devotional Favorites
+    description: Managing favorited devotionals
+  - name: Devotional Series
+    description: Series progression and reading plan management
+  - name: Devotional History
+    description: Browsing and searching past completions
+
+paths:
+  # ───────────────────────────────────────────────────
+  # Content Endpoints
+  # ───────────────────────────────────────────────────
+
+  /devotionals/today:
+    get:
+      operationId: getTodayDevotional
+      tags: [Devotional Content]
+      summary: Get today's devotional
+      description: |
+        Retrieve the daily devotional for the authenticated user.
+
+        For free-tier users, returns the current day in the 30-day rotation.
+        For premium users with an active series, returns the next unread devotional in their series.
+
+        Day boundary is determined by the user's configured timezone.
+      responses:
+        '200':
+          description: OK - Today's devotional retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Devotional'
+                  links:
+                    $ref: '#/components/schemas/ResourceLinks'
+              example:
+                data:
+                  id: dev_a1b2c3d4
+                  title: "Strength in Surrender"
+                  scriptureReference: "2 Corinthians 12:9"
+                  scriptureText: "My grace is sufficient for you, for my power is made perfect in weakness."
+                  bibleTranslation: NIV
+                  reading: "In our recovery journey, we often try to fight our battles alone. We grip tighter, push harder, and exhaust ourselves trying to maintain control over something that only God can transform..."
+                  recoveryConnection: "Surrender is not giving up -- it is giving over. When you release control to God, you gain access to a power far greater than your own willpower."
+                  reflectionQuestion: "Where in your recovery are you trying to control what only God can do?"
+                  prayer: "Lord, I confess that I have been trying to do this on my own. Today I surrender my addiction, my shame, and my fear to You. Fill me with Your strength where I am weak. Amen."
+                  authorName: "Dr. Mark Laaser"
+                  authorBio: "Christian counselor specializing in sexual addiction recovery"
+                  date: "2026-04-07"
+                  topic: surrender
+                  seriesId: null
+                  seriesDay: null
+                  seriesTotalDays: null
+                  tier: free
+                  language: en
+                  isCompleted: false
+                  isFavorite: false
+                  links:
+                    self: https://api.regalrecovery.com/v1/devotionals/dev_a1b2c3d4
+                links:
+                  self: https://api.regalrecovery.com/v1/devotionals/today
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found - Feature flag disabled or no devotional available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devotionals:
+    get:
+      operationId: listDevotionals
+      tags: [Devotional Content]
+      summary: List devotionals
+      description: |
+        Retrieve paginated list of devotionals.
+
+        Supports filtering by topic, author, series, tier, and language.
+        Full-text search across titles, scripture references, and body text.
+      parameters:
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: topic
+          in: query
+          schema:
+            type: string
+            enum: [shame, temptation, identity, marriage, forgiveness, surrender, gratitude, restoration, fear, hope]
+          description: Filter by devotional topic
+        - name: author
+          in: query
+          schema:
+            type: string
+          description: Filter by author name
+        - name: seriesId
+          in: query
+          schema:
+            type: string
+            pattern: '^series_[a-zA-Z0-9]+$'
+          description: Filter by series ID
+        - name: tier
+          in: query
+          schema:
+            type: string
+            enum: [free, premium]
+          description: Filter by content tier
+        - name: language
+          in: query
+          schema:
+            type: string
+            enum: [en, es]
+          description: Filter by language
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 200
+          description: Full-text search across titles, scripture, and body
+      responses:
+        '200':
+          description: OK - Devotionals retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DevotionalSummary'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devotionals/{id}:
+    get:
+      operationId: getDevotional
+      tags: [Devotional Content]
+      summary: Get devotional by ID
+      description: |
+        Retrieve a single devotional by its ID.
+
+        Returns full devotional content. Premium devotionals return 403 if the user
+        has not purchased the containing series.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^dev_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Devotional retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Devotional'
+                  links:
+                    $ref: '#/components/schemas/ResourceLinks'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Premium content not purchased
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    code: "rr:0x00D00001"
+                    status: 403
+                    title: "Premium Content Locked"
+                    detail: "This devotional is part of a premium series. Purchase the series to unlock."
+                    correlationId: "fe8793b2-1bf0-4d29-bf10-adcf72640ec5"
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ───────────────────────────────────────────────────
+  # Completion Endpoints
+  # ───────────────────────────────────────────────────
+
+  /devotionals/{id}/completions:
+    post:
+      operationId: createDevotionalCompletion
+      tags: [Devotional Completions]
+      summary: Record devotional completion
+      description: |
+        Record that the user has completed reading a devotional.
+
+        Optionally includes a reflection response and mood tag.
+        Completion without reflection is allowed -- the reflection can be added later via PATCH.
+
+        Timestamp is immutable once set (FR2.7).
+        Also writes a CALENDAR_ACTIVITY entry and updates the devotional streak.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^dev_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DevotionalCompletionRequest'
+            example:
+              timestamp: "2026-04-07T06:30:00Z"
+              reflection: "The passage about surrender resonated deeply. I have been trying to control my recovery instead of trusting God's timing."
+              moodTag: hopeful
+      responses:
+        '201':
+          description: Created - Devotional completion recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DevotionalCompletion'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  completionId: dc_e5f6g7h8
+                  devotionalId: dev_a1b2c3d4
+                  timestamp: "2026-04-07T06:30:00Z"
+                  reflection: "The passage about surrender resonated deeply..."
+                  moodTag: hopeful
+                  seriesId: null
+                  seriesDay: null
+                  devotionalStreak:
+                    currentDays: 15
+                    longestDays: 23
+                  links:
+                    self: https://api.regalrecovery.com/v1/devotionals/dev_a1b2c3d4/completions/dc_e5f6g7h8
+                    devotional: https://api.regalrecovery.com/v1/devotionals/dev_a1b2c3d4
+                meta:
+                  createdAt: "2026-04-07T06:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict - Devotional already completed today
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devotionals/completions/{completionId}:
+    get:
+      operationId: getDevotionalCompletion
+      tags: [Devotional Completions]
+      summary: Get a devotional completion
+      parameters:
+        - name: completionId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^dc_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Completion retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DevotionalCompletion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateDevotionalCompletion
+      tags: [Devotional Completions]
+      summary: Update a devotional completion
+      description: |
+        Update the reflection or mood tag on a devotional completion.
+
+        Timestamp is immutable and cannot be modified (FR2.7).
+        Only reflection text and mood tag can be updated.
+      parameters:
+        - name: completionId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^dc_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              type: object
+              properties:
+                reflection:
+                  type: string
+                  description: Updated reflection text
+                moodTag:
+                  type: string
+                  enum: [grateful, hopeful, peaceful, convicted, challenged, comforted, anxious, struggling, numb]
+            example:
+              reflection: "After further reflection, I realize the surrender message applies to my marriage too."
+              moodTag: convicted
+      responses:
+        '200':
+          description: OK - Completion updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DevotionalCompletion'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ───────────────────────────────────────────────────
+  # History Endpoints
+  # ───────────────────────────────────────────────────
+
+  /devotionals/history:
+    get:
+      operationId: listDevotionalHistory
+      tags: [Devotional History]
+      summary: List devotional completion history
+      description: |
+        Retrieve paginated list of the user's completed devotionals in reverse chronological order.
+
+        Supports filtering by series, topic, author, and date range.
+        Supports searching the user's own reflection text.
+      parameters:
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: seriesId
+          in: query
+          schema:
+            type: string
+            pattern: '^series_[a-zA-Z0-9]+$'
+          description: Filter by series
+        - name: topic
+          in: query
+          schema:
+            type: string
+            enum: [shame, temptation, identity, marriage, forgiveness, surrender, gratitude, restoration, fear, hope]
+          description: Filter by topic
+        - name: author
+          in: query
+          schema:
+            type: string
+          description: Filter by author
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter completions from this date (inclusive)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter completions to this date (inclusive)
+        - name: searchReflections
+          in: query
+          schema:
+            type: string
+            maxLength: 200
+          description: Search within user's reflection text
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: ["-timestamp", "+timestamp"]
+            default: "-timestamp"
+          description: Sort order
+      responses:
+        '200':
+          description: OK - History retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DevotionalCompletion'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+                      totalCompleted:
+                        type: integer
+                        description: Total number of devotionals completed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devotionals/history/export:
+    post:
+      operationId: exportDevotionalHistory
+      tags: [Devotional History]
+      summary: Export devotional history as PDF
+      description: |
+        Trigger an async export of the user's devotional history with reflections as a PDF.
+
+        Returns a 202 Accepted with a URL to poll for the export status.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                startDate:
+                  type: string
+                  format: date
+                  description: Export from this date (inclusive)
+                endDate:
+                  type: string
+                  format: date
+                  description: Export to this date (inclusive)
+                includeReflections:
+                  type: boolean
+                  default: true
+                  description: Include user reflections in export
+      responses:
+        '202':
+          description: Accepted - Export started
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URL to poll for export status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      exportId:
+                        type: string
+                      status:
+                        type: string
+                        enum: [pending, processing, completed, failed]
+                      links:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            format: uri
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ───────────────────────────────────────────────────
+  # Favorites Endpoints
+  # ───────────────────────────────────────────────────
+
+  /devotionals/favorites:
+    get:
+      operationId: listFavoriteDevotionals
+      tags: [Devotional Favorites]
+      summary: List favorite devotionals
+      parameters:
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: OK - Favorites retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DevotionalSummary'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devotionals/favorites/{id}:
+    post:
+      operationId: addFavoriteDevotional
+      tags: [Devotional Favorites]
+      summary: Add devotional to favorites
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^dev_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Added to favorites
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: removeFavoriteDevotional
+      tags: [Devotional Favorites]
+      summary: Remove devotional from favorites
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^dev_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Removed from favorites
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ───────────────────────────────────────────────────
+  # Series Endpoints
+  # ───────────────────────────────────────────────────
+
+  /devotionals/series:
+    get:
+      operationId: listDevotionalSeries
+      tags: [Devotional Series]
+      summary: List available devotional series
+      description: |
+        Retrieve all devotional series with user's progress and ownership status.
+      parameters:
+        - $ref: '#/components/parameters/CursorParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: tier
+          in: query
+          schema:
+            type: string
+            enum: [free, premium]
+      responses:
+        '200':
+          description: OK - Series retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DevotionalSeries'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devotionals/series/{seriesId}:
+    get:
+      operationId: getDevotionalSeries
+      tags: [Devotional Series]
+      summary: Get devotional series details
+      parameters:
+        - name: seriesId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^series_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Series retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DevotionalSeries'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /devotionals/series/{seriesId}/activate:
+    post:
+      operationId: activateDevotionalSeries
+      tags: [Devotional Series]
+      summary: Activate a devotional series
+      description: |
+        Set a series as the user's active reading plan.
+
+        If the user has another active series, it is paused at its current position.
+        Only one series can be active at a time.
+        Resuming a paused series continues from where the user left off.
+      parameters:
+        - name: seriesId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^series_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Series activated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      activeSeriesId:
+                        type: string
+                      currentDay:
+                        type: integer
+                        description: Day number the user will resume at
+                      totalDays:
+                        type: integer
+                      pausedSeries:
+                        type: object
+                        nullable: true
+                        description: Previously active series that was paused
+                        properties:
+                          seriesId:
+                            type: string
+                          pausedAtDay:
+                            type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Series not purchased
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ───────────────────────────────────────────────────
+  # Sharing Endpoints
+  # ───────────────────────────────────────────────────
+
+  /devotionals/{id}/share:
+    post:
+      operationId: shareDevotional
+      tags: [Devotional Content]
+      summary: Share a devotional
+      description: |
+        Generate a shareable representation of a devotional (without the user's personal reflection).
+
+        Can share to a support network contact or generate a shareable link/image.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^dev_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shareType]
+              properties:
+                shareType:
+                  type: string
+                  enum: [contact, link, image]
+                  description: Type of share action
+                contactId:
+                  type: string
+                  description: Support network contact ID (required when shareType is contact)
+            example:
+              shareType: contact
+              contactId: c_99999
+      responses:
+        '200':
+          description: OK - Share generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      shareUrl:
+                        type: string
+                        format: uri
+                        nullable: true
+                        description: Shareable link (for link/image types)
+                      sharedToContactId:
+                        type: string
+                        nullable: true
+                        description: Contact ID the devotional was shared with
+                      message:
+                        type: string
+                        description: Confirmation message
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ───────────────────────────────────────────────────
+  # Streak Endpoint
+  # ───────────────────────────────────────────────────
+
+  /devotionals/streak:
+    get:
+      operationId: getDevotionalStreak
+      tags: [Devotional Completions]
+      summary: Get devotional streak
+      description: |
+        Retrieve the user's current and longest devotional reading streak.
+      responses:
+        '200':
+          description: OK - Streak retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DevotionalStreak'
+              example:
+                data:
+                  currentDays: 15
+                  longestDays: 23
+                  lastCompletedDate: "2026-04-07"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  parameters:
+    CursorParam:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: Cursor for pagination
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of items per page
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        pattern: '^\d+\.\d+\.\d+$'
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Unique request identifier for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    # ─── Domain Models ───────────────────────────────
+
+    Devotional:
+      type: object
+      description: Full devotional content with all elements
+      properties:
+        id:
+          type: string
+          pattern: '^dev_[a-zA-Z0-9]+$'
+          description: Unique devotional ID
+        title:
+          type: string
+          description: Brief, evocative title for the day's reading
+        scriptureReference:
+          type: string
+          description: "Bible verse reference (e.g., '2 Corinthians 12:9')"
+        scriptureText:
+          type: string
+          description: Full scripture passage text
+        bibleTranslation:
+          type: string
+          enum: [NIV, ESV, NLT, KJV, RVR1960, NVI]
+          description: Bible translation used for scripture display
+        reading:
+          type: string
+          description: 300-600 word reflection connecting scripture to recovery
+        recoveryConnection:
+          type: string
+          description: 1-2 sentences linking devotional theme to a practical recovery principle
+        reflectionQuestion:
+          type: string
+          description: A thought-provoking question for the user to reflect on
+        prayer:
+          type: string
+          description: Short closing prayer (50-100 words)
+        authorName:
+          type: string
+          nullable: true
+          description: Name of the devotional author
+        authorBio:
+          type: string
+          nullable: true
+          description: Brief bio of the author
+        date:
+          type: string
+          format: date
+          description: Date this devotional is assigned to
+        topic:
+          type: string
+          enum: [shame, temptation, identity, marriage, forgiveness, surrender, gratitude, restoration, fear, hope]
+          description: Primary topic/theme
+        seriesId:
+          type: string
+          nullable: true
+          pattern: '^series_[a-zA-Z0-9]+$'
+          description: Series ID (null for freemium rotation)
+        seriesDay:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: Day number within the series
+        seriesTotalDays:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: Total days in the series
+        tier:
+          type: string
+          enum: [free, premium]
+          description: Content tier
+        language:
+          type: string
+          enum: [en, es]
+          description: Language of the content
+        isCompleted:
+          type: boolean
+          description: Whether the authenticated user has completed this devotional
+        isFavorite:
+          type: boolean
+          description: Whether the authenticated user has favorited this devotional
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    DevotionalSummary:
+      type: object
+      description: Abbreviated devotional for list views
+      properties:
+        id:
+          type: string
+          pattern: '^dev_[a-zA-Z0-9]+$'
+        title:
+          type: string
+        scriptureReference:
+          type: string
+        topic:
+          type: string
+          enum: [shame, temptation, identity, marriage, forgiveness, surrender, gratitude, restoration, fear, hope]
+        authorName:
+          type: string
+          nullable: true
+        date:
+          type: string
+          format: date
+        seriesId:
+          type: string
+          nullable: true
+        tier:
+          type: string
+          enum: [free, premium]
+        isLocked:
+          type: boolean
+          description: True if premium and user has not purchased
+        isCompleted:
+          type: boolean
+        isFavorite:
+          type: boolean
+        language:
+          type: string
+          enum: [en, es]
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    DevotionalCompletionRequest:
+      type: object
+      required: [timestamp]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of completion (immutable once set)
+        reflection:
+          type: string
+          nullable: true
+          description: User's reflection response (unlimited length)
+        moodTag:
+          type: string
+          nullable: true
+          enum: [grateful, hopeful, peaceful, convicted, challenged, comforted, anxious, struggling, numb]
+          description: How the user feels after reading
+
+    DevotionalCompletion:
+      type: object
+      description: A recorded devotional completion with optional reflection
+      properties:
+        completionId:
+          type: string
+          pattern: '^dc_[a-zA-Z0-9]+$'
+        devotionalId:
+          type: string
+          pattern: '^dev_[a-zA-Z0-9]+$'
+        devotionalTitle:
+          type: string
+          description: Title of the completed devotional
+        scriptureReference:
+          type: string
+          description: Scripture reference for display in history
+        timestamp:
+          type: string
+          format: date-time
+          description: Immutable completion timestamp
+        reflection:
+          type: string
+          nullable: true
+          description: User's reflection text
+        moodTag:
+          type: string
+          nullable: true
+          enum: [grateful, hopeful, peaceful, convicted, challenged, comforted, anxious, struggling, numb]
+        seriesId:
+          type: string
+          nullable: true
+        seriesDay:
+          type: integer
+          nullable: true
+        devotionalStreak:
+          $ref: '#/components/schemas/DevotionalStreak'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            devotional:
+              type: string
+              format: uri
+
+    DevotionalSeries:
+      type: object
+      description: A devotional series with user's progress
+      properties:
+        seriesId:
+          type: string
+          pattern: '^series_[a-zA-Z0-9]+$'
+        name:
+          type: string
+          description: Series title
+        description:
+          type: string
+          description: Series description
+        authorName:
+          type: string
+          nullable: true
+        totalDays:
+          type: integer
+          minimum: 1
+          description: Total number of devotionals in the series
+        tier:
+          type: string
+          enum: [free, premium]
+        price:
+          type: number
+          format: decimal
+          nullable: true
+          description: Price in USD (null for free)
+        currency:
+          type: string
+          nullable: true
+          example: USD
+        isOwned:
+          type: boolean
+          description: Whether the user owns/has purchased this series
+        isActive:
+          type: boolean
+          description: Whether this is the user's currently active series
+        currentDay:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: User's current day progress (null if never started)
+        completedDays:
+          type: integer
+          description: Number of devotionals completed in this series
+        status:
+          type: string
+          enum: [not_started, active, paused, completed]
+          description: User's status with this series
+        category:
+          type: string
+          enum: [recovery, marriage, identity, spiritual-growth]
+          description: Series category
+        language:
+          type: string
+          enum: [en, es]
+        thumbnailUrl:
+          type: string
+          format: uri
+          nullable: true
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            devotionals:
+              type: string
+              format: uri
+
+    DevotionalStreak:
+      type: object
+      description: User's devotional reading streak
+      properties:
+        currentDays:
+          type: integer
+          minimum: 0
+          description: Current consecutive days of devotional completion
+        longestDays:
+          type: integer
+          minimum: 0
+          description: Longest consecutive devotional streak ever
+        lastCompletedDate:
+          type: string
+          format: date
+          nullable: true
+          description: Date of most recent devotional completion
+
+    # ─── Common Schemas ──────────────────────────────
+
+    ResourceLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+          description: "Devotionals error codes use prefix rr:0x00D0xxxx"
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+          properties:
+            pointer:
+              type: string
+            parameter:
+              type: string
+            header:
+              type: string
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request syntax
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
