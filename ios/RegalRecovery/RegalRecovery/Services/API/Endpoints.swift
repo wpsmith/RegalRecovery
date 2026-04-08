@@ -68,6 +68,22 @@ enum Endpoint: Sendable {
     case getFlags
     case evaluateFlag(key: String)
 
+    // MARK: Nutrition
+    case nutritionCreateMeal(CreateMealLogRequest)
+    case nutritionQuickLog(CreateQuickMealLogRequest)
+    case nutritionGetMeal(mealId: String)
+    case nutritionListMeals(mealType: String?, eatingContext: String?, startDate: String?, endDate: String?, search: String?, cursor: String?, limit: Int?)
+    case nutritionUpdateMeal(mealId: String, UpdateMealLogRequest)
+    case nutritionDeleteMeal(mealId: String)
+    case nutritionGetHydration
+    case nutritionLogHydration(LogHydrationRequest)
+    case nutritionHydrationHistory(startDate: String, endDate: String)
+    case nutritionCalendar(year: Int, month: Int)
+    case nutritionTrends(period: String)
+    case nutritionWeeklySummary
+    case nutritionGetSettings
+    case nutritionUpdateSettings(Any)
+
     // MARK: - Path
 
     var path: String {
@@ -120,6 +136,19 @@ enum Endpoint: Sendable {
         // Flags
         case .getFlags: return "/flags"
         case .evaluateFlag(let key): return "/flags/\(key)"
+
+        // Nutrition
+        case .nutritionCreateMeal, .nutritionListMeals: return "/activities/nutrition/meals"
+        case .nutritionQuickLog: return "/activities/nutrition/meals/quick"
+        case .nutritionGetMeal(let id), .nutritionUpdateMeal(let id, _), .nutritionDeleteMeal(let id):
+            return "/activities/nutrition/meals/\(id)"
+        case .nutritionGetHydration: return "/activities/nutrition/hydration"
+        case .nutritionLogHydration: return "/activities/nutrition/hydration/log"
+        case .nutritionHydrationHistory: return "/activities/nutrition/hydration/history"
+        case .nutritionCalendar: return "/activities/nutrition/calendar"
+        case .nutritionTrends: return "/activities/nutrition/trends"
+        case .nutritionWeeklySummary: return "/activities/nutrition/trends/weekly-summary"
+        case .nutritionGetSettings, .nutritionUpdateSettings: return "/activities/nutrition/settings"
         }
     }
 
@@ -133,16 +162,19 @@ enum Endpoint: Sendable {
              .logRelapse,
              .logActivity,
              .addFavoriteAffirmation,
-             .purchaseContentPack:
+             .purchaseContentPack,
+             .nutritionCreateMeal, .nutritionQuickLog, .nutritionLogHydration:
             return .post
 
         case .updateSettings, .updatePrivacySettings:
             return .put
 
-        case .updateProfile, .setPrimaryAddiction:
+        case .updateProfile, .setPrimaryAddiction,
+             .nutritionUpdateMeal, .nutritionUpdateSettings:
             return .patch
 
-        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation:
+        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
+             .nutritionDeleteMeal:
             return .delete
 
         default:
@@ -169,6 +201,10 @@ enum Endpoint: Sendable {
         case .logRelapse(let req): return req
         case .logActivity(_, let data): return data
         case .purchaseContentPack(_, let receipt): return receipt
+        case .nutritionCreateMeal(let req): return req
+        case .nutritionQuickLog(let req): return req
+        case .nutritionUpdateMeal(_, let req): return req
+        case .nutritionLogHydration(let req): return req
         default: return nil
         }
     }
@@ -221,6 +257,26 @@ enum Endpoint: Sendable {
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
             if let type { items.append(.init(name: "type", value: type)) }
             if let category { items.append(.init(name: "category", value: category)) }
+
+        case .nutritionListMeals(let mealType, let eatingContext, let startDate, let endDate, let search, let cursor, let limit):
+            if let mealType { items.append(.init(name: "mealType", value: mealType)) }
+            if let eatingContext { items.append(.init(name: "eatingContext", value: eatingContext)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .nutritionHydrationHistory(let startDate, let endDate):
+            items.append(.init(name: "startDate", value: startDate))
+            items.append(.init(name: "endDate", value: endDate))
+
+        case .nutritionCalendar(let year, let month):
+            items.append(.init(name: "year", value: String(year)))
+            items.append(.init(name: "month", value: String(month)))
+
+        case .nutritionTrends(let period):
+            items.append(.init(name: "period", value: period))
 
         default:
             break
