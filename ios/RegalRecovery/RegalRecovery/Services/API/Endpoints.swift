@@ -64,6 +64,18 @@ enum Endpoint: Sendable {
     case listOwnedPacks
     case purchaseContentPack(packId: String, receipt: PurchaseRequest)
 
+    // MARK: Post-Mortem
+    case createPostMortem(CreatePostMortemRequest)
+    case listPostMortems(startDate: String?, endDate: String?, addictionId: String?, status: String?, eventType: String?, cursor: String?, limit: Int?)
+    case getPostMortem(analysisId: String)
+    case updatePostMortem(analysisId: String, UpdatePostMortemRequest)
+    case deletePostMortem(analysisId: String)
+    case completePostMortem(analysisId: String)
+    case sharePostMortem(analysisId: String, SharePostMortemRequestBody)
+    case exportPostMortem(analysisId: String, format: String)
+    case convertActionItem(analysisId: String, actionId: String, ConvertActionItemRequestBody)
+    case getPostMortemInsights(addictionId: String?)
+
     // MARK: Flags
     case getFlags
     case evaluateFlag(key: String)
@@ -103,6 +115,17 @@ enum Endpoint: Sendable {
         case .logActivity(let type, _): return "/activities/\(type)"
         case .getActivities(let type, _, _): return "/activities/\(type)"
 
+        // Post-Mortem
+        case .createPostMortem, .listPostMortems: return "/activities/post-mortem"
+        case .getPostMortem(let id), .updatePostMortem(let id, _), .deletePostMortem(let id):
+            return "/activities/post-mortem/\(id)"
+        case .completePostMortem(let id): return "/activities/post-mortem/\(id)/complete"
+        case .sharePostMortem(let id, _): return "/activities/post-mortem/\(id)/share"
+        case .exportPostMortem(let id, _): return "/activities/post-mortem/\(id)/export"
+        case .convertActionItem(let id, let actionId, _):
+            return "/activities/post-mortem/\(id)/action-items/\(actionId)/convert"
+        case .getPostMortemInsights: return "/activities/post-mortem/insights"
+
         // Content
         case .listAffirmations: return "/content/affirmations"
         case .getTodayAffirmation: return "/content/affirmations/today"
@@ -133,16 +156,20 @@ enum Endpoint: Sendable {
              .logRelapse,
              .logActivity,
              .addFavoriteAffirmation,
-             .purchaseContentPack:
+             .purchaseContentPack,
+             .createPostMortem,
+             .completePostMortem,
+             .sharePostMortem,
+             .convertActionItem:
             return .post
 
         case .updateSettings, .updatePrivacySettings:
             return .put
 
-        case .updateProfile, .setPrimaryAddiction:
+        case .updateProfile, .setPrimaryAddiction, .updatePostMortem:
             return .patch
 
-        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation:
+        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation, .deletePostMortem:
             return .delete
 
         default:
@@ -169,6 +196,10 @@ enum Endpoint: Sendable {
         case .logRelapse(let req): return req
         case .logActivity(_, let data): return data
         case .purchaseContentPack(_, let receipt): return receipt
+        case .createPostMortem(let req): return req
+        case .updatePostMortem(_, let req): return req
+        case .sharePostMortem(_, let req): return req
+        case .convertActionItem(_, _, let req): return req
         default: return nil
         }
     }
@@ -221,6 +252,21 @@ enum Endpoint: Sendable {
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
             if let type { items.append(.init(name: "type", value: type)) }
             if let category { items.append(.init(name: "category", value: category)) }
+
+        case .listPostMortems(let startDate, let endDate, let addictionId, let status, let eventType, let cursor, let limit):
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let addictionId { items.append(.init(name: "addictionId", value: addictionId)) }
+            if let status { items.append(.init(name: "status", value: status)) }
+            if let eventType { items.append(.init(name: "eventType", value: eventType)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .exportPostMortem(_, let format):
+            items.append(.init(name: "format", value: format))
+
+        case .getPostMortemInsights(let addictionId):
+            if let addictionId { items.append(.init(name: "addictionId", value: addictionId)) }
 
         default:
             break
