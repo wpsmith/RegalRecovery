@@ -64,6 +64,25 @@ enum Endpoint: Sendable {
     case listOwnedPacks
     case purchaseContentPack(packId: String, receipt: PurchaseRequest)
 
+    // MARK: Prayer Activity
+    case createPrayerSession(CreatePrayerSessionDTO)
+    case listPrayerSessions(prayerType: String?, startDate: String?, endDate: String?, cursor: String?, limit: Int?)
+    case getPrayerSession(id: String)
+    case updatePrayerSession(id: String, UpdatePrayerSessionDTO)
+    case deletePrayerSession(id: String)
+    case getPrayerStats
+    case getPrayerTrends(period: String)
+    case getTodayPrayer
+    case getPrayerById(id: String)
+    case createPersonalPrayer(CreatePersonalPrayerDTO)
+    case listPersonalPrayers(cursor: String?, limit: Int?)
+    case updatePersonalPrayer(id: String, UpdatePersonalPrayerDTO)
+    case deletePersonalPrayer(id: String)
+    case reorderPersonalPrayers(ReorderPrayersDTO)
+    case listFavoritePrayers(cursor: String?, limit: Int?)
+    case favoritePrayer(id: String)
+    case unfavoritePrayer(id: String)
+
     // MARK: Flags
     case getFlags
     case evaluateFlag(key: String)
@@ -113,6 +132,19 @@ enum Endpoint: Sendable {
         case .getTodayDevotional: return "/content/devotionals/today"
         case .listPrayers: return "/content/prayers"
         case .listResources: return "/content/resources"
+
+        // Prayer Activity
+        case .createPrayerSession, .listPrayerSessions: return "/activities/prayer"
+        case .getPrayerSession(let id), .updatePrayerSession(let id, _), .deletePrayerSession(let id): return "/activities/prayer/\(id)"
+        case .getPrayerStats: return "/activities/prayer/stats"
+        case .getPrayerTrends: return "/activities/prayer/trends"
+        case .getTodayPrayer: return "/content/prayers/today"
+        case .getPrayerById(let id): return "/content/prayers/\(id)"
+        case .createPersonalPrayer, .listPersonalPrayers: return "/content/prayers/personal"
+        case .updatePersonalPrayer(let id, _), .deletePersonalPrayer(let id): return "/content/prayers/personal/\(id)"
+        case .reorderPersonalPrayers: return "/content/prayers/personal/order"
+        case .listFavoritePrayers: return "/content/prayers/favorites"
+        case .favoritePrayer(let id), .unfavoritePrayer(let id): return "/content/prayers/favorites/\(id)"
         case .listContentPacks: return "/content/packs"
         case .listOwnedPacks: return "/content/packs/owned"
         case .purchaseContentPack(let packId, _): return "/content/packs/\(packId)/purchase"
@@ -133,16 +165,22 @@ enum Endpoint: Sendable {
              .logRelapse,
              .logActivity,
              .addFavoriteAffirmation,
-             .purchaseContentPack:
+             .purchaseContentPack,
+             .createPrayerSession,
+             .createPersonalPrayer,
+             .favoritePrayer:
             return .post
 
-        case .updateSettings, .updatePrivacySettings:
+        case .updateSettings, .updatePrivacySettings,
+             .reorderPersonalPrayers:
             return .put
 
-        case .updateProfile, .setPrimaryAddiction:
+        case .updateProfile, .setPrimaryAddiction,
+             .updatePrayerSession, .updatePersonalPrayer:
             return .patch
 
-        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation:
+        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
+             .deletePrayerSession, .deletePersonalPrayer, .unfavoritePrayer:
             return .delete
 
         default:
@@ -169,6 +207,11 @@ enum Endpoint: Sendable {
         case .logRelapse(let req): return req
         case .logActivity(_, let data): return data
         case .purchaseContentPack(_, let receipt): return receipt
+        case .createPrayerSession(let req): return req
+        case .updatePrayerSession(_, let req): return req
+        case .createPersonalPrayer(let req): return req
+        case .updatePersonalPrayer(_, let req): return req
+        case .reorderPersonalPrayers(let req): return req
         default: return nil
         }
     }
@@ -221,6 +264,21 @@ enum Endpoint: Sendable {
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
             if let type { items.append(.init(name: "type", value: type)) }
             if let category { items.append(.init(name: "category", value: category)) }
+
+        case .listPrayerSessions(let prayerType, let startDate, let endDate, let cursor, let limit):
+            if let prayerType { items.append(.init(name: "prayerType", value: prayerType)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getPrayerTrends(let period):
+            items.append(.init(name: "period", value: period))
+
+        case .listPersonalPrayers(let cursor, let limit),
+             .listFavoritePrayers(let cursor, let limit):
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
 
         default:
             break
