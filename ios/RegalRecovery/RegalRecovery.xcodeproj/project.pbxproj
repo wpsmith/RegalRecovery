@@ -359,6 +359,12 @@
 		20000114 /* StreakViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModelTests.swift; sourceTree = "<group>"; };
 		20000115 /* UrgeLogViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModelTests.swift; sourceTree = "<group>"; };
 		20000116 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
+		29000001 /* GratitudeModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeModelTests.swift; sourceTree = "<group>"; };
+		29000002 /* GratitudePromptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudePromptTests.swift; sourceTree = "<group>"; };
+		29000003 /* GratitudeEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeEntryViewModelTests.swift; sourceTree = "<group>"; };
+		29000004 /* GratitudeHistoryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeHistoryViewModelTests.swift; sourceTree = "<group>"; };
+		29000005 /* GratitudeTrendsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeTrendsViewModelTests.swift; sourceTree = "<group>"; };
+		29000006 /* GratitudeSharingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeSharingTests.swift; sourceTree = "<group>"; };
 		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20000208 /* RecoveryWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkView.swift; sourceTree = "<group>"; };
@@ -775,6 +781,12 @@
 				20000110 /* AffirmationsViewModelTests.swift */,
 				20000111 /* CheckInViewModelTests.swift */,
 				20000112 /* EmotionalJournalViewModelTests.swift */,
+				29000001 /* GratitudeModelTests.swift */,
+				29000002 /* GratitudePromptTests.swift */,
+				29000003 /* GratitudeEntryViewModelTests.swift */,
+				29000004 /* GratitudeHistoryViewModelTests.swift */,
+				29000005 /* GratitudeTrendsViewModelTests.swift */,
+				29000006 /* GratitudeSharingTests.swift */,
 				20000113 /* ProfileViewModelTests.swift */,
 				20000114 /* StreakViewModelTests.swift */,
 				20000115 /* UrgeLogViewModelTests.swift */,
