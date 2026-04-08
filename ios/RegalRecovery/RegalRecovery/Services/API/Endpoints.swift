@@ -68,6 +68,19 @@ enum Endpoint: Sendable {
     case getFlags
     case evaluateFlag(key: String)
 
+    // MARK: Mood
+    case createMoodEntry(CreateMoodEntryRequest)
+    case listMoodEntries(startDate: String?, endDate: String?, rating: String?, emotionLabel: String?, timeOfDay: String?, search: String?, cursor: String?, limit: Int?)
+    case getMoodEntry(moodId: String)
+    case updateMoodEntry(moodId: String, UpdateMoodEntryRequest)
+    case deleteMoodEntry(moodId: String)
+    case getMoodToday
+    case getMoodDailySummaries(startDate: String, endDate: String, cursor: String?, limit: Int?)
+    case getMoodTrends(period: String)
+    case getMoodCorrelations(period: String)
+    case getMoodAlertStatus
+    case getMoodStreak
+
     // MARK: - Path
 
     var path: String {
@@ -120,6 +133,17 @@ enum Endpoint: Sendable {
         // Flags
         case .getFlags: return "/flags"
         case .evaluateFlag(let key): return "/flags/\(key)"
+
+        // Mood
+        case .createMoodEntry, .listMoodEntries: return "/activities/mood"
+        case .getMoodEntry(let moodId), .updateMoodEntry(let moodId, _), .deleteMoodEntry(let moodId):
+            return "/activities/mood/\(moodId)"
+        case .getMoodToday: return "/activities/mood/today"
+        case .getMoodDailySummaries: return "/activities/mood/daily-summaries"
+        case .getMoodTrends: return "/activities/mood/trends"
+        case .getMoodCorrelations: return "/activities/mood/correlations"
+        case .getMoodAlertStatus: return "/activities/mood/alerts/status"
+        case .getMoodStreak: return "/activities/mood/streak"
         }
     }
 
@@ -133,16 +157,17 @@ enum Endpoint: Sendable {
              .logRelapse,
              .logActivity,
              .addFavoriteAffirmation,
-             .purchaseContentPack:
+             .purchaseContentPack,
+             .createMoodEntry:
             return .post
 
         case .updateSettings, .updatePrivacySettings:
             return .put
 
-        case .updateProfile, .setPrimaryAddiction:
+        case .updateProfile, .setPrimaryAddiction, .updateMoodEntry:
             return .patch
 
-        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation:
+        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation, .deleteMoodEntry:
             return .delete
 
         default:
@@ -169,6 +194,8 @@ enum Endpoint: Sendable {
         case .logRelapse(let req): return req
         case .logActivity(_, let data): return data
         case .purchaseContentPack(_, let receipt): return receipt
+        case .createMoodEntry(let req): return req
+        case .updateMoodEntry(_, let req): return req
         default: return nil
         }
     }
@@ -221,6 +248,28 @@ enum Endpoint: Sendable {
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
             if let type { items.append(.init(name: "type", value: type)) }
             if let category { items.append(.init(name: "category", value: category)) }
+
+        case .listMoodEntries(let startDate, let endDate, let rating, let emotionLabel, let timeOfDay, let search, let cursor, let limit):
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let rating { items.append(.init(name: "rating", value: rating)) }
+            if let emotionLabel { items.append(.init(name: "emotionLabel", value: emotionLabel)) }
+            if let timeOfDay { items.append(.init(name: "timeOfDay", value: timeOfDay)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getMoodDailySummaries(let startDate, let endDate, let cursor, let limit):
+            items.append(.init(name: "startDate", value: startDate))
+            items.append(.init(name: "endDate", value: endDate))
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getMoodTrends(let period):
+            items.append(.init(name: "period", value: period))
+
+        case .getMoodCorrelations(let period):
+            items.append(.init(name: "period", value: period))
 
         default:
             break
