@@ -1,0 +1,1333 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Affirmations Activity API
+  version: 1.0.0
+  description: |
+    Affirmations activity API for Regal Recovery.
+
+    Scripture-based affirmations library with daily delivery, custom creation, level-based progression,
+    multiple selection modes, and contextual trigger delivery.
+
+    Key features:
+    - 50+ system affirmations across multiple categories and 3 progression levels
+    - Custom affirmation creation (user-written, max 50)
+    - Four selection modes: Individually Chosen, Random Automatic, Permanent Package, Day-of-Week Package
+    - Rotation logic with trigger weighting (40%), favorites (30%), under-served (20%), random (10%)
+    - Level gating: L1 (day 0+), L2 (30+ cumulative days), L3 (90+ cumulative days)
+    - Post-relapse: Level 1 only for 24 hours
+    - SOS mode: never above Level 2
+    - Healthy Sexuality category: OFF by default, requires 60+ days AND explicit opt-in
+    - Audio TTS with headphone-disconnect auto-pause (non-negotiable safety)
+    - Cumulative progress tracking (no streak-based gamification)
+    - Contextual delivery: post-urge-log, morning commitment, struggling flow
+
+    All entry timestamps are immutable once recorded (FR2.7).
+    Feature flag: `activity.affirmations`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Affirmation Delivery
+    description: Daily and contextual affirmation delivery
+  - name: Affirmation Browse
+    description: Browse and search affirmation library
+  - name: Custom Affirmations
+    description: User-created affirmation management
+  - name: Affirmation Favorites
+    description: Favorite affirmation management
+  - name: Affirmation Rotation
+    description: Selection mode and rotation configuration
+  - name: Affirmation Progress
+    description: Cumulative progress and read history
+  - name: Affirmation Packs
+    description: Affirmation pack management
+  - name: Affirmation Widget
+    description: Dashboard widget data
+
+paths:
+  /activities/affirmations/today:
+    get:
+      operationId: getTodayAffirmation
+      tags: [Affirmation Delivery]
+      summary: Get today's affirmation
+      description: |
+        Retrieve the daily affirmation for the authenticated user.
+
+        Selection based on user's rotation mode, owned packs, sobriety level,
+        and contextual state. Same affirmation returned for the entire day
+        unless manually overridden.
+
+        Level gating applied:
+        - Level 1: Available from day 0
+        - Level 2: Requires 30+ cumulative sobriety days
+        - Level 3: Requires 90+ cumulative sobriety days
+        - Post-relapse: Level 1 only for 24 hours
+        - SOS mode: Never above Level 2
+
+        Records a read event and updates cumulative progress.
+
+        Requires feature flag `activity.affirmations` to be enabled.
+      responses:
+        '200':
+          description: OK - Today's affirmation retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AffirmationResponse'
+                  meta:
+                    type: object
+                    properties:
+                      userLevel:
+                        type: integer
+                        description: User's current max affirmation level (1-3)
+                        example: 2
+                      cumulativeDays:
+                        type: integer
+                        description: User's cumulative sobriety days
+                        example: 47
+                      selectionMode:
+                        type: string
+                        enum: [individuallyChosen, randomAutomatic, permanentPackage, dayOfWeekPackage]
+                        example: randomAutomatic
+                      source:
+                        type: string
+                        enum: [daily, triggerOverride, manualChoice, packageCycle, dayOfWeek]
+                        description: How this affirmation was selected
+                        example: daily
+              example:
+                data:
+                  affirmationId: aff_001
+                  statement: "I am fearfully and wonderfully made."
+                  scriptureReference: "Psalm 139:14"
+                  scriptureText: "I praise you because I am fearfully and wonderfully made; your works are wonderful, I know that full well."
+                  expansion: "God created you with intention and purpose."
+                  prayer: "Lord, help me see myself as You see me today."
+                  category: identity
+                  level: 1
+                  packId: pack_basic_affirmations
+                  packName: "Basic Affirmations Pack"
+                  isFavorite: true
+                  isCustom: false
+                  language: en
+                  links:
+                    self: /v1/activities/affirmations/aff_001
+                meta:
+                  userLevel: 2
+                  cumulativeDays: 47
+                  selectionMode: randomAutomatic
+                  source: daily
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/contextual:
+    get:
+      operationId: getContextualAffirmation
+      tags: [Affirmation Delivery]
+      summary: Get contextual affirmation for trigger
+      description: |
+        Retrieve an affirmation contextually relevant to a specific trigger category.
+        Used after urge logging, in the struggling flow, or on-demand.
+
+        Always overrides current rotation mode. Selects from owned packs,
+        filtered by trigger-relevant tags and current level gating.
+      parameters:
+        - name: triggerCategory
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [emotional, environmental, relational, physical, digital, spiritual]
+          description: Trigger category from urge log
+        - name: source
+          in: query
+          schema:
+            type: string
+            enum: [postUrgeLog, strugglingFlow, onDemand]
+            default: onDemand
+          description: Context in which this affirmation is requested
+      responses:
+        '200':
+          description: OK - Contextual affirmation retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AffirmationResponse'
+                  meta:
+                    type: object
+                    properties:
+                      triggerCategory:
+                        type: string
+                      source:
+                        type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations:
+    get:
+      operationId: listAffirmations
+      tags: [Affirmation Browse]
+      summary: List affirmations from owned packs
+      description: |
+        Browse paginated list of affirmations from user's owned packs.
+        Supports filtering by pack, category, and level.
+        Level gating is applied -- user only sees affirmations at or below their current level.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: packId
+          in: query
+          schema:
+            type: string
+            pattern: '^pack_[a-zA-Z0-9_]+$'
+          description: Filter by content pack ID
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [identity, strength, recovery, purity, freedom, surrender, courage, hope, family, healthySexuality]
+        - name: level
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 3
+          description: Filter by specific level (still capped by user's max level)
+        - name: q
+          in: query
+          schema:
+            type: string
+            maxLength: 200
+          description: Full-text search query
+      responses:
+        '200':
+          description: OK - Affirmations retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, links, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AffirmationResponse'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+                      totalCount:
+                        type: integer
+                        description: Total affirmations matching filters
+                      userLevel:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/{affirmationId}:
+    get:
+      operationId: getAffirmation
+      tags: [Affirmation Browse]
+      summary: Get affirmation by ID
+      description: |
+        Retrieve a specific affirmation by ID. Works for both system and custom affirmations.
+        Level gating enforced -- returns 404 if affirmation is above user's current level.
+      parameters:
+        - name: affirmationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^(aff|caff)_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK - Affirmation retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AffirmationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/custom:
+    get:
+      operationId: listCustomAffirmations
+      tags: [Custom Affirmations]
+      summary: List user's custom affirmations
+      description: Returns all custom affirmations created by the authenticated user.
+      responses:
+        '200':
+          description: OK - Custom affirmations retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomAffirmationResponse'
+                  meta:
+                    type: object
+                    properties:
+                      totalCustom:
+                        type: integer
+                        description: Total custom affirmations
+                      maxCustom:
+                        type: integer
+                        description: Maximum allowed custom affirmations (50)
+                        example: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createCustomAffirmation
+      tags: [Custom Affirmations]
+      summary: Create a custom affirmation
+      description: |
+        Create a user-defined affirmation with statement, optional scripture, category, and schedule.
+        Custom affirmations are included in the rotation based on schedule.
+        Maximum 50 custom affirmations per user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomAffirmationRequest'
+            example:
+              statement: "My family deserves the best version of me."
+              scriptureReference: "Philippians 4:13"
+              category: family
+              schedule: daily
+      responses:
+        '201':
+          description: Created - Custom affirmation saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the created custom affirmation
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, meta]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CustomAffirmationResponse'
+                  meta:
+                    type: object
+                    properties:
+                      totalCustom:
+                        type: integer
+                      maxCustom:
+                        type: integer
+                        example: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/custom/{affirmationId}:
+    put:
+      operationId: updateCustomAffirmation
+      tags: [Custom Affirmations]
+      summary: Update a custom affirmation
+      description: |
+        Update an existing custom affirmation. All mutable fields can be changed.
+        No edit window restriction -- custom affirmations are always editable.
+      parameters:
+        - name: affirmationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^caff_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomAffirmationRequest'
+      responses:
+        '200':
+          description: OK - Custom affirmation updated
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CustomAffirmationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteCustomAffirmation
+      tags: [Custom Affirmations]
+      summary: Delete a custom affirmation
+      parameters:
+        - name: affirmationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^caff_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Custom affirmation deleted
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/favorites:
+    get:
+      operationId: listFavoriteAffirmations
+      tags: [Affirmation Favorites]
+      summary: List favorited affirmations
+      description: Returns all affirmations favorited by the authenticated user.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK - Favorites retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, links, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AffirmationResponse'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+                      totalFavorites:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/{affirmationId}/favorite:
+    post:
+      operationId: addFavoriteAffirmation
+      tags: [Affirmation Favorites]
+      summary: Add affirmation to favorites
+      parameters:
+        - name: affirmationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^(aff|caff)_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Added to favorites
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: removeFavoriteAffirmation
+      tags: [Affirmation Favorites]
+      summary: Remove affirmation from favorites
+      parameters:
+        - name: affirmationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^(aff|caff)_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Removed from favorites
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/rotation:
+    get:
+      operationId: getRotationState
+      tags: [Affirmation Rotation]
+      summary: Get current rotation configuration
+      responses:
+        '200':
+          description: OK - Rotation state retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RotationStateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateRotationState
+      tags: [Affirmation Rotation]
+      summary: Update rotation configuration
+      description: |
+        Change affirmation selection mode and related settings.
+        Changes take effect for the next day's affirmation (today's stays the same
+        unless manually overridden).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRotationStateRequest'
+      responses:
+        '200':
+          description: OK - Rotation state updated
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/RotationStateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/progress:
+    get:
+      operationId: getAffirmationProgress
+      tags: [Affirmation Progress]
+      summary: Get cumulative affirmation progress
+      description: |
+        Returns cumulative progress counters. No streak-based metrics --
+        only total counts (clinical requirement: no gamification of sobriety).
+      responses:
+        '200':
+          description: OK - Progress retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AffirmationProgressResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/history:
+    get:
+      operationId: getAffirmationReadHistory
+      tags: [Affirmation Progress]
+      summary: Get affirmation read history
+      description: Returns paginated list of past affirmation reads with dates.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK - Read history retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, links, meta]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AffirmationReadResponse'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/packs:
+    get:
+      operationId: listAffirmationPacks
+      tags: [Affirmation Packs]
+      summary: List available affirmation packs
+      description: |
+        Returns all affirmation packs with ownership status.
+        Free packs are always owned. Premium packs show purchase status.
+      responses:
+        '200':
+          description: OK - Packs retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AffirmationPackResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/{affirmationId}/share:
+    post:
+      operationId: shareAffirmation
+      tags: [Affirmation Browse]
+      summary: Generate shareable content for an affirmation
+      description: |
+        Returns shareable text or styled graphic data for an affirmation.
+        Shared content includes statement, scripture reference, and Regal Recovery watermark.
+      parameters:
+        - name: affirmationId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^(aff|caff)_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [format]
+              properties:
+                format:
+                  type: string
+                  enum: [text, styledGraphic]
+      responses:
+        '200':
+          description: OK - Shareable content generated
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      text:
+                        type: string
+                        description: Plain text shareable content
+                      graphicUrl:
+                        type: string
+                        format: uri
+                        description: Pre-signed URL for styled graphic image (when format=styledGraphic)
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/widget:
+    get:
+      operationId: getAffirmationWidget
+      tags: [Affirmation Widget]
+      summary: Get affirmation widget data for dashboard
+      description: |
+        Returns today's affirmation preview (truncated to 100 chars),
+        cumulative read count, and favorite count for dashboard display.
+      responses:
+        '200':
+          description: OK - Widget data retrieved
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AffirmationWidgetResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/affirmations/healthy-sexuality/opt-in:
+    post:
+      operationId: optInHealthySexuality
+      tags: [Affirmation Rotation]
+      summary: Opt in to Healthy Sexuality affirmation category
+      description: |
+        Enables the Healthy Sexuality category for the user.
+        Requires 60+ cumulative sobriety days. Returns 403 if requirement not met.
+        Opt-in is revocable via DELETE.
+      responses:
+        '204':
+          description: No Content - Opted in successfully
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Forbidden - Insufficient sobriety days (requires 60+)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - code: "rr:0x000A0010"
+                    status: 403
+                    title: "Insufficient Recovery Progress"
+                    detail: "The Healthy Sexuality category requires at least 60 cumulative days of sobriety. You're making great progress -- keep going."
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: optOutHealthySexuality
+      tags: [Affirmation Rotation]
+      summary: Opt out of Healthy Sexuality affirmation category
+      description: Revokes opt-in for the Healthy Sexuality category.
+      responses:
+        '204':
+          description: No Content - Opted out successfully
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  headers:
+    CorrelationId:
+      description: Unique correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    AffirmationResponse:
+      type: object
+      required: [affirmationId, statement, scriptureReference, category, level, isFavorite, isCustom, language]
+      properties:
+        affirmationId:
+          type: string
+          pattern: '^(aff|caff)_[a-zA-Z0-9]+$'
+          description: Unique affirmation ID
+        statement:
+          type: string
+          maxLength: 500
+          description: First-person, present-tense affirmation statement
+        scriptureReference:
+          type: string
+          description: Bible verse reference (e.g., "Psalm 139:14")
+        scriptureText:
+          type: string
+          nullable: true
+          description: Full verse text in user's preferred Bible version
+        expansion:
+          type: string
+          nullable: true
+          description: Optional deeper reflection text
+        prayer:
+          type: string
+          nullable: true
+          description: Optional closing prayer
+        category:
+          type: string
+          enum: [identity, strength, recovery, purity, freedom, surrender, courage, hope, family, healthySexuality]
+        level:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Progression level
+        packId:
+          type: string
+          nullable: true
+          description: Pack ID (null for custom affirmations)
+        packName:
+          type: string
+          nullable: true
+        isFavorite:
+          type: boolean
+        isCustom:
+          type: boolean
+          description: Whether this is a user-created affirmation
+        language:
+          type: string
+          enum: [en, es]
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    CustomAffirmationResponse:
+      allOf:
+        - $ref: '#/components/schemas/AffirmationResponse'
+        - type: object
+          required: [schedule, isActive, createdAt]
+          properties:
+            schedule:
+              type: string
+              enum: [daily, weekdays, weekends, custom]
+            customScheduleDays:
+              type: array
+              nullable: true
+              items:
+                type: string
+                enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+            isActive:
+              type: boolean
+              description: Whether included in rotation
+            createdAt:
+              type: string
+              format: date-time
+              description: Immutable creation timestamp
+
+    CreateCustomAffirmationRequest:
+      type: object
+      required: [statement, category, schedule]
+      properties:
+        statement:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: First-person, present-tense affirmation statement
+        scriptureReference:
+          type: string
+          nullable: true
+          description: Optional Bible verse reference
+        category:
+          type: string
+          enum: [identity, strength, recovery, purity, freedom, surrender, courage, hope, family]
+          description: Category (healthySexuality not allowed for custom)
+        schedule:
+          type: string
+          enum: [daily, weekdays, weekends, custom]
+        customScheduleDays:
+          type: array
+          nullable: true
+          items:
+            type: string
+            enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+          description: Required when schedule is 'custom'
+
+    UpdateCustomAffirmationRequest:
+      type: object
+      properties:
+        statement:
+          type: string
+          minLength: 1
+          maxLength: 500
+        scriptureReference:
+          type: string
+          nullable: true
+        category:
+          type: string
+          enum: [identity, strength, recovery, purity, freedom, surrender, courage, hope, family]
+        schedule:
+          type: string
+          enum: [daily, weekdays, weekends, custom]
+        customScheduleDays:
+          type: array
+          nullable: true
+          items:
+            type: string
+            enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+        isActive:
+          type: boolean
+
+    RotationStateResponse:
+      type: object
+      required: [selectionMode]
+      properties:
+        selectionMode:
+          type: string
+          enum: [individuallyChosen, randomAutomatic, permanentPackage, dayOfWeekPackage]
+        activePackId:
+          type: string
+          nullable: true
+          description: Pack used for permanentPackage mode
+        dayOfWeekAssignments:
+          type: object
+          nullable: true
+          description: Affirmation ID mapped to each day of week
+          properties:
+            monday:
+              type: string
+            tuesday:
+              type: string
+            wednesday:
+              type: string
+            thursday:
+              type: string
+            friday:
+              type: string
+            saturday:
+              type: string
+            sunday:
+              type: string
+        chosenAffirmationId:
+          type: string
+          nullable: true
+          description: Specific affirmation ID for individuallyChosen mode
+        healthySexualityOptIn:
+          type: boolean
+          description: Whether user has opted in to Healthy Sexuality category
+        lastDeliveredId:
+          type: string
+          nullable: true
+        lastDeliveredDate:
+          type: string
+          format: date
+          nullable: true
+
+    UpdateRotationStateRequest:
+      type: object
+      required: [selectionMode]
+      properties:
+        selectionMode:
+          type: string
+          enum: [individuallyChosen, randomAutomatic, permanentPackage, dayOfWeekPackage]
+        activePackId:
+          type: string
+          nullable: true
+          description: Required for permanentPackage mode
+        dayOfWeekAssignments:
+          type: object
+          nullable: true
+          description: Required for dayOfWeekPackage mode
+          properties:
+            monday:
+              type: string
+            tuesday:
+              type: string
+            wednesday:
+              type: string
+            thursday:
+              type: string
+            friday:
+              type: string
+            saturday:
+              type: string
+            sunday:
+              type: string
+        chosenAffirmationId:
+          type: string
+          nullable: true
+          description: Required for individuallyChosen mode
+
+    AffirmationProgressResponse:
+      type: object
+      required: [totalRead, totalFavorites, totalCustomCreated, categoryBreakdown, levelBreakdown]
+      properties:
+        totalRead:
+          type: integer
+          description: Total affirmations read lifetime
+        totalFavorites:
+          type: integer
+          description: Current number of favorites
+        totalCustomCreated:
+          type: integer
+          description: Current number of custom affirmations
+        categoryBreakdown:
+          type: object
+          description: Read count by category
+          additionalProperties:
+            type: integer
+        levelBreakdown:
+          type: object
+          description: Read count by level
+          additionalProperties:
+            type: integer
+
+    AffirmationReadResponse:
+      type: object
+      required: [affirmationId, calendarDate, source]
+      properties:
+        affirmationId:
+          type: string
+        statement:
+          type: string
+          description: Truncated statement preview (100 chars)
+        category:
+          type: string
+        calendarDate:
+          type: string
+          format: date
+        source:
+          type: string
+          enum: [daily, triggerOverride, manualChoice, packageCycle, dayOfWeek]
+        createdAt:
+          type: string
+          format: date-time
+
+    AffirmationPackResponse:
+      type: object
+      required: [packId, name, description, tier, affirmationCount, isOwned]
+      properties:
+        packId:
+          type: string
+          pattern: '^pack_[a-zA-Z0-9_]+$'
+        name:
+          type: string
+        description:
+          type: string
+        tier:
+          type: string
+          enum: [free, premium]
+        price:
+          type: number
+          nullable: true
+          description: Price in USD (null for free packs)
+        affirmationCount:
+          type: integer
+        categories:
+          type: array
+          items:
+            type: string
+        isOwned:
+          type: boolean
+          description: Whether user owns this pack
+        language:
+          type: string
+          enum: [en, es]
+
+    AffirmationWidgetResponse:
+      type: object
+      required: [todayStatement, totalRead, totalFavorites, hasReadToday]
+      properties:
+        todayStatement:
+          type: string
+          maxLength: 100
+          description: Today's affirmation truncated to 100 chars
+        todayAffirmationId:
+          type: string
+          description: ID to link to full affirmation
+        todayCategory:
+          type: string
+        totalRead:
+          type: integer
+          description: Cumulative total affirmations read
+        totalFavorites:
+          type: integer
+        hasReadToday:
+          type: boolean
+          description: Whether user has read today's affirmation
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required: [code, status, title, detail]
+            properties:
+              code:
+                type: string
+                pattern: '^rr:0x[0-9a-fA-F]{8}$'
+                description: Error code in rr:0x000Axxxx range for affirmations
+              status:
+                type: integer
+              title:
+                type: string
+              detail:
+                type: string
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid Bearer token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - code: "rr:0x000A0001"
+                status: 401
+                title: "Authentication Required"
+                detail: "A valid Bearer token is required to access this resource."
+
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - code: "rr:0x000A0002"
+                status: 404
+                title: "Affirmation Not Found"
+                detail: "The requested affirmation does not exist or is not accessible."
+
+    FeatureDisabled:
+      description: Not Found - Feature flag activity.affirmations is disabled
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - code: "rr:0x000A0003"
+                status: 404
+                title: "Feature Not Available"
+                detail: "This feature is not currently available."
+
+    ValidationError:
+      description: Unprocessable Entity - Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - code: "rr:0x000A0004"
+                status: 422
+                title: "Validation Error"
+                detail: "The request body contains invalid data."
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - code: "rr:0x000A00FF"
+                status: 500
+                title: "Internal Error"
+                detail: "An unexpected error occurred. Please try again."
