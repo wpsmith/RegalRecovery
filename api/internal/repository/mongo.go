@@ -83,13 +83,28 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 		},
 		"meetings": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "timestamp", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "meetingId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
+		"savedMeetings": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "savedMeetingId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "isActive", Value: 1}, {Key: "name", Value: 1}}},
 		},
 		"prayers": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
 			{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetExpireAfterSeconds(0)},
 		},
 		"exercises": {
-			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "timestamp", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "exerciseId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "externalId", Value: 1}}},
+		},
+		"exerciseFavorites": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "favoriteId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}}},
+		},
+		"exerciseGoals": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}}, Options: options.Index().SetUnique(true)},
 		},
 		"activities": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "date", Value: 1}}},
@@ -116,6 +131,20 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 		"devotionals": {
 			{Keys: bson.D{{Key: "day", Value: 1}}, Options: options.Index().SetUnique(true)},
 		},
+		// Devotionals Activity (Wave 2) -- system-level content
+		"devotionals_content": {
+			{Keys: bson.D{{Key: "devotionalId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "topic", Value: 1}, {Key: "tier", Value: 1}}},
+			{Keys: bson.D{{Key: "authorName", Value: 1}}},
+			{Keys: bson.D{{Key: "seriesId", Value: 1}, {Key: "seriesDay", Value: 1}}},
+			{Keys: bson.D{{Key: "tier", Value: 1}, {Key: "freemiumRotationDay", Value: 1}}},
+			{Keys: bson.D{{Key: "isPublished", Value: 1}}},
+		},
+		"devotional_series": {
+			{Keys: bson.D{{Key: "seriesId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "tier", Value: 1}, {Key: "isPublished", Value: 1}}},
+			{Keys: bson.D{{Key: "category", Value: 1}}},
+		},
 		"prompts": {
 			{Keys: bson.D{{Key: "category", Value: 1}}},
 		},
@@ -132,6 +161,14 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 			{Keys: bson.D{{Key: "userId", Value: 1}}},
 			{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetExpireAfterSeconds(0)},
 		},
+		"phoneCalls": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}, {Key: "timestamp", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "callId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
+		"savedContacts": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "savedContactId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
 		"timeJournalEntries": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "date", Value: 1}}},
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "date", Value: 1}, {Key: "slotStart", Value: 1}}, Options: options.Index().SetUnique(true)},
@@ -143,6 +180,14 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "status", Value: 1}, {Key: "date", Value: -1}}},
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "streakEligible", Value: 1}, {Key: "date", Value: -1}}},
 			{Keys: bson.D{{Key: "tenantId", Value: 1}, {Key: "userId", Value: 1}}},
+		},
+		"moodRatings": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "rating", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "emotionLabels", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "datePartition", Value: 1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+			{Keys: bson.D{{Key: "moodId", Value: 1}}, Options: options.Index().SetUnique(true)},
 		},
 	}
 

@@ -92,6 +92,7 @@ enum ActivityType: String, CaseIterable {
     case stepWork = "12-Step Work"
     case weeklyGoals = "Weekly Goals"
     case affirmationLog = "Affirmation Log"
+    case devotional = "Devotional"
 
     var icon: String {
         switch self {
@@ -113,6 +114,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return "stairs"
         case .weeklyGoals: return "target"
         case .affirmationLog: return "text.quote"
+        case .devotional: return "book.fill"
         }
     }
 
@@ -134,6 +136,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return .rrSecondary
         case .weeklyGoals: return .rrPrimary
         case .affirmationLog: return .rrSecondary
+        case .devotional: return .rrPrimary
         }
     }
 
@@ -148,6 +151,8 @@ enum ActivityType: String, CaseIterable {
         case .phoneCalls, .meetingsAttended, .spouseCheckIn:
             return .connection
         case .stepWork, .weeklyGoals, .affirmationLog:
+            return .growth
+        case .devotional:
             return .growth
         }
     }

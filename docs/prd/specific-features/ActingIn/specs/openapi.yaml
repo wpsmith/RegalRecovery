@@ -1,0 +1,1275 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Acting In Behaviors API
+  version: 1.0.0
+  description: |
+    Acting In Behaviors activity API for Regal Recovery.
+
+    Covers the full acting-in behaviors lifecycle:
+    - Behavior configuration (enable/disable defaults, create/edit/delete custom behaviors)
+    - Check-in submission (mark behaviors, add context notes, triggers, relationship tags)
+    - Check-in history with filtering and search
+    - Pattern insights (frequency, triggers, relationships, heatmaps)
+    - Cross-tool correlations (PCI, FASTER Scale, Post-Mortem)
+    - Export (CSV, PDF)
+    - Settings (frequency, reminder time)
+
+    All activity timestamps are immutable once recorded.
+    Feature flag: `activity.acting-in-behaviors`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Behaviors
+    description: Behavior catalog configuration (defaults and custom)
+  - name: Check-Ins
+    description: Acting-in behavior check-in submissions
+  - name: History
+    description: Check-in history browsing, filtering, and export
+  - name: Insights
+    description: Pattern tracking, trends, trigger analysis, and cross-tool correlations
+  - name: Settings
+    description: Acting-in frequency and reminder configuration
+
+paths:
+  # ---------- Behavior Catalog ----------
+
+  /activities/acting-in-behaviors/behaviors:
+    get:
+      operationId: listActingInBehaviors
+      tags: [Behaviors]
+      summary: List all acting-in behaviors
+      description: |
+        Returns all behaviors available to the user: enabled/disabled defaults and custom behaviors.
+        Used to populate the Settings screen and check-in flow.
+      responses:
+        '200':
+          description: OK - Behaviors retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Behavior'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  - behaviorId: "beh_default_blame"
+                    name: "Blame"
+                    description: "Shifting responsibility onto others instead of owning your part"
+                    isDefault: true
+                    enabled: true
+                    sortOrder: 1
+                  - behaviorId: "beh_custom_001"
+                    name: "Sarcasm Deflection"
+                    description: "Using sharp humor to avoid vulnerability"
+                    isDefault: false
+                    enabled: true
+                    sortOrder: 16
+                meta:
+                  totalBehaviors: 17
+                  enabledCount: 15
+                  defaultCount: 15
+                  customCount: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/behaviors/custom:
+    post:
+      operationId: createCustomBehavior
+      tags: [Behaviors]
+      summary: Create a custom acting-in behavior
+      description: |
+        Add a user-defined behavior beyond the 15 defaults.
+        Custom behaviors appear alongside enabled defaults in check-in flow.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomBehaviorRequest'
+            example:
+              name: "Sarcasm Deflection"
+              description: "Using sharp humor to avoid vulnerability"
+      responses:
+        '201':
+          description: Created - Custom behavior saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Behavior'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/behaviors/custom/{behaviorId}:
+    parameters:
+      - name: behaviorId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^beh_custom_[a-zA-Z0-9]+$'
+        example: beh_custom_001
+
+    put:
+      operationId: updateCustomBehavior
+      tags: [Behaviors]
+      summary: Update a custom behavior
+      description: |
+        Edit name or description of a user-defined behavior.
+        Default behaviors cannot be edited via this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomBehaviorRequest'
+      responses:
+        '200':
+          description: OK - Custom behavior updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Behavior'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteCustomBehavior
+      tags: [Behaviors]
+      summary: Delete a custom behavior
+      description: |
+        Remove a user-defined behavior. Historical check-in data referencing
+        this behavior is preserved with the original name.
+      responses:
+        '204':
+          description: No Content - Custom behavior deleted
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/behaviors/{behaviorId}/toggle:
+    parameters:
+      - name: behaviorId
+        in: path
+        required: true
+        schema:
+          type: string
+        example: beh_default_humor
+
+    patch:
+      operationId: toggleBehaviorEnabled
+      tags: [Behaviors]
+      summary: Enable or disable a behavior
+      description: |
+        Toggle enabled state for a default or custom behavior.
+        Disabled behaviors are hidden from check-in flow but historical data is preserved.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - enabled
+              properties:
+                enabled:
+                  type: boolean
+            example:
+              enabled: false
+      responses:
+        '200':
+          description: OK - Behavior toggled
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Behavior'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Check-In ----------
+
+  /activities/acting-in-behaviors/check-ins:
+    post:
+      operationId: createActingInCheckIn
+      tags: [Check-Ins]
+      summary: Submit an acting-in behaviors check-in
+      description: |
+        Record which acting-in behaviors occurred since the last check-in.
+        Each checked behavior can include optional context note, trigger, and relationship tag.
+        Zero behaviors checked is valid and celebrated.
+
+        Timestamps are immutable once recorded (FR2.7).
+        Also written to the calendarActivities collection (dual-write).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCheckInRequest'
+            example:
+              timestamp: "2026-03-28T21:00:00Z"
+              behaviors:
+                - behaviorId: "beh_default_stonewall"
+                  contextNote: "Shut down after argument about finances"
+                  trigger: "conflict"
+                  relationshipTag: "spouse"
+                - behaviorId: "beh_default_avoid"
+                  contextNote: "Avoided sponsor's call"
+                  trigger: "shame"
+                  relationshipTag: "sponsor"
+      responses:
+        '201':
+          description: Created - Check-in recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CheckIn'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  checkInId: "aic_11111"
+                  timestamp: "2026-03-28T21:00:00Z"
+                  behaviorCount: 2
+                  behaviors:
+                    - behaviorId: "beh_default_stonewall"
+                      behaviorName: "Stonewall"
+                      contextNote: "Shut down after argument about finances"
+                      trigger: "conflict"
+                      relationshipTag: "spouse"
+                    - behaviorId: "beh_default_avoid"
+                      behaviorName: "Avoid"
+                      contextNote: "Avoided sponsor's call"
+                      trigger: "shame"
+                      relationshipTag: "sponsor"
+                  consecutiveCheckIns: 7
+                  message: "Awareness is the first step toward change. Thank you for being honest."
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/acting-in-behaviors/check-ins/aic_11111"
+                meta:
+                  createdAt: "2026-03-28T21:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listActingInCheckIns
+      tags: [History]
+      summary: List acting-in check-ins
+      description: |
+        Browse past check-ins with cursor-based pagination.
+        Supports filtering by behavior, trigger, relationship tag, and date range.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter check-ins from this date (inclusive)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter check-ins up to this date (inclusive)
+        - name: behaviorId
+          in: query
+          schema:
+            type: string
+          description: Filter by specific behavior ID
+        - name: trigger
+          in: query
+          schema:
+            type: string
+            enum: [stress, conflict, fear, shame, exhaustion, loneliness, other]
+          description: Filter by trigger type
+        - name: relationshipTag
+          in: query
+          schema:
+            type: string
+            enum: [spouse, child, coworker, friend, sponsor, self, other]
+          description: Filter by relationship tag
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination (opaque string from previous response)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum number of results to return
+      responses:
+        '200':
+          description: OK - Check-ins retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CheckIn'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/check-ins/{checkInId}:
+    parameters:
+      - name: checkInId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^aic_[a-zA-Z0-9]+$'
+        example: aic_11111
+
+    get:
+      operationId: getActingInCheckIn
+      tags: [History]
+      summary: Get a specific check-in
+      description: |
+        Retrieve full details of a past check-in including all behaviors,
+        context notes, triggers, and relationship tags.
+      responses:
+        '200':
+          description: OK - Check-in retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CheckIn'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Insights ----------
+
+  /activities/acting-in-behaviors/insights/frequency:
+    get:
+      operationId: getActingInFrequencyInsights
+      tags: [Insights]
+      summary: Get behavior frequency insights
+      description: |
+        Returns occurrence counts per behavior with trend indicators.
+        Supports 7-day, 30-day, and 90-day views.
+        Behaviors sorted by frequency (most frequent first).
+      parameters:
+        - name: range
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ["7d", "30d", "90d"]
+          description: Time range for frequency analysis
+      responses:
+        '200':
+          description: OK - Frequency insights retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      range:
+                        type: string
+                        enum: ["7d", "30d", "90d"]
+                      behaviors:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BehaviorFrequency'
+                      totalCheckIns:
+                        type: integer
+                      totalBehaviorsLogged:
+                        type: integer
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  range: "30d"
+                  behaviors:
+                    - behaviorId: "beh_default_stonewall"
+                      behaviorName: "Stonewall"
+                      count: 12
+                      trend: "decreasing"
+                      percentageOfCheckIns: 40.0
+                    - behaviorId: "beh_default_avoid"
+                      behaviorName: "Avoid"
+                      count: 8
+                      trend: "stable"
+                      percentageOfCheckIns: 26.7
+                  totalCheckIns: 30
+                  totalBehaviorsLogged: 45
+                meta:
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/insights/triggers:
+    get:
+      operationId: getActingInTriggerInsights
+      tags: [Insights]
+      summary: Get trigger analysis
+      description: |
+        Returns most common triggers and trigger-to-behavior correlations.
+      parameters:
+        - name: range
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ["7d", "30d", "90d"]
+      responses:
+        '200':
+          description: OK - Trigger insights retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      range:
+                        type: string
+                      triggers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TriggerInsight'
+                      correlations:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/TriggerBehaviorCorrelation'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/insights/relationships:
+    get:
+      operationId: getActingInRelationshipInsights
+      tags: [Insights]
+      summary: Get relationship impact insights
+      description: |
+        Returns which relationships are most frequently affected and trend over time.
+      parameters:
+        - name: range
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ["7d", "30d", "90d"]
+      responses:
+        '200':
+          description: OK - Relationship insights retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      range:
+                        type: string
+                      relationships:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RelationshipInsight'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/insights/heatmap:
+    get:
+      operationId: getActingInHeatmap
+      tags: [Insights]
+      summary: Get time-of-day and day-of-week heatmap
+      description: |
+        Returns heatmap data showing when acting-in behaviors are most common.
+      parameters:
+        - name: range
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ["30d", "90d"]
+      responses:
+        '200':
+          description: OK - Heatmap data retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      range:
+                        type: string
+                      cells:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/HeatmapCell'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/acting-in-behaviors/insights/cross-tool:
+    get:
+      operationId: getActingInCrossToolInsights
+      tags: [Insights]
+      summary: Get cross-tool correlations
+      description: |
+        Returns correlations between acting-in behaviors and PCI scores,
+        FASTER Scale stages, and post-mortem build-up patterns.
+      parameters:
+        - name: range
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ["30d", "90d"]
+      responses:
+        '200':
+          description: OK - Cross-tool insights retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      range:
+                        type: string
+                      pciCorrelation:
+                        $ref: '#/components/schemas/PciCorrelation'
+                      fasterCorrelation:
+                        $ref: '#/components/schemas/FasterCorrelation'
+                      postMortemPatterns:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PostMortemPattern'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Export ----------
+
+  /activities/acting-in-behaviors/export:
+    get:
+      operationId: exportActingInHistory
+      tags: [History]
+      summary: Export check-in history
+      description: |
+        Export acting-in check-in history as CSV or PDF for therapy sessions or sponsor meetings.
+      parameters:
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [csv, pdf]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK - Export file returned
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+                example: 'attachment; filename="acting-in-export-2026-03-28.csv"'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            text/csv:
+              schema:
+                type: string
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ---------- Settings ----------
+
+  /activities/acting-in-behaviors/settings:
+    get:
+      operationId: getActingInSettings
+      tags: [Settings]
+      summary: Get acting-in behavior settings
+      description: |
+        Retrieve user's acting-in behavior configuration: check-in frequency,
+        reminder time, and reminder day (for weekly).
+      responses:
+        '200':
+          description: OK - Settings retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ActingInSettings'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: updateActingInSettings
+      tags: [Settings]
+      summary: Update acting-in behavior settings
+      description: |
+        Update check-in frequency, reminder time, or reminder day.
+        Changing frequency preserves historical data and recalculates streaks.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateActingInSettingsRequest'
+            example:
+              frequency: "daily"
+              reminderTime: "21:00"
+      responses:
+        '200':
+          description: OK - Settings updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ActingInSettings'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  headers:
+    Api-Version:
+      description: API version
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Correlation ID for request tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    Behavior:
+      type: object
+      properties:
+        behaviorId:
+          type: string
+          description: Unique behavior identifier
+        name:
+          type: string
+          maxLength: 100
+          description: Display name of the behavior
+        description:
+          type: string
+          description: Optional description of the behavior
+        isDefault:
+          type: boolean
+          description: Whether this is a system-provided default behavior
+        enabled:
+          type: boolean
+          description: Whether this behavior appears in check-in flow
+        sortOrder:
+          type: integer
+          description: Display order in check-in flow
+
+    CreateCustomBehaviorRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Custom behavior name
+        description:
+          type: string
+          maxLength: 500
+          description: Optional description
+
+    UpdateCustomBehaviorRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+
+    CreateCheckInRequest:
+      type: object
+      required:
+        - timestamp
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of check-in (immutable once set)
+        behaviors:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckedBehavior'
+          description: Behaviors that occurred since last check-in (empty array for zero-behavior check-in)
+          default: []
+
+    CheckedBehavior:
+      type: object
+      required:
+        - behaviorId
+      properties:
+        behaviorId:
+          type: string
+          description: ID of the behavior being logged
+        contextNote:
+          type: string
+          maxLength: 500
+          description: Optional context about what happened
+        trigger:
+          type: string
+          enum: [stress, conflict, fear, shame, exhaustion, loneliness, other]
+          description: What prompted the behavior
+        relationshipTag:
+          type: string
+          enum: [spouse, child, coworker, friend, sponsor, self, other]
+          description: Who was affected
+
+    CheckIn:
+      type: object
+      properties:
+        checkInId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        behaviorCount:
+          type: integer
+          description: Number of behaviors checked in this check-in
+        behaviors:
+          type: array
+          items:
+            type: object
+            properties:
+              behaviorId:
+                type: string
+              behaviorName:
+                type: string
+              contextNote:
+                type: string
+              trigger:
+                type: string
+              relationshipTag:
+                type: string
+        consecutiveCheckIns:
+          type: integer
+          description: Current check-in streak (consecutive days or weeks)
+        message:
+          type: string
+          description: Compassionate confirmation message
+        links:
+          $ref: '#/components/schemas/Links'
+
+    BehaviorFrequency:
+      type: object
+      properties:
+        behaviorId:
+          type: string
+        behaviorName:
+          type: string
+        count:
+          type: integer
+          description: Number of times this behavior was logged in the range
+        trend:
+          type: string
+          enum: [increasing, stable, decreasing]
+          description: Trend compared to prior equal-length period
+        percentageOfCheckIns:
+          type: number
+          format: float
+          description: Percentage of check-ins that included this behavior
+
+    TriggerInsight:
+      type: object
+      properties:
+        trigger:
+          type: string
+        count:
+          type: integer
+        percentageOfTotal:
+          type: number
+          format: float
+
+    TriggerBehaviorCorrelation:
+      type: object
+      properties:
+        trigger:
+          type: string
+        topBehaviors:
+          type: array
+          items:
+            type: object
+            properties:
+              behaviorId:
+                type: string
+              behaviorName:
+                type: string
+              count:
+                type: integer
+        narrative:
+          type: string
+          description: Human-readable correlation (e.g., "When you're stressed, you most often stonewall or avoid")
+
+    RelationshipInsight:
+      type: object
+      properties:
+        relationshipTag:
+          type: string
+        count:
+          type: integer
+        trend:
+          type: string
+          enum: [increasing, stable, decreasing]
+        narrative:
+          type: string
+          description: Trend description (e.g., "Behaviors affecting your spouse decreased 40% this month")
+
+    HeatmapCell:
+      type: object
+      properties:
+        dayOfWeek:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: "0=Sunday, 6=Saturday"
+        hourOfDay:
+          type: integer
+          minimum: 0
+          maximum: 23
+        count:
+          type: integer
+        intensity:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          description: Normalized intensity for heatmap coloring
+
+    PciCorrelation:
+      type: object
+      properties:
+        correlationFound:
+          type: boolean
+        pciElevatedDays:
+          type: integer
+          description: Days with elevated PCI and increased acting-in
+        narrative:
+          type: string
+
+    FasterCorrelation:
+      type: object
+      properties:
+        correlationFound:
+          type: boolean
+        stageBreakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              stage:
+                type: string
+              actingInCount:
+                type: integer
+        narrative:
+          type: string
+
+    PostMortemPattern:
+      type: object
+      properties:
+        postMortemId:
+          type: string
+        relapseDate:
+          type: string
+          format: date
+        buildUpBehaviors:
+          type: array
+          items:
+            type: string
+          description: Acting-in behaviors identified in the build-up phase
+
+    ActingInSettings:
+      type: object
+      properties:
+        frequency:
+          type: string
+          enum: [daily, weekly]
+          default: daily
+        reminderTime:
+          type: string
+          pattern: '^([01]\\d|2[0-3]):[0-5]\\d$'
+          description: "HH:mm format in user's local time zone"
+          default: "21:00"
+        reminderDay:
+          type: string
+          enum: [sunday, monday, tuesday, wednesday, thursday, friday, saturday]
+          description: Day of week for weekly frequency (ignored for daily)
+          default: sunday
+        firstUseCompleted:
+          type: boolean
+          description: Whether the user has seen the first-use helper text
+
+    UpdateActingInSettingsRequest:
+      type: object
+      properties:
+        frequency:
+          type: string
+          enum: [daily, weekly]
+        reminderTime:
+          type: string
+          pattern: '^([01]\\d|2[0-3]):[0-5]\\d$'
+        reminderDay:
+          type: string
+          enum: [sunday, monday, tuesday, wednesday, thursday, friday, saturday]
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        retrievedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

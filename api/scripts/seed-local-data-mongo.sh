@@ -133,6 +133,25 @@ db.flags.insertOne({
   "description": "AI-powered Recovery Agent"
 });
 print("✓ Created feature flag: feature.recovery-agent");
+
+// Feature flag: meetings activity (initial rollout 0%)
+db.flags.insertOne({
+  "PK": "FLAGS",
+  "SK": "activity.meetings",
+  "EntityType": "FEATURE_FLAG",
+  "TenantId": "SYSTEM",
+  "CreatedAt": "2026-04-01T00:00:00Z",
+  "ModifiedAt": "2026-04-01T00:00:00Z",
+  "flagKey": "activity.meetings",
+  "enabled": true,
+  "rolloutPercentage": 0,
+  "tiers": ["*"],
+  "tenants": ["*"],
+  "platforms": ["ios", "android"],
+  "minAppVersion": "1.2.0",
+  "description": "Meeting attendance logging with saved templates and attendance history"
+});
+print("✓ Created feature flag: activity.meetings");
 '
 
 echo ""

@@ -30,6 +30,7 @@ const (
 	ActivityTypeStepWork           = "step-work"
 	ActivityTypeGoal               = "goal"
 	ActivityTypeSpouseCheckInPrep  = "spouse-check-in-prep"
+	ActivityTypeAffirmation        = "affirmation"
 )
 
 // Activity represents a recovery activity log entry.
@@ -141,10 +142,20 @@ type MoodData struct {
 	Notes  string `json:"notes,omitempty"`
 }
 
-// GratitudeData represents gratitude entry data.
+// GratitudeData represents gratitude entry data with structured items.
 type GratitudeData struct {
-	Items []string `json:"items"`
-	Notes string   `json:"notes,omitempty"`
+	Items      []GratitudeItemData `json:"items"`
+	MoodScore  *int                `json:"moodScore,omitempty"`
+	PhotoKey   *string             `json:"photoKey,omitempty"`
+	PromptUsed *string             `json:"promptUsed,omitempty"`
+}
+
+// GratitudeItemData represents a single structured gratitude item.
+type GratitudeItemData struct {
+	Text       string  `json:"text"`
+	Category   *string `json:"category,omitempty"`
+	IsFavorite bool    `json:"isFavorite"`
+	SortOrder  int     `json:"sortOrder"`
 }
 
 // PhoneCallData represents phone call log data.

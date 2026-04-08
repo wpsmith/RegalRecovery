@@ -1,0 +1,1329 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Prayer Activity API
+  version: 1.0.0
+  description: |
+    Prayer Activity API for Regal Recovery.
+
+    Extends the existing activities and content APIs with comprehensive prayer session
+    logging, prayer content library management, personal prayers, favorites, streak
+    tracking, and trends.
+
+    This specification is additive to `activities.yaml` and `content.yaml`. It replaces
+    the existing minimal prayer endpoints with a full-featured Prayer Activity domain.
+
+    All endpoints are gated behind the `activity.prayer` feature flag.
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Prayer Sessions
+    description: Log and manage prayer sessions
+  - name: Prayer Library
+    description: Browse curated prayer content
+  - name: Personal Prayers
+    description: User-created prayers
+  - name: Prayer Favorites
+    description: Favorite prayers for quick access
+  - name: Prayer Stats
+    description: Prayer streaks, trends, and insights
+
+paths:
+  # ──────────────────────────────────────────────
+  # Prayer Session Logging
+  # ──────────────────────────────────────────────
+
+  /activities/prayer:
+    post:
+      operationId: createPrayerSession
+      tags: [Prayer Sessions]
+      summary: Log a prayer session
+      description: |
+        Record a prayer session with type, optional duration, notes, linked prayer,
+        and mood before/after. Timestamps are immutable once recorded (FR2.7).
+
+        Quick log: submit only `prayerType` and `timestamp` for a one-tap log.
+        All other fields can be added via PATCH within 24 hours.
+
+        Feature flag: `activity.prayer`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrayerSessionRequest'
+            example:
+              timestamp: "2026-03-28T06:00:00Z"
+              prayerType: personal
+              durationMinutes: 15
+              notes: "Spent time in silence. Felt God's presence."
+              linkedPrayerId: "pryr_1a2b3c4d"
+              moodBefore: 3
+              moodAfter: 4
+      responses:
+        '201':
+          description: Created -- Prayer session recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the created prayer session
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PrayerSession'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  prayerId: "ps_1a2b3c4d"
+                  timestamp: "2026-03-28T06:00:00Z"
+                  prayerType: personal
+                  durationMinutes: 15
+                  notes: "Spent time in silence. Felt God's presence."
+                  linkedPrayerId: "pryr_1a2b3c4d"
+                  linkedPrayerTitle: "Prayer for Strength Against Temptation"
+                  moodBefore: 3
+                  moodAfter: 4
+                  isEphemeral: false
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/prayer/ps_1a2b3c4d"
+                meta:
+                  createdAt: "2026-03-28T06:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Feature flag `activity.prayer` is disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPrayerSessions
+      tags: [Prayer Sessions]
+      summary: List prayer session history
+      description: |
+        Retrieve prayer session history in reverse chronological order.
+        Supports filtering by prayer type, date range, and linked prayer.
+
+        Feature flag: `activity.prayer`
+      parameters:
+        - name: prayerType
+          in: query
+          description: Filter by prayer type
+          schema:
+            type: string
+            enum: [personal, guided, group, scriptureBased, intercessory, listening]
+        - name: startDate
+          in: query
+          description: Inclusive start date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: Inclusive end date (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+        - name: linkedPrayerId
+          in: query
+          description: Filter sessions linked to a specific prayer
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Number of results per page
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: "-timestamp"
+          description: Sort order (e.g., `-timestamp` for newest first)
+      responses:
+        '200':
+          description: OK -- Prayer sessions retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PrayerSessionSummary'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Feature flag `activity.prayer` is disabled
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/prayer/{id}:
+    get:
+      operationId: getPrayerSession
+      tags: [Prayer Sessions]
+      summary: Get prayer session by ID
+      description: |
+        Retrieve full details of a specific prayer session, including notes.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ps_[a-zA-Z0-9]+$'
+          description: Prayer session ID
+      responses:
+        '200':
+          description: OK -- Prayer session retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PrayerSession'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updatePrayerSession
+      tags: [Prayer Sessions]
+      summary: Update prayer session
+      description: |
+        Update mutable fields on a prayer session. `timestamp` is immutable (FR2.7).
+        `notes` are editable for 24 hours after creation, then read-only.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ps_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdatePrayerSessionRequest'
+      responses:
+        '200':
+          description: OK -- Prayer session updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PrayerSession'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deletePrayerSession
+      tags: [Prayer Sessions]
+      summary: Delete prayer session
+      description: |
+        Permanently remove a prayer session. This affects streak calculations.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ps_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content -- Prayer session deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ──────────────────────────────────────────────
+  # Prayer Stats & Streak
+  # ──────────────────────────────────────────────
+
+  /activities/prayer/stats:
+    get:
+      operationId: getPrayerStats
+      tags: [Prayer Stats]
+      summary: Get prayer statistics and streak
+      description: |
+        Returns current prayer streak, longest streak, total prayer days,
+        sessions this week, average duration, and type distribution.
+      responses:
+        '200':
+          description: OK -- Prayer stats retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PrayerStats'
+              example:
+                data:
+                  currentStreakDays: 14
+                  longestStreakDays: 30
+                  totalPrayerDays: 87
+                  sessionsThisWeek: 9
+                  averageDurationMinutes: 12
+                  typeDistribution:
+                    personal: 42
+                    guided: 18
+                    group: 12
+                    scriptureBased: 8
+                    intercessory: 5
+                    listening: 2
+                  moodImpact:
+                    averageMoodBefore: 2.8
+                    averageMoodAfter: 3.9
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/prayer/trends:
+    get:
+      operationId: getPrayerTrends
+      tags: [Prayer Stats]
+      summary: Get prayer trend data
+      description: |
+        Returns time-series data for prayer frequency, duration, and type
+        distribution over a specified period.
+      parameters:
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+          description: Time period for trend data
+      responses:
+        '200':
+          description: OK -- Prayer trends retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PrayerTrends'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ──────────────────────────────────────────────
+  # Prayer Content Library (extends content.yaml)
+  # ──────────────────────────────────────────────
+
+  /content/prayers:
+    get:
+      operationId: listPrayers
+      tags: [Prayer Library]
+      summary: Browse prayer library
+      description: |
+        List prayers from the content library with filtering by topic, pack, step,
+        and full-text search. Premium prayers the user has not purchased show
+        `isLocked: true` with truncated body.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: pack
+          in: query
+          description: Filter by content pack ID
+          schema:
+            type: string
+        - name: topic
+          in: query
+          description: Filter by topic tag
+          schema:
+            type: string
+        - name: step
+          in: query
+          description: Filter by 12-step number (1-12)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+        - name: search
+          in: query
+          description: Full-text search across title and body
+          schema:
+            type: string
+            maxLength: 200
+        - name: tier
+          in: query
+          description: Filter by content tier
+          schema:
+            type: string
+            enum: [free, premium, all]
+            default: all
+      responses:
+        '200':
+          description: OK -- Prayers retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LibraryPrayer'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/prayers/today:
+    get:
+      operationId: getTodayPrayer
+      tags: [Prayer Library]
+      summary: Get today's featured prayer
+      description: |
+        Returns the daily featured prayer, rotated daily based on the user's
+        timezone, drawn from the user's owned packs.
+      responses:
+        '200':
+          description: OK -- Today's prayer retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LibraryPrayer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/prayers/{id}:
+    get:
+      operationId: getPrayer
+      tags: [Prayer Library]
+      summary: Get prayer by ID
+      description: |
+        Retrieve a single prayer from the library by ID. Returns `isLocked: true`
+        if the prayer is premium and the user has not purchased the pack.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pryr_[a-zA-Z0-9]+$'
+      responses:
+        '200':
+          description: OK -- Prayer retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/LibraryPrayer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ──────────────────────────────────────────────
+  # Personal Prayers
+  # ──────────────────────────────────────────────
+
+  /content/prayers/personal:
+    post:
+      operationId: createPersonalPrayer
+      tags: [Personal Prayers]
+      summary: Create a personal prayer
+      description: |
+        Write and save a user-created prayer to the personal prayer collection.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePersonalPrayerRequest'
+            example:
+              title: "Prayer for my marriage"
+              body: "Lord, heal the wounds between us. Give me the courage to be honest and the patience to listen..."
+              topicTags: ["marriage", "healing"]
+              scriptureReference: "1 Corinthians 13:4-7"
+      responses:
+        '201':
+          description: Created -- Personal prayer saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PersonalPrayer'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPersonalPrayers
+      tags: [Personal Prayers]
+      summary: List personal prayers
+      description: |
+        Retrieve all personal prayers for the authenticated user, sorted by
+        user-defined order (or creation date if no custom order).
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK -- Personal prayers retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PersonalPrayer'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/prayers/personal/{id}:
+    patch:
+      operationId: updatePersonalPrayer
+      tags: [Personal Prayers]
+      summary: Update a personal prayer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pp_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdatePersonalPrayerRequest'
+      responses:
+        '200':
+          description: OK -- Personal prayer updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PersonalPrayer'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deletePersonalPrayer
+      tags: [Personal Prayers]
+      summary: Delete a personal prayer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pp_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content -- Personal prayer deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/prayers/personal/order:
+    put:
+      operationId: reorderPersonalPrayers
+      tags: [Personal Prayers]
+      summary: Reorder personal prayers
+      description: |
+        Set the display order of personal prayers by providing an ordered list of IDs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prayerIds]
+              properties:
+                prayerIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Ordered list of personal prayer IDs
+      responses:
+        '200':
+          description: OK -- Order updated
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ──────────────────────────────────────────────
+  # Prayer Favorites
+  # ──────────────────────────────────────────────
+
+  /content/prayers/favorites:
+    get:
+      operationId: listFavoritePrayers
+      tags: [Prayer Favorites]
+      summary: List favorite prayers
+      description: |
+        Retrieve all prayers the user has favorited, including both library
+        and personal prayers.
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK -- Favorite prayers retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LibraryPrayer'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/CursorPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /content/prayers/favorites/{id}:
+    post:
+      operationId: favoritePrayer
+      tags: [Prayer Favorites]
+      summary: Favorite a prayer
+      description: |
+        Add a library or personal prayer to favorites.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Prayer ID (library pryr_ or personal pp_)
+      responses:
+        '201':
+          description: Created -- Prayer favorited
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Conflict -- Prayer already favorited
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: unfavoritePrayer
+      tags: [Prayer Favorites]
+      summary: Unfavorite a prayer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content -- Prayer unfavorited
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# ──────────────────────────────────────────────
+# Components
+# ──────────────────────────────────────────────
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      schema:
+        type: string
+        example: "1.0.0"
+      description: Semantic version of the API
+    X-Correlation-Id:
+      schema:
+        type: string
+        format: uuid
+      description: Correlation ID for distributed tracing
+
+  schemas:
+    # ── Request Schemas ──
+
+    CreatePrayerSessionRequest:
+      type: object
+      required:
+        - timestamp
+        - prayerType
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the prayer occurred (default now, editable for backdating up to 7 days)
+        prayerType:
+          type: string
+          enum: [personal, guided, group, scriptureBased, intercessory, listening]
+          description: Type of prayer session
+        durationMinutes:
+          type: integer
+          minimum: 0
+          maximum: 1440
+          nullable: true
+          description: Duration in minutes (optional -- logging the act of prayer matters more than length)
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Free-text notes (voice-to-text available on mobile)
+        linkedPrayerId:
+          type: string
+          nullable: true
+          description: ID of a library or personal prayer prayed during this session
+        moodBefore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+          description: Mood rating before prayer (1=low, 5=high)
+        moodAfter:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+          description: Mood rating after prayer (1=low, 5=high)
+        isEphemeral:
+          type: boolean
+          default: false
+          description: If true, session auto-deletes after 30 days
+
+    UpdatePrayerSessionRequest:
+      type: object
+      properties:
+        prayerType:
+          type: string
+          enum: [personal, guided, group, scriptureBased, intercessory, listening]
+        durationMinutes:
+          type: integer
+          minimum: 0
+          maximum: 1440
+          nullable: true
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: Editable within 24 hours of creation only
+        linkedPrayerId:
+          type: string
+          nullable: true
+        moodBefore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        moodAfter:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+
+    CreatePersonalPrayerRequest:
+      type: object
+      required:
+        - title
+        - body
+      properties:
+        title:
+          type: string
+          maxLength: 100
+          description: Prayer title
+        body:
+          type: string
+          description: Full prayer text (unlimited length)
+        topicTags:
+          type: array
+          items:
+            type: string
+          description: Topic tags for browsing and search
+        scriptureReference:
+          type: string
+          nullable: true
+          description: Associated Bible verse reference (e.g., "Psalm 51:10")
+
+    UpdatePersonalPrayerRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 100
+        body:
+          type: string
+        topicTags:
+          type: array
+          items:
+            type: string
+        scriptureReference:
+          type: string
+          nullable: true
+
+    # ── Response Schemas ──
+
+    PrayerSession:
+      type: object
+      description: Full prayer session detail
+      properties:
+        prayerId:
+          type: string
+          pattern: '^ps_[a-zA-Z0-9]+$'
+          description: Unique prayer session ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the prayer occurred (immutable)
+        prayerType:
+          type: string
+          enum: [personal, guided, group, scriptureBased, intercessory, listening]
+        durationMinutes:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        linkedPrayerId:
+          type: string
+          nullable: true
+        linkedPrayerTitle:
+          type: string
+          nullable: true
+          description: Title of the linked prayer (resolved from library/personal)
+        moodBefore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        moodAfter:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        isEphemeral:
+          type: boolean
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    PrayerSessionSummary:
+      type: object
+      description: Prayer session summary for list views
+      properties:
+        prayerId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        prayerType:
+          type: string
+        durationMinutes:
+          type: integer
+          nullable: true
+        linkedPrayerTitle:
+          type: string
+          nullable: true
+        moodBefore:
+          type: integer
+          nullable: true
+        moodAfter:
+          type: integer
+          nullable: true
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    PrayerStats:
+      type: object
+      description: Prayer activity statistics and streak data
+      properties:
+        currentStreakDays:
+          type: integer
+          description: Consecutive days with at least one prayer session
+        longestStreakDays:
+          type: integer
+          description: Longest prayer streak ever achieved
+        totalPrayerDays:
+          type: integer
+          description: Total lifetime days with at least one prayer session
+        sessionsThisWeek:
+          type: integer
+          description: Number of prayer sessions in the current week
+        averageDurationMinutes:
+          type: number
+          format: float
+          nullable: true
+          description: Average session duration (null if no durations recorded)
+        typeDistribution:
+          type: object
+          description: Count of sessions per prayer type
+          properties:
+            personal:
+              type: integer
+            guided:
+              type: integer
+            group:
+              type: integer
+            scriptureBased:
+              type: integer
+            intercessory:
+              type: integer
+            listening:
+              type: integer
+        moodImpact:
+          type: object
+          description: Mood before/after averages across all sessions
+          properties:
+            averageMoodBefore:
+              type: number
+              format: float
+              nullable: true
+            averageMoodAfter:
+              type: number
+              format: float
+              nullable: true
+
+    PrayerTrends:
+      type: object
+      description: Time-series prayer trend data
+      properties:
+        period:
+          type: string
+          enum: [7d, 30d, 90d]
+        dailySessions:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              count:
+                type: integer
+              totalDurationMinutes:
+                type: integer
+                nullable: true
+        typeDistribution:
+          type: object
+          properties:
+            personal:
+              type: integer
+            guided:
+              type: integer
+            group:
+              type: integer
+            scriptureBased:
+              type: integer
+            intercessory:
+              type: integer
+            listening:
+              type: integer
+        timeOfDayDistribution:
+          type: object
+          description: Session count by time of day
+          properties:
+            morning:
+              type: integer
+            midday:
+              type: integer
+            evening:
+              type: integer
+            lateNight:
+              type: integer
+
+    LibraryPrayer:
+      type: object
+      description: A prayer from the curated content library
+      properties:
+        id:
+          type: string
+          pattern: '^pryr_[a-zA-Z0-9]+$'
+        title:
+          type: string
+        body:
+          type: string
+          description: Full prayer text (truncated if isLocked)
+        topicTags:
+          type: array
+          items:
+            type: string
+        sourceAttribution:
+          type: string
+          description: "Author, book, or 'Traditional' / 'App Original'"
+        scriptureConnection:
+          type: string
+          nullable: true
+          description: Associated Bible verse(s)
+        packId:
+          type: string
+        packName:
+          type: string
+        stepNumber:
+          type: integer
+          minimum: 1
+          maximum: 12
+          nullable: true
+          description: Step number if this is a step prayer
+        tier:
+          type: string
+          enum: [free, premium]
+        isLocked:
+          type: boolean
+          description: True if user has not purchased the premium pack
+        isFavorite:
+          type: boolean
+          description: True if user has favorited this prayer
+        language:
+          type: string
+          enum: [en, es]
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    PersonalPrayer:
+      type: object
+      description: A user-created personal prayer
+      properties:
+        id:
+          type: string
+          pattern: '^pp_[a-zA-Z0-9]+$'
+        title:
+          type: string
+        body:
+          type: string
+        topicTags:
+          type: array
+          items:
+            type: string
+        scriptureReference:
+          type: string
+          nullable: true
+        isFavorite:
+          type: boolean
+        sortOrder:
+          type: integer
+          description: User-defined display order
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+
+    # ── Common Schemas ──
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+
+    CursorPage:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+          description: Application error code
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+          properties:
+            pointer:
+              type: string
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+  responses:
+    BadRequest:
+      description: Bad Request -- Malformed request syntax
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "550e8400-e29b-41d4-a716-446655440000"
+                code: "rr:0x00500000"
+                status: 400
+                title: "Bad Request"
+                detail: "Request body is malformed"
+
+    Unauthorized:
+      description: Unauthorized -- Missing or invalid authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found -- Resource does not exist or existence not disclosed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity -- Validation failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "550e8400-e29b-41d4-a716-446655440001"
+                code: "rr:0x00500001"
+                status: 422
+                title: "Invalid Prayer Type"
+                detail: "prayerType must be one of: personal, guided, group, scriptureBased, intercessory, listening"
+                source:
+                  pointer: "/data/prayerType"
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

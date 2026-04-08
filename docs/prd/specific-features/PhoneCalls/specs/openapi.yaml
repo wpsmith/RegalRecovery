@@ -1,0 +1,1028 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Phone Calls Activity API
+  version: 1.0.0
+  description: |
+    Phone call logging and tracking API for Regal Recovery.
+
+    Covers:
+    - Phone call logging (made and received, connected and attempted)
+    - Quick log (minimal friction one-tap logging)
+    - Saved recovery contacts with optional phone number for deep-link dialing
+    - Call history with filtering, search, and calendar views
+    - Call streak tracking (consecutive days with at least one call)
+    - Trends and insights (frequency, connection rate, contact distribution)
+    - Isolation warnings when no calls logged for configurable threshold
+
+    All call timestamps are immutable once recorded (FR2.7).
+    Feature flag: `activity.phone-calls` (P1, Wave 2).
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Phone Calls
+    description: Phone call logging and history
+  - name: Saved Contacts
+    description: Saved recovery contacts for quick-select and emergency dialing
+  - name: Phone Call Trends
+    description: Call frequency, connection rate, and isolation insights
+  - name: Phone Call Streak
+    description: Consecutive-day call streak tracking
+
+paths:
+  # ──────────────────────────────────────────────
+  # Phone Call CRUD
+  # ──────────────────────────────────────────────
+  /activities/phone-calls:
+    post:
+      operationId: createPhoneCallLog
+      tags: [Phone Calls]
+      summary: Log a phone call
+      description: |
+        Record a recovery-related phone call (made or received).
+
+        Both connected and attempted-but-not-connected calls are valid entries.
+        Attempted calls still count toward the daily call streak because the effort
+        of reaching out is the behavior being reinforced.
+
+        Timestamp is immutable once created (FR2.7). A calendar activity dual-write
+        is created automatically.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePhoneCallRequest'
+            example:
+              timestamp: "2026-03-28T12:30:00Z"
+              direction: "made"
+              contactType: "sponsor"
+              connected: true
+              contactName: "Mike S."
+              savedContactId: "sc_99999"
+              durationMinutes: 15
+              notes: "Discussed urge triggers from earlier today"
+      responses:
+        '201':
+          description: Created - Phone call logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneCallResponse'
+              example:
+                data:
+                  callId: "pc_11111"
+                  timestamp: "2026-03-28T12:30:00Z"
+                  direction: "made"
+                  contactType: "sponsor"
+                  connected: true
+                  contactName: "Mike S."
+                  savedContactId: "sc_99999"
+                  durationMinutes: 15
+                  notes: "Discussed urge triggers from earlier today"
+                  callStreakDays: 12
+                  crossReferencePrompt: "You logged a call with your sponsor. Would you also like to log a person check-in?"
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/phone-calls/pc_11111"
+                meta:
+                  createdAt: "2026-03-28T12:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPhoneCallLogs
+      tags: [Phone Calls]
+      summary: List phone call logs
+      description: |
+        Retrieve phone call logs in reverse chronological order with cursor-based pagination.
+
+        Supports filtering by direction, contact type, connected status, and date range.
+        Supports keyword search on notes.
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+          description: |
+            OData-style filter expression. Supported fields:
+            - `direction` (eq): `made`, `received`
+            - `contactType` (eq): `sponsor`, `accountability-partner`, `counselor`, `coach`, `support-person`, `custom`
+            - `connected` (eq): `true`, `false`
+            - `timestamp` (ge, le, gt, lt): ISO 8601 date-time
+          example: "direction eq 'made' and connected eq true"
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date (inclusive) for date range filter
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date (inclusive) for date range filter
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+          description: Keyword search on notes (case-insensitive)
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: "-timestamp"
+          description: "Sort field: -timestamp (desc, default), timestamp (asc)"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Opaque cursor for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum number of results per page
+      responses:
+        '200':
+          description: OK - Phone call logs retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneCallListResponse'
+              example:
+                data:
+                  - callId: "pc_11111"
+                    timestamp: "2026-03-28T12:30:00Z"
+                    direction: "made"
+                    contactType: "sponsor"
+                    connected: true
+                    contactName: "Mike S."
+                    durationMinutes: 15
+                    links:
+                      self: "https://api.regalrecovery.com/v1/activities/phone-calls/pc_11111"
+                  - callId: "pc_11112"
+                    timestamp: "2026-03-27T18:00:00Z"
+                    direction: "received"
+                    contactType: "accountability-partner"
+                    connected: true
+                    contactName: "James R."
+                    durationMinutes: 10
+                    links:
+                      self: "https://api.regalrecovery.com/v1/activities/phone-calls/pc_11112"
+                links:
+                  self: "https://api.regalrecovery.com/v1/activities/phone-calls?limit=50"
+                  next: "https://api.regalrecovery.com/v1/activities/phone-calls?cursor=bmV4dA&limit=50"
+                meta:
+                  page:
+                    nextCursor: "bmV4dA"
+                    limit: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/phone-calls/{callId}:
+    get:
+      operationId: getPhoneCallLog
+      tags: [Phone Calls]
+      summary: Get phone call log by ID
+      description: Retrieve a single phone call log entry with full details including notes.
+      parameters:
+        - $ref: '#/components/parameters/CallId'
+      responses:
+        '200':
+          description: OK - Phone call log retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneCallResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updatePhoneCallLog
+      tags: [Phone Calls]
+      summary: Update phone call log
+      description: |
+        Partial update of a phone call log entry (JSON Merge Patch RFC 7396).
+
+        The `timestamp` field is immutable and cannot be changed (FR2.7).
+        Use this to expand a quick-logged call with additional details.
+      parameters:
+        - $ref: '#/components/parameters/CallId'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdatePhoneCallRequest'
+            example:
+              contactName: "Mike S."
+              durationMinutes: 20
+              notes: "Great conversation about accountability"
+      responses:
+        '200':
+          description: OK - Phone call log updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneCallResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deletePhoneCallLog
+      tags: [Phone Calls]
+      summary: Delete phone call log
+      description: |
+        Delete a phone call log entry. The call streak and analytics
+        are recalculated. Calendar activity dual-write is also deleted.
+      parameters:
+        - $ref: '#/components/parameters/CallId'
+      responses:
+        '204':
+          description: No Content - Phone call log deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ──────────────────────────────────────────────
+  # Saved Contacts
+  # ──────────────────────────────────────────────
+  /activities/phone-calls/saved-contacts:
+    post:
+      operationId: createSavedContact
+      tags: [Saved Contacts]
+      summary: Create a saved recovery contact
+      description: |
+        Save a frequently called recovery contact for faster logging.
+        Maximum 10 saved contacts per user.
+        Contacts with phone numbers enable the "Call Now" deep-link button
+        and appear in the Emergency Tools overlay.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSavedContactRequest'
+            example:
+              contactName: "Mike S."
+              contactType: "sponsor"
+              phoneNumber: "+15551234567"
+      responses:
+        '201':
+          description: Created - Saved contact created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedContactResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listSavedContacts
+      tags: [Saved Contacts]
+      summary: List saved recovery contacts
+      description: Retrieve all saved recovery contacts for the authenticated user (max 10).
+      responses:
+        '200':
+          description: OK - Saved contacts retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedContactListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/phone-calls/saved-contacts/{savedContactId}:
+    patch:
+      operationId: updateSavedContact
+      tags: [Saved Contacts]
+      summary: Update a saved contact
+      parameters:
+        - $ref: '#/components/parameters/SavedContactId'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdateSavedContactRequest'
+      responses:
+        '200':
+          description: OK - Saved contact updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedContactResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteSavedContact
+      tags: [Saved Contacts]
+      summary: Delete a saved contact
+      description: |
+        Delete a saved contact. Historical call logs referencing this
+        contact's savedContactId are preserved unchanged.
+      parameters:
+        - $ref: '#/components/parameters/SavedContactId'
+      responses:
+        '204':
+          description: No Content - Saved contact deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ──────────────────────────────────────────────
+  # Call Streak
+  # ──────────────────────────────────────────────
+  /activities/phone-calls/streak:
+    get:
+      operationId: getPhoneCallStreak
+      tags: [Phone Call Streak]
+      summary: Get phone call streak
+      description: |
+        Get the current consecutive-day call streak.
+        A day counts if at least one call (connected or attempted) was logged.
+      responses:
+        '200':
+          description: OK - Call streak retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneCallStreakResponse'
+              example:
+                data:
+                  currentStreakDays: 12
+                  longestStreakDays: 34
+                  lastCallDate: "2026-03-28"
+                  totalCallsAllTime: 156
+                  totalConnectedCalls: 132
+                meta:
+                  calculatedAt: "2026-03-28T15:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ──────────────────────────────────────────────
+  # Trends and Insights
+  # ──────────────────────────────────────────────
+  /activities/phone-calls/trends:
+    get:
+      operationId: getPhoneCallTrends
+      tags: [Phone Call Trends]
+      summary: Get phone call trends and insights
+      description: |
+        Retrieve phone call trends including frequency, connection rate,
+        contact type distribution, and isolation status.
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: "30d"
+          description: Time period for trend data
+      responses:
+        '200':
+          description: OK - Trends retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneCallTrendsResponse'
+              example:
+                data:
+                  period: "30d"
+                  totalCalls: 42
+                  callsMade: 30
+                  callsReceived: 12
+                  connectedCalls: 36
+                  attemptedCalls: 6
+                  connectionRate: 85.7
+                  averageCallsPerWeek: 10.5
+                  contactTypeDistribution:
+                    - contactType: "sponsor"
+                      count: 18
+                      percentage: 42.9
+                    - contactType: "accountability-partner"
+                      count: 12
+                      percentage: 28.6
+                    - contactType: "counselor"
+                      count: 6
+                      percentage: 14.3
+                    - contactType: "support-person"
+                      count: 6
+                      percentage: 14.3
+                  previousPeriodComparison:
+                    totalCallsDelta: 8
+                    connectionRateDelta: 5.2
+                  daysSinceLastCall: 0
+                  isolationWarning: false
+                meta:
+                  calculatedAt: "2026-03-28T15:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/phone-calls/trends/daily:
+    get:
+      operationId: getPhoneCallDailyTrends
+      tags: [Phone Call Trends]
+      summary: Get daily call frequency breakdown
+      description: |
+        Retrieve per-day call counts for charting (bar chart data).
+        Includes breakdown by direction and connected status.
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: "30d"
+      responses:
+        '200':
+          description: OK - Daily trends retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneCallDailyTrendsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  parameters:
+    CallId:
+      name: callId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^pc_[a-zA-Z0-9]+$'
+      description: Unique phone call log identifier
+      example: "pc_11111"
+
+    SavedContactId:
+      name: savedContactId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^sc_[a-zA-Z0-9]+$'
+      description: Unique saved contact identifier
+      example: "sc_99999"
+
+  schemas:
+    # ── Request Schemas ──
+
+    CreatePhoneCallRequest:
+      type: object
+      required:
+        - direction
+        - contactType
+        - connected
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the call occurred (default: now, editable for backdating)
+        direction:
+          type: string
+          enum: [made, received]
+          description: Whether the user made or received the call
+        contactType:
+          type: string
+          enum: [sponsor, accountability-partner, counselor, coach, support-person, custom]
+          description: Type of recovery contact
+        customContactLabel:
+          type: string
+          maxLength: 50
+          description: Free-text label when contactType is "custom". Required if contactType is "custom".
+        connected:
+          type: boolean
+          description: Whether a conversation actually happened
+        contactName:
+          type: string
+          maxLength: 50
+          description: Free-text contact name (optional, saved for future quick-select)
+        savedContactId:
+          type: string
+          description: Reference to a saved contact (optional)
+        durationMinutes:
+          type: integer
+          minimum: 0
+          description: Call duration in minutes (optional)
+        notes:
+          type: string
+          maxLength: 500
+          description: Free-text notes about the call (optional, voice-to-text available)
+
+    UpdatePhoneCallRequest:
+      type: object
+      description: |
+        Partial update fields. Timestamp is immutable and cannot be included.
+      properties:
+        direction:
+          type: string
+          enum: [made, received]
+        contactType:
+          type: string
+          enum: [sponsor, accountability-partner, counselor, coach, support-person, custom]
+        customContactLabel:
+          type: string
+          maxLength: 50
+        connected:
+          type: boolean
+        contactName:
+          type: string
+          maxLength: 50
+        savedContactId:
+          type: string
+        durationMinutes:
+          type: integer
+          minimum: 0
+        notes:
+          type: string
+          maxLength: 500
+
+    CreateSavedContactRequest:
+      type: object
+      required:
+        - contactName
+        - contactType
+      properties:
+        contactName:
+          type: string
+          maxLength: 50
+          description: Display name for the saved contact
+        contactType:
+          type: string
+          enum: [sponsor, accountability-partner, counselor, coach, support-person, custom]
+          description: Type of recovery contact
+        phoneNumber:
+          type: string
+          pattern: '^\+[1-9]\d{1,14}$'
+          description: E.164 phone number (enables "Call Now" deep-link button)
+
+    UpdateSavedContactRequest:
+      type: object
+      properties:
+        contactName:
+          type: string
+          maxLength: 50
+        contactType:
+          type: string
+          enum: [sponsor, accountability-partner, counselor, coach, support-person, custom]
+        phoneNumber:
+          type: string
+          pattern: '^\+[1-9]\d{1,14}$'
+          nullable: true
+
+    # ── Response Schemas ──
+
+    PhoneCall:
+      type: object
+      properties:
+        callId:
+          type: string
+          description: Unique phone call log identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: When the call occurred (immutable)
+        direction:
+          type: string
+          enum: [made, received]
+        contactType:
+          type: string
+          enum: [sponsor, accountability-partner, counselor, coach, support-person, custom]
+        customContactLabel:
+          type: string
+          nullable: true
+        connected:
+          type: boolean
+        contactName:
+          type: string
+          nullable: true
+        savedContactId:
+          type: string
+          nullable: true
+        durationMinutes:
+          type: integer
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        callStreakDays:
+          type: integer
+          description: Current consecutive-day call streak after this entry
+        crossReferencePrompt:
+          type: string
+          nullable: true
+          description: Suggestion to also log a person check-in (dismissible)
+        links:
+          $ref: '#/components/schemas/Links'
+
+    PhoneCallResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PhoneCall'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    PhoneCallListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneCall'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+
+    SavedContact:
+      type: object
+      properties:
+        savedContactId:
+          type: string
+        contactName:
+          type: string
+        contactType:
+          type: string
+          enum: [sponsor, accountability-partner, counselor, coach, support-person, custom]
+        phoneNumber:
+          type: string
+          nullable: true
+        hasPhoneNumber:
+          type: boolean
+          description: Indicates whether deep-link calling is available
+        links:
+          $ref: '#/components/schemas/Links'
+
+    SavedContactResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/SavedContact'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    SavedContactListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedContact'
+          maxItems: 10
+        meta:
+          type: object
+          properties:
+            totalContacts:
+              type: integer
+              maximum: 10
+
+    PhoneCallStreakResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            currentStreakDays:
+              type: integer
+              description: Consecutive days with at least one call logged
+            longestStreakDays:
+              type: integer
+              description: All-time longest consecutive call streak
+            lastCallDate:
+              type: string
+              format: date
+              nullable: true
+              description: Date of most recent call log
+            totalCallsAllTime:
+              type: integer
+            totalConnectedCalls:
+              type: integer
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    PhoneCallTrendsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period:
+              type: string
+              enum: [7d, 30d, 90d]
+            totalCalls:
+              type: integer
+            callsMade:
+              type: integer
+            callsReceived:
+              type: integer
+            connectedCalls:
+              type: integer
+            attemptedCalls:
+              type: integer
+            connectionRate:
+              type: number
+              format: double
+              description: Percentage of outgoing calls that connected (0-100)
+            averageCallsPerWeek:
+              type: number
+              format: double
+            contactTypeDistribution:
+              type: array
+              items:
+                type: object
+                properties:
+                  contactType:
+                    type: string
+                  count:
+                    type: integer
+                  percentage:
+                    type: number
+                    format: double
+            previousPeriodComparison:
+              type: object
+              properties:
+                totalCallsDelta:
+                  type: integer
+                  description: Change in total calls vs. previous period
+                connectionRateDelta:
+                  type: number
+                  format: double
+                  description: Change in connection rate vs. previous period
+            daysSinceLastCall:
+              type: integer
+              description: Number of days since the most recent call
+            isolationWarning:
+              type: boolean
+              description: True if daysSinceLastCall exceeds user's configured threshold
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    PhoneCallDailyTrendsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              totalCalls:
+                type: integer
+              callsMade:
+                type: integer
+              callsReceived:
+                type: integer
+              connectedCalls:
+                type: integer
+              attemptedCalls:
+                type: integer
+        meta:
+          type: object
+          properties:
+            period:
+              type: string
+            totalDays:
+              type: integer
+
+    # ── Common Schemas ──
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

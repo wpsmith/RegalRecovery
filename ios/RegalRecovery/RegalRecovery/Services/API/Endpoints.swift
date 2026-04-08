@@ -50,6 +50,24 @@ enum Endpoint: Sendable {
     case logActivity(type: String, data: ActivityRequest)
     case getActivities(type: String, cursor: String?, limit: Int?)
 
+    // MARK: Exercise
+    case createExerciseLog(CreateExerciseLogRequest)
+    case listExerciseLogs(activityType: String?, intensity: String?, startDate: String?, endDate: String?, search: String?, cursor: String?, limit: Int?, sort: String?)
+    case getExerciseLog(exerciseId: String)
+    case updateExerciseLog(exerciseId: String, UpdateExerciseLogRequest)
+    case deleteExerciseLog(exerciseId: String)
+    case listExerciseFavorites
+    case createExerciseFavorite(CreateExerciseFavoriteRequest)
+    case updateExerciseFavorite(favoriteId: String, CreateExerciseFavoriteRequest)
+    case deleteExerciseFavorite(favoriteId: String)
+    case getExerciseStats(period: String, referenceDate: String?)
+    case getExerciseStreak
+    case getExerciseCorrelations
+    case getExerciseGoal
+    case setExerciseGoal(SetExerciseGoalRequest)
+    case deleteExerciseGoal
+    case getExerciseWidget
+
     // MARK: Content
     case listAffirmations(cursor: String?, limit: Int?, pack: String?, category: String?)
     case getTodayAffirmation
@@ -64,9 +82,96 @@ enum Endpoint: Sendable {
     case listOwnedPacks
     case purchaseContentPack(packId: String, receipt: PurchaseRequest)
 
+    // MARK: Prayer Activity
+    case createPrayerSession(CreatePrayerSessionDTO)
+    case listPrayerSessions(prayerType: String?, startDate: String?, endDate: String?, cursor: String?, limit: Int?)
+    case getPrayerSession(id: String)
+    case updatePrayerSession(id: String, UpdatePrayerSessionDTO)
+    case deletePrayerSession(id: String)
+    case getPrayerStats
+    case getPrayerTrends(period: String)
+    case getTodayPrayer
+    case getPrayerById(id: String)
+    case createPersonalPrayer(CreatePersonalPrayerDTO)
+    case listPersonalPrayers(cursor: String?, limit: Int?)
+    case updatePersonalPrayer(id: String, UpdatePersonalPrayerDTO)
+    case deletePersonalPrayer(id: String)
+    case reorderPersonalPrayers(ReorderPrayersDTO)
+    case listFavoritePrayers(cursor: String?, limit: Int?)
+    case favoritePrayer(id: String)
+    case unfavoritePrayer(id: String)
+
+    // MARK: Phone Calls
+    case createPhoneCall(CreatePhoneCallRequest)
+    case listPhoneCalls(direction: String?, contactType: String?, connected: Bool?, startDate: String?, endDate: String?, search: String?, cursor: String?, limit: Int?)
+    case getPhoneCall(callId: String)
+    case updatePhoneCall(callId: String, UpdatePhoneCallRequest)
+    case deletePhoneCall(callId: String)
+    case createSavedContact(CreateSavedContactAPIRequest)
+    case listSavedContacts
+    case updateSavedContact(savedContactId: String, UpdateSavedContactAPIRequest)
+    case deleteSavedContact(savedContactId: String)
+    case getPhoneCallStreak
+    case getPhoneCallTrends(period: String?)
+    case getPhoneCallDailyTrends(period: String?)
+
+    // MARK: Post-Mortem
+    case createPostMortem(CreatePostMortemRequest)
+    case listPostMortems(startDate: String?, endDate: String?, addictionId: String?, status: String?, eventType: String?, cursor: String?, limit: Int?)
+    case getPostMortem(analysisId: String)
+    case updatePostMortem(analysisId: String, UpdatePostMortemRequest)
+    case deletePostMortem(analysisId: String)
+    case completePostMortem(analysisId: String)
+    case sharePostMortem(analysisId: String, SharePostMortemRequestBody)
+    case exportPostMortem(analysisId: String, format: String)
+    case convertActionItem(analysisId: String, actionId: String, ConvertActionItemRequestBody)
+    case getPostMortemInsights(addictionId: String?)
+
     // MARK: Flags
     case getFlags
     case evaluateFlag(key: String)
+
+    // MARK: Meetings
+    case createMeetingLog(CreateMeetingLogRequest)
+    case listMeetingLogs(meetingType: MeetingType?, startDate: String?, endDate: String?, cursor: String?, limit: Int?, sort: String?)
+    case getMeetingLog(meetingId: String)
+    case updateMeetingLog(meetingId: String, UpdateMeetingLogRequest)
+    case deleteMeetingLog(meetingId: String)
+    case getMeetingAttendanceSummary(period: MeetingSummaryPeriod, date: String?)
+    case createSavedMeeting(CreateSavedMeetingRequest)
+    case listSavedMeetings
+    case getSavedMeeting(savedMeetingId: String)
+    case updateSavedMeeting(savedMeetingId: String, UpdateSavedMeetingRequest)
+    case deleteSavedMeeting(savedMeetingId: String)
+
+    // MARK: Nutrition
+    case nutritionCreateMeal(CreateMealLogRequest)
+    case nutritionQuickLog(CreateQuickMealLogRequest)
+    case nutritionGetMeal(mealId: String)
+    case nutritionListMeals(mealType: String?, eatingContext: String?, startDate: String?, endDate: String?, search: String?, cursor: String?, limit: Int?)
+    case nutritionUpdateMeal(mealId: String, UpdateMealLogRequest)
+    case nutritionDeleteMeal(mealId: String)
+    case nutritionGetHydration
+    case nutritionLogHydration(LogHydrationRequest)
+    case nutritionHydrationHistory(startDate: String, endDate: String)
+    case nutritionCalendar(year: Int, month: Int)
+    case nutritionTrends(period: String)
+    case nutritionWeeklySummary
+    case nutritionGetSettings
+    case nutritionUpdateSettings(Any)
+
+    // MARK: Mood
+    case createMoodEntry(CreateMoodEntryRequest)
+    case listMoodEntries(startDate: String?, endDate: String?, rating: String?, emotionLabel: String?, timeOfDay: String?, search: String?, cursor: String?, limit: Int?)
+    case getMoodEntry(moodId: String)
+    case updateMoodEntry(moodId: String, UpdateMoodEntryRequest)
+    case deleteMoodEntry(moodId: String)
+    case getMoodToday
+    case getMoodDailySummaries(startDate: String, endDate: String, cursor: String?, limit: Int?)
+    case getMoodTrends(period: String)
+    case getMoodCorrelations(period: String)
+    case getMoodAlertStatus
+    case getMoodStreak
 
     // MARK: - Path
 
@@ -103,6 +208,30 @@ enum Endpoint: Sendable {
         case .logActivity(let type, _): return "/activities/\(type)"
         case .getActivities(let type, _, _): return "/activities/\(type)"
 
+        // Exercise
+        case .createExerciseLog, .listExerciseLogs: return "/activities/exercise"
+        case .getExerciseLog(let id), .updateExerciseLog(let id, _), .deleteExerciseLog(let id):
+            return "/activities/exercise/\(id)"
+        case .listExerciseFavorites, .createExerciseFavorite: return "/activities/exercise/favorites"
+        case .updateExerciseFavorite(let id, _), .deleteExerciseFavorite(let id):
+            return "/activities/exercise/favorites/\(id)"
+        case .getExerciseStats: return "/activities/exercise/stats"
+        case .getExerciseStreak: return "/activities/exercise/streak"
+        case .getExerciseCorrelations: return "/activities/exercise/correlations"
+        case .getExerciseGoal, .setExerciseGoal, .deleteExerciseGoal: return "/activities/exercise/goals"
+        case .getExerciseWidget: return "/activities/exercise/widget"
+
+        // Post-Mortem
+        case .createPostMortem, .listPostMortems: return "/activities/post-mortem"
+        case .getPostMortem(let id), .updatePostMortem(let id, _), .deletePostMortem(let id):
+            return "/activities/post-mortem/\(id)"
+        case .completePostMortem(let id): return "/activities/post-mortem/\(id)/complete"
+        case .sharePostMortem(let id, _): return "/activities/post-mortem/\(id)/share"
+        case .exportPostMortem(let id, _): return "/activities/post-mortem/\(id)/export"
+        case .convertActionItem(let id, let actionId, _):
+            return "/activities/post-mortem/\(id)/action-items/\(actionId)/convert"
+        case .getPostMortemInsights: return "/activities/post-mortem/insights"
+
         // Content
         case .listAffirmations: return "/content/affirmations"
         case .getTodayAffirmation: return "/content/affirmations/today"
@@ -113,13 +242,70 @@ enum Endpoint: Sendable {
         case .getTodayDevotional: return "/content/devotionals/today"
         case .listPrayers: return "/content/prayers"
         case .listResources: return "/content/resources"
+
+        // Prayer Activity
+        case .createPrayerSession, .listPrayerSessions: return "/activities/prayer"
+        case .getPrayerSession(let id), .updatePrayerSession(let id, _), .deletePrayerSession(let id): return "/activities/prayer/\(id)"
+        case .getPrayerStats: return "/activities/prayer/stats"
+        case .getPrayerTrends: return "/activities/prayer/trends"
+        case .getTodayPrayer: return "/content/prayers/today"
+        case .getPrayerById(let id): return "/content/prayers/\(id)"
+        case .createPersonalPrayer, .listPersonalPrayers: return "/content/prayers/personal"
+        case .updatePersonalPrayer(let id, _), .deletePersonalPrayer(let id): return "/content/prayers/personal/\(id)"
+        case .reorderPersonalPrayers: return "/content/prayers/personal/order"
+        case .listFavoritePrayers: return "/content/prayers/favorites"
+        case .favoritePrayer(let id), .unfavoritePrayer(let id): return "/content/prayers/favorites/\(id)"
         case .listContentPacks: return "/content/packs"
         case .listOwnedPacks: return "/content/packs/owned"
         case .purchaseContentPack(let packId, _): return "/content/packs/\(packId)/purchase"
 
+        // Phone Calls
+        case .createPhoneCall, .listPhoneCalls: return "/activities/phone-calls"
+        case .getPhoneCall(let callId), .updatePhoneCall(let callId, _), .deletePhoneCall(let callId):
+            return "/activities/phone-calls/\(callId)"
+        case .createSavedContact, .listSavedContacts: return "/activities/phone-calls/saved-contacts"
+        case .updateSavedContact(let id, _), .deleteSavedContact(let id):
+            return "/activities/phone-calls/saved-contacts/\(id)"
+        case .getPhoneCallStreak: return "/activities/phone-calls/streak"
+        case .getPhoneCallTrends: return "/activities/phone-calls/trends"
+        case .getPhoneCallDailyTrends: return "/activities/phone-calls/trends/daily"
+
         // Flags
         case .getFlags: return "/flags"
         case .evaluateFlag(let key): return "/flags/\(key)"
+
+        // Meetings
+        case .createMeetingLog, .listMeetingLogs: return "/activities/meetings"
+        case .getMeetingLog(let id), .updateMeetingLog(let id, _), .deleteMeetingLog(let id):
+            return "/activities/meetings/\(id)"
+        case .getMeetingAttendanceSummary: return "/activities/meetings/summary"
+        case .createSavedMeeting, .listSavedMeetings: return "/activities/meetings/saved"
+        case .getSavedMeeting(let id), .updateSavedMeeting(let id, _), .deleteSavedMeeting(let id):
+            return "/activities/meetings/saved/\(id)"
+
+        // Nutrition
+        case .nutritionCreateMeal, .nutritionListMeals: return "/activities/nutrition/meals"
+        case .nutritionQuickLog: return "/activities/nutrition/meals/quick"
+        case .nutritionGetMeal(let id), .nutritionUpdateMeal(let id, _), .nutritionDeleteMeal(let id):
+            return "/activities/nutrition/meals/\(id)"
+        case .nutritionGetHydration: return "/activities/nutrition/hydration"
+        case .nutritionLogHydration: return "/activities/nutrition/hydration/log"
+        case .nutritionHydrationHistory: return "/activities/nutrition/hydration/history"
+        case .nutritionCalendar: return "/activities/nutrition/calendar"
+        case .nutritionTrends: return "/activities/nutrition/trends"
+        case .nutritionWeeklySummary: return "/activities/nutrition/trends/weekly-summary"
+        case .nutritionGetSettings, .nutritionUpdateSettings: return "/activities/nutrition/settings"
+
+        // Mood
+        case .createMoodEntry, .listMoodEntries: return "/activities/mood"
+        case .getMoodEntry(let moodId), .updateMoodEntry(let moodId, _), .deleteMoodEntry(let moodId):
+            return "/activities/mood/\(moodId)"
+        case .getMoodToday: return "/activities/mood/today"
+        case .getMoodDailySummaries: return "/activities/mood/daily-summaries"
+        case .getMoodTrends: return "/activities/mood/trends"
+        case .getMoodCorrelations: return "/activities/mood/correlations"
+        case .getMoodAlertStatus: return "/activities/mood/alerts/status"
+        case .getMoodStreak: return "/activities/mood/streak"
         }
     }
 
@@ -133,16 +319,47 @@ enum Endpoint: Sendable {
              .logRelapse,
              .logActivity,
              .addFavoriteAffirmation,
-             .purchaseContentPack:
+             .purchaseContentPack,
+             .createPrayerSession,
+             .createPersonalPrayer,
+             .favoritePrayer,
+             .createPhoneCall,
+             .createSavedContact,
+             .createPostMortem,
+             .completePostMortem,
+             .sharePostMortem,
+             .convertActionItem,
+             .createMeetingLog,
+             .createSavedMeeting,
+             .nutritionCreateMeal, .nutritionQuickLog, .nutritionLogHydration,
+             .createExerciseLog,
+             .createExerciseFavorite,
+             .createMoodEntry:
             return .post
 
-        case .updateSettings, .updatePrivacySettings:
+        case .updateSettings, .updatePrivacySettings,
+             .reorderPersonalPrayers,
+             .updateExerciseFavorite, .setExerciseGoal:
             return .put
 
-        case .updateProfile, .setPrimaryAddiction:
+        case .updateProfile, .setPrimaryAddiction,
+             .updatePrayerSession, .updatePersonalPrayer,
+             .updatePhoneCall, .updateSavedContact,
+             .updatePostMortem,
+             .updateMeetingLog, .updateSavedMeeting,
+             .nutritionUpdateMeal, .nutritionUpdateSettings,
+             .updateExerciseLog,
+             .updateMoodEntry:
             return .patch
 
-        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation:
+        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
+             .deletePrayerSession, .deletePersonalPrayer, .unfavoritePrayer,
+             .deletePhoneCall, .deleteSavedContact,
+             .deletePostMortem,
+             .deleteMeetingLog, .deleteSavedMeeting,
+             .nutritionDeleteMeal,
+             .deleteExerciseLog, .deleteExerciseFavorite, .deleteExerciseGoal,
+             .deleteMoodEntry:
             return .delete
 
         default:
@@ -169,6 +386,34 @@ enum Endpoint: Sendable {
         case .logRelapse(let req): return req
         case .logActivity(_, let data): return data
         case .purchaseContentPack(_, let receipt): return receipt
+        case .createPrayerSession(let req): return req
+        case .updatePrayerSession(_, let req): return req
+        case .createPersonalPrayer(let req): return req
+        case .updatePersonalPrayer(_, let req): return req
+        case .reorderPersonalPrayers(let req): return req
+        case .createPhoneCall(let req): return req
+        case .updatePhoneCall(_, let req): return req
+        case .createSavedContact(let req): return req
+        case .updateSavedContact(_, let req): return req
+        case .createPostMortem(let req): return req
+        case .updatePostMortem(_, let req): return req
+        case .sharePostMortem(_, let req): return req
+        case .convertActionItem(_, _, let req): return req
+        case .createMeetingLog(let req): return req
+        case .updateMeetingLog(_, let req): return req
+        case .createSavedMeeting(let req): return req
+        case .updateSavedMeeting(_, let req): return req
+        case .nutritionCreateMeal(let req): return req
+        case .nutritionQuickLog(let req): return req
+        case .nutritionUpdateMeal(_, let req): return req
+        case .nutritionLogHydration(let req): return req
+        case .createExerciseLog(let req): return req
+        case .updateExerciseLog(_, let req): return req
+        case .createExerciseFavorite(let req): return req
+        case .updateExerciseFavorite(_, let req): return req
+        case .setExerciseGoal(let req): return req
+        case .createMoodEntry(let req): return req
+        case .updateMoodEntry(_, let req): return req
         default: return nil
         }
     }
@@ -201,6 +446,20 @@ enum Endpoint: Sendable {
             if let cursor { items.append(.init(name: "cursor", value: cursor)) }
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
 
+        case .listExerciseLogs(let activityType, let intensity, let startDate, let endDate, let search, let cursor, let limit, let sort):
+            if let activityType { items.append(.init(name: "activityType", value: activityType)) }
+            if let intensity { items.append(.init(name: "intensity", value: intensity)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+            if let sort { items.append(.init(name: "sort", value: sort)) }
+
+        case .getExerciseStats(let period, let referenceDate):
+            items.append(.init(name: "period", value: period))
+            if let referenceDate { items.append(.init(name: "referenceDate", value: referenceDate)) }
+
         case .listAffirmations(let cursor, let limit, let pack, let category):
             if let cursor { items.append(.init(name: "cursor", value: cursor)) }
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
@@ -221,6 +480,106 @@ enum Endpoint: Sendable {
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
             if let type { items.append(.init(name: "type", value: type)) }
             if let category { items.append(.init(name: "category", value: category)) }
+
+        case .listPrayerSessions(let prayerType, let startDate, let endDate, let cursor, let limit):
+            if let prayerType { items.append(.init(name: "prayerType", value: prayerType)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getPrayerTrends(let period):
+            items.append(.init(name: "period", value: period))
+
+        case .listPersonalPrayers(let cursor, let limit),
+             .listFavoritePrayers(let cursor, let limit):
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .listPhoneCalls(let direction, let contactType, let connected, let startDate, let endDate, let search, let cursor, let limit):
+            if let direction { items.append(.init(name: "direction", value: direction)) }
+            if let contactType { items.append(.init(name: "contactType", value: contactType)) }
+            if let connected { items.append(.init(name: "connected", value: String(connected))) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getPhoneCallTrends(let period):
+            if let period { items.append(.init(name: "period", value: period)) }
+
+        case .getPhoneCallDailyTrends(let period):
+            if let period { items.append(.init(name: "period", value: period)) }
+
+        case .listPostMortems(let startDate, let endDate, let addictionId, let status, let eventType, let cursor, let limit):
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let addictionId { items.append(.init(name: "addictionId", value: addictionId)) }
+            if let status { items.append(.init(name: "status", value: status)) }
+            if let eventType { items.append(.init(name: "eventType", value: eventType)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .exportPostMortem(_, let format):
+            items.append(.init(name: "format", value: format))
+
+        case .getPostMortemInsights(let addictionId):
+            if let addictionId { items.append(.init(name: "addictionId", value: addictionId)) }
+
+        case .listMeetingLogs(let meetingType, let startDate, let endDate, let cursor, let limit, let sort):
+            if let meetingType { items.append(.init(name: "meetingType", value: meetingType.rawValue)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+            if let sort { items.append(.init(name: "sort", value: sort)) }
+
+        case .getMeetingAttendanceSummary(let period, let date):
+            items.append(.init(name: "period", value: period.rawValue))
+            if let date { items.append(.init(name: "date", value: date)) }
+
+        case .nutritionListMeals(let mealType, let eatingContext, let startDate, let endDate, let search, let cursor, let limit):
+            if let mealType { items.append(.init(name: "mealType", value: mealType)) }
+            if let eatingContext { items.append(.init(name: "eatingContext", value: eatingContext)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .nutritionHydrationHistory(let startDate, let endDate):
+            items.append(.init(name: "startDate", value: startDate))
+            items.append(.init(name: "endDate", value: endDate))
+
+        case .nutritionCalendar(let year, let month):
+            items.append(.init(name: "year", value: String(year)))
+            items.append(.init(name: "month", value: String(month)))
+
+        case .nutritionTrends(let period):
+            items.append(.init(name: "period", value: period))
+
+        case .listMoodEntries(let startDate, let endDate, let rating, let emotionLabel, let timeOfDay, let search, let cursor, let limit):
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let rating { items.append(.init(name: "rating", value: rating)) }
+            if let emotionLabel { items.append(.init(name: "emotionLabel", value: emotionLabel)) }
+            if let timeOfDay { items.append(.init(name: "timeOfDay", value: timeOfDay)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getMoodDailySummaries(let startDate, let endDate, let cursor, let limit):
+            items.append(.init(name: "startDate", value: startDate))
+            items.append(.init(name: "endDate", value: endDate))
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getMoodTrends(let period):
+            items.append(.init(name: "period", value: period))
+
+        case .getMoodCorrelations(let period):
+            items.append(.init(name: "period", value: period))
 
         default:
             break

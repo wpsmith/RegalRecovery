@@ -144,13 +144,39 @@ type Journal struct {
 type Meeting struct {
 	BaseDocument
 
-	UserID          string `bson:"userId"`
-	MeetingID       string `bson:"meetingId"`
-	MeetingType     string `bson:"meetingType"`
-	Name            string `bson:"name"`
-	Location        string `bson:"location,omitempty"`
-	Notes           string `bson:"notes,omitempty"`
-	DurationMinutes int    `bson:"durationMinutes"`
+	UserID          string     `bson:"userId"`
+	MeetingID       string     `bson:"meetingId"`
+	Timestamp       time.Time  `bson:"timestamp"`
+	MeetingType     string     `bson:"meetingType"`
+	CustomTypeLabel *string    `bson:"customTypeLabel,omitempty"`
+	Name            *string    `bson:"name,omitempty"`
+	Location        *string    `bson:"location,omitempty"`
+	Notes           *string    `bson:"notes,omitempty"`
+	DurationMinutes *int       `bson:"durationMinutes,omitempty"`
+	Status          string     `bson:"status"`
+	SavedMeetingID  *string    `bson:"savedMeetingId,omitempty"`
+}
+
+// SavedMeeting represents a saved meeting template for one-tap logging.
+type SavedMeeting struct {
+	BaseDocument
+
+	UserID                string              `bson:"userId"`
+	SavedMeetingID        string              `bson:"savedMeetingId"`
+	Name                  string              `bson:"name"`
+	MeetingType           string              `bson:"meetingType"`
+	CustomTypeLabel       *string             `bson:"customTypeLabel,omitempty"`
+	Location              *string             `bson:"location,omitempty"`
+	Schedule              *MeetingScheduleDoc `bson:"schedule,omitempty"`
+	ReminderMinutesBefore *int                `bson:"reminderMinutesBefore,omitempty"`
+	IsActive              bool                `bson:"isActive"`
+}
+
+// MeetingScheduleDoc represents a recurring meeting schedule in MongoDB.
+type MeetingScheduleDoc struct {
+	DayOfWeek string `bson:"dayOfWeek"`
+	Time      string `bson:"time"`
+	TimeZone  string `bson:"timeZone"`
 }
 
 // Prayer represents a prayer log entry.
