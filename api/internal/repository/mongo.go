@@ -181,6 +181,14 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "streakEligible", Value: 1}, {Key: "date", Value: -1}}},
 			{Keys: bson.D{{Key: "tenantId", Value: 1}, {Key: "userId", Value: 1}}},
 		},
+		"moodRatings": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "rating", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "emotionLabels", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "datePartition", Value: 1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+			{Keys: bson.D{{Key: "moodId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
 	}
 
 	for collName, collIndexes := range indexes {

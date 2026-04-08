@@ -148,6 +148,19 @@ enum Endpoint: Sendable {
     case nutritionGetSettings
     case nutritionUpdateSettings(Any)
 
+    // MARK: Mood
+    case createMoodEntry(CreateMoodEntryRequest)
+    case listMoodEntries(startDate: String?, endDate: String?, rating: String?, emotionLabel: String?, timeOfDay: String?, search: String?, cursor: String?, limit: Int?)
+    case getMoodEntry(moodId: String)
+    case updateMoodEntry(moodId: String, UpdateMoodEntryRequest)
+    case deleteMoodEntry(moodId: String)
+    case getMoodToday
+    case getMoodDailySummaries(startDate: String, endDate: String, cursor: String?, limit: Int?)
+    case getMoodTrends(period: String)
+    case getMoodCorrelations(period: String)
+    case getMoodAlertStatus
+    case getMoodStreak
+
     // MARK: - Path
 
     var path: String {
@@ -259,6 +272,17 @@ enum Endpoint: Sendable {
         case .nutritionTrends: return "/activities/nutrition/trends"
         case .nutritionWeeklySummary: return "/activities/nutrition/trends/weekly-summary"
         case .nutritionGetSettings, .nutritionUpdateSettings: return "/activities/nutrition/settings"
+
+        // Mood
+        case .createMoodEntry, .listMoodEntries: return "/activities/mood"
+        case .getMoodEntry(let moodId), .updateMoodEntry(let moodId, _), .deleteMoodEntry(let moodId):
+            return "/activities/mood/\(moodId)"
+        case .getMoodToday: return "/activities/mood/today"
+        case .getMoodDailySummaries: return "/activities/mood/daily-summaries"
+        case .getMoodTrends: return "/activities/mood/trends"
+        case .getMoodCorrelations: return "/activities/mood/correlations"
+        case .getMoodAlertStatus: return "/activities/mood/alerts/status"
+        case .getMoodStreak: return "/activities/mood/streak"
         }
     }
 
@@ -282,7 +306,8 @@ enum Endpoint: Sendable {
              .createSavedMeeting,
              .nutritionCreateMeal, .nutritionQuickLog, .nutritionLogHydration,
              .createExerciseLog,
-             .createExerciseFavorite:
+             .createExerciseFavorite,
+             .createMoodEntry:
             return .post
 
         case .updateSettings, .updatePrivacySettings,
@@ -295,7 +320,8 @@ enum Endpoint: Sendable {
              .updatePhoneCall, .updateSavedContact,
              .updateMeetingLog, .updateSavedMeeting,
              .nutritionUpdateMeal, .nutritionUpdateSettings,
-             .updateExerciseLog:
+             .updateExerciseLog,
+             .updateMoodEntry:
             return .patch
 
         case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
@@ -303,7 +329,8 @@ enum Endpoint: Sendable {
              .deletePhoneCall, .deleteSavedContact,
              .deleteMeetingLog, .deleteSavedMeeting,
              .nutritionDeleteMeal,
-             .deleteExerciseLog, .deleteExerciseFavorite, .deleteExerciseGoal:
+             .deleteExerciseLog, .deleteExerciseFavorite, .deleteExerciseGoal,
+             .deleteMoodEntry:
             return .delete
 
         default:
@@ -352,6 +379,8 @@ enum Endpoint: Sendable {
         case .createExerciseFavorite(let req): return req
         case .updateExerciseFavorite(_, let req): return req
         case .setExerciseGoal(let req): return req
+        case .createMoodEntry(let req): return req
+        case .updateMoodEntry(_, let req): return req
         default: return nil
         }
     }
@@ -480,6 +509,28 @@ enum Endpoint: Sendable {
             items.append(.init(name: "month", value: String(month)))
 
         case .nutritionTrends(let period):
+            items.append(.init(name: "period", value: period))
+
+        case .listMoodEntries(let startDate, let endDate, let rating, let emotionLabel, let timeOfDay, let search, let cursor, let limit):
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let rating { items.append(.init(name: "rating", value: rating)) }
+            if let emotionLabel { items.append(.init(name: "emotionLabel", value: emotionLabel)) }
+            if let timeOfDay { items.append(.init(name: "timeOfDay", value: timeOfDay)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getMoodDailySummaries(let startDate, let endDate, let cursor, let limit):
+            items.append(.init(name: "startDate", value: startDate))
+            items.append(.init(name: "endDate", value: endDate))
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getMoodTrends(let period):
+            items.append(.init(name: "period", value: period))
+
+        case .getMoodCorrelations(let period):
             items.append(.init(name: "period", value: period))
 
         default:
