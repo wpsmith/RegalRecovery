@@ -30,6 +30,7 @@ const (
 	ActivityTypeStepWork           = "step-work"
 	ActivityTypeGoal               = "goal"
 	ActivityTypeSpouseCheckInPrep  = "spouse-check-in-prep"
+	ActivityTypeAffirmation        = "affirmation"
 )
 
 // Activity represents a recovery activity log entry.
