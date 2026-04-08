@@ -124,6 +124,7 @@ final class FeatureFlagService {
         flags["activity.gratitude"] = true
         flags["activity.phone-calls"] = true
         flags["activity.prayer"] = true
+        flags["activity.nutrition"] = false
         flags["activity.integrity-inventory"] = false
         flags["activity.pci"] = false
         flags["activity.acting-in-behaviors"] = false
