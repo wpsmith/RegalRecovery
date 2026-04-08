@@ -1,0 +1,1380 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Person Check-ins API
+  version: 1.0.0
+  description: |
+    Person Check-ins API for tracking interpersonal check-ins with key support people.
+
+    Covers spouse, sponsor, and counselor/coach check-ins with independent streaks,
+    frequency tracking, quality ratings, topic tracking, and follow-up items.
+
+    All check-in timestamps are immutable once recorded (FR2.7).
+    Gated by feature flag `activity.person-check-ins`.
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Person Check-Ins
+    description: Log and manage interpersonal check-ins with support people
+  - name: Person Check-In Streaks
+    description: Independent streaks per check-in sub-type
+  - name: Person Check-In Settings
+    description: Per-sub-type streak frequency and alert configuration
+  - name: Person Check-In Trends
+    description: Frequency, quality, topic, and balance trends
+
+paths:
+  /activities/person-check-ins:
+    post:
+      operationId: createPersonCheckIn
+      tags: [Person Check-Ins]
+      summary: Log a person check-in
+      description: |
+        Record a check-in with a support person (spouse, sponsor, or counselor/coach).
+
+        Each check-in is independently tracked per sub-type with its own streak.
+        The `createdAt` timestamp is immutable once set.
+
+        Supports backdating via the `timestamp` field.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePersonCheckInRequest'
+            example:
+              checkInType: spouse
+              method: in-person
+              timestamp: "2026-03-28T18:30:00Z"
+              contactName: "Sarah"
+              durationMinutes: 30
+              qualityRating: 4
+              topicsDiscussed:
+                - relationships-marriage
+                - emotions-feelings
+                - accountability
+              notes: "Had a really honest conversation about this week. She appreciated the transparency."
+              followUpItems:
+                - "Schedule a date night for Friday"
+                - "Follow up on the apology from Tuesday"
+      responses:
+        '201':
+          description: Created - Person check-in recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInResponse'
+              example:
+                data:
+                  checkInId: pci_11111
+                  checkInType: spouse
+                  method: in-person
+                  timestamp: "2026-03-28T18:30:00Z"
+                  contactName: "Sarah"
+                  durationMinutes: 30
+                  qualityRating: 4
+                  topicsDiscussed:
+                    - relationships-marriage
+                    - emotions-feelings
+                    - accountability
+                  notes: "Had a really honest conversation about this week."
+                  followUpItems:
+                    - text: "Schedule a date night for Friday"
+                      goalId: null
+                    - text: "Follow up on the apology from Tuesday"
+                      goalId: null
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/person-check-ins/pci_11111
+                meta:
+                  createdAt: "2026-03-28T18:30:00Z"
+                  streakUpdated: true
+                  currentStreak: 5
+                  encouragement: "Showing up for that conversation took courage. That's recovery in action."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPersonCheckIns
+      tags: [Person Check-Ins]
+      summary: List person check-ins
+      description: |
+        Retrieve person check-ins in reverse chronological order.
+        Supports filtering by sub-type, method, quality rating, topics, date range, and keyword search.
+      parameters:
+        - name: checkInType
+          in: query
+          description: Filter by check-in sub-type
+          schema:
+            type: string
+            enum: [spouse, sponsor, counselor-coach]
+        - name: method
+          in: query
+          description: Filter by contact method
+          schema:
+            type: string
+            enum: [in-person, phone-call, video-call, text-message, app-messaging]
+        - name: minQualityRating
+          in: query
+          description: Filter by minimum quality rating (inclusive)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+        - name: topic
+          in: query
+          description: Filter by topic discussed
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          description: Start of date range (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End of date range (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: q
+          in: query
+          description: Keyword search across notes and follow-up items
+          schema:
+            type: string
+            maxLength: 100
+        - name: sort
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            default: "-timestamp"
+            enum: ["-timestamp", "+timestamp", "-qualityRating", "+qualityRating"]
+        - name: cursor
+          in: query
+          description: Pagination cursor
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: OK - Person check-ins retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInListResponse'
+              example:
+                data:
+                  - checkInId: pci_11111
+                    checkInType: spouse
+                    method: in-person
+                    timestamp: "2026-03-28T18:30:00Z"
+                    contactName: "Sarah"
+                    durationMinutes: 30
+                    qualityRating: 4
+                    topicsDiscussed:
+                      - relationships-marriage
+                      - emotions-feelings
+                    links:
+                      self: https://api.regalrecovery.com/v1/activities/person-check-ins/pci_11111
+                  - checkInId: pci_11110
+                    checkInType: sponsor
+                    method: phone-call
+                    timestamp: "2026-03-27T12:00:00Z"
+                    contactName: "Mike S."
+                    durationMinutes: 15
+                    qualityRating: 5
+                    topicsDiscussed:
+                      - step-work
+                      - accountability
+                    links:
+                      self: https://api.regalrecovery.com/v1/activities/person-check-ins/pci_11110
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/person-check-ins?limit=25
+                  next: https://api.regalrecovery.com/v1/activities/person-check-ins?cursor=bmV4dA&limit=25
+                meta:
+                  page:
+                    nextCursor: bmV4dA
+                    limit: 25
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/person-check-ins/quick:
+    post:
+      operationId: quickLogPersonCheckIn
+      tags: [Person Check-Ins]
+      summary: Quick-log a person check-in
+      description: |
+        One-tap check-in logging with minimal fields. Only `checkInType` is required.
+        Method defaults to last-used for that sub-type. Timestamp defaults to now.
+
+        The entry can be expanded later via PATCH.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuickLogPersonCheckInRequest'
+            example:
+              checkInType: sponsor
+      responses:
+        '201':
+          description: Created - Quick check-in recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInResponse'
+              example:
+                data:
+                  checkInId: pci_22222
+                  checkInType: sponsor
+                  method: phone-call
+                  timestamp: "2026-03-28T20:00:00Z"
+                  contactName: "Mike S."
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/person-check-ins/pci_22222
+                meta:
+                  createdAt: "2026-03-28T20:00:00Z"
+                  streakUpdated: true
+                  currentStreak: 12
+                  encouragement: "You didn't do today alone. That's worth celebrating."
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/person-check-ins/{checkInId}:
+    get:
+      operationId: getPersonCheckIn
+      tags: [Person Check-Ins]
+      summary: Get a person check-in by ID
+      description: |
+        Retrieve full details of a specific person check-in including topics, notes, and follow-up items.
+      parameters:
+        - name: checkInId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pci_[a-zA-Z0-9]+$'
+          example: pci_11111
+      responses:
+        '200':
+          description: OK - Person check-in retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updatePersonCheckIn
+      tags: [Person Check-Ins]
+      summary: Update a person check-in
+      description: |
+        Partial update of a person check-in (JSON Merge Patch RFC 7396).
+        Used to expand a quick-log entry with additional detail.
+
+        The `createdAt` timestamp is immutable and cannot be changed.
+        The `checkInType` field is immutable after creation.
+      parameters:
+        - name: checkInId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pci_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdatePersonCheckInRequest'
+            example:
+              qualityRating: 4
+              topicsDiscussed:
+                - sobriety-recovery
+                - step-work
+              notes: "Great conversation about Step 4 progress."
+              followUpItems:
+                - "Write out resentment list before next meeting"
+      responses:
+        '200':
+          description: OK - Person check-in updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deletePersonCheckIn
+      tags: [Person Check-Ins]
+      summary: Delete a person check-in
+      description: |
+        Permanently delete a person check-in entry. Streaks are recalculated after deletion.
+      parameters:
+        - name: checkInId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pci_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Check-in deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/person-check-ins/streaks:
+    get:
+      operationId: getPersonCheckInStreaks
+      tags: [Person Check-In Streaks]
+      summary: Get streaks for all sub-types
+      description: |
+        Retrieve current and longest streaks for each configured sub-type.
+        Also includes frequency metrics (this week, this month, 30-day average).
+
+        Streak data is cached in Valkey with 5-minute TTL.
+      responses:
+        '200':
+          description: OK - Streaks retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInStreaksResponse'
+              example:
+                data:
+                  streaks:
+                    - checkInType: spouse
+                      currentStreak: 5
+                      longestStreak: 21
+                      streakUnit: days
+                      checkInsThisWeek: 4
+                      checkInsThisMonth: 18
+                      averagePerWeek: 4.5
+                    - checkInType: sponsor
+                      currentStreak: 12
+                      longestStreak: 12
+                      streakUnit: days
+                      checkInsThisWeek: 3
+                      checkInsThisMonth: 14
+                      averagePerWeek: 3.2
+                    - checkInType: counselor-coach
+                      currentStreak: 8
+                      longestStreak: 15
+                      streakUnit: weeks
+                      checkInsThisWeek: 1
+                      checkInsThisMonth: 4
+                      averagePerWeek: 1.0
+                  combined:
+                    totalCheckInsThisWeek: 8
+                    totalCheckInsThisMonth: 36
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/person-check-ins/streaks
+                meta:
+                  retrievedAt: "2026-03-28T20:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/person-check-ins/settings:
+    get:
+      operationId: getPersonCheckInSettings
+      tags: [Person Check-In Settings]
+      summary: Get person check-in settings
+      description: |
+        Retrieve per-sub-type configuration: streak frequency, inactivity alert thresholds,
+        reminder preferences, and saved contact names.
+      responses:
+        '200':
+          description: OK - Settings retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInSettingsResponse'
+              example:
+                data:
+                  spouse:
+                    contactName: "Sarah"
+                    streakFrequency: daily
+                    inactivityAlertDays: 3
+                    reminderEnabled: false
+                    reminderTime: null
+                  sponsor:
+                    contactName: "Mike S."
+                    streakFrequency: daily
+                    inactivityAlertDays: 5
+                    reminderEnabled: true
+                    reminderTime: "09:00"
+                    reminderFrequency: weekly
+                  counselorCoach:
+                    contactName: "Dr. Johnson"
+                    streakFrequency: weekly
+                    inactivityAlertDays: 10
+                    reminderEnabled: false
+                    reminderTime: null
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/person-check-ins/settings
+                meta:
+                  modifiedAt: "2026-03-20T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updatePersonCheckInSettings
+      tags: [Person Check-In Settings]
+      summary: Update person check-in settings
+      description: |
+        Update per-sub-type configuration. Streak frequency changes trigger a full streak recalculation.
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdatePersonCheckInSettingsRequest'
+            example:
+              sponsor:
+                streakFrequency: x-per-week
+                requiredCountPerWeek: 3
+                inactivityAlertDays: 7
+      responses:
+        '200':
+          description: OK - Settings updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/person-check-ins/trends:
+    get:
+      operationId: getPersonCheckInTrends
+      tags: [Person Check-In Trends]
+      summary: Get check-in trends and insights
+      description: |
+        Retrieve trend data: frequency over time, method distribution, quality trends,
+        topic trends, and balance analysis across sub-types.
+      parameters:
+        - name: period
+          in: query
+          description: Time period for trend calculation
+          required: true
+          schema:
+            type: string
+            enum: ["7d", "30d", "90d"]
+        - name: checkInType
+          in: query
+          description: Filter trends to a specific sub-type (omit for all)
+          schema:
+            type: string
+            enum: [spouse, sponsor, counselor-coach]
+      responses:
+        '200':
+          description: OK - Trends retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInTrendsResponse'
+              example:
+                data:
+                  frequency:
+                    - date: "2026-03-22"
+                      spouse: 1
+                      sponsor: 1
+                      counselorCoach: 0
+                    - date: "2026-03-23"
+                      spouse: 1
+                      sponsor: 0
+                      counselorCoach: 1
+                  methodDistribution:
+                    spouse:
+                      in-person: 12
+                      phone-call: 3
+                      video-call: 1
+                      text-message: 2
+                      app-messaging: 0
+                    sponsor:
+                      in-person: 2
+                      phone-call: 8
+                      video-call: 0
+                      text-message: 4
+                      app-messaging: 0
+                  qualityTrends:
+                    spouse:
+                      averageRating: 3.8
+                      trend: improving
+                      dataPoints:
+                        - date: "2026-03-01"
+                          average: 3.2
+                        - date: "2026-03-15"
+                          average: 4.1
+                  topicFrequency:
+                    - topic: accountability
+                      count: 18
+                    - topic: step-work
+                      count: 12
+                    - topic: emotions-feelings
+                      count: 10
+                  balance:
+                    spouse: 18
+                    sponsor: 14
+                    counselorCoach: 4
+                    gaps:
+                      - type: counselor-coach
+                        message: "You've checked in with your sponsor 14 times this month but your counselor only 4 times (outside of scheduled sessions)."
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/person-check-ins/trends?period=30d
+                meta:
+                  period: "30d"
+                  calculatedAt: "2026-03-28T20:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/person-check-ins/calendar:
+    get:
+      operationId: getPersonCheckInCalendar
+      tags: [Person Check-Ins]
+      summary: Get calendar view of person check-ins
+      description: |
+        Monthly calendar showing color-coded check-in indicators by sub-type per day.
+      parameters:
+        - name: month
+          in: query
+          required: true
+          description: Month in YYYY-MM format
+          schema:
+            type: string
+            pattern: '^\d{4}-\d{2}$'
+          example: "2026-03"
+      responses:
+        '200':
+          description: OK - Calendar data retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonCheckInCalendarResponse'
+              example:
+                data:
+                  month: "2026-03"
+                  days:
+                    - date: "2026-03-28"
+                      checkIns:
+                        - checkInType: spouse
+                          count: 1
+                        - checkInType: sponsor
+                          count: 1
+                    - date: "2026-03-27"
+                      checkIns:
+                        - checkInType: sponsor
+                          count: 1
+                        - checkInType: counselor-coach
+                          count: 1
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/person-check-ins/calendar?month=2026-03
+                meta:
+                  totalCheckIns: 36
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/person-check-ins/{checkInId}/follow-ups/{index}/convert-to-goal:
+    post:
+      operationId: convertFollowUpToGoal
+      tags: [Person Check-Ins]
+      summary: Convert a follow-up item to a goal
+      description: |
+        Converts a follow-up item from a person check-in into a recovery goal via the Goals API.
+        The `goalId` is linked back to the follow-up item.
+      parameters:
+        - name: checkInId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^pci_[a-zA-Z0-9]+$'
+        - name: index
+          in: path
+          required: true
+          description: Zero-based index of the follow-up item
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 2
+      responses:
+        '201':
+          description: Created - Goal created from follow-up item
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+                description: URI of the created goal
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      goalId:
+                        type: string
+                        description: ID of the created goal
+                      followUpText:
+                        type: string
+                      links:
+                        type: object
+                        properties:
+                          goal:
+                            type: string
+                            format: uri
+                          checkIn:
+                            type: string
+                            format: uri
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CreatePersonCheckInRequest:
+      type: object
+      required:
+        - checkInType
+        - method
+      properties:
+        checkInType:
+          type: string
+          enum: [spouse, sponsor, counselor-coach]
+          description: Sub-type of person check-in
+        method:
+          type: string
+          enum: [in-person, phone-call, video-call, text-message, app-messaging]
+          description: How the check-in happened
+        timestamp:
+          type: string
+          format: date-time
+          description: When the check-in occurred (default now, editable for backdating)
+        contactName:
+          type: string
+          maxLength: 50
+          description: Name of the person checked in with (auto-populated from previous if omitted)
+        durationMinutes:
+          type: integer
+          minimum: 0
+          maximum: 480
+          description: Duration of check-in in minutes
+        qualityRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: "How meaningful was this check-in? (1=Surface-level, 5=Deep and honest)"
+        topicsDiscussed:
+          type: array
+          items:
+            type: string
+            enum:
+              - sobriety-recovery
+              - step-work
+              - triggers-urges
+              - emotions-feelings
+              - relationships-marriage
+              - boundaries
+              - goals-commitments
+              - accountability
+              - spiritual-life
+              - general-life-support
+              - crisis-emergency
+              - other
+          maxItems: 12
+          description: Topics discussed during the check-in
+        notes:
+          type: string
+          maxLength: 1000
+          description: Free-text notes about the check-in
+        followUpItems:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+          maxItems: 3
+          description: Action items from the check-in (1-3 brief items)
+        counselorSubCategory:
+          type: string
+          enum: [scheduled-session, between-session-contact]
+          description: Sub-category for counselor/coach check-ins (optional)
+
+    QuickLogPersonCheckInRequest:
+      type: object
+      required:
+        - checkInType
+      properties:
+        checkInType:
+          type: string
+          enum: [spouse, sponsor, counselor-coach]
+          description: Sub-type of person check-in
+        method:
+          type: string
+          enum: [in-person, phone-call, video-call, text-message, app-messaging]
+          description: How the check-in happened (defaults to last-used for this sub-type)
+
+    UpdatePersonCheckInRequest:
+      type: object
+      description: Partial update fields (JSON Merge Patch). checkInType and createdAt are immutable.
+      properties:
+        method:
+          type: string
+          enum: [in-person, phone-call, video-call, text-message, app-messaging]
+        contactName:
+          type: string
+          maxLength: 50
+        durationMinutes:
+          type: integer
+          minimum: 0
+          maximum: 480
+        qualityRating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        topicsDiscussed:
+          type: array
+          items:
+            type: string
+            enum:
+              - sobriety-recovery
+              - step-work
+              - triggers-urges
+              - emotions-feelings
+              - relationships-marriage
+              - boundaries
+              - goals-commitments
+              - accountability
+              - spiritual-life
+              - general-life-support
+              - crisis-emergency
+              - other
+          maxItems: 12
+        notes:
+          type: string
+          maxLength: 1000
+        followUpItems:
+          type: array
+          items:
+            type: string
+            maxLength: 200
+          maxItems: 3
+        counselorSubCategory:
+          type: string
+          enum: [scheduled-session, between-session-contact]
+
+    PersonCheckIn:
+      type: object
+      properties:
+        checkInId:
+          type: string
+          description: Unique check-in identifier
+        checkInType:
+          type: string
+          enum: [spouse, sponsor, counselor-coach]
+        method:
+          type: string
+          enum: [in-person, phone-call, video-call, text-message, app-messaging]
+        timestamp:
+          type: string
+          format: date-time
+          description: When the check-in occurred (immutable)
+        contactName:
+          type: string
+        durationMinutes:
+          type: integer
+          nullable: true
+        qualityRating:
+          type: integer
+          nullable: true
+        topicsDiscussed:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+          nullable: true
+        followUpItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowUpItem'
+        counselorSubCategory:
+          type: string
+          nullable: true
+        links:
+          $ref: '#/components/schemas/Links'
+
+    FollowUpItem:
+      type: object
+      properties:
+        text:
+          type: string
+          description: Follow-up item text
+        goalId:
+          type: string
+          nullable: true
+          description: ID of linked goal (if converted)
+
+    PersonCheckInResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PersonCheckIn'
+        meta:
+          type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+            modifiedAt:
+              type: string
+              format: date-time
+            streakUpdated:
+              type: boolean
+              description: Whether the streak was updated by this action
+            currentStreak:
+              type: integer
+              description: Current streak for this sub-type after the action
+            encouragement:
+              type: string
+              description: Rotating encouragement message
+
+    PersonCheckInListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PersonCheckIn'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+
+    PersonCheckInStreaksResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            streaks:
+              type: array
+              items:
+                $ref: '#/components/schemas/PersonCheckInStreak'
+            combined:
+              type: object
+              properties:
+                totalCheckInsThisWeek:
+                  type: integer
+                totalCheckInsThisMonth:
+                  type: integer
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          type: object
+          properties:
+            retrievedAt:
+              type: string
+              format: date-time
+
+    PersonCheckInStreak:
+      type: object
+      properties:
+        checkInType:
+          type: string
+          enum: [spouse, sponsor, counselor-coach]
+        currentStreak:
+          type: integer
+          description: Current consecutive streak count
+        longestStreak:
+          type: integer
+          description: All-time longest streak
+        streakUnit:
+          type: string
+          enum: [days, weeks]
+          description: Unit of streak measurement based on configured frequency
+        checkInsThisWeek:
+          type: integer
+        checkInsThisMonth:
+          type: integer
+        averagePerWeek:
+          type: number
+          format: float
+          description: Average check-ins per week (30-day rolling)
+
+    PersonCheckInSettingsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            spouse:
+              $ref: '#/components/schemas/SubTypeSettings'
+            sponsor:
+              $ref: '#/components/schemas/SubTypeSettings'
+            counselorCoach:
+              $ref: '#/components/schemas/SubTypeSettings'
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    SubTypeSettings:
+      type: object
+      properties:
+        contactName:
+          type: string
+          nullable: true
+          description: Saved contact name for this sub-type
+        streakFrequency:
+          type: string
+          enum: [daily, x-per-week, weekly]
+          description: How streak is measured
+        requiredCountPerWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+          nullable: true
+          description: Required count for x-per-week frequency
+        inactivityAlertDays:
+          type: integer
+          minimum: 1
+          maximum: 30
+          description: Days of inactivity before alert is triggered
+        reminderEnabled:
+          type: boolean
+        reminderTime:
+          type: string
+          nullable: true
+          description: "Time of day for reminder (HH:MM)"
+          pattern: '^\d{2}:\d{2}$'
+        reminderFrequency:
+          type: string
+          nullable: true
+          enum: [daily, weekly]
+
+    UpdatePersonCheckInSettingsRequest:
+      type: object
+      description: Partial update of per-sub-type settings (JSON Merge Patch)
+      properties:
+        spouse:
+          $ref: '#/components/schemas/SubTypeSettingsUpdate'
+        sponsor:
+          $ref: '#/components/schemas/SubTypeSettingsUpdate'
+        counselorCoach:
+          $ref: '#/components/schemas/SubTypeSettingsUpdate'
+
+    SubTypeSettingsUpdate:
+      type: object
+      properties:
+        contactName:
+          type: string
+          maxLength: 50
+        streakFrequency:
+          type: string
+          enum: [daily, x-per-week, weekly]
+        requiredCountPerWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+        inactivityAlertDays:
+          type: integer
+          minimum: 1
+          maximum: 30
+        reminderEnabled:
+          type: boolean
+        reminderTime:
+          type: string
+          pattern: '^\d{2}:\d{2}$'
+        reminderFrequency:
+          type: string
+          enum: [daily, weekly]
+
+    PersonCheckInTrendsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            frequency:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  spouse:
+                    type: integer
+                  sponsor:
+                    type: integer
+                  counselorCoach:
+                    type: integer
+            methodDistribution:
+              type: object
+              description: Method count breakdown per sub-type
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: integer
+            qualityTrends:
+              type: object
+              description: Average quality rating over time per sub-type
+              additionalProperties:
+                type: object
+                properties:
+                  averageRating:
+                    type: number
+                    format: float
+                  trend:
+                    type: string
+                    enum: [improving, stable, declining]
+                  dataPoints:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        average:
+                          type: number
+                          format: float
+            topicFrequency:
+              type: array
+              items:
+                type: object
+                properties:
+                  topic:
+                    type: string
+                  count:
+                    type: integer
+            balance:
+              type: object
+              properties:
+                spouse:
+                  type: integer
+                sponsor:
+                  type: integer
+                counselorCoach:
+                  type: integer
+                gaps:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      message:
+                        type: string
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          type: object
+          properties:
+            period:
+              type: string
+            calculatedAt:
+              type: string
+              format: date-time
+
+    PersonCheckInCalendarResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            month:
+              type: string
+            days:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  checkIns:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        checkInType:
+                          type: string
+                          enum: [spouse, sponsor, counselor-coach]
+                        count:
+                          type: integer
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          type: object
+          properties:
+            totalCheckIns:
+              type: integer
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
