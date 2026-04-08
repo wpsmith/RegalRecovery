@@ -10,7 +10,9 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 
 	appconfig "github.com/regalrecovery/api/internal/config"
+	"github.com/regalrecovery/api/internal/cache"
 	"github.com/regalrecovery/api/internal/domain/activities"
+	"github.com/regalrecovery/api/internal/domain/phonecalls"
 	"github.com/regalrecovery/api/internal/domain/timejournal"
 	"github.com/regalrecovery/api/internal/middleware"
 	"github.com/regalrecovery/api/internal/repository"
@@ -45,11 +47,22 @@ func main() {
 	tjService := timejournal.NewTimeJournalService(tjRepo)
 	tjHandler := timejournal.NewHandler(tjService)
 
+	// Wire Phone Calls dependency chain:
+	// MongoClient -> Repos -> Cache -> Service -> Handler
+	pcCallRepo := repository.NewPhoneCallRepo(mongoClient)
+	pcContactRepo := repository.NewSavedContactRepo(mongoClient)
+	pcStreakCache := cache.NewValkeyPhoneCallStreakCache(nil) // Valkey client wired at infra layer
+	pcService := phonecalls.NewPhoneCallService(pcCallRepo, pcContactRepo, pcStreakCache)
+	pcHandler := phonecalls.NewHandler(pcService)
+
 	// Create HTTP router
 	mux := http.NewServeMux()
 
 	// Register Time Journal routes
 	tjHandler.RegisterRoutes(mux)
+
+	// Register Phone Calls routes
+	pcHandler.RegisterRoutes(mux)
 
 	// Generic activity routes (stub — not yet implemented)
 	mux.HandleFunc("POST /v1/activities/{type}", func(w http.ResponseWriter, r *http.Request) {
