@@ -64,6 +64,20 @@ enum Endpoint: Sendable {
     case listOwnedPacks
     case purchaseContentPack(packId: String, receipt: PurchaseRequest)
 
+    // MARK: Phone Calls
+    case createPhoneCall(CreatePhoneCallRequest)
+    case listPhoneCalls(direction: String?, contactType: String?, connected: Bool?, startDate: String?, endDate: String?, search: String?, cursor: String?, limit: Int?)
+    case getPhoneCall(callId: String)
+    case updatePhoneCall(callId: String, UpdatePhoneCallRequest)
+    case deletePhoneCall(callId: String)
+    case createSavedContact(CreateSavedContactAPIRequest)
+    case listSavedContacts
+    case updateSavedContact(savedContactId: String, UpdateSavedContactAPIRequest)
+    case deleteSavedContact(savedContactId: String)
+    case getPhoneCallStreak
+    case getPhoneCallTrends(period: String?)
+    case getPhoneCallDailyTrends(period: String?)
+
     // MARK: Flags
     case getFlags
     case evaluateFlag(key: String)
@@ -117,6 +131,17 @@ enum Endpoint: Sendable {
         case .listOwnedPacks: return "/content/packs/owned"
         case .purchaseContentPack(let packId, _): return "/content/packs/\(packId)/purchase"
 
+        // Phone Calls
+        case .createPhoneCall, .listPhoneCalls: return "/activities/phone-calls"
+        case .getPhoneCall(let callId), .updatePhoneCall(let callId, _), .deletePhoneCall(let callId):
+            return "/activities/phone-calls/\(callId)"
+        case .createSavedContact, .listSavedContacts: return "/activities/phone-calls/saved-contacts"
+        case .updateSavedContact(let id, _), .deleteSavedContact(let id):
+            return "/activities/phone-calls/saved-contacts/\(id)"
+        case .getPhoneCallStreak: return "/activities/phone-calls/streak"
+        case .getPhoneCallTrends: return "/activities/phone-calls/trends"
+        case .getPhoneCallDailyTrends: return "/activities/phone-calls/trends/daily"
+
         // Flags
         case .getFlags: return "/flags"
         case .evaluateFlag(let key): return "/flags/\(key)"
@@ -133,16 +158,20 @@ enum Endpoint: Sendable {
              .logRelapse,
              .logActivity,
              .addFavoriteAffirmation,
-             .purchaseContentPack:
+             .purchaseContentPack,
+             .createPhoneCall,
+             .createSavedContact:
             return .post
 
         case .updateSettings, .updatePrivacySettings:
             return .put
 
-        case .updateProfile, .setPrimaryAddiction:
+        case .updateProfile, .setPrimaryAddiction,
+             .updatePhoneCall, .updateSavedContact:
             return .patch
 
-        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation:
+        case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
+             .deletePhoneCall, .deleteSavedContact:
             return .delete
 
         default:
@@ -169,6 +198,10 @@ enum Endpoint: Sendable {
         case .logRelapse(let req): return req
         case .logActivity(_, let data): return data
         case .purchaseContentPack(_, let receipt): return receipt
+        case .createPhoneCall(let req): return req
+        case .updatePhoneCall(_, let req): return req
+        case .createSavedContact(let req): return req
+        case .updateSavedContact(_, let req): return req
         default: return nil
         }
     }
@@ -221,6 +254,22 @@ enum Endpoint: Sendable {
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
             if let type { items.append(.init(name: "type", value: type)) }
             if let category { items.append(.init(name: "category", value: category)) }
+
+        case .listPhoneCalls(let direction, let contactType, let connected, let startDate, let endDate, let search, let cursor, let limit):
+            if let direction { items.append(.init(name: "direction", value: direction)) }
+            if let contactType { items.append(.init(name: "contactType", value: contactType)) }
+            if let connected { items.append(.init(name: "connected", value: String(connected))) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .getPhoneCallTrends(let period):
+            if let period { items.append(.init(name: "period", value: period)) }
+
+        case .getPhoneCallDailyTrends(let period):
+            if let period { items.append(.init(name: "period", value: period)) }
 
         default:
             break
