@@ -87,6 +87,19 @@ enum Endpoint: Sendable {
     case getFlags
     case evaluateFlag(key: String)
 
+    // MARK: Meetings
+    case createMeetingLog(CreateMeetingLogRequest)
+    case listMeetingLogs(meetingType: MeetingType?, startDate: String?, endDate: String?, cursor: String?, limit: Int?, sort: String?)
+    case getMeetingLog(meetingId: String)
+    case updateMeetingLog(meetingId: String, UpdateMeetingLogRequest)
+    case deleteMeetingLog(meetingId: String)
+    case getMeetingAttendanceSummary(period: MeetingSummaryPeriod, date: String?)
+    case createSavedMeeting(CreateSavedMeetingRequest)
+    case listSavedMeetings
+    case getSavedMeeting(savedMeetingId: String)
+    case updateSavedMeeting(savedMeetingId: String, UpdateSavedMeetingRequest)
+    case deleteSavedMeeting(savedMeetingId: String)
+
     // MARK: - Path
 
     var path: String {
@@ -152,6 +165,15 @@ enum Endpoint: Sendable {
         // Flags
         case .getFlags: return "/flags"
         case .evaluateFlag(let key): return "/flags/\(key)"
+
+        // Meetings
+        case .createMeetingLog, .listMeetingLogs: return "/activities/meetings"
+        case .getMeetingLog(let id), .updateMeetingLog(let id, _), .deleteMeetingLog(let id):
+            return "/activities/meetings/\(id)"
+        case .getMeetingAttendanceSummary: return "/activities/meetings/summary"
+        case .createSavedMeeting, .listSavedMeetings: return "/activities/meetings/saved"
+        case .getSavedMeeting(let id), .updateSavedMeeting(let id, _), .deleteSavedMeeting(let id):
+            return "/activities/meetings/saved/\(id)"
         }
     }
 
@@ -168,7 +190,9 @@ enum Endpoint: Sendable {
              .purchaseContentPack,
              .createPrayerSession,
              .createPersonalPrayer,
-             .favoritePrayer:
+             .favoritePrayer,
+             .createMeetingLog,
+             .createSavedMeeting:
             return .post
 
         case .updateSettings, .updatePrivacySettings,
@@ -176,11 +200,13 @@ enum Endpoint: Sendable {
             return .put
 
         case .updateProfile, .setPrimaryAddiction,
-             .updatePrayerSession, .updatePersonalPrayer:
+             .updatePrayerSession, .updatePersonalPrayer,
+             .updateMeetingLog, .updateSavedMeeting:
             return .patch
 
         case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
-             .deletePrayerSession, .deletePersonalPrayer, .unfavoritePrayer:
+             .deletePrayerSession, .deletePersonalPrayer, .unfavoritePrayer,
+             .deleteMeetingLog, .deleteSavedMeeting:
             return .delete
 
         default:
@@ -212,6 +238,10 @@ enum Endpoint: Sendable {
         case .createPersonalPrayer(let req): return req
         case .updatePersonalPrayer(_, let req): return req
         case .reorderPersonalPrayers(let req): return req
+        case .createMeetingLog(let req): return req
+        case .updateMeetingLog(_, let req): return req
+        case .createSavedMeeting(let req): return req
+        case .updateSavedMeeting(_, let req): return req
         default: return nil
         }
     }
@@ -279,6 +309,18 @@ enum Endpoint: Sendable {
              .listFavoritePrayers(let cursor, let limit):
             if let cursor { items.append(.init(name: "cursor", value: cursor)) }
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .listMeetingLogs(let meetingType, let startDate, let endDate, let cursor, let limit, let sort):
+            if let meetingType { items.append(.init(name: "meetingType", value: meetingType.rawValue)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+            if let sort { items.append(.init(name: "sort", value: sort)) }
+
+        case .getMeetingAttendanceSummary(let period, let date):
+            items.append(.init(name: "period", value: period.rawValue))
+            if let date { items.append(.init(name: "date", value: date)) }
 
         default:
             break
