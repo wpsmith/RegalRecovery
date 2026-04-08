@@ -41,13 +41,13 @@ func (h *PrayerSessionHandler) CreatePrayerSession(w http.ResponseWriter, r *htt
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, "rr:0x00500000", "Bad Request", "Request body is malformed")
+		writeError(w, http.StatusBadRequest, "rr:0x00500000", "Bad Request", "Request body is malformed", "")
 		return
 	}
 
 	ts, err := time.Parse(time.RFC3339, body.Timestamp)
 	if err != nil {
-		writeError(w, http.StatusBadRequest, "rr:0x00500000", "Bad Request", "timestamp must be RFC3339 format")
+		writeError(w, http.StatusBadRequest, "rr:0x00500000", "Bad Request", "timestamp must be RFC3339 format", "")
 		return
 	}
 
@@ -179,7 +179,7 @@ func (h *PrayerSessionHandler) UpdatePrayerSession(w http.ResponseWriter, r *htt
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		writeError(w, http.StatusBadRequest, "rr:0x00500000", "Bad Request", "Request body is malformed")
+		writeError(w, http.StatusBadRequest, "rr:0x00500000", "Bad Request", "Request body is malformed", "")
 		return
 	}
 
@@ -375,10 +375,10 @@ func writeDomainError(w http.ResponseWriter, err error) {
 	case errors.Is(err, prayer.ErrPrayerNotFound),
 		errors.Is(err, prayer.ErrFavoriteNotFound),
 		errors.Is(err, prayer.ErrFeatureDisabled):
-		writeError(w, http.StatusNotFound, "", "Not Found", err.Error())
+		writeError(w, http.StatusNotFound, "", "Not Found", err.Error(), "")
 
 	case errors.Is(err, prayer.ErrFavoriteAlreadyExists):
-		writeError(w, http.StatusConflict, "", "Conflict", err.Error())
+		writeError(w, http.StatusConflict, "", "Conflict", err.Error(), "")
 
 	case errors.Is(err, prayer.ErrInvalidPrayerType),
 		errors.Is(err, prayer.ErrLinkedPrayerLocked),
@@ -394,34 +394,11 @@ func writeDomainError(w http.ResponseWriter, err error) {
 		errors.Is(err, prayer.ErrFutureTimestamp),
 		errors.Is(err, prayer.ErrInvalidReorderIDs):
 		code := prayer.ErrorCode[err]
-		writeError(w, http.StatusUnprocessableEntity, code, "Unprocessable Entity", err.Error())
+		writeError(w, http.StatusUnprocessableEntity, code, "Unprocessable Entity", err.Error(), "")
 
 	default:
-		writeError(w, http.StatusInternalServerError, "", "Internal Server Error", "An unexpected error occurred")
+		writeError(w, http.StatusInternalServerError, "", "Internal Server Error", "An unexpected error occurred", "")
 	}
 }
 
-// writeError writes a standard JSON error response.
-func writeError(w http.ResponseWriter, status int, code, title, detail string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	errObj := map[string]interface{}{
-		"status": status,
-		"title":  title,
-		"detail": detail,
-	}
-	if code != "" {
-		errObj["code"] = code
-	}
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"errors": []interface{}{errObj},
-	})
-}
-
-// nilIfEmpty returns nil for empty strings (for JSON null output).
-func nilIfEmpty(s string) interface{} {
-	if s == "" {
-		return nil
-	}
-	return s
-}
+// writeError and nilIfEmpty are defined in postmortem_handler.go

@@ -7,8 +7,7 @@ import (
 	"github.com/regalrecovery/api/internal/domain/prayer"
 )
 
-func intPtr(v int) *int       { return &v }
-func strPtr(v string) *string { return &v }
+// intPtr and strPtr are defined in phone_call_fixtures.go
 
 func daysAgo(n int) time.Time {
 	return time.Now().UTC().AddDate(0, 0, -n).Truncate(24 * time.Hour).Add(6 * time.Hour)
