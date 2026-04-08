@@ -152,6 +152,14 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 			{Keys: bson.D{{Key: "userId", Value: 1}}},
 			{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetExpireAfterSeconds(0)},
 		},
+		"phoneCalls": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}, {Key: "timestamp", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "callId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
+		"savedContacts": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "savedContactId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
 		"timeJournalEntries": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "date", Value: 1}}},
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "date", Value: 1}, {Key: "slotStart", Value: 1}}, Options: options.Index().SetUnique(true)},

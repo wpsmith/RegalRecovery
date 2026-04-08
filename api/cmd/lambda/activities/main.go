@@ -11,8 +11,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 
 	appconfig "github.com/regalrecovery/api/internal/config"
+	"github.com/regalrecovery/api/internal/cache"
 	"github.com/regalrecovery/api/internal/domain/activities"
 	meetingsDomain "github.com/regalrecovery/api/internal/domain/meetings"
+	"github.com/regalrecovery/api/internal/domain/phonecalls"
 	"github.com/regalrecovery/api/internal/domain/timejournal"
 	"github.com/regalrecovery/api/internal/events"
 	meetingsEvents "github.com/regalrecovery/api/internal/events/meetings"
@@ -68,6 +70,14 @@ func main() {
 	// Feature flag checker: always enabled for now (will be wired to flag service).
 	meetingsHdlr := meetingsHandler.NewHandler(meetingLogSvc, savedMeetingSvc, summarySvc, nil)
 
+	// Wire Phone Calls dependency chain:
+	// MongoClient -> Repos -> Cache -> Service -> Handler
+	pcCallRepo := repository.NewPhoneCallRepo(mongoClient)
+	pcContactRepo := repository.NewSavedContactRepo(mongoClient)
+	pcStreakCache := cache.NewValkeyPhoneCallStreakCache(nil) // Valkey client wired at infra layer
+	pcService := phonecalls.NewPhoneCallService(pcCallRepo, pcContactRepo, pcStreakCache)
+	pcHandler := phonecalls.NewHandler(pcService)
+
 	// Create HTTP router
 	mux := http.NewServeMux()
 
@@ -76,6 +86,9 @@ func main() {
 
 	// Register Meeting routes
 	meetingsHdlr.RegisterRoutes(mux)
+
+	// Register Phone Calls routes
+	pcHandler.RegisterRoutes(mux)
 
 	// Generic activity routes (stub — not yet implemented)
 	mux.HandleFunc("POST /v1/activities/{type}", func(w http.ResponseWriter, r *http.Request) {
