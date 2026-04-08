@@ -594,6 +594,132 @@ struct PurchaseResultData: Codable, Sendable {
     let status: String?
 }
 
+// MARK: - Exercise API Models (matching OpenAPI spec)
+
+/// Request to create an exercise log entry.
+struct CreateExerciseLogRequest: Codable, Sendable {
+    let timestamp: String
+    let activityType: String
+    let customTypeLabel: String?
+    let durationMinutes: Int
+    let intensity: String?
+    let notes: String?
+    let moodBefore: Int?
+    let moodAfter: Int?
+    let source: String?
+    let externalId: String?
+}
+
+/// Request to update an exercise log (merge patch -- mutable fields only).
+struct UpdateExerciseLogRequest: Codable, Sendable {
+    let intensity: String?
+    let notes: String?
+    let moodBefore: Int?
+    let moodAfter: Int?
+    let customTypeLabel: String?
+}
+
+/// Request to create or update an exercise favorite.
+struct CreateExerciseFavoriteRequest: Codable, Sendable {
+    let activityType: String
+    let customTypeLabel: String?
+    let defaultDurationMinutes: Int
+    let defaultIntensity: String?
+    let label: String
+}
+
+/// Request to set a weekly exercise goal.
+struct SetExerciseGoalRequest: Codable, Sendable {
+    let targetActiveMinutes: Int?
+    let targetSessions: Int?
+}
+
+/// Exercise log data from API response.
+struct ExerciseLogData: Codable, Sendable {
+    let exerciseId: String
+    let timestamp: String
+    let activityType: String
+    let customTypeLabel: String?
+    let durationMinutes: Int
+    let intensity: String?
+    let notes: String?
+    let moodBefore: Int?
+    let moodAfter: Int?
+    let source: String
+    let externalId: String?
+    let exerciseStreak: ExerciseStreakResponse?
+}
+
+/// Exercise streak from API response.
+struct ExerciseStreakResponse: Codable, Sendable {
+    let currentDays: Int
+    let longestDays: Int
+    let lastExerciseDate: String?
+    let nextMilestone: ExerciseMilestoneResponse?
+}
+
+struct ExerciseMilestoneResponse: Codable, Sendable {
+    let days: Int
+    let daysRemaining: Int
+    let label: String
+}
+
+/// Exercise favorite from API response.
+struct ExerciseFavoriteData: Codable, Sendable {
+    let favoriteId: String
+    let activityType: String
+    let customTypeLabel: String?
+    let defaultDurationMinutes: Int
+    let defaultIntensity: String?
+    let label: String
+}
+
+/// Exercise goal progress from API response.
+struct ExerciseGoalData: Codable, Sendable {
+    let targetActiveMinutes: Int?
+    let targetSessions: Int?
+    let currentActiveMinutes: Int
+    let currentSessions: Int
+    let progressPercent: Double
+    let weekStartDate: String
+    let isGoalMet: Bool
+}
+
+/// Exercise widget data from API response.
+struct ExerciseWidgetApiData: Codable, Sendable {
+    let exercisedToday: Bool
+    let todayActiveMinutes: Int
+    let todaySessions: Int
+    let streak: ExerciseWidgetStreak
+    let weeklyGoal: ExerciseWidgetGoal?
+}
+
+struct ExerciseWidgetStreak: Codable, Sendable {
+    let currentDays: Int
+}
+
+struct ExerciseWidgetGoal: Codable, Sendable {
+    let targetActiveMinutes: Int
+    let currentActiveMinutes: Int
+    let progressPercent: Double
+    let isGoalMet: Bool
+}
+
+// MARK: - Siemens Error Response
+
+struct SiemensErrorResponse: Decodable, Sendable {
+    let errors: [SiemensError]
+}
+
+struct SiemensError: Decodable, Sendable {
+    let id: String?
+    let code: String?
+    let status: Int?
+    let title: String?
+    let detail: String?
+    let correlationId: String?
+}
+
 // MARK: - Feature Flag Models
 
 struct EvaluatedFlagData: Codable, Sendable {
