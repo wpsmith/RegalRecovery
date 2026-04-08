@@ -1,0 +1,963 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Meetings Attended API
+  version: 1.0.0
+  description: |
+    Meeting attendance tracking API for Regal Recovery.
+
+    Covers meeting logging, saved meeting templates (favorites), attendance history,
+    and attendance summaries. Integrates with the tracking system (commitments, calendar),
+    support network permissions, and analytics dashboard.
+
+    Meeting types: SA (Sexaholics Anonymous), CR (Celebrate Recovery), AA, therapy,
+    group-counseling, church, or custom with free-text label.
+
+    All meeting timestamps are immutable once recorded (FR2.7).
+    Gated by feature flag `activity.meetings`.
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Meeting Logs
+    description: Log and manage meeting attendance
+  - name: Saved Meetings
+    description: Saved meeting templates for one-tap logging
+  - name: Attendance Summary
+    description: Meeting attendance statistics
+
+paths:
+  /activities/meetings:
+    post:
+      operationId: createMeetingLog
+      tags: [Meeting Logs]
+      summary: Log meeting attendance
+      description: |
+        Record attendance at a recovery meeting.
+
+        Supports logging from a saved meeting template via `savedMeetingId` for one-tap entry.
+        Multiple meetings per day are allowed; each is logged independently.
+
+        Creates a dual-write calendar activity entry for the calendar view.
+        Publishes an event to the commitments tracking system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMeetingLogRequest'
+            example:
+              timestamp: "2026-03-28T19:00:00Z"
+              meetingType: "SA"
+              name: "Tuesday Night Recovery"
+              location: "Community Center"
+              durationMinutes: 60
+              notes: "Shared my story. Felt supported."
+      responses:
+        '201':
+          description: Created - Meeting logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the created meeting log
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingLogResponse'
+              example:
+                data:
+                  meetingId: mt_33333
+                  timestamp: "2026-03-28T19:00:00Z"
+                  meetingType: SA
+                  name: "Tuesday Night Recovery"
+                  location: "Community Center"
+                  durationMinutes: 60
+                  status: attended
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/meetings/mt_33333
+                meta:
+                  createdAt: "2026-03-28T19:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listMeetingLogs
+      tags: [Meeting Logs]
+      summary: List meeting logs
+      description: |
+        Retrieve meeting attendance history for the authenticated user.
+
+        Supports filtering by meeting type and date range. Results are returned
+        in reverse chronological order with cursor-based pagination.
+      parameters:
+        - name: meetingType
+          in: query
+          description: Filter by meeting type
+          schema:
+            type: string
+            enum: [SA, CR, AA, therapy, group-counseling, church, custom]
+        - name: startDate
+          in: query
+          description: Start of date range (inclusive, YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+          example: "2026-03-01"
+        - name: endDate
+          in: query
+          description: End of date range (inclusive, YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+          example: "2026-03-31"
+        - name: cursor
+          in: query
+          description: Cursor for pagination (opaque string from previous response)
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Maximum number of results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: sort
+          in: query
+          description: "Sort order. Default: -timestamp (newest first)"
+          schema:
+            type: string
+            default: "-timestamp"
+            enum: ["-timestamp", "timestamp"]
+      responses:
+        '200':
+          description: OK - Meeting logs retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingLogListResponse'
+              example:
+                data:
+                  - meetingId: mt_33333
+                    timestamp: "2026-03-28T19:00:00Z"
+                    meetingType: SA
+                    name: "Tuesday Night Recovery"
+                    location: "Community Center"
+                    durationMinutes: 60
+                    status: attended
+                    notes: "Shared my story. Felt supported."
+                  - meetingId: mt_33334
+                    timestamp: "2026-03-26T12:00:00Z"
+                    meetingType: therapy
+                    name: "Dr. Wilson Session"
+                    location: null
+                    durationMinutes: 50
+                    status: attended
+                    notes: "Discussed triggers and coping strategies."
+                links:
+                  self: https://api.regalrecovery.com/v1/activities/meetings?limit=50
+                  next: https://api.regalrecovery.com/v1/activities/meetings?cursor=bmV4dEN1cnNvcg&limit=50
+                meta:
+                  page:
+                    nextCursor: bmV4dEN1cnNvcg
+                    limit: 50
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/meetings/{meetingId}:
+    get:
+      operationId: getMeetingLog
+      tags: [Meeting Logs]
+      summary: Get meeting log by ID
+      description: Retrieve full details of a specific meeting log including notes.
+      parameters:
+        - $ref: '#/components/parameters/MeetingId'
+      responses:
+        '200':
+          description: OK - Meeting log retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingLogResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateMeetingLog
+      tags: [Meeting Logs]
+      summary: Update meeting log
+      description: |
+        Partially update a meeting log. The `timestamp` field is immutable and cannot
+        be changed (FR2.7). Updatable fields: name, location, durationMinutes, notes,
+        meetingType, customTypeLabel, status.
+      parameters:
+        - $ref: '#/components/parameters/MeetingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMeetingLogRequest'
+            example:
+              notes: "Updated notes after reflection."
+              durationMinutes: 75
+      responses:
+        '200':
+          description: OK - Meeting log updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeetingLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteMeetingLog
+      tags: [Meeting Logs]
+      summary: Delete meeting log
+      description: |
+        Permanently delete a meeting log and its associated calendar activity entry.
+      parameters:
+        - $ref: '#/components/parameters/MeetingId'
+      responses:
+        '204':
+          description: No Content - Meeting log deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/meetings/summary:
+    get:
+      operationId: getMeetingAttendanceSummary
+      tags: [Attendance Summary]
+      summary: Get attendance summary
+      description: |
+        Retrieve meeting attendance statistics for the specified period.
+
+        Returns total count, breakdown by meeting type, and the date range.
+      parameters:
+        - name: period
+          in: query
+          required: true
+          description: Summary period
+          schema:
+            type: string
+            enum: [week, month, quarter, year]
+          example: month
+        - name: date
+          in: query
+          description: "Reference date for the period (defaults to today). For 'week' returns the week containing this date; for 'month' returns that month."
+          schema:
+            type: string
+            format: date
+          example: "2026-03-15"
+      responses:
+        '200':
+          description: OK - Attendance summary retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSummaryResponse'
+              example:
+                data:
+                  period: month
+                  startDate: "2026-03-01"
+                  endDate: "2026-03-31"
+                  totalCount: 12
+                  canceledCount: 1
+                  byType:
+                    SA: 8
+                    therapy: 3
+                    church: 1
+                meta:
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/meetings/saved:
+    post:
+      operationId: createSavedMeeting
+      tags: [Saved Meetings]
+      summary: Create a saved meeting template
+      description: |
+        Save a frequently attended meeting for one-tap logging.
+
+        Includes optional schedule for pre-meeting reminders and post-meeting logging prompts.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSavedMeetingRequest'
+            example:
+              name: "Tuesday Night Recovery"
+              meetingType: SA
+              location: "Community Center"
+              schedule:
+                dayOfWeek: tuesday
+                time: "19:00"
+                timeZone: "America/New_York"
+              reminderMinutesBefore: 30
+      responses:
+        '201':
+          description: Created - Saved meeting created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedMeetingResponse'
+              example:
+                data:
+                  savedMeetingId: sm_11111
+                  name: "Tuesday Night Recovery"
+                  meetingType: SA
+                  location: "Community Center"
+                  schedule:
+                    dayOfWeek: tuesday
+                    time: "19:00"
+                    timeZone: "America/New_York"
+                  reminderMinutesBefore: 30
+                  isActive: true
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/meetings/saved/sm_11111
+                meta:
+                  createdAt: "2026-03-01T10:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listSavedMeetings
+      tags: [Saved Meetings]
+      summary: List saved meeting templates
+      description: |
+        Retrieve all active saved meeting templates for the authenticated user.
+        Sorted by name alphabetically.
+      responses:
+        '200':
+          description: OK - Saved meetings retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedMeetingListResponse'
+              example:
+                data:
+                  - savedMeetingId: sm_11111
+                    name: "Tuesday Night Recovery"
+                    meetingType: SA
+                    location: "Community Center"
+                    schedule:
+                      dayOfWeek: tuesday
+                      time: "19:00"
+                      timeZone: "America/New_York"
+                    reminderMinutesBefore: 30
+                    isActive: true
+                  - savedMeetingId: sm_22222
+                    name: "Thursday Celebrate Recovery"
+                    meetingType: CR
+                    location: "Grace Church"
+                    schedule:
+                      dayOfWeek: thursday
+                      time: "18:30"
+                      timeZone: "America/New_York"
+                    reminderMinutesBefore: 60
+                    isActive: true
+                meta:
+                  totalCount: 2
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/meetings/saved/{savedMeetingId}:
+    get:
+      operationId: getSavedMeeting
+      tags: [Saved Meetings]
+      summary: Get saved meeting by ID
+      parameters:
+        - $ref: '#/components/parameters/SavedMeetingId'
+      responses:
+        '200':
+          description: OK - Saved meeting retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedMeetingResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateSavedMeeting
+      tags: [Saved Meetings]
+      summary: Update saved meeting template
+      description: |
+        Update a saved meeting's name, type, location, schedule, or reminder settings.
+        Previously logged meetings are not retroactively changed.
+      parameters:
+        - $ref: '#/components/parameters/SavedMeetingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSavedMeetingRequest'
+      responses:
+        '200':
+          description: OK - Saved meeting updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedMeetingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteSavedMeeting
+      tags: [Saved Meetings]
+      summary: Delete saved meeting template
+      description: |
+        Soft-delete a saved meeting template. Sets `isActive` to false.
+        Previously logged meetings referencing this template are unaffected.
+      parameters:
+        - $ref: '#/components/parameters/SavedMeetingId'
+      responses:
+        '204':
+          description: No Content - Saved meeting deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  parameters:
+    MeetingId:
+      name: meetingId
+      in: path
+      required: true
+      description: Unique meeting log identifier
+      schema:
+        type: string
+        pattern: '^mt_[a-zA-Z0-9]+$'
+      example: mt_33333
+
+    SavedMeetingId:
+      name: savedMeetingId
+      in: path
+      required: true
+      description: Unique saved meeting template identifier
+      schema:
+        type: string
+        pattern: '^sm_[a-zA-Z0-9]+$'
+      example: sm_11111
+
+  schemas:
+    MeetingType:
+      type: string
+      enum: [SA, CR, AA, therapy, group-counseling, church, custom]
+      description: |
+        Meeting type. SA = Sexaholics Anonymous, CR = Celebrate Recovery,
+        AA = Alcoholics Anonymous, or custom with a free-text label.
+
+    MeetingStatus:
+      type: string
+      enum: [attended, canceled]
+      description: Whether the meeting was attended or canceled.
+
+    CreateMeetingLogRequest:
+      type: object
+      required:
+        - timestamp
+        - meetingType
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the meeting occurred (immutable once set)
+        meetingType:
+          $ref: '#/components/schemas/MeetingType'
+        customTypeLabel:
+          type: string
+          maxLength: 100
+          description: Free-text label when meetingType is 'custom'
+        name:
+          type: string
+          maxLength: 200
+          description: Meeting name or group name
+        location:
+          type: string
+          maxLength: 300
+          description: Meeting location
+        durationMinutes:
+          type: integer
+          minimum: 0
+          description: Duration in minutes
+        notes:
+          type: string
+          maxLength: 2000
+          description: Post-meeting notes or takeaways
+        savedMeetingId:
+          type: string
+          pattern: '^sm_[a-zA-Z0-9]+$'
+          description: Reference to a saved meeting template for one-tap logging
+
+    UpdateMeetingLogRequest:
+      type: object
+      properties:
+        meetingType:
+          $ref: '#/components/schemas/MeetingType'
+        customTypeLabel:
+          type: string
+          maxLength: 100
+        name:
+          type: string
+          maxLength: 200
+        location:
+          type: string
+          maxLength: 300
+        durationMinutes:
+          type: integer
+          minimum: 0
+        notes:
+          type: string
+          maxLength: 2000
+        status:
+          $ref: '#/components/schemas/MeetingStatus'
+      description: |
+        Partial update. The `timestamp` field is immutable and cannot be included.
+        Any attempt to include `timestamp` will result in a 422 error.
+
+    MeetingLog:
+      type: object
+      properties:
+        meetingId:
+          type: string
+          description: Unique meeting log identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: When the meeting occurred
+        meetingType:
+          $ref: '#/components/schemas/MeetingType'
+        customTypeLabel:
+          type: string
+          nullable: true
+          description: Custom type label (only when meetingType is 'custom')
+        name:
+          type: string
+          nullable: true
+          description: Meeting name
+        location:
+          type: string
+          nullable: true
+          description: Meeting location
+        durationMinutes:
+          type: integer
+          nullable: true
+          description: Duration in minutes
+        notes:
+          type: string
+          nullable: true
+          description: Notes (only returned to the owning user)
+        status:
+          $ref: '#/components/schemas/MeetingStatus'
+        savedMeetingId:
+          type: string
+          nullable: true
+          description: Reference to saved meeting template, if applicable
+        links:
+          $ref: '#/components/schemas/Links'
+
+    MeetingLogResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MeetingLog'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    MeetingLogListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MeetingLog'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+
+    MeetingSchedule:
+      type: object
+      properties:
+        dayOfWeek:
+          type: string
+          enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+          description: Day of the week for the recurring meeting
+        time:
+          type: string
+          pattern: '^\d{2}:\d{2}$'
+          description: Local time in HH:mm format
+          example: "19:00"
+        timeZone:
+          type: string
+          description: IANA timezone identifier
+          example: "America/New_York"
+
+    CreateSavedMeetingRequest:
+      type: object
+      required:
+        - name
+        - meetingType
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          description: Meeting name
+        meetingType:
+          $ref: '#/components/schemas/MeetingType'
+        customTypeLabel:
+          type: string
+          maxLength: 100
+        location:
+          type: string
+          maxLength: 300
+        schedule:
+          $ref: '#/components/schemas/MeetingSchedule'
+        reminderMinutesBefore:
+          type: integer
+          enum: [15, 30, 60]
+          description: Minutes before meeting to send reminder notification
+
+    UpdateSavedMeetingRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        meetingType:
+          $ref: '#/components/schemas/MeetingType'
+        customTypeLabel:
+          type: string
+          maxLength: 100
+        location:
+          type: string
+          maxLength: 300
+        schedule:
+          $ref: '#/components/schemas/MeetingSchedule'
+        reminderMinutesBefore:
+          type: integer
+          enum: [15, 30, 60]
+          nullable: true
+
+    SavedMeeting:
+      type: object
+      properties:
+        savedMeetingId:
+          type: string
+          description: Unique saved meeting identifier
+        name:
+          type: string
+        meetingType:
+          $ref: '#/components/schemas/MeetingType'
+        customTypeLabel:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        schedule:
+          $ref: '#/components/schemas/MeetingSchedule'
+          nullable: true
+        reminderMinutesBefore:
+          type: integer
+          nullable: true
+        isActive:
+          type: boolean
+        links:
+          $ref: '#/components/schemas/Links'
+
+    SavedMeetingResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/SavedMeeting'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    SavedMeetingListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedMeeting'
+        meta:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+
+    AttendanceSummary:
+      type: object
+      properties:
+        period:
+          type: string
+          enum: [week, month, quarter, year]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        totalCount:
+          type: integer
+          description: Total meetings attended (excludes canceled)
+        canceledCount:
+          type: integer
+          description: Number of meetings marked as canceled
+        byType:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Attendance count broken down by meeting type
+
+    AttendanceSummaryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/AttendanceSummary'
+        meta:
+          type: object
+          properties:
+            retrievedAt:
+              type: string
+              format: date-time
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist or existence not disclosed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

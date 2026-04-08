@@ -1,0 +1,1154 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Mood Ratings API
+  version: 1.0.0
+  description: |
+    Mood Ratings activity API for Regal Recovery.
+
+    Enables users to log mood ratings (1-5 scale) multiple times per day with optional
+    emotion labels and context notes. Provides daily summaries, trends, insights,
+    and alert triggers for sustained low moods and crisis entries.
+
+    Key behaviors:
+    - Multiple entries per day, each independently timestamped
+    - Entries editable/deletable within 24 hours only
+    - All timestamps immutable once created (FR2.7)
+    - Crisis entries (rating=1) trigger compassionate prompts
+    - Sustained low mood (avg <=2.0 for 3+ days) triggers alerts
+    - Feature-flagged behind `activity.mood`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Mood Entries
+    description: Create, read, update, delete mood ratings
+  - name: Mood Summary
+    description: Daily summaries and today's view
+  - name: Mood Trends
+    description: Trends, insights, and aggregation endpoints
+  - name: Mood Alerts
+    description: Alert status and configuration
+
+paths:
+  /activities/mood:
+    post:
+      operationId: createMoodEntry
+      tags: [Mood Entries]
+      summary: Log a mood rating
+      description: |
+        Record a mood rating on the 1-5 scale with optional emotion labels and context note.
+
+        Multiple entries per day are supported. Each entry is independently timestamped.
+
+        If rating is 1 (Crisis), the response includes `crisisPrompted: true` to signal
+        the client to display the crisis support overlay.
+
+        Requires feature flag `activity.mood` to be enabled.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMoodEntryRequest'
+            example:
+              timestamp: "2026-04-07T14:30:00Z"
+              rating: 4
+              emotionLabels: ["Hopeful", "Grateful"]
+              contextNote: "Felt centered after morning prayer."
+              source: "direct"
+      responses:
+        '201':
+          description: Created - Mood entry saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URI of the created mood entry
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodEntryResponse'
+              example:
+                data:
+                  moodId: "mood_a1b2c3"
+                  timestamp: "2026-04-07T14:30:00Z"
+                  rating: 4
+                  ratingLabel: "Good"
+                  emotionLabels: ["Hopeful", "Grateful"]
+                  contextNote: "Felt centered after morning prayer."
+                  source: "direct"
+                  crisisPrompted: false
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/mood/mood_a1b2c3"
+                meta:
+                  createdAt: "2026-04-07T14:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listMoodEntries
+      tags: [Mood Entries]
+      summary: List mood entries
+      description: |
+        Retrieve mood entries for the authenticated user with optional filters.
+
+        Supports cursor-based pagination, date range filtering, rating filtering,
+        emotion label filtering, and time-of-day filtering.
+      parameters:
+        - name: startDate
+          in: query
+          description: Start of date range (inclusive, ISO 8601 date)
+          schema:
+            type: string
+            format: date
+          example: "2026-04-01"
+        - name: endDate
+          in: query
+          description: End of date range (inclusive, ISO 8601 date)
+          schema:
+            type: string
+            format: date
+          example: "2026-04-07"
+        - name: rating
+          in: query
+          description: Filter by one or more ratings (comma-separated)
+          schema:
+            type: string
+          example: "1,2"
+        - name: emotionLabel
+          in: query
+          description: Filter by emotion label
+          schema:
+            type: string
+          example: "Anxious"
+        - name: timeOfDay
+          in: query
+          description: Filter by time of day (in user's timezone)
+          schema:
+            type: string
+            enum: [morning, afternoon, evening, night]
+        - name: search
+          in: query
+          description: Keyword search in context notes
+          schema:
+            type: string
+            maxLength: 100
+        - name: cursor
+          in: query
+          description: Pagination cursor
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of entries per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: sort
+          in: query
+          description: "Sort field. Default: -timestamp (newest first)"
+          schema:
+            type: string
+            default: "-timestamp"
+      responses:
+        '200':
+          description: OK - Mood entries retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodEntryListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood/{moodId}:
+    get:
+      operationId: getMoodEntry
+      tags: [Mood Entries]
+      summary: Get a single mood entry
+      parameters:
+        - $ref: '#/components/parameters/MoodId'
+      responses:
+        '200':
+          description: OK - Mood entry retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodEntryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateMoodEntry
+      tags: [Mood Entries]
+      summary: Update a mood entry
+      description: |
+        Update a mood entry's rating, emotion labels, or context note.
+
+        Only permitted within 24 hours of creation. The `createdAt` timestamp
+        is immutable and cannot be changed. Only `modifiedAt` is updated.
+      parameters:
+        - $ref: '#/components/parameters/MoodId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMoodEntryRequest'
+            example:
+              rating: 3
+              contextNote: "Actually feeling more 'okay' than 'good'."
+      responses:
+        '200':
+          description: OK - Mood entry updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodEntryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Unprocessable Entity - Entry locked (older than 24 hours)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    code: "rr:0x00040001"
+                    status: 422
+                    title: "Entry Locked"
+                    detail: "This mood entry is older than 24 hours and can no longer be edited."
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteMoodEntry
+      tags: [Mood Entries]
+      summary: Delete a mood entry
+      description: |
+        Delete a mood entry. Only permitted within 24 hours of creation.
+        After 24 hours, entries are permanent to preserve data integrity.
+      parameters:
+        - $ref: '#/components/parameters/MoodId'
+      responses:
+        '204':
+          description: No Content - Entry deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Unprocessable Entity - Entry locked (older than 24 hours)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    code: "rr:0x00040002"
+                    status: 422
+                    title: "Entry Permanent"
+                    detail: "This mood entry is older than 24 hours and cannot be deleted."
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood/today:
+    get:
+      operationId: getMoodToday
+      tags: [Mood Summary]
+      summary: Get today's mood summary
+      description: |
+        Retrieve all mood entries for today with computed summary statistics.
+
+        Returns the mini-timeline data, today's average, high/low, entry count,
+        and a quick comparison to yesterday.
+      responses:
+        '200':
+          description: OK - Today's mood data
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodTodayResponse'
+              example:
+                data:
+                  entries:
+                    - moodId: "mood_a1b2c3"
+                      timestamp: "2026-04-07T08:00:00Z"
+                      rating: 3
+                      ratingLabel: "Okay"
+                      emotionLabels: ["Restless"]
+                    - moodId: "mood_d4e5f6"
+                      timestamp: "2026-04-07T14:30:00Z"
+                      rating: 4
+                      ratingLabel: "Good"
+                      emotionLabels: ["Hopeful", "Grateful"]
+                  summary:
+                    averageRating: 3.5
+                    averageLabel: "Okay"
+                    highestRating: 4
+                    lowestRating: 3
+                    entryCount: 2
+                  yesterdayComparison:
+                    averageRating: 3.0
+                    timeOfDayRating: 2
+                    timeOfDayLabel: "Struggling"
+                meta:
+                  date: "2026-04-07"
+                  timezone: "America/New_York"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood/daily-summaries:
+    get:
+      operationId: getMoodDailySummaries
+      tags: [Mood Summary]
+      summary: Get daily mood summaries
+      description: |
+        Retrieve aggregated daily mood summaries for a date range. Used for
+        calendar color-coding, daily view browsing, and history.
+
+        Each day includes average mood, entry count, high/low, and color code.
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-03-01"
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-03-31"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 31
+      responses:
+        '200':
+          description: OK - Daily summaries
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodDailySummariesResponse'
+              example:
+                data:
+                  - date: "2026-03-28"
+                    averageRating: 4.2
+                    colorCode: "green"
+                    entryCount: 3
+                    highestRating: 5
+                    lowestRating: 3
+                  - date: "2026-03-27"
+                    averageRating: 2.5
+                    colorCode: "orange"
+                    entryCount: 2
+                    highestRating: 3
+                    lowestRating: 2
+                meta:
+                  startDate: "2026-03-01"
+                  endDate: "2026-03-31"
+                  daysWithEntries: 25
+                  daysWithoutEntries: 6
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood/trends:
+    get:
+      operationId: getMoodTrends
+      tags: [Mood Trends]
+      summary: Get mood trends and insights
+      description: |
+        Retrieve computed mood trends including daily averages over time,
+        weekly/monthly summaries, time-of-day patterns, day-of-week patterns,
+        emotion label frequency, and trend direction.
+      parameters:
+        - name: period
+          in: query
+          required: true
+          description: Time period for trend calculation
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+          example: "30d"
+      responses:
+        '200':
+          description: OK - Trends data
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodTrendsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood/correlations:
+    get:
+      operationId: getMoodCorrelations
+      tags: [Mood Trends]
+      summary: Get mood correlations with other activities
+      description: |
+        Compute correlations between mood ratings and other recovery activities
+        (exercise, prayer, meetings, journaling, urges, check-ins).
+
+        Requires sufficient data in both mood and the correlated activity.
+      parameters:
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [30d, 90d]
+          example: "30d"
+      responses:
+        '200':
+          description: OK - Correlation data
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodCorrelationsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood/alerts/status:
+    get:
+      operationId: getMoodAlertStatus
+      tags: [Mood Alerts]
+      summary: Get current mood alert status
+      description: |
+        Check if any mood alerts are active (sustained low mood, crisis).
+
+        Returns the current alert state and recommended actions.
+      responses:
+        '200':
+          description: OK - Alert status
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoodAlertStatusResponse'
+              example:
+                data:
+                  sustainedLowMood: false
+                  consecutiveLowDays: 0
+                  lastCrisisEntry: null
+                  alertSharedWithNetwork: false
+                meta:
+                  evaluatedAt: "2026-04-07T15:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/mood/streak:
+    get:
+      operationId: getMoodStreak
+      tags: [Mood Summary]
+      summary: Get mood tracking streak
+      description: |
+        Get the current mood tracking streak (consecutive days with at least
+        one mood entry).
+      responses:
+        '200':
+          description: OK - Streak data
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      currentStreakDays:
+                        type: integer
+                        description: Consecutive days with at least one mood entry
+                      longestStreakDays:
+                        type: integer
+                        description: Longest mood tracking streak ever
+                      lastEntryDate:
+                        type: string
+                        format: date
+                        description: Date of most recent mood entry
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  currentStreakDays: 14
+                  longestStreakDays: 30
+                  lastEntryDate: "2026-04-07"
+                meta:
+                  evaluatedAt: "2026-04-07T15:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  parameters:
+    MoodId:
+      name: moodId
+      in: path
+      required: true
+      description: Unique mood entry identifier
+      schema:
+        type: string
+        pattern: '^mood_[a-zA-Z0-9]+$'
+      example: "mood_a1b2c3"
+
+  schemas:
+    CreateMoodEntryRequest:
+      type: object
+      required:
+        - timestamp
+        - rating
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the mood was experienced (UTC)
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: "Mood rating: 1=Crisis, 2=Struggling, 3=Okay, 4=Good, 5=Great"
+        emotionLabels:
+          type: array
+          items:
+            type: string
+            enum:
+              - Peaceful
+              - Grateful
+              - Hopeful
+              - Confident
+              - Connected
+              - Anxious
+              - Lonely
+              - Angry
+              - Ashamed
+              - Overwhelmed
+              - Sad
+              - Numb
+              - Restless
+              - Afraid
+              - Frustrated
+          maxItems: 15
+          description: Optional emotion labels for specificity
+        contextNote:
+          type: string
+          maxLength: 200
+          description: Brief free-text note about what is driving the mood
+        source:
+          type: string
+          enum: [direct, widget, post-activity, notification]
+          default: direct
+          description: Where the mood was logged from
+
+    UpdateMoodEntryRequest:
+      type: object
+      properties:
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        emotionLabels:
+          type: array
+          items:
+            type: string
+            enum:
+              - Peaceful
+              - Grateful
+              - Hopeful
+              - Confident
+              - Connected
+              - Anxious
+              - Lonely
+              - Angry
+              - Ashamed
+              - Overwhelmed
+              - Sad
+              - Numb
+              - Restless
+              - Afraid
+              - Frustrated
+          maxItems: 15
+        contextNote:
+          type: string
+          maxLength: 200
+
+    MoodEntry:
+      type: object
+      properties:
+        moodId:
+          type: string
+          description: Unique mood entry identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: When the mood was experienced (immutable)
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        ratingLabel:
+          type: string
+          enum: [Crisis, Struggling, Okay, Good, Great]
+          description: Human-readable label for the rating
+        emotionLabels:
+          type: array
+          items:
+            type: string
+        contextNote:
+          type: string
+        source:
+          type: string
+        crisisPrompted:
+          type: boolean
+          description: True if rating=1 and crisis prompt was triggered
+        links:
+          $ref: '#/components/schemas/Links'
+
+    MoodEntryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MoodEntry'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    MoodEntryListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MoodEntry'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+            totalEntries:
+              type: integer
+
+    MoodTodayResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            entries:
+              type: array
+              items:
+                $ref: '#/components/schemas/MoodEntry'
+            summary:
+              $ref: '#/components/schemas/MoodDaySummary'
+            yesterdayComparison:
+              type: object
+              nullable: true
+              properties:
+                averageRating:
+                  type: number
+                  format: double
+                timeOfDayRating:
+                  type: integer
+                  nullable: true
+                  description: Yesterday's mood at this same time of day
+                timeOfDayLabel:
+                  type: string
+                  nullable: true
+        meta:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+            timezone:
+              type: string
+
+    MoodDaySummary:
+      type: object
+      properties:
+        averageRating:
+          type: number
+          format: double
+          description: Average mood rating for the day
+        averageLabel:
+          type: string
+          enum: [Crisis, Struggling, Okay, Good, Great]
+        highestRating:
+          type: integer
+        lowestRating:
+          type: integer
+        entryCount:
+          type: integer
+
+    MoodDailySummary:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        averageRating:
+          type: number
+          format: double
+        colorCode:
+          type: string
+          enum: [green, yellow, orange, red, gray]
+          description: "Color based on average: green 4-5, yellow 3-3.9, orange 2-2.9, red 1-1.9, gray no data"
+        entryCount:
+          type: integer
+        highestRating:
+          type: integer
+        lowestRating:
+          type: integer
+
+    MoodDailySummariesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MoodDailySummary'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+            daysWithEntries:
+              type: integer
+            daysWithoutEntries:
+              type: integer
+
+    MoodTrendsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            dailyAverages:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  averageRating:
+                    type: number
+                    format: double
+                  entryCount:
+                    type: integer
+            trendDirection:
+              type: string
+              enum: [improving, stable, declining]
+              description: Overall trend over the requested period
+            weeklySummary:
+              type: object
+              properties:
+                averageThisWeek:
+                  type: number
+                  format: double
+                averageLastWeek:
+                  type: number
+                  format: double
+                bestDay:
+                  type: string
+                  format: date
+                mostChallengingDay:
+                  type: string
+                  format: date
+                topEmotionLabels:
+                  type: array
+                  items:
+                    type: string
+                entryCount:
+                  type: integer
+            monthlySummary:
+              type: object
+              properties:
+                averageThisMonth:
+                  type: number
+                  format: double
+                distribution:
+                  type: object
+                  properties:
+                    great:
+                      type: number
+                      format: double
+                      description: Percentage of entries rated 5
+                    good:
+                      type: number
+                      format: double
+                    okay:
+                      type: number
+                      format: double
+                    struggling:
+                      type: number
+                      format: double
+                    crisis:
+                      type: number
+                      format: double
+                comparedToPreviousMonth:
+                  type: number
+                  format: double
+                  description: Difference in average vs previous month
+            timeOfDayHeatmap:
+              type: array
+              items:
+                type: object
+                properties:
+                  hour:
+                    type: integer
+                    minimum: 0
+                    maximum: 23
+                  averageRating:
+                    type: number
+                    format: double
+                  entryCount:
+                    type: integer
+            dayOfWeekPatterns:
+              type: array
+              items:
+                type: object
+                properties:
+                  dayOfWeek:
+                    type: integer
+                    minimum: 0
+                    maximum: 6
+                    description: "0=Sunday, 6=Saturday"
+                  dayName:
+                    type: string
+                  averageRating:
+                    type: number
+                    format: double
+            emotionLabelTrends:
+              type: array
+              items:
+                type: object
+                properties:
+                  label:
+                    type: string
+                  count:
+                    type: integer
+                  percentageChange:
+                    type: number
+                    format: double
+                    description: Change vs previous period
+        meta:
+          type: object
+          properties:
+            period:
+              type: string
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+            totalEntries:
+              type: integer
+
+    MoodCorrelationsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            activities:
+              type: array
+              items:
+                type: object
+                properties:
+                  activityType:
+                    type: string
+                    description: "e.g., exercise, prayer, meeting, journal"
+                  moodDelta:
+                    type: number
+                    format: double
+                    description: Average mood difference on days with this activity vs without
+                  insight:
+                    type: string
+                    description: Human-readable insight text
+                  dataPoints:
+                    type: integer
+                    description: Number of days used for this correlation
+            urgeCorrelation:
+              type: object
+              nullable: true
+              properties:
+                averageMoodBeforeUrge:
+                  type: number
+                  format: double
+                consecutiveLowDayUrgeIncrease:
+                  type: string
+                  nullable: true
+                  description: "e.g., 'When below Okay for 3+ days, urge frequency increases by 40%'"
+                insight:
+                  type: string
+        meta:
+          type: object
+          properties:
+            period:
+              type: string
+            sufficientData:
+              type: boolean
+              description: Whether enough data exists for reliable correlations
+
+    MoodAlertStatusResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            sustainedLowMood:
+              type: boolean
+              description: True if average daily mood <= 2.0 for 3+ consecutive days
+            consecutiveLowDays:
+              type: integer
+              description: Number of consecutive days with average <= 2.0
+            lastCrisisEntry:
+              type: object
+              nullable: true
+              properties:
+                moodId:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+            alertSharedWithNetwork:
+              type: boolean
+              description: Whether low mood alerts are shared with support network
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,1380 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Post-Mortem Analysis API
+  version: 1.0.0
+  description: |
+    Post-Mortem Analysis API for Regal Recovery.
+
+    Provides structured post-relapse (or near-miss) analysis with a guided six-section walkthrough,
+    visual timeline, FASTER Scale mapping, trigger identification, action planning, sharing, and
+    cross-analysis pattern insights.
+
+    All activity timestamps are immutable once recorded. Supports draft/complete lifecycle
+    with auto-save for unfinished analyses.
+
+    Feature flag: `activity.post-mortem`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Post-Mortem
+    description: Post-relapse and near-miss analysis with guided walkthrough
+  - name: Post-Mortem Insights
+    description: Cross-analysis pattern recognition across multiple post-mortems
+  - name: Post-Mortem Sharing
+    description: Sharing post-mortems with support network
+  - name: Post-Mortem Actions
+    description: Action plan management and conversion to commitments/goals
+
+paths:
+  /activities/post-mortem:
+    post:
+      operationId: createPostMortemAnalysis
+      tags: [Post-Mortem]
+      summary: Create post-mortem analysis
+      description: |
+        Create a new post-mortem analysis after a relapse or near-miss event.
+
+        The analysis is created in `draft` status. Sections can be added incrementally
+        via PATCH. Call the `/complete` endpoint when all sections are filled.
+
+        For relapses, provide `relapseId` to link to the relapse record. For near-miss
+        events, omit `relapseId` and set `eventType` to `near-miss`.
+
+        Feature flag: `activity.post-mortem`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostMortemRequest'
+            example:
+              timestamp: "2026-03-28T23:00:00Z"
+              eventType: relapse
+              relapseId: r_98765
+              addictionId: a_67890
+              sections:
+                dayBefore:
+                  text: "Was feeling disconnected and skipped evening prayer..."
+                  moodRating: 4
+                  recoveryPracticesKept: false
+                  unresolvedConflicts: "Argument with spouse about finances"
+      responses:
+        '201':
+          description: Created - Post-mortem analysis draft saved
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URL of the created post-mortem
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMortemResponse'
+              example:
+                data:
+                  analysisId: pm_99999
+                  timestamp: "2026-03-28T23:00:00Z"
+                  status: draft
+                  eventType: relapse
+                  relapseId: r_98765
+                  addictionId: a_67890
+                  sectionsCompleted: ["dayBefore"]
+                  sectionsRemaining: ["morning", "throughoutTheDay", "buildUp", "actingOut", "immediatelyAfter"]
+                  links:
+                    self: https://api.regalrecovery.com/v1/activities/post-mortem/pm_99999
+                    complete: https://api.regalrecovery.com/v1/activities/post-mortem/pm_99999/complete
+                meta:
+                  createdAt: "2026-03-28T23:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listPostMortemAnalyses
+      tags: [Post-Mortem]
+      summary: List post-mortem analyses
+      description: |
+        Retrieve post-mortem analyses for the authenticated user.
+
+        Results are returned in reverse chronological order with cursor-based pagination.
+        Filter by date range, addiction, status, or event type.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter post-mortems on or after this date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Filter post-mortems on or before this date
+        - name: addictionId
+          in: query
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          description: Filter by addiction ID
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, complete]
+          description: Filter by analysis status
+        - name: eventType
+          in: query
+          schema:
+            type: string
+            enum: [relapse, near-miss, combined]
+          description: Filter by event type
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: Cursor for pagination
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+          description: Maximum results to return
+      responses:
+        '200':
+          description: OK - Post-mortem analyses retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PostMortemSummary'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        $ref: '#/components/schemas/PageMetadata'
+                      totalComplete:
+                        type: integer
+                        description: Total completed post-mortems for this user
+                      totalDrafts:
+                        type: integer
+                        description: Total draft post-mortems for this user
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/post-mortem/{analysisId}:
+    get:
+      operationId: getPostMortemAnalysis
+      tags: [Post-Mortem]
+      summary: Get post-mortem analysis by ID
+      description: |
+        Retrieve the full post-mortem analysis including all sections, trigger details,
+        FASTER mapping, action plan, and sharing status.
+
+        Support contacts can access shared post-mortems if they have `post-mortem:read` permission.
+      parameters:
+        - $ref: '#/components/parameters/AnalysisId'
+      responses:
+        '200':
+          description: OK - Full post-mortem analysis returned
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMortemDetailResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updatePostMortemAnalysis
+      tags: [Post-Mortem]
+      summary: Update post-mortem analysis
+      description: |
+        Update sections, triggers, FASTER mapping, or action plan of a post-mortem.
+
+        For `draft` status: any section can be updated.
+        For `complete` status: only `actionPlan` and `sharing` can be modified.
+
+        Uses JSON Merge Patch (RFC 7396). Only include fields being changed.
+      parameters:
+        - $ref: '#/components/parameters/AnalysisId'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostMortemRequest'
+            example:
+              sections:
+                morning:
+                  text: "Woke up feeling flat, skipped morning commitment..."
+                  moodRating: 3
+                  morningCommitmentCompleted: false
+                  affirmationViewed: false
+      responses:
+        '200':
+          description: OK - Post-mortem updated
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMortemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deletePostMortemAnalysis
+      tags: [Post-Mortem]
+      summary: Delete post-mortem analysis
+      description: |
+        Delete a post-mortem analysis. Only drafts can be deleted.
+        Completed post-mortems are immutable recovery data and cannot be deleted
+        (except via account deletion DSR).
+      parameters:
+        - $ref: '#/components/parameters/AnalysisId'
+      responses:
+        '204':
+          description: No Content - Draft deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Unprocessable Entity - Cannot delete completed post-mortem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/post-mortem/{analysisId}/complete:
+    post:
+      operationId: completePostMortemAnalysis
+      tags: [Post-Mortem]
+      summary: Mark post-mortem as complete
+      description: |
+        Transition a draft post-mortem to `complete` status.
+
+        Requires all six walkthrough sections and at least one action plan item.
+        Sets `completedAt` timestamp and triggers calendar activity dual-write.
+
+        Displays closing message: "Thank you for your honesty and courage.
+        Every insight you have gained here is a step toward lasting freedom."
+      parameters:
+        - $ref: '#/components/parameters/AnalysisId'
+      responses:
+        '200':
+          description: OK - Post-mortem marked as complete
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMortemDetailResponse'
+              example:
+                data:
+                  analysisId: pm_99999
+                  status: complete
+                  completedAt: "2026-03-29T10:00:00Z"
+                  message: "Thank you for your honesty and courage. Every insight you have gained here is a step toward lasting freedom."
+                meta:
+                  createdAt: "2026-03-28T23:00:00Z"
+                  modifiedAt: "2026-03-29T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Unprocessable Entity - Missing required sections or action items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                errors:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    code: "rr:0x00050001"
+                    status: 422
+                    title: Incomplete Post-Mortem
+                    detail: "Missing required sections: buildUp, actingOut. Minimum 1 action plan item required."
+                    source:
+                      pointer: /data/sections
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/post-mortem/{analysisId}/share:
+    post:
+      operationId: sharePostMortemAnalysis
+      tags: [Post-Mortem Sharing]
+      summary: Share post-mortem with support contacts
+      description: |
+        Share a completed post-mortem with one or more support contacts.
+
+        Only completed post-mortems can be shared. Each contact can receive
+        either the `full` analysis or a `summary` version. Requires the contact
+        to have an active relationship with the user.
+
+        Shared post-mortems are visible to contacts who have `post-mortem:read` permission.
+      parameters:
+        - $ref: '#/components/parameters/AnalysisId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SharePostMortemRequest'
+            example:
+              shares:
+                - contactId: c_99999
+                  shareType: full
+                - contactId: c_88888
+                  shareType: summary
+      responses:
+        '200':
+          description: OK - Sharing configured
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      analysisId:
+                        type: string
+                      sharing:
+                        $ref: '#/components/schemas/SharingStatus'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/post-mortem/{analysisId}/export:
+    get:
+      operationId: exportPostMortemAnalysis
+      tags: [Post-Mortem]
+      summary: Export post-mortem as PDF
+      description: |
+        Generate and download a PDF export of a completed post-mortem analysis.
+        Suitable for therapy sessions or sponsor meetings.
+      parameters:
+        - $ref: '#/components/parameters/AnalysisId'
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [pdf]
+          description: Export format (currently only PDF supported)
+      responses:
+        '200':
+          description: OK - PDF binary returned
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Unprocessable Entity - Cannot export draft post-mortem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/post-mortem/{analysisId}/action-items/{actionId}/convert:
+    post:
+      operationId: convertActionItemToCommitment
+      tags: [Post-Mortem Actions]
+      summary: Convert action item to commitment or goal
+      description: |
+        Convert a post-mortem action plan item into a commitment or daily/weekly goal.
+
+        The created commitment/goal includes a `sourcePostMortemId` reference.
+        The action item is updated with the created entity's ID.
+      parameters:
+        - $ref: '#/components/parameters/AnalysisId'
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ap_[a-zA-Z0-9]+$'
+          description: Action item ID within the post-mortem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertActionItemRequest'
+            example:
+              targetType: commitment
+              title: "Call sponsor when I first notice isolation"
+              frequency: daily
+      responses:
+        '201':
+          description: Created - Commitment or goal created from action item
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      actionId:
+                        type: string
+                      targetType:
+                        type: string
+                        enum: [commitment, goal]
+                      createdEntityId:
+                        type: string
+                        description: ID of the created commitment or goal
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/post-mortem/insights:
+    get:
+      operationId: getPostMortemInsights
+      tags: [Post-Mortem Insights]
+      summary: Get cross-analysis pattern insights
+      description: |
+        Analyze patterns across all completed post-mortems for the authenticated user.
+
+        Returns:
+        - Most common triggers ranked by frequency
+        - Most frequent FASTER stage at the point of no return
+        - Most common time of day for acting out
+        - Recurring decision points where intervention was missed
+
+        Requires at least 2 completed post-mortems to generate insights.
+      parameters:
+        - name: addictionId
+          in: query
+          schema:
+            type: string
+            pattern: '^a_[a-zA-Z0-9]+$'
+          description: Filter insights by addiction ID
+      responses:
+        '200':
+          description: OK - Insights returned
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostMortemInsightsResponse'
+              example:
+                data:
+                  totalAnalyses: 5
+                  commonTriggers:
+                    - category: digital
+                      frequency: 4
+                      percentage: 80
+                    - category: emotional
+                      frequency: 3
+                      percentage: 60
+                    - category: relational
+                      frequency: 2
+                      percentage: 40
+                  commonFasterStageAtBreak:
+                    stage: exhausted
+                    frequency: 3
+                    percentage: 60
+                  commonTimeOfDay:
+                    period: evening
+                    frequency: 4
+                    percentage: 80
+                  recurringDecisionPoints:
+                    - theme: "Choosing to isolate instead of reaching out"
+                      frequency: 3
+                    - theme: "Staying on phone past bedtime"
+                      frequency: 2
+                  deepTriggerPatterns:
+                    - surface: "Boredom"
+                      underlying: "Loneliness"
+                      coreWound: "Fear of being unlovable"
+                      frequency: 3
+                meta:
+                  analysisCount: 5
+                  insufficientData: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  parameters:
+    AnalysisId:
+      name: analysisId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^pm_[a-zA-Z0-9]+$'
+      description: Post-mortem analysis ID
+      example: pm_99999
+
+  schemas:
+    # --- Request Schemas ---
+
+    CreatePostMortemRequest:
+      type: object
+      required:
+        - timestamp
+        - eventType
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the event being analyzed (immutable once set)
+        eventType:
+          type: string
+          enum: [relapse, near-miss, combined]
+          description: |
+            Type of event: `relapse` (linked to relapse record), `near-miss` (urge resisted),
+            or `combined` (multiple events in a period)
+        relapseId:
+          type: string
+          description: Reference to relapse record (required when eventType is "relapse")
+        addictionId:
+          type: string
+          description: Associated addiction ID
+        sections:
+          $ref: '#/components/schemas/PostMortemSections'
+
+    UpdatePostMortemRequest:
+      type: object
+      description: |
+        JSON Merge Patch for updating a post-mortem. Only include fields being changed.
+        For draft status, any section can be updated. For complete status, only
+        actionPlan and sharing can be modified.
+      properties:
+        sections:
+          $ref: '#/components/schemas/PostMortemSections'
+        triggerSummary:
+          type: array
+          items:
+            type: string
+            enum: [emotional, environmental, relational, physical, digital, spiritual]
+          maxItems: 6
+        triggerDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/TriggerDetail'
+          maxItems: 15
+        fasterMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/FasterMappingEntry'
+          maxItems: 24
+        actionPlan:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionPlanItem'
+          minItems: 1
+          maxItems: 10
+
+    SharePostMortemRequest:
+      type: object
+      required:
+        - shares
+      properties:
+        shares:
+          type: array
+          items:
+            type: object
+            required:
+              - contactId
+              - shareType
+            properties:
+              contactId:
+                type: string
+                description: Support contact ID
+              shareType:
+                type: string
+                enum: [full, summary]
+                description: Share the full analysis or summary only
+          minItems: 1
+          maxItems: 10
+
+    ConvertActionItemRequest:
+      type: object
+      required:
+        - targetType
+        - title
+      properties:
+        targetType:
+          type: string
+          enum: [commitment, goal]
+          description: Convert to a commitment or a goal
+        title:
+          type: string
+          maxLength: 200
+          description: Title for the created commitment or goal
+        frequency:
+          type: string
+          enum: [daily, weekly]
+          description: Frequency for commitment (required when targetType is "commitment")
+        targetDate:
+          type: string
+          format: date
+          description: Target date for goal (optional when targetType is "goal")
+
+    # --- Response Schemas ---
+
+    PostMortemResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PostMortemSummary'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    PostMortemDetailResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PostMortemAnalysis'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    PostMortemInsightsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/PostMortemInsights'
+        meta:
+          type: object
+          properties:
+            analysisCount:
+              type: integer
+              description: Number of completed analyses used for insights
+            insufficientData:
+              type: boolean
+              description: True if fewer than 2 analyses exist (insights may be limited)
+
+    # --- Domain Schemas ---
+
+    PostMortemSummary:
+      type: object
+      description: Summary view of a post-mortem (used in list responses)
+      properties:
+        analysisId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [draft, complete]
+        eventType:
+          type: string
+          enum: [relapse, near-miss, combined]
+        relapseId:
+          type: string
+          nullable: true
+        addictionId:
+          type: string
+          nullable: true
+        sectionsCompleted:
+          type: array
+          items:
+            type: string
+          description: List of completed section names
+        sectionsRemaining:
+          type: array
+          items:
+            type: string
+          description: List of incomplete section names
+        triggerSummary:
+          type: array
+          items:
+            type: string
+          description: High-level trigger categories
+        actionItemCount:
+          type: integer
+          description: Number of action plan items
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        links:
+          $ref: '#/components/schemas/Links'
+
+    PostMortemAnalysis:
+      type: object
+      description: Full post-mortem analysis with all details
+      properties:
+        analysisId:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [draft, complete]
+        eventType:
+          type: string
+          enum: [relapse, near-miss, combined]
+        relapseId:
+          type: string
+          nullable: true
+        addictionId:
+          type: string
+          nullable: true
+        sections:
+          $ref: '#/components/schemas/PostMortemSections'
+        triggerSummary:
+          type: array
+          items:
+            type: string
+        triggerDetails:
+          type: array
+          items:
+            $ref: '#/components/schemas/TriggerDetail'
+        fasterMapping:
+          type: array
+          items:
+            $ref: '#/components/schemas/FasterMappingEntry'
+        actionPlan:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionPlanItem'
+        sharing:
+          $ref: '#/components/schemas/SharingStatus'
+        linkedEntities:
+          $ref: '#/components/schemas/LinkedEntities'
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        message:
+          type: string
+          description: Compassionate closing or opening message
+          nullable: true
+        links:
+          $ref: '#/components/schemas/Links'
+
+    PostMortemSections:
+      type: object
+      description: The six guided walkthrough sections
+      properties:
+        dayBefore:
+          $ref: '#/components/schemas/DayBeforeSection'
+        morning:
+          $ref: '#/components/schemas/MorningSection'
+        throughoutTheDay:
+          $ref: '#/components/schemas/ThroughoutTheDaySection'
+        buildUp:
+          $ref: '#/components/schemas/BuildUpSection'
+        actingOut:
+          $ref: '#/components/schemas/ActingOutSection'
+        immediatelyAfter:
+          $ref: '#/components/schemas/ImmediatelyAfterSection'
+
+    DayBeforeSection:
+      type: object
+      properties:
+        text:
+          type: string
+          maxLength: 5000
+          description: Free-text description of emotional/spiritual state
+        moodRating:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Overall mood rating for the day before
+        recoveryPracticesKept:
+          type: boolean
+          description: Whether recovery practices were maintained
+        unresolvedConflicts:
+          type: string
+          maxLength: 2000
+          description: Description of any unresolved conflicts or stressors
+
+    MorningSection:
+      type: object
+      properties:
+        text:
+          type: string
+          maxLength: 5000
+          description: Description of how the day started
+        moodRating:
+          type: integer
+          minimum: 1
+          maximum: 10
+          description: Mood when waking up
+        morningCommitmentCompleted:
+          type: boolean
+          description: Whether morning commitment was completed
+        affirmationViewed:
+          type: boolean
+          description: Whether daily affirmation was viewed
+        autoPopulated:
+          type: object
+          description: Auto-populated data from recovery records (read-only in responses)
+          properties:
+            morningCommitmentCompleted:
+              type: boolean
+              nullable: true
+            moodRating:
+              type: integer
+              nullable: true
+            affirmationViewed:
+              type: boolean
+              nullable: true
+
+    ThroughoutTheDaySection:
+      type: object
+      properties:
+        timeBlocks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimeBlock'
+          maxItems: 24
+          description: Guided time-block entries (morning, midday, afternoon, evening or hourly)
+        freeFormEntries:
+          type: array
+          items:
+            type: object
+            properties:
+              time:
+                type: string
+                description: Time of entry (HH:MM format)
+              text:
+                type: string
+                maxLength: 2000
+          maxItems: 48
+          description: Free-form hour-by-hour entries
+
+    TimeBlock:
+      type: object
+      properties:
+        period:
+          type: string
+          enum: [morning, midday, afternoon, evening]
+          description: Time block period
+        startTime:
+          type: string
+          description: Block start time (HH:MM format)
+        endTime:
+          type: string
+          description: Block end time (HH:MM format)
+        activity:
+          type: string
+          maxLength: 500
+          description: What were you doing?
+        location:
+          type: string
+          maxLength: 200
+          description: Where were you?
+        company:
+          type: string
+          maxLength: 200
+          description: Who were you with?
+        thoughts:
+          type: string
+          maxLength: 1000
+          description: What were you thinking?
+        feelings:
+          type: string
+          maxLength: 1000
+          description: What were you feeling?
+        warningSigns:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+          description: Warning signs identified (FASTER stages, PCI behaviors, acting-in behaviors)
+
+    BuildUpSection:
+      type: object
+      properties:
+        firstNoticed:
+          type: string
+          maxLength: 2000
+          description: When did you first notice something was off?
+        triggers:
+          type: array
+          items:
+            $ref: '#/components/schemas/TriggerDetail'
+          maxItems: 15
+          description: Triggers with optional deep exploration
+        responseToWarnings:
+          type: string
+          maxLength: 2000
+          description: What did you do (or not do) in response?
+        missedHelpOpportunities:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+                maxLength: 500
+              reason:
+                type: string
+                maxLength: 500
+                description: Why did you not reach out?
+          maxItems: 10
+          description: Moments considered reaching out but did not
+        decisionPoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionPoint'
+          maxItems: 10
+          description: Key decision points in the build-up
+
+    ActingOutSection:
+      type: object
+      properties:
+        description:
+          type: string
+          maxLength: 5000
+          description: Free-text description (compassionate, non-judgmental framing)
+        addictionId:
+          type: string
+          description: Which addiction was involved
+        durationMinutes:
+          type: integer
+          minimum: 1
+          description: How long the episode lasted
+        linkedRelapseId:
+          type: string
+          nullable: true
+          description: Auto-linked to relapse log if already recorded
+
+    ImmediatelyAfterSection:
+      type: object
+      properties:
+        feelings:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+          description: Free-text feeling descriptions
+        feelingsWheelSelections:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+          description: Selections from the Feelings Wheel taxonomy
+        whatDidNext:
+          type: string
+          maxLength: 2000
+          description: What the user did immediately after
+        reachedOut:
+          type: boolean
+          description: Whether the user reached out to anyone
+        reachedOutTo:
+          type: string
+          nullable: true
+          description: Contact ID or description of who was contacted
+        wishDoneDifferently:
+          type: string
+          maxLength: 2000
+          description: What the user wishes they had done differently
+
+    TriggerDetail:
+      type: object
+      properties:
+        category:
+          type: string
+          enum: [emotional, environmental, relational, physical, digital, spiritual]
+          description: Trigger category (same as Urge Logging categories)
+        surface:
+          type: string
+          maxLength: 200
+          description: Surface-level trigger
+        underlying:
+          type: string
+          maxLength: 200
+          nullable: true
+          description: Underlying emotion
+        coreWound:
+          type: string
+          maxLength: 200
+          nullable: true
+          description: Core wound (deepest layer)
+
+    DecisionPoint:
+      type: object
+      properties:
+        timeOfDay:
+          type: string
+          description: Time of the decision point (HH:MM format)
+        description:
+          type: string
+          maxLength: 500
+          description: Full description of the moment
+        couldHaveDone:
+          type: string
+          maxLength: 500
+          description: What the user could have done instead
+        insteadDid:
+          type: string
+          maxLength: 500
+          description: What the user actually did
+
+    FasterMappingEntry:
+      type: object
+      properties:
+        timeOfDay:
+          type: string
+          description: Time of the FASTER stage observation (HH:MM format)
+        stage:
+          type: string
+          enum: [restoration, forgetting-priorities, anxiety, speeding-up, ticked-off, exhausted, relapse]
+          description: FASTER Scale stage active at this time
+
+    ActionPlanItem:
+      type: object
+      properties:
+        actionId:
+          type: string
+          description: Unique action item ID (server-generated)
+        timelinePoint:
+          type: string
+          description: Reference to a point on the timeline (HH:MM format)
+        action:
+          type: string
+          maxLength: 500
+          description: The alternative action to take
+        category:
+          type: string
+          enum: [spiritual, relational, emotional, physical, practical]
+          description: Recovery category for the action
+        convertedToCommitmentId:
+          type: string
+          nullable: true
+          description: ID of commitment created from this action (if converted)
+        convertedToGoalId:
+          type: string
+          nullable: true
+          description: ID of goal created from this action (if converted)
+
+    SharingStatus:
+      type: object
+      properties:
+        isShared:
+          type: boolean
+          description: Whether the post-mortem is shared with anyone
+        sharedWith:
+          type: array
+          items:
+            type: object
+            properties:
+              contactId:
+                type: string
+              shareType:
+                type: string
+                enum: [full, summary]
+              sharedAt:
+                type: string
+                format: date-time
+
+    LinkedEntities:
+      type: object
+      description: References to related recovery data
+      properties:
+        relapseId:
+          type: string
+          nullable: true
+        urgeLogIds:
+          type: array
+          items:
+            type: string
+        fasterEntryIds:
+          type: array
+          items:
+            type: string
+        checkInIds:
+          type: array
+          items:
+            type: string
+
+    PostMortemInsights:
+      type: object
+      description: Cross-analysis pattern insights
+      properties:
+        totalAnalyses:
+          type: integer
+          description: Number of completed analyses used
+        commonTriggers:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              frequency:
+                type: integer
+              percentage:
+                type: number
+                format: float
+          description: Triggers ranked by frequency
+        commonFasterStageAtBreak:
+          type: object
+          properties:
+            stage:
+              type: string
+            frequency:
+              type: integer
+            percentage:
+              type: number
+              format: float
+          description: Most frequent FASTER stage at the point of no return
+        commonTimeOfDay:
+          type: object
+          properties:
+            period:
+              type: string
+            frequency:
+              type: integer
+            percentage:
+              type: number
+              format: float
+          description: Most common time of day for acting out
+        recurringDecisionPoints:
+          type: array
+          items:
+            type: object
+            properties:
+              theme:
+                type: string
+              frequency:
+                type: integer
+          description: Recurring patterns in missed decision points
+        deepTriggerPatterns:
+          type: array
+          items:
+            $ref: '#/components/schemas/TriggerDetail'
+          description: Recurring three-layer trigger chains
+
+    # --- Common Schemas ---
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+      additionalProperties:
+        type: string
+        format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required: [status, title]
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+          description: Application-specific error code
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+          properties:
+            pointer:
+              type: string
+        links:
+          type: object
+          properties:
+            about:
+              type: string
+              format: uri
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist or existence not disclosed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

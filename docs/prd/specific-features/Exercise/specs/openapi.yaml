@@ -1,0 +1,1205 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Exercise / Physical Activity API
+  version: 1.0.0
+  description: |
+    Extended Exercise / Physical Activity API for Regal Recovery.
+
+    This specification defines the full set of endpoints for exercise logging,
+    quick log favorites, exercise history, stats/trends, weekly goals,
+    exercise streaks, correlation insights, and dashboard widget data.
+
+    The base exercise CRUD (POST/GET /activities/exercise) is defined in
+    activities.yaml. This spec extends that with the following:
+    - Favorite activities management (quick log)
+    - Exercise stats, streaks, and trends
+    - Weekly goal configuration and progress
+    - Correlation insights (exercise vs. recovery outcomes)
+    - Dashboard widget data
+    - Exercise detail retrieval and update
+
+    All timestamps are immutable once recorded (FR2.7).
+    Feature flag: `activity.exercise`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Exercise
+    description: Exercise logging and history
+  - name: Exercise Favorites
+    description: Quick log favorite activities
+  - name: Exercise Stats
+    description: Stats, trends, streaks, and correlation insights
+  - name: Exercise Goals
+    description: Weekly exercise goal configuration and progress
+  - name: Exercise Widget
+    description: Dashboard widget data
+
+paths:
+  /activities/exercise:
+    post:
+      operationId: createExerciseLog
+      tags: [Exercise]
+      summary: Log exercise activity
+      description: |
+        Record a manual or synced exercise entry.
+
+        Supports predefined activity types and custom types via "other".
+        Mood before/after is optional and feeds into correlation insights.
+        Timestamp defaults to now; backdating allowed for streak credit on original date.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExerciseLogRequest'
+            example:
+              timestamp: "2026-03-28T06:30:00Z"
+              activityType: "running"
+              durationMinutes: 30
+              intensity: "moderate"
+              notes: "Morning jog in the park. Felt great after."
+              moodBefore: 3
+              moodAfter: 5
+              source: "manual"
+      responses:
+        '201':
+          description: Created - Exercise logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseLogResponse'
+              example:
+                data:
+                  exerciseId: "ex_44444"
+                  timestamp: "2026-03-28T06:30:00Z"
+                  activityType: "running"
+                  durationMinutes: 30
+                  intensity: "moderate"
+                  notes: "Morning jog in the park. Felt great after."
+                  moodBefore: 3
+                  moodAfter: 5
+                  source: "manual"
+                  exerciseStreak:
+                    currentDays: 5
+                    longestDays: 12
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/exercise/ex_44444"
+                meta:
+                  createdAt: "2026-03-28T06:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listExerciseLogs
+      tags: [Exercise]
+      summary: List exercise logs
+      description: |
+        Retrieve exercise history in reverse chronological order.
+
+        Supports filtering by activity type, intensity, date range, and keyword search in notes.
+        Uses cursor-based pagination.
+      parameters:
+        - name: activityType
+          in: query
+          description: Filter by activity type
+          schema:
+            $ref: '#/components/schemas/ActivityType'
+        - name: intensity
+          in: query
+          description: Filter by intensity level
+          schema:
+            $ref: '#/components/schemas/IntensityLevel'
+        - name: startDate
+          in: query
+          description: Start of date range filter (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End of date range filter (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: search
+          in: query
+          description: Keyword search in notes
+          schema:
+            type: string
+            maxLength: 100
+        - name: cursor
+          in: query
+          description: Pagination cursor from previous response
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: sort
+          in: query
+          description: Sort order. Default is -timestamp (newest first).
+          schema:
+            type: string
+            enum: ["-timestamp", "+timestamp"]
+            default: "-timestamp"
+      responses:
+        '200':
+          description: OK - Exercise logs retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseLogListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/{exerciseId}:
+    get:
+      operationId: getExerciseLog
+      tags: [Exercise]
+      summary: Get a single exercise log by ID
+      parameters:
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ex_[a-zA-Z0-9]+$'
+          example: ex_44444
+      responses:
+        '200':
+          description: OK - Exercise log retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseLogResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateExerciseLog
+      tags: [Exercise]
+      summary: Update an exercise log
+      description: |
+        Partial update of an exercise log entry. JSON Merge Patch (RFC 7396).
+
+        Timestamp and createdAt are immutable and cannot be modified (FR2.7).
+        Only notes, intensity, moodBefore, moodAfter, and customTypeLabel can be updated.
+      parameters:
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ex_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdateExerciseLogRequest'
+      responses:
+        '200':
+          description: OK - Exercise log updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteExerciseLog
+      tags: [Exercise]
+      summary: Delete an exercise log
+      parameters:
+        - name: exerciseId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ex_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Exercise log deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/favorites:
+    get:
+      operationId: listExerciseFavorites
+      tags: [Exercise Favorites]
+      summary: List saved favorite activities
+      description: |
+        Returns the user's saved favorite exercise activities for quick logging.
+        Maximum 5 favorites.
+      responses:
+        '200':
+          description: OK - Favorites retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseFavoriteListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: createExerciseFavorite
+      tags: [Exercise Favorites]
+      summary: Save a favorite activity
+      description: |
+        Save an activity type with default duration and intensity for quick logging.
+        Maximum 5 favorites per user. Returns 422 if limit reached.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExerciseFavoriteRequest'
+            example:
+              activityType: "running"
+              defaultDurationMinutes: 30
+              defaultIntensity: "moderate"
+              label: "Morning Run"
+      responses:
+        '201':
+          description: Created - Favorite saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseFavoriteResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/favorites/{favoriteId}:
+    put:
+      operationId: updateExerciseFavorite
+      tags: [Exercise Favorites]
+      summary: Replace a favorite activity
+      parameters:
+        - name: favoriteId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^fav_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExerciseFavoriteRequest'
+      responses:
+        '200':
+          description: OK - Favorite updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseFavoriteResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteExerciseFavorite
+      tags: [Exercise Favorites]
+      summary: Delete a favorite activity
+      parameters:
+        - name: favoriteId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^fav_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Favorite deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/stats:
+    get:
+      operationId: getExerciseStats
+      tags: [Exercise Stats]
+      summary: Get exercise statistics
+      description: |
+        Returns weekly summary, monthly/90-day trend data, and streak information.
+      parameters:
+        - name: period
+          in: query
+          description: Stats period
+          required: true
+          schema:
+            type: string
+            enum: [week, month, "90-day"]
+        - name: referenceDate
+          in: query
+          description: Reference date for the period (defaults to today)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK - Stats retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseStatsResponse'
+              example:
+                data:
+                  period: "week"
+                  referenceDate: "2026-03-28"
+                  totalActiveMinutes: 180
+                  sessionCount: 5
+                  mostCommonActivityType: "running"
+                  comparisonToPrevious:
+                    activeMinutesDelta: 30
+                    activeMinutesPercentChange: 20.0
+                    sessionCountDelta: 1
+                  streak:
+                    currentDays: 5
+                    longestDays: 12
+                    nextMilestone:
+                      days: 7
+                      daysRemaining: 2
+                  activityTypeDistribution:
+                    - activityType: "running"
+                      count: 3
+                      totalMinutes: 90
+                    - activityType: "yoga"
+                      count: 2
+                      totalMinutes: 90
+                  intensityDistribution:
+                    - intensity: "moderate"
+                      count: 3
+                    - intensity: "light"
+                      count: 2
+                meta:
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/streak:
+    get:
+      operationId: getExerciseStreak
+      tags: [Exercise Stats]
+      summary: Get exercise streak
+      description: |
+        Returns the user's current and longest exercise streak.
+        A streak counts consecutive calendar days with at least one logged activity.
+      responses:
+        '200':
+          description: OK - Streak retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ExerciseStreak'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+              example:
+                data:
+                  currentDays: 5
+                  longestDays: 12
+                  lastExerciseDate: "2026-03-28"
+                  nextMilestone:
+                    days: 7
+                    daysRemaining: 2
+                    label: "1 Week"
+                meta:
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/correlations:
+    get:
+      operationId: getExerciseCorrelations
+      tags: [Exercise Stats]
+      summary: Get exercise-recovery correlation insights
+      description: |
+        Returns correlation insights between exercise activity and recovery outcomes.
+        Requires at least 14 days of combined exercise and recovery data.
+      responses:
+        '200':
+          description: OK - Correlations retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseCorrelationsResponse'
+              example:
+                data:
+                  sufficientData: true
+                  insights:
+                    - type: "urge-frequency"
+                      message: "On days you exercise, your urge frequency is 40% lower"
+                      percentDelta: -40.0
+                    - type: "checkin-score"
+                      message: "Your average check-in score is 12 points higher on active days"
+                      pointsDelta: 12
+                    - type: "mood-improvement"
+                      message: "Your post-exercise mood averages 1.5 points higher than pre-exercise"
+                      pointsDelta: 1.5
+                    - type: "inactivity-risk"
+                      message: "You haven't exercised in 4 days -- your last 3 relapses followed similar gaps"
+                      daysSinceExercise: 4
+                meta:
+                  dataWindowDays: 90
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/goals:
+    get:
+      operationId: getExerciseGoal
+      tags: [Exercise Goals]
+      summary: Get weekly exercise goal
+      description: |
+        Returns the user's configured weekly exercise goal and current progress.
+      responses:
+        '200':
+          description: OK - Goal retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseGoalResponse'
+              example:
+                data:
+                  targetActiveMinutes: 150
+                  targetSessions: 4
+                  currentActiveMinutes: 120
+                  currentSessions: 3
+                  progressPercent: 80.0
+                  weekStartDate: "2026-03-25"
+                  isGoalMet: false
+                meta:
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Not Found - No weekly goal configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      operationId: setExerciseGoal
+      tags: [Exercise Goals]
+      summary: Set or update weekly exercise goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetExerciseGoalRequest'
+            example:
+              targetActiveMinutes: 150
+              targetSessions: 4
+      responses:
+        '200':
+          description: OK - Goal updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseGoalResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteExerciseGoal
+      tags: [Exercise Goals]
+      summary: Remove weekly exercise goal
+      responses:
+        '204':
+          description: No Content - Goal removed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/exercise/widget:
+    get:
+      operationId: getExerciseWidget
+      tags: [Exercise Widget]
+      summary: Get dashboard widget data
+      description: |
+        Returns compact exercise data for the dashboard widget:
+        today's exercise status, current streak, and weekly goal progress.
+      responses:
+        '200':
+          description: OK - Widget data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExerciseWidgetResponse'
+              example:
+                data:
+                  exercisedToday: true
+                  todayActiveMinutes: 30
+                  todaySessions: 1
+                  streak:
+                    currentDays: 5
+                  weeklyGoal:
+                    targetActiveMinutes: 150
+                    currentActiveMinutes: 120
+                    progressPercent: 80.0
+                    isGoalMet: false
+                meta:
+                  retrievedAt: "2026-03-28T10:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      schema:
+        type: string
+        example: "1.0.0"
+      description: API semantic version
+    X-Correlation-Id:
+      schema:
+        type: string
+        format: uuid
+      description: Correlation ID for request tracing
+
+  schemas:
+    ActivityType:
+      type: string
+      enum:
+        - walking
+        - running
+        - gym
+        - yoga
+        - swimming
+        - cycling
+        - sports
+        - hiking
+        - dance
+        - martial-arts
+        - group-fitness
+        - home-workout
+        - yardwork
+        - other
+      description: Predefined exercise activity types
+
+    IntensityLevel:
+      type: string
+      enum: [light, moderate, vigorous]
+      description: |
+        Exercise intensity level.
+        Light = easy conversation possible.
+        Moderate = can talk but not sing.
+        Vigorous = can only say a few words.
+
+    CreateExerciseLogRequest:
+      type: object
+      required:
+        - timestamp
+        - activityType
+        - durationMinutes
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: When the exercise occurred (default now, editable for backdating)
+        activityType:
+          $ref: '#/components/schemas/ActivityType'
+        customTypeLabel:
+          type: string
+          maxLength: 50
+          description: Free-text label when activityType is "other"
+        durationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+          description: Duration in minutes
+        intensity:
+          $ref: '#/components/schemas/IntensityLevel'
+        notes:
+          type: string
+          maxLength: 500
+          description: Free-text notes (voice-to-text available on mobile)
+        moodBefore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Mood rating before exercise (1-5 scale)
+        moodAfter:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Mood rating after exercise (1-5 scale)
+        source:
+          type: string
+          enum: [manual, apple-health, google-fit]
+          default: manual
+          description: Data source for this entry
+        externalId:
+          type: string
+          description: External identifier from health platform (for duplicate detection)
+
+    UpdateExerciseLogRequest:
+      type: object
+      description: |
+        Partial update. Only specified fields are changed.
+        Timestamp, activityType, durationMinutes, and source are immutable after creation.
+      properties:
+        intensity:
+          $ref: '#/components/schemas/IntensityLevel'
+        notes:
+          type: string
+          maxLength: 500
+        moodBefore:
+          type: integer
+          minimum: 1
+          maximum: 5
+        moodAfter:
+          type: integer
+          minimum: 1
+          maximum: 5
+        customTypeLabel:
+          type: string
+          maxLength: 50
+
+    ExerciseLog:
+      type: object
+      properties:
+        exerciseId:
+          type: string
+          description: Unique exercise log ID
+        timestamp:
+          type: string
+          format: date-time
+          description: When the exercise occurred (immutable)
+        activityType:
+          $ref: '#/components/schemas/ActivityType'
+        customTypeLabel:
+          type: string
+          nullable: true
+        durationMinutes:
+          type: integer
+        intensity:
+          $ref: '#/components/schemas/IntensityLevel'
+        notes:
+          type: string
+          nullable: true
+        moodBefore:
+          type: integer
+          nullable: true
+        moodAfter:
+          type: integer
+          nullable: true
+        source:
+          type: string
+          enum: [manual, apple-health, google-fit]
+        externalId:
+          type: string
+          nullable: true
+        links:
+          $ref: '#/components/schemas/Links'
+
+    ExerciseLogResponse:
+      type: object
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/ExerciseLog'
+            - type: object
+              properties:
+                exerciseStreak:
+                  type: object
+                  properties:
+                    currentDays:
+                      type: integer
+                    longestDays:
+                      type: integer
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    ExerciseLogListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExerciseLog'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+
+    ExerciseStreak:
+      type: object
+      properties:
+        currentDays:
+          type: integer
+          description: Current consecutive days with at least one exercise
+        longestDays:
+          type: integer
+          description: Longest exercise streak ever
+        lastExerciseDate:
+          type: string
+          format: date
+          nullable: true
+          description: Date of most recent exercise
+        nextMilestone:
+          type: object
+          nullable: true
+          properties:
+            days:
+              type: integer
+            daysRemaining:
+              type: integer
+            label:
+              type: string
+
+    CreateExerciseFavoriteRequest:
+      type: object
+      required:
+        - activityType
+        - defaultDurationMinutes
+      properties:
+        activityType:
+          $ref: '#/components/schemas/ActivityType'
+        customTypeLabel:
+          type: string
+          maxLength: 50
+          description: Label when activityType is "other"
+        defaultDurationMinutes:
+          type: integer
+          minimum: 1
+          maximum: 1440
+        defaultIntensity:
+          $ref: '#/components/schemas/IntensityLevel'
+        label:
+          type: string
+          maxLength: 50
+          description: Display label for the favorite
+
+    ExerciseFavorite:
+      type: object
+      properties:
+        favoriteId:
+          type: string
+        activityType:
+          $ref: '#/components/schemas/ActivityType'
+        customTypeLabel:
+          type: string
+          nullable: true
+        defaultDurationMinutes:
+          type: integer
+        defaultIntensity:
+          $ref: '#/components/schemas/IntensityLevel'
+        label:
+          type: string
+        links:
+          $ref: '#/components/schemas/Links'
+
+    ExerciseFavoriteResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ExerciseFavorite'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    ExerciseFavoriteListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/ExerciseFavorite'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    ExerciseStatsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period:
+              type: string
+              enum: [week, month, "90-day"]
+            referenceDate:
+              type: string
+              format: date
+            totalActiveMinutes:
+              type: integer
+            sessionCount:
+              type: integer
+            mostCommonActivityType:
+              $ref: '#/components/schemas/ActivityType'
+            comparisonToPrevious:
+              type: object
+              nullable: true
+              properties:
+                activeMinutesDelta:
+                  type: integer
+                activeMinutesPercentChange:
+                  type: number
+                  format: float
+                sessionCountDelta:
+                  type: integer
+            streak:
+              $ref: '#/components/schemas/ExerciseStreak'
+            activityTypeDistribution:
+              type: array
+              items:
+                type: object
+                properties:
+                  activityType:
+                    $ref: '#/components/schemas/ActivityType'
+                  count:
+                    type: integer
+                  totalMinutes:
+                    type: integer
+            intensityDistribution:
+              type: array
+              items:
+                type: object
+                properties:
+                  intensity:
+                    $ref: '#/components/schemas/IntensityLevel'
+                  count:
+                    type: integer
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    ExerciseCorrelationsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            sufficientData:
+              type: boolean
+              description: Whether enough data exists (>= 14 days) for insights
+            insights:
+              type: array
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      - urge-frequency
+                      - checkin-score
+                      - mood-improvement
+                      - inactivity-risk
+                  message:
+                    type: string
+                    description: Human-readable insight message
+                  percentDelta:
+                    type: number
+                    format: float
+                    nullable: true
+                  pointsDelta:
+                    type: number
+                    format: float
+                    nullable: true
+                  daysSinceExercise:
+                    type: integer
+                    nullable: true
+        meta:
+          type: object
+          properties:
+            dataWindowDays:
+              type: integer
+              description: Number of days used for correlation calculation
+            retrievedAt:
+              type: string
+              format: date-time
+
+    SetExerciseGoalRequest:
+      type: object
+      properties:
+        targetActiveMinutes:
+          type: integer
+          minimum: 1
+          maximum: 10080
+          description: Weekly target active minutes (e.g., 150)
+        targetSessions:
+          type: integer
+          minimum: 1
+          maximum: 50
+          description: Weekly target session count (e.g., 4)
+
+    ExerciseGoalResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            targetActiveMinutes:
+              type: integer
+              nullable: true
+            targetSessions:
+              type: integer
+              nullable: true
+            currentActiveMinutes:
+              type: integer
+            currentSessions:
+              type: integer
+            progressPercent:
+              type: number
+              format: float
+              description: Progress toward goal (0-100+)
+            weekStartDate:
+              type: string
+              format: date
+            isGoalMet:
+              type: boolean
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    ExerciseWidgetResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            exercisedToday:
+              type: boolean
+            todayActiveMinutes:
+              type: integer
+            todaySessions:
+              type: integer
+            streak:
+              type: object
+              properties:
+                currentDays:
+                  type: integer
+            weeklyGoal:
+              type: object
+              nullable: true
+              description: Null if no weekly goal configured
+              properties:
+                targetActiveMinutes:
+                  type: integer
+                currentActiveMinutes:
+                  type: integer
+                progressPercent:
+                  type: number
+                  format: float
+                isGoalMet:
+                  type: boolean
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        retrievedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

@@ -1,0 +1,1356 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Nutrition Activity API
+  version: 1.0.0
+  description: |
+    Nutrition and hydration tracking API for Regal Recovery.
+
+    Covers meal logging, hydration tracking, meal history, calendar views,
+    trends/insights, and nutrition settings. Designed with eating disorder
+    sensitivity -- no calorie counts, weight tracking, or food judgment.
+
+    All activity timestamps are immutable once recorded (FR2.7).
+    Feature flag: `activity.nutrition`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Meals
+    description: Meal logging and history
+  - name: Quick Log
+    description: One-tap meal logging
+  - name: Hydration
+    description: Water intake tracking
+  - name: Nutrition Calendar
+    description: Calendar views of nutrition data
+  - name: Nutrition Trends
+    description: Trends, insights, and correlations
+  - name: Nutrition Settings
+    description: User configuration for nutrition activity
+
+paths:
+  # ─────────────────────────────────────────────
+  # Meal Logging
+  # ─────────────────────────────────────────────
+  /activities/nutrition/meals:
+    post:
+      operationId: createMealLog
+      tags: [Meals]
+      summary: Log a meal
+      description: |
+        Record a meal entry with description, optional eating context,
+        mood before/after, mindfulness check, and notes.
+
+        Timestamp defaults to now if omitted. Timestamp is immutable after creation (FR2.7).
+        A corresponding calendar activity entry is created automatically.
+
+        No calorie, macro, portion, or weight data is accepted or returned.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMealLogRequest'
+            example:
+              timestamp: "2026-03-28T12:00:00Z"
+              mealType: lunch
+              description: "Grilled chicken salad with water"
+              eatingContext: homemade
+              moodBefore: 3
+              moodAfter: 4
+              mindfulnessCheck: somewhat
+              notes: "Felt better after eating. Was hungrier than I realized."
+      responses:
+        '201':
+          description: Created - Meal logged
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealLogResponse'
+              example:
+                data:
+                  mealId: "ml_11111"
+                  timestamp: "2026-03-28T12:00:00Z"
+                  mealType: lunch
+                  description: "Grilled chicken salad with water"
+                  eatingContext: homemade
+                  moodBefore: 3
+                  moodAfter: 4
+                  mindfulnessCheck: somewhat
+                  notes: "Felt better after eating. Was hungrier than I realized."
+                  isQuickLog: false
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/nutrition/meals/ml_11111"
+                meta:
+                  createdAt: "2026-03-28T12:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listMealLogs
+      tags: [Meals]
+      summary: List meal logs
+      description: |
+        Retrieve meal history with filtering, search, and cursor pagination.
+        Results are returned in reverse chronological order by default.
+      parameters:
+        - name: mealType
+          in: query
+          description: Filter by meal type (comma-separated for multiple)
+          schema:
+            type: string
+            example: breakfast,lunch
+        - name: eatingContext
+          in: query
+          description: Filter by eating context
+          schema:
+            type: string
+            enum: [homemade, takeout, on-the-go, meal-prepped, skipped, social, alone]
+        - name: moodBefore
+          in: query
+          description: Filter by mood before eating (comma-separated values)
+          schema:
+            type: string
+            example: "1,2"
+        - name: moodAfter
+          in: query
+          description: Filter by mood after eating (comma-separated values)
+          schema:
+            type: string
+            example: "4,5"
+        - name: mindfulnessCheck
+          in: query
+          description: Filter by mindfulness check response
+          schema:
+            type: string
+            enum: [yes, somewhat, no]
+        - name: startDate
+          in: query
+          description: Start date for date range filter (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: End date for date range filter (inclusive)
+          schema:
+            type: string
+            format: date
+        - name: search
+          in: query
+          description: Keyword search in description and notes (case-insensitive)
+          schema:
+            type: string
+            maxLength: 100
+        - name: sort
+          in: query
+          description: "Sort field. Default: -timestamp (newest first)"
+          schema:
+            type: string
+            default: "-timestamp"
+        - name: cursor
+          in: query
+          description: Pagination cursor
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Number of results per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Meal logs retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealLogListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/nutrition/meals/{mealId}:
+    get:
+      operationId: getMealLog
+      tags: [Meals]
+      summary: Get a specific meal log
+      parameters:
+        - name: mealId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ml_[a-zA-Z0-9]+$'
+          example: ml_11111
+      responses:
+        '200':
+          description: OK - Meal log retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealLogResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateMealLog
+      tags: [Meals]
+      summary: Update a meal log
+      description: |
+        Partial update of a meal log entry using JSON Merge Patch (RFC 7396).
+        Timestamp is immutable and cannot be changed (FR2.7).
+      parameters:
+        - name: mealId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ml_[a-zA-Z0-9]+$'
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdateMealLogRequest'
+      responses:
+        '200':
+          description: OK - Meal log updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealLogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteMealLog
+      tags: [Meals]
+      summary: Delete a meal log
+      parameters:
+        - name: mealId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^ml_[a-zA-Z0-9]+$'
+      responses:
+        '204':
+          description: No Content - Meal log deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Quick Log
+  # ─────────────────────────────────────────────
+  /activities/nutrition/meals/quick:
+    post:
+      operationId: createQuickMealLog
+      tags: [Quick Log]
+      summary: Quick-log a meal
+      description: |
+        One-tap meal logging. Only requires meal type. Timestamp is set to now.
+        The user can expand the entry later via PATCH to add description, mood, context, notes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - mealType
+              properties:
+                mealType:
+                  $ref: '#/components/schemas/MealType'
+                customMealLabel:
+                  type: string
+                  maxLength: 50
+                  description: Required when mealType is "other"
+            example:
+              mealType: breakfast
+      responses:
+        '201':
+          description: Created - Quick log recorded
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MealLogResponse'
+              example:
+                data:
+                  mealId: "ml_22222"
+                  timestamp: "2026-03-28T08:00:00Z"
+                  mealType: breakfast
+                  description: null
+                  isQuickLog: true
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/nutrition/meals/ml_22222"
+                meta:
+                  createdAt: "2026-03-28T08:00:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Hydration
+  # ─────────────────────────────────────────────
+  /activities/nutrition/hydration:
+    get:
+      operationId: getHydrationToday
+      tags: [Hydration]
+      summary: Get today's hydration status
+      description: |
+        Returns current hydration status for today including servings logged,
+        total ounces, goal progress, and serving size configuration.
+      responses:
+        '200':
+          description: OK - Today's hydration status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HydrationStatusResponse'
+              example:
+                data:
+                  date: "2026-03-28"
+                  servingsLogged: 5
+                  totalOunces: 40
+                  servingSizeOz: 8
+                  dailyTargetServings: 8
+                  dailyTargetOunces: 64
+                  goalMet: false
+                  goalProgressPercent: 62
+                meta:
+                  retrievedAt: "2026-03-28T14:30:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/nutrition/hydration/log:
+    post:
+      operationId: logHydration
+      tags: [Hydration]
+      summary: Log water intake
+      description: |
+        Add or remove servings of water for today.
+        Increment with `action=add`, decrement with `action=remove`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - action
+              properties:
+                action:
+                  type: string
+                  enum: [add, remove]
+                  description: Add or remove a serving
+                servings:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  default: 1
+                  description: Number of servings to add/remove
+                timestamp:
+                  type: string
+                  format: date-time
+                  description: Defaults to now. Used for backdating.
+            example:
+              action: add
+              servings: 1
+      responses:
+        '200':
+          description: OK - Hydration updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HydrationStatusResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/nutrition/hydration/history:
+    get:
+      operationId: getHydrationHistory
+      tags: [Hydration]
+      summary: Get hydration history
+      description: |
+        Retrieve daily hydration data for a date range.
+        Used for calendar view and trend charts.
+      parameters:
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK - Hydration history retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HydrationHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Calendar
+  # ─────────────────────────────────────────────
+  /activities/nutrition/calendar:
+    get:
+      operationId: getNutritionCalendar
+      tags: [Nutrition Calendar]
+      summary: Get nutrition calendar view
+      description: |
+        Returns a month-view calendar with per-day nutrition summaries.
+        Includes meals logged count, hydration goal status, and completeness indicator.
+      parameters:
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: integer
+            example: 2026
+        - name: month
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            example: 3
+      responses:
+        '200':
+          description: OK - Calendar data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutritionCalendarResponse'
+              example:
+                data:
+                  year: 2026
+                  month: 3
+                  days:
+                    - date: "2026-03-28"
+                      mealsLogged: 3
+                      mealTypes: [breakfast, lunch, dinner]
+                      hydrationGoalMet: true
+                      completeness: green
+                    - date: "2026-03-27"
+                      mealsLogged: 1
+                      mealTypes: [lunch]
+                      hydrationGoalMet: false
+                      completeness: yellow
+                    - date: "2026-03-26"
+                      mealsLogged: 0
+                      mealTypes: []
+                      hydrationGoalMet: false
+                      completeness: gray
+                meta:
+                  retrievedAt: "2026-03-28T14:30:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Trends & Insights
+  # ─────────────────────────────────────────────
+  /activities/nutrition/trends:
+    get:
+      operationId: getNutritionTrends
+      tags: [Nutrition Trends]
+      summary: Get nutrition trends and insights
+      description: |
+        Returns aggregated trends: meal consistency, eating context distribution,
+        emotional eating patterns, mindfulness trends, hydration trends.
+
+        Insights use recovery-positive language. No food judgment.
+        For users with ED co-addiction, insight language is adjusted automatically.
+      parameters:
+        - name: period
+          in: query
+          required: true
+          description: "Trend period: 7d, 30d, or 90d"
+          schema:
+            type: string
+            enum: ["7d", "30d", "90d"]
+        - name: insightTypes
+          in: query
+          description: "Comma-separated list of insight types to include. Omit for all."
+          schema:
+            type: string
+            example: "meal-consistency,hydration,emotional-eating"
+      responses:
+        '200':
+          description: OK - Trends retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutritionTrendsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/nutrition/trends/weekly-summary:
+    get:
+      operationId: getNutritionWeeklySummary
+      tags: [Nutrition Trends]
+      summary: Get weekly nutrition summary
+      description: |
+        Returns a summary of the current week's nutrition data compared to previous week.
+      responses:
+        '200':
+          description: OK - Weekly summary retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklySummaryResponse'
+              example:
+                data:
+                  currentWeek:
+                    mealsLogged: 18
+                    averageMealsPerDay: 2.6
+                    hydrationGoalMetDays: 5
+                    mostCommonContext: homemade
+                    mindfulMealPercent: 65
+                  previousWeek:
+                    mealsLogged: 14
+                    averageMealsPerDay: 2.0
+                    hydrationGoalMetDays: 3
+                    mostCommonContext: takeout
+                    mindfulMealPercent: 50
+                  comparison:
+                    mealsLoggedDelta: 4
+                    hydrationDelta: 2
+                    direction: improving
+                meta:
+                  weekStartDate: "2026-03-24"
+                  weekEndDate: "2026-03-30"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Nutrition Settings
+  # ─────────────────────────────────────────────
+  /activities/nutrition/settings:
+    get:
+      operationId: getNutritionSettings
+      tags: [Nutrition Settings]
+      summary: Get nutrition settings
+      responses:
+        '200':
+          description: OK - Settings retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutritionSettingsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateNutritionSettings
+      tags: [Nutrition Settings]
+      summary: Update nutrition settings
+      description: |
+        Partial update of nutrition settings using JSON Merge Patch (RFC 7396).
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdateNutritionSettingsRequest'
+      responses:
+        '200':
+          description: OK - Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NutritionSettingsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# ═══════════════════════════════════════════════
+# Components
+# ═══════════════════════════════════════════════
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  headers:
+    Api-Version:
+      description: Semantic version of the API
+      schema:
+        type: string
+        example: "1.0.0"
+    X-Correlation-Id:
+      description: Request correlation ID for distributed tracing
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    # ── Enums ──────────────────────────────────
+    MealType:
+      type: string
+      enum: [breakfast, lunch, dinner, snack, other]
+      description: "Type of meal. When 'other' is selected, customMealLabel is required."
+
+    EatingContext:
+      type: string
+      enum: [homemade, takeout, on-the-go, meal-prepped, skipped, social, alone]
+      description: "Context in which the meal was eaten."
+
+    MindfulnessCheck:
+      type: string
+      enum: ["yes", "somewhat", "no"]
+      description: "Whether the user was present/mindful during the meal."
+
+    # ── Meal Log Schemas ───────────────────────
+    CreateMealLogRequest:
+      type: object
+      required:
+        - mealType
+        - description
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: "Timestamp of the meal. Defaults to server time if omitted."
+        mealType:
+          $ref: '#/components/schemas/MealType'
+        customMealLabel:
+          type: string
+          maxLength: 50
+          description: "Custom label when mealType is 'other' (e.g., 'post-workout shake')"
+        description:
+          type: string
+          maxLength: 300
+          description: "Natural language description of what was eaten. No structured ingredients."
+        eatingContext:
+          $ref: '#/components/schemas/EatingContext'
+        moodBefore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: "Emotional state before eating (1=very low, 5=very good)"
+        moodAfter:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: "Emotional state after eating (1=very low, 5=very good)"
+        mindfulnessCheck:
+          $ref: '#/components/schemas/MindfulnessCheck'
+        notes:
+          type: string
+          maxLength: 500
+          description: "Optional free-text notes about the meal"
+
+    UpdateMealLogRequest:
+      type: object
+      description: "JSON Merge Patch for meal log. Timestamp cannot be changed."
+      properties:
+        description:
+          type: string
+          maxLength: 300
+        eatingContext:
+          $ref: '#/components/schemas/EatingContext'
+        moodBefore:
+          type: integer
+          minimum: 1
+          maximum: 5
+        moodAfter:
+          type: integer
+          minimum: 1
+          maximum: 5
+        mindfulnessCheck:
+          $ref: '#/components/schemas/MindfulnessCheck'
+        notes:
+          type: string
+          maxLength: 500
+
+    MealLog:
+      type: object
+      description: "A meal log entry."
+      properties:
+        mealId:
+          type: string
+          description: "Unique meal log identifier"
+        timestamp:
+          type: string
+          format: date-time
+          description: "Immutable timestamp of when the meal occurred"
+        mealType:
+          $ref: '#/components/schemas/MealType'
+        customMealLabel:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+          description: "Meal description. Null for unexpanded quick logs."
+        eatingContext:
+          $ref: '#/components/schemas/EatingContext'
+          nullable: true
+        moodBefore:
+          type: integer
+          nullable: true
+        moodAfter:
+          type: integer
+          nullable: true
+        mindfulnessCheck:
+          $ref: '#/components/schemas/MindfulnessCheck'
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        isQuickLog:
+          type: boolean
+          description: "Whether this was created via quick log"
+        links:
+          $ref: '#/components/schemas/Links'
+
+    MealLogResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MealLog'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    MealLogListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealLog'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+            totalToday:
+              type: integer
+              description: "Total meals logged today"
+
+    # ── Hydration Schemas ──────────────────────
+    HydrationStatus:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        servingsLogged:
+          type: integer
+          description: "Number of servings logged today"
+        totalOunces:
+          type: number
+          description: "Total ounces consumed today"
+        servingSizeOz:
+          type: number
+          description: "Current serving size in ounces"
+        dailyTargetServings:
+          type: integer
+          description: "Daily target in servings"
+        dailyTargetOunces:
+          type: number
+          description: "Daily target in ounces"
+        goalMet:
+          type: boolean
+          description: "Whether the daily hydration goal has been met"
+        goalProgressPercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: "Percentage progress toward daily goal"
+
+    HydrationStatusResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/HydrationStatus'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    HydrationDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        servingsLogged:
+          type: integer
+        totalOunces:
+          type: number
+        goalMet:
+          type: boolean
+        servingSizeOz:
+          type: number
+          description: "Serving size in effect on that day"
+
+    HydrationHistoryResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/HydrationDay'
+        meta:
+          type: object
+          properties:
+            averageDailyOunces:
+              type: number
+            daysGoalMet:
+              type: integer
+            totalDays:
+              type: integer
+
+    # ── Calendar Schemas ───────────────────────
+    NutritionCalendarDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        mealsLogged:
+          type: integer
+          description: "Number of meals logged that day"
+        mealTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/MealType'
+          description: "Distinct meal types logged that day"
+        hydrationGoalMet:
+          type: boolean
+        completeness:
+          type: string
+          enum: [green, yellow, gray]
+          description: "green: 3+ meals AND hydration met. yellow: 1-2 meals OR partial hydration. gray: 0 meals."
+
+    NutritionCalendarResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            year:
+              type: integer
+            month:
+              type: integer
+            days:
+              type: array
+              items:
+                $ref: '#/components/schemas/NutritionCalendarDay'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    # ── Trends Schemas ─────────────────────────
+    MealConsistencyTrend:
+      type: object
+      properties:
+        dailyMealCounts:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              total:
+                type: integer
+              breakfast:
+                type: integer
+              lunch:
+                type: integer
+              dinner:
+                type: integer
+              snack:
+                type: integer
+              other:
+                type: integer
+        averageMealsPerDay:
+          type: number
+        mealTypePercentages:
+          type: object
+          description: "Percentage of days each meal type is logged"
+          properties:
+            breakfast:
+              type: number
+            lunch:
+              type: number
+            dinner:
+              type: number
+            snack:
+              type: number
+
+    EatingContextTrend:
+      type: object
+      properties:
+        distribution:
+          type: object
+          description: "Percentage distribution of eating contexts"
+          additionalProperties:
+            type: number
+        socialEatingCount:
+          type: integer
+          description: "Number of social meals in the period"
+
+    EmotionalEatingTrend:
+      type: object
+      properties:
+        averageMoodBefore:
+          type: number
+          nullable: true
+        averageMoodAfter:
+          type: number
+          nullable: true
+        moodImprovementPercent:
+          type: number
+          nullable: true
+          description: "Percentage of meals where mood improved after eating"
+
+    MindfulnessTrend:
+      type: object
+      properties:
+        mindfulPercent:
+          type: number
+          description: "Percentage of meals marked 'yes' for mindfulness"
+        somewhatPercent:
+          type: number
+        distractedPercent:
+          type: number
+        trendDirection:
+          type: string
+          enum: [improving, stable, declining]
+          nullable: true
+
+    HydrationTrend:
+      type: object
+      properties:
+        averageDailyOunces:
+          type: number
+        daysGoalMet:
+          type: integer
+        totalDays:
+          type: integer
+        dailyIntake:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              totalOunces:
+                type: number
+              goalMet:
+                type: boolean
+
+    Insight:
+      type: object
+      description: "A generated insight about the user's nutrition patterns"
+      properties:
+        insightId:
+          type: string
+        type:
+          type: string
+          enum:
+            - gap-detection
+            - meal-consistency
+            - emotional-eating
+            - mindfulness
+            - hydration
+            - cross-domain
+          description: "Category of the insight"
+        message:
+          type: string
+          description: "Human-readable insight message using recovery-positive language"
+        severity:
+          type: string
+          enum: [info, attention]
+          description: "info = positive/neutral; attention = pattern worth noticing"
+
+    NutritionTrendsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period:
+              type: string
+            mealConsistency:
+              $ref: '#/components/schemas/MealConsistencyTrend'
+            eatingContext:
+              $ref: '#/components/schemas/EatingContextTrend'
+            emotionalEating:
+              $ref: '#/components/schemas/EmotionalEatingTrend'
+            mindfulness:
+              $ref: '#/components/schemas/MindfulnessTrend'
+            hydration:
+              $ref: '#/components/schemas/HydrationTrend'
+            insights:
+              type: array
+              items:
+                $ref: '#/components/schemas/Insight'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    # ── Weekly Summary ─────────────────────────
+    WeekSummary:
+      type: object
+      properties:
+        mealsLogged:
+          type: integer
+        averageMealsPerDay:
+          type: number
+        hydrationGoalMetDays:
+          type: integer
+        mostCommonContext:
+          type: string
+          nullable: true
+        mindfulMealPercent:
+          type: number
+
+    WeeklySummaryResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            currentWeek:
+              $ref: '#/components/schemas/WeekSummary'
+            previousWeek:
+              $ref: '#/components/schemas/WeekSummary'
+            comparison:
+              type: object
+              properties:
+                mealsLoggedDelta:
+                  type: integer
+                hydrationDelta:
+                  type: integer
+                direction:
+                  type: string
+                  enum: [improving, stable, declining]
+        meta:
+          type: object
+          properties:
+            weekStartDate:
+              type: string
+              format: date
+            weekEndDate:
+              type: string
+              format: date
+
+    # ── Settings Schemas ───────────────────────
+    NutritionSettings:
+      type: object
+      properties:
+        hydration:
+          type: object
+          properties:
+            servingSizeOz:
+              type: number
+              default: 8
+              description: "Water serving size in ounces"
+            dailyTargetServings:
+              type: integer
+              default: 8
+              description: "Daily hydration target in servings"
+        mealReminders:
+          type: object
+          properties:
+            breakfast:
+              $ref: '#/components/schemas/MealReminderSetting'
+            lunch:
+              $ref: '#/components/schemas/MealReminderSetting'
+            dinner:
+              $ref: '#/components/schemas/MealReminderSetting'
+        hydrationReminders:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              default: false
+            intervalHours:
+              type: integer
+              enum: [1, 2, 3]
+              default: 2
+        missedMealNudge:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              default: false
+            nudgeTime:
+              type: string
+              description: "Time to send nudge if no meals logged (HH:MM in user timezone)"
+              default: "14:00"
+        insightPreferences:
+          type: object
+          description: "Allows users to disable specific insight types"
+          properties:
+            mealConsistencyEnabled:
+              type: boolean
+              default: true
+            emotionalEatingEnabled:
+              type: boolean
+              default: true
+            mindfulnessEnabled:
+              type: boolean
+              default: true
+            crossDomainEnabled:
+              type: boolean
+              default: true
+
+    MealReminderSetting:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          default: false
+        time:
+          type: string
+          description: "Reminder time in HH:MM format (user timezone)"
+
+    NutritionSettingsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/NutritionSettings'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    UpdateNutritionSettingsRequest:
+      type: object
+      description: "JSON Merge Patch for nutrition settings"
+      properties:
+        hydration:
+          type: object
+          properties:
+            servingSizeOz:
+              type: number
+            dailyTargetServings:
+              type: integer
+        mealReminders:
+          type: object
+        hydrationReminders:
+          type: object
+        missedMealNudge:
+          type: object
+        insightPreferences:
+          type: object
+
+    # ── Common Schemas ─────────────────────────
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+        prev:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        prevCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
