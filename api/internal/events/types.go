@@ -11,7 +11,9 @@ const (
 	EventRelapseRecorded   EventType = "relapse.recorded"
 	EventStreakUpdated     EventType = "streak.updated"
 	EventCheckInCompleted  EventType = "checkin.completed"
-	EventActivityLogged    EventType = "activity.logged"
+	EventActivityLogged          EventType = "activity.logged"
+	EventPrayerSessionCreatedCore EventType = "prayer.session.created"
+	EventPrayerStreakMilestoneCore EventType = "prayer.streak.milestone"
 )
 
 // Event represents a domain event to be published.
