@@ -115,6 +115,18 @@ enum Endpoint: Sendable {
     case getPhoneCallTrends(period: String?)
     case getPhoneCallDailyTrends(period: String?)
 
+    // MARK: Post-Mortem
+    case createPostMortem(CreatePostMortemRequest)
+    case listPostMortems(startDate: String?, endDate: String?, addictionId: String?, status: String?, eventType: String?, cursor: String?, limit: Int?)
+    case getPostMortem(analysisId: String)
+    case updatePostMortem(analysisId: String, UpdatePostMortemRequest)
+    case deletePostMortem(analysisId: String)
+    case completePostMortem(analysisId: String)
+    case sharePostMortem(analysisId: String, SharePostMortemRequestBody)
+    case exportPostMortem(analysisId: String, format: String)
+    case convertActionItem(analysisId: String, actionId: String, ConvertActionItemRequestBody)
+    case getPostMortemInsights(addictionId: String?)
+
     // MARK: Flags
     case getFlags
     case evaluateFlag(key: String)
@@ -209,6 +221,17 @@ enum Endpoint: Sendable {
         case .getExerciseGoal, .setExerciseGoal, .deleteExerciseGoal: return "/activities/exercise/goals"
         case .getExerciseWidget: return "/activities/exercise/widget"
 
+        // Post-Mortem
+        case .createPostMortem, .listPostMortems: return "/activities/post-mortem"
+        case .getPostMortem(let id), .updatePostMortem(let id, _), .deletePostMortem(let id):
+            return "/activities/post-mortem/\(id)"
+        case .completePostMortem(let id): return "/activities/post-mortem/\(id)/complete"
+        case .sharePostMortem(let id, _): return "/activities/post-mortem/\(id)/share"
+        case .exportPostMortem(let id, _): return "/activities/post-mortem/\(id)/export"
+        case .convertActionItem(let id, let actionId, _):
+            return "/activities/post-mortem/\(id)/action-items/\(actionId)/convert"
+        case .getPostMortemInsights: return "/activities/post-mortem/insights"
+
         // Content
         case .listAffirmations: return "/content/affirmations"
         case .getTodayAffirmation: return "/content/affirmations/today"
@@ -302,6 +325,10 @@ enum Endpoint: Sendable {
              .favoritePrayer,
              .createPhoneCall,
              .createSavedContact,
+             .createPostMortem,
+             .completePostMortem,
+             .sharePostMortem,
+             .convertActionItem,
              .createMeetingLog,
              .createSavedMeeting,
              .nutritionCreateMeal, .nutritionQuickLog, .nutritionLogHydration,
@@ -318,6 +345,7 @@ enum Endpoint: Sendable {
         case .updateProfile, .setPrimaryAddiction,
              .updatePrayerSession, .updatePersonalPrayer,
              .updatePhoneCall, .updateSavedContact,
+             .updatePostMortem,
              .updateMeetingLog, .updateSavedMeeting,
              .nutritionUpdateMeal, .nutritionUpdateSettings,
              .updateExerciseLog,
@@ -327,6 +355,7 @@ enum Endpoint: Sendable {
         case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
              .deletePrayerSession, .deletePersonalPrayer, .unfavoritePrayer,
              .deletePhoneCall, .deleteSavedContact,
+             .deletePostMortem,
              .deleteMeetingLog, .deleteSavedMeeting,
              .nutritionDeleteMeal,
              .deleteExerciseLog, .deleteExerciseFavorite, .deleteExerciseGoal,
@@ -366,6 +395,10 @@ enum Endpoint: Sendable {
         case .updatePhoneCall(_, let req): return req
         case .createSavedContact(let req): return req
         case .updateSavedContact(_, let req): return req
+        case .createPostMortem(let req): return req
+        case .updatePostMortem(_, let req): return req
+        case .sharePostMortem(_, let req): return req
+        case .convertActionItem(_, _, let req): return req
         case .createMeetingLog(let req): return req
         case .updateMeetingLog(_, let req): return req
         case .createSavedMeeting(let req): return req
@@ -478,6 +511,21 @@ enum Endpoint: Sendable {
 
         case .getPhoneCallDailyTrends(let period):
             if let period { items.append(.init(name: "period", value: period)) }
+
+        case .listPostMortems(let startDate, let endDate, let addictionId, let status, let eventType, let cursor, let limit):
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let addictionId { items.append(.init(name: "addictionId", value: addictionId)) }
+            if let status { items.append(.init(name: "status", value: status)) }
+            if let eventType { items.append(.init(name: "eventType", value: eventType)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .exportPostMortem(_, let format):
+            items.append(.init(name: "format", value: format))
+
+        case .getPostMortemInsights(let addictionId):
+            if let addictionId { items.append(.init(name: "addictionId", value: addictionId)) }
 
         case .listMeetingLogs(let meetingType, let startDate, let endDate, let cursor, let limit, let sort):
             if let meetingType { items.append(.init(name: "meetingType", value: meetingType.rawValue)) }
