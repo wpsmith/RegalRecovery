@@ -126,6 +126,7 @@ final class FeatureFlagService {
         flags["activity.prayer"] = true
         flags["activity.integrity-inventory"] = false
         flags["activity.pci"] = false
+        flags["activity.acting-in-behaviors"] = false
 
         // App Architecture
         flags["feature.today-view"] = false
