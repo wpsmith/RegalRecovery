@@ -13,6 +13,7 @@ import (
 	appconfig "github.com/regalrecovery/api/internal/config"
 	"github.com/regalrecovery/api/internal/cache"
 	"github.com/regalrecovery/api/internal/domain/activities"
+	"github.com/regalrecovery/api/internal/domain/exercise"
 	meetingsDomain "github.com/regalrecovery/api/internal/domain/meetings"
 	"github.com/regalrecovery/api/internal/domain/phonecalls"
 	"github.com/regalrecovery/api/internal/domain/timejournal"
@@ -78,6 +79,14 @@ func main() {
 	pcService := phonecalls.NewPhoneCallService(pcCallRepo, pcContactRepo, pcStreakCache)
 	pcHandler := phonecalls.NewHandler(pcService)
 
+	// Wire Exercise dependency chain:
+	// MongoClient -> Repos -> ExerciseService -> Handler
+	exRepo := repository.NewExerciseLogRepo(mongoClient)
+	exFavRepo := repository.NewExerciseFavoriteRepo(mongoClient)
+	exGoalRepo := repository.NewExerciseGoalRepo(mongoClient)
+	exService := exercise.NewExerciseService(exRepo, exFavRepo, exGoalRepo)
+	exHandler := exercise.NewHandler(exService)
+
 	// Create HTTP router
 	mux := http.NewServeMux()
 
@@ -89,6 +98,9 @@ func main() {
 
 	// Register Phone Calls routes
 	pcHandler.RegisterRoutes(mux)
+
+	// Register Exercise routes
+	exHandler.RegisterRoutes(mux)
 
 	// Generic activity routes (stub — not yet implemented)
 	mux.HandleFunc("POST /v1/activities/{type}", func(w http.ResponseWriter, r *http.Request) {

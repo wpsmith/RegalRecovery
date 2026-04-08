@@ -95,7 +95,16 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 			{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetExpireAfterSeconds(0)},
 		},
 		"exercises": {
-			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "timestamp", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "exerciseId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "externalId", Value: 1}}},
+		},
+		"exerciseFavorites": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "favoriteId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}}},
+		},
+		"exerciseGoals": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "entityType", Value: 1}}, Options: options.Index().SetUnique(true)},
 		},
 		"activities": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "date", Value: 1}}},

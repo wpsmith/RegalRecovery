@@ -744,30 +744,127 @@ final class RRPrayerLog {
 final class RRExerciseLog {
 
     @Attribute(.unique) var id: UUID
+    var exerciseId: String
     var userId: UUID
     var date: Date
     var durationMinutes: Int
     var exerciseType: String
+    var customTypeLabel: String?
+    var intensity: String?
     var notes: String
+    var moodBefore: Int?
+    var moodAfter: Int?
+    var source: String
+    var externalId: String?
+    var synced: Bool
+    var createdAt: Date
+    var modifiedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        exerciseId: String = "",
+        userId: UUID,
+        date: Date,
+        durationMinutes: Int,
+        exerciseType: String,
+        customTypeLabel: String? = nil,
+        intensity: String? = nil,
+        notes: String = "",
+        moodBefore: Int? = nil,
+        moodAfter: Int? = nil,
+        source: String = "manual",
+        externalId: String? = nil,
+        synced: Bool = false,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.exerciseId = exerciseId.isEmpty ? "ex_\(id.uuidString.prefix(8))" : exerciseId
+        self.userId = userId
+        self.date = date
+        self.durationMinutes = durationMinutes
+        self.exerciseType = exerciseType
+        self.customTypeLabel = customTypeLabel
+        self.intensity = intensity
+        self.notes = notes
+        self.moodBefore = moodBefore
+        self.moodAfter = moodAfter
+        self.source = source
+        self.externalId = externalId
+        self.synced = synced
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+// MARK: - Exercise Favorite
+
+@Model
+final class RRExerciseFavorite {
+
+    @Attribute(.unique) var id: UUID
+    var favoriteId: String
+    var userId: UUID
+    var activityType: String
+    var customTypeLabel: String?
+    var defaultDurationMinutes: Int
+    var defaultIntensity: String?
+    var label: String
+    var sortOrder: Int
+    var createdAt: Date
+    var modifiedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        favoriteId: String = "",
+        userId: UUID,
+        activityType: String,
+        customTypeLabel: String? = nil,
+        defaultDurationMinutes: Int = 30,
+        defaultIntensity: String? = nil,
+        label: String,
+        sortOrder: Int = 0,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.favoriteId = favoriteId.isEmpty ? "fav_\(id.uuidString.prefix(8))" : favoriteId
+        self.userId = userId
+        self.activityType = activityType
+        self.customTypeLabel = customTypeLabel
+        self.defaultDurationMinutes = defaultDurationMinutes
+        self.defaultIntensity = defaultIntensity
+        self.label = label
+        self.sortOrder = sortOrder
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+// MARK: - Exercise Goal
+
+@Model
+final class RRExerciseGoal {
+
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var targetActiveMinutes: Int?
+    var targetSessions: Int?
     var createdAt: Date
     var modifiedAt: Date
 
     init(
         id: UUID = UUID(),
         userId: UUID,
-        date: Date,
-        durationMinutes: Int,
-        exerciseType: String,
-        notes: String = "",
+        targetActiveMinutes: Int? = nil,
+        targetSessions: Int? = nil,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
         self.id = id
         self.userId = userId
-        self.date = date
-        self.durationMinutes = durationMinutes
-        self.exerciseType = exerciseType
-        self.notes = notes
+        self.targetActiveMinutes = targetActiveMinutes
+        self.targetSessions = targetSessions
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }
@@ -1327,6 +1424,8 @@ enum RRModelConfiguration {
         RRGratitudeEntry.self,
         RRPrayerLog.self,
         RRExerciseLog.self,
+        RRExerciseFavorite.self,
+        RRExerciseGoal.self,
         RRPhoneCallLog.self,
         RRMeetingLog.self,
         RRSpouseCheckIn.self,

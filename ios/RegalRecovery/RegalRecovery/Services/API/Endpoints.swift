@@ -50,6 +50,24 @@ enum Endpoint: Sendable {
     case logActivity(type: String, data: ActivityRequest)
     case getActivities(type: String, cursor: String?, limit: Int?)
 
+    // MARK: Exercise
+    case createExerciseLog(CreateExerciseLogRequest)
+    case listExerciseLogs(activityType: String?, intensity: String?, startDate: String?, endDate: String?, search: String?, cursor: String?, limit: Int?, sort: String?)
+    case getExerciseLog(exerciseId: String)
+    case updateExerciseLog(exerciseId: String, UpdateExerciseLogRequest)
+    case deleteExerciseLog(exerciseId: String)
+    case listExerciseFavorites
+    case createExerciseFavorite(CreateExerciseFavoriteRequest)
+    case updateExerciseFavorite(favoriteId: String, CreateExerciseFavoriteRequest)
+    case deleteExerciseFavorite(favoriteId: String)
+    case getExerciseStats(period: String, referenceDate: String?)
+    case getExerciseStreak
+    case getExerciseCorrelations
+    case getExerciseGoal
+    case setExerciseGoal(SetExerciseGoalRequest)
+    case deleteExerciseGoal
+    case getExerciseWidget
+
     // MARK: Content
     case listAffirmations(cursor: String?, limit: Int?, pack: String?, category: String?)
     case getTodayAffirmation
@@ -165,6 +183,19 @@ enum Endpoint: Sendable {
         case .logActivity(let type, _): return "/activities/\(type)"
         case .getActivities(let type, _, _): return "/activities/\(type)"
 
+        // Exercise
+        case .createExerciseLog, .listExerciseLogs: return "/activities/exercise"
+        case .getExerciseLog(let id), .updateExerciseLog(let id, _), .deleteExerciseLog(let id):
+            return "/activities/exercise/\(id)"
+        case .listExerciseFavorites, .createExerciseFavorite: return "/activities/exercise/favorites"
+        case .updateExerciseFavorite(let id, _), .deleteExerciseFavorite(let id):
+            return "/activities/exercise/favorites/\(id)"
+        case .getExerciseStats: return "/activities/exercise/stats"
+        case .getExerciseStreak: return "/activities/exercise/streak"
+        case .getExerciseCorrelations: return "/activities/exercise/correlations"
+        case .getExerciseGoal, .setExerciseGoal, .deleteExerciseGoal: return "/activities/exercise/goals"
+        case .getExerciseWidget: return "/activities/exercise/widget"
+
         // Content
         case .listAffirmations: return "/content/affirmations"
         case .getTodayAffirmation: return "/content/affirmations/today"
@@ -249,25 +280,30 @@ enum Endpoint: Sendable {
              .createSavedContact,
              .createMeetingLog,
              .createSavedMeeting,
-             .nutritionCreateMeal, .nutritionQuickLog, .nutritionLogHydration:
+             .nutritionCreateMeal, .nutritionQuickLog, .nutritionLogHydration,
+             .createExerciseLog,
+             .createExerciseFavorite:
             return .post
 
         case .updateSettings, .updatePrivacySettings,
-             .reorderPersonalPrayers:
+             .reorderPersonalPrayers,
+             .updateExerciseFavorite, .setExerciseGoal:
             return .put
 
         case .updateProfile, .setPrimaryAddiction,
              .updatePrayerSession, .updatePersonalPrayer,
              .updatePhoneCall, .updateSavedContact,
              .updateMeetingLog, .updateSavedMeeting,
-             .nutritionUpdateMeal, .nutritionUpdateSettings:
+             .nutritionUpdateMeal, .nutritionUpdateSettings,
+             .updateExerciseLog:
             return .patch
 
         case .revokeSession, .deleteAddiction, .removeFavoriteAffirmation,
              .deletePrayerSession, .deletePersonalPrayer, .unfavoritePrayer,
              .deletePhoneCall, .deleteSavedContact,
              .deleteMeetingLog, .deleteSavedMeeting,
-             .nutritionDeleteMeal:
+             .nutritionDeleteMeal,
+             .deleteExerciseLog, .deleteExerciseFavorite, .deleteExerciseGoal:
             return .delete
 
         default:
@@ -311,6 +347,11 @@ enum Endpoint: Sendable {
         case .nutritionQuickLog(let req): return req
         case .nutritionUpdateMeal(_, let req): return req
         case .nutritionLogHydration(let req): return req
+        case .createExerciseLog(let req): return req
+        case .updateExerciseLog(_, let req): return req
+        case .createExerciseFavorite(let req): return req
+        case .updateExerciseFavorite(_, let req): return req
+        case .setExerciseGoal(let req): return req
         default: return nil
         }
     }
@@ -342,6 +383,20 @@ enum Endpoint: Sendable {
         case .getActivities(_, let cursor, let limit):
             if let cursor { items.append(.init(name: "cursor", value: cursor)) }
             if let limit { items.append(.init(name: "limit", value: String(limit))) }
+
+        case .listExerciseLogs(let activityType, let intensity, let startDate, let endDate, let search, let cursor, let limit, let sort):
+            if let activityType { items.append(.init(name: "activityType", value: activityType)) }
+            if let intensity { items.append(.init(name: "intensity", value: intensity)) }
+            if let startDate { items.append(.init(name: "startDate", value: startDate)) }
+            if let endDate { items.append(.init(name: "endDate", value: endDate)) }
+            if let search { items.append(.init(name: "search", value: search)) }
+            if let cursor { items.append(.init(name: "cursor", value: cursor)) }
+            if let limit { items.append(.init(name: "limit", value: String(limit))) }
+            if let sort { items.append(.init(name: "sort", value: sort)) }
+
+        case .getExerciseStats(let period, let referenceDate):
+            items.append(.init(name: "period", value: period))
+            if let referenceDate { items.append(.init(name: "referenceDate", value: referenceDate)) }
 
         case .listAffirmations(let cursor, let limit, let pack, let category):
             if let cursor { items.append(.init(name: "cursor", value: cursor)) }
