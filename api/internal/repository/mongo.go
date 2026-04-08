@@ -83,6 +83,12 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 		},
 		"meetings": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "timestamp", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "meetingId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
+		"savedMeetings": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "savedMeetingId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "isActive", Value: 1}, {Key: "name", Value: 1}}},
 		},
 		"prayers": {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
