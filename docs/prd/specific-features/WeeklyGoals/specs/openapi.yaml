@@ -1,0 +1,1773 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery Weekly/Daily Goals API
+  version: 1.0.0
+  description: |
+    Weekly and daily recovery goals management API.
+
+    Supports goal creation across five dynamics (spiritual, physical, emotional,
+    intellectual, relational), auto-population from commitments and activities,
+    daily/weekly views, end-of-day and end-of-week reviews, trends, and history.
+
+    Feature flag: `activity.weekly-daily-goals`
+  contact:
+    name: Regal Recovery Platform Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.com/v1
+    description: Production
+  - url: https://api.staging.regalrecovery.com/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Weekly/Daily Goals
+    description: Goal CRUD, daily/weekly views, completion tracking
+  - name: Goal Reviews
+    description: End-of-day and end-of-week review flows
+  - name: Goal Trends
+    description: Completion trends, consistency scores, streaks
+  - name: Goal Settings
+    description: Auto-population and notification configuration
+
+paths:
+  # ─────────────────────────────────────────────
+  # Daily Goals
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/daily:
+    get:
+      operationId: getDailyGoals
+      tags: [Weekly/Daily Goals]
+      summary: Get goals for a specific day
+      description: |
+        Retrieve all goals for a given date, grouped by dynamic. Includes
+        auto-populated goals, manual goals, and carried-over goals.
+        Returns per-dynamic completion counts and overall progress summary.
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Date in YYYY-MM-DD format. Defaults to today in user's timezone.
+          example: "2026-04-07"
+      responses:
+        '200':
+          description: OK - Daily goals retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyGoalsResponse'
+              example:
+                data:
+                  date: "2026-04-07"
+                  goals:
+                    - goalInstanceId: "gi_11111"
+                      goalId: "wdg_22222"
+                      text: "Morning prayer and scripture reading"
+                      dynamics: ["spiritual"]
+                      scope: daily
+                      priority: high
+                      status: completed
+                      completedAt: "2026-04-07T07:30:00Z"
+                      source: null
+                      sourceId: null
+                      carriedFrom: null
+                      notes: "Read Psalm 51"
+                    - goalInstanceId: "gi_33333"
+                      goalId: "wdg_44444"
+                      text: "Call sponsor"
+                      dynamics: ["relational"]
+                      scope: daily
+                      priority: medium
+                      status: pending
+                      completedAt: null
+                      source: "commitment"
+                      sourceId: "cm_77777"
+                      carriedFrom: null
+                      notes: null
+                  summary:
+                    totalGoals: 7
+                    completedGoals: 4
+                    dynamicBalance:
+                      spiritual:
+                        total: 2
+                        completed: 2
+                      physical:
+                        total: 1
+                        completed: 0
+                      emotional:
+                        total: 1
+                        completed: 1
+                      intellectual:
+                        total: 0
+                        completed: 0
+                      relational:
+                        total: 3
+                        completed: 1
+                  nudges:
+                    - dynamic: "intellectual"
+                      message: "You don't have any intellectual goals today. Would you like to add one?"
+                      dismissed: false
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/weekly-daily-goals/daily?date=2026-04-07"
+                    weekly: "https://api.regalrecovery.com/v1/activities/weekly-daily-goals/weekly?weekOf=2026-04-07"
+                meta:
+                  retrievedAt: "2026-04-07T12:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Weekly Goals
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/weekly:
+    get:
+      operationId: getWeeklyGoals
+      tags: [Weekly/Daily Goals]
+      summary: Get goals for a specific week
+      description: |
+        Retrieve all goals for a given week, grouped by dynamic. Includes
+        completion status, per-dynamic completion percentages, and weekly summary.
+      parameters:
+        - name: weekOf
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Any date within the target week (YYYY-MM-DD). Defaults to current week.
+          example: "2026-04-07"
+      responses:
+        '200':
+          description: OK - Weekly goals retrieved
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyGoalsResponse'
+              example:
+                data:
+                  weekStart: "2026-04-06"
+                  weekEnd: "2026-04-12"
+                  goals:
+                    - goalInstanceId: "gi_55555"
+                      goalId: "wdg_66666"
+                      text: "Attend 3 meetings this week"
+                      dynamics: ["relational", "spiritual"]
+                      scope: weekly
+                      priority: high
+                      status: completed
+                      completedAt: "2026-04-10T20:00:00Z"
+                      dueDay: null
+                      notes: null
+                  summary:
+                    totalGoals: 18
+                    completedGoals: 12
+                    completionRate: 66.7
+                    dynamicBalance:
+                      spiritual:
+                        total: 5
+                        completed: 4
+                        completionRate: 80.0
+                      physical:
+                        total: 3
+                        completed: 2
+                        completionRate: 66.7
+                      emotional:
+                        total: 4
+                        completed: 3
+                        completionRate: 75.0
+                      intellectual:
+                        total: 2
+                        completed: 1
+                        completionRate: 50.0
+                      relational:
+                        total: 4
+                        completed: 2
+                        completionRate: 50.0
+                  links:
+                    self: "https://api.regalrecovery.com/v1/activities/weekly-daily-goals/weekly?weekOf=2026-04-07"
+                    previousWeek: "https://api.regalrecovery.com/v1/activities/weekly-daily-goals/weekly?weekOf=2026-03-31"
+                    nextWeek: "https://api.regalrecovery.com/v1/activities/weekly-daily-goals/weekly?weekOf=2026-04-14"
+                meta:
+                  retrievedAt: "2026-04-07T12:00:00Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Goal CRUD
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals:
+    post:
+      operationId: createWeeklyDailyGoal
+      tags: [Weekly/Daily Goals]
+      summary: Create a weekly or daily goal
+      description: |
+        Create a new recovery goal tagged to one or more of the five dynamics.
+        Goals can be one-time or recurring. Auto-populated goals are created
+        by the system and cannot be created via this endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWeeklyDailyGoalRequest'
+            example:
+              text: "30 minutes of exercise"
+              dynamics: ["physical"]
+              scope: "daily"
+              recurrence: "specific-days"
+              daysOfWeek: ["monday", "wednesday", "friday"]
+              priority: "medium"
+              notes: "Morning run or gym session"
+      responses:
+        '201':
+          description: Created - Goal created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+            X-Correlation-Id:
+              $ref: '#/components/headers/X-Correlation-Id'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDailyGoalResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      operationId: listWeeklyDailyGoals
+      tags: [Weekly/Daily Goals]
+      summary: List goal definitions (templates)
+      description: |
+        List all goal definitions (recurring templates and one-time goals) for the user.
+        This returns goal definitions, not daily instances. Use the daily/weekly
+        endpoints to get materialized instances.
+      parameters:
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly]
+          description: Filter by scope
+        - name: dynamic
+          in: query
+          schema:
+            type: string
+            enum: [spiritual, physical, emotional, intellectual, relational]
+          description: Filter by dynamic
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Filter active/inactive goals
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Goal definitions retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDailyGoalListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/weekly-daily-goals/{goalId}:
+    get:
+      operationId: getWeeklyDailyGoal
+      tags: [Weekly/Daily Goals]
+      summary: Get a goal definition
+      parameters:
+        - $ref: '#/components/parameters/GoalIdPath'
+      responses:
+        '200':
+          description: OK - Goal retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDailyGoalResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateWeeklyDailyGoal
+      tags: [Weekly/Daily Goals]
+      summary: Update a goal definition
+      description: |
+        Partial update of a goal definition. Changes to recurrence
+        take effect from the next applicable day.
+      parameters:
+        - $ref: '#/components/parameters/GoalIdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWeeklyDailyGoalRequest'
+      responses:
+        '200':
+          description: OK - Goal updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyDailyGoalResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      operationId: deleteWeeklyDailyGoal
+      tags: [Weekly/Daily Goals]
+      summary: Delete a goal definition
+      description: |
+        Deactivates a goal definition. Past completion data is preserved.
+        Future instances are no longer generated.
+      parameters:
+        - $ref: '#/components/parameters/GoalIdPath'
+      responses:
+        '204':
+          description: No Content - Goal deleted
+          headers:
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Goal Instance Actions
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/instances/{goalInstanceId}/complete:
+    post:
+      operationId: completeGoalInstance
+      tags: [Weekly/Daily Goals]
+      summary: Mark a goal instance as completed
+      parameters:
+        - $ref: '#/components/parameters/GoalInstanceIdPath'
+      responses:
+        '200':
+          description: OK - Goal instance marked completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalInstanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/weekly-daily-goals/instances/{goalInstanceId}/uncomplete:
+    post:
+      operationId: uncompleteGoalInstance
+      tags: [Weekly/Daily Goals]
+      summary: Revert a goal instance to pending
+      parameters:
+        - $ref: '#/components/parameters/GoalInstanceIdPath'
+      responses:
+        '200':
+          description: OK - Goal instance reverted to pending
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalInstanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/weekly-daily-goals/instances/{goalInstanceId}/dismiss:
+    post:
+      operationId: dismissGoalInstance
+      tags: [Weekly/Daily Goals]
+      summary: Dismiss an auto-populated goal instance for today
+      description: |
+        Dismisses an auto-populated goal for the current day only.
+        Does not affect auto-populate settings or future instances.
+      parameters:
+        - $ref: '#/components/parameters/GoalInstanceIdPath'
+      responses:
+        '200':
+          description: OK - Goal instance dismissed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalInstanceResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Nudge Dismissal
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/nudges/{dynamic}/dismiss:
+    post:
+      operationId: dismissDynamicNudge
+      tags: [Weekly/Daily Goals]
+      summary: Dismiss a dynamic gap nudge for today
+      parameters:
+        - name: dynamic
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [spiritual, physical, emotional, intellectual, relational]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - date
+              properties:
+                date:
+                  type: string
+                  format: date
+                  description: The date for which the nudge is dismissed
+      responses:
+        '204':
+          description: No Content - Nudge dismissed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # End-of-Day Review
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/reviews/daily:
+    get:
+      operationId: getDailyReview
+      tags: [Goal Reviews]
+      summary: Get end-of-day review data
+      description: |
+        Returns today's goals with completion status and uncompleted goal
+        disposition options. Used to drive the end-of-day review UI.
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK - Daily review data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyReviewResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: submitDailyReview
+      tags: [Goal Reviews]
+      summary: Submit end-of-day review
+      description: |
+        Submit dispositions for uncompleted goals and optional reflection.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitDailyReviewRequest'
+            example:
+              date: "2026-04-07"
+              dispositions:
+                - goalInstanceId: "gi_33333"
+                  action: "carry-to-tomorrow"
+                - goalInstanceId: "gi_44444"
+                  action: "skipped"
+              reflection: "Work was intense today, but I stayed connected with my sponsor."
+      responses:
+        '201':
+          description: Created - Daily review submitted
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyReviewSubmittedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # End-of-Week Review
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/reviews/weekly:
+    get:
+      operationId: getWeeklyReview
+      tags: [Goal Reviews]
+      summary: Get end-of-week review data
+      description: |
+        Returns the full week's goal completion data with stats, dynamic balance,
+        comparison to previous week, and reflection prompts.
+      parameters:
+        - name: weekOf
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: OK - Weekly review data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyReviewResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      operationId: submitWeeklyReview
+      tags: [Goal Reviews]
+      summary: Submit end-of-week review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitWeeklyReviewRequest'
+      responses:
+        '201':
+          description: Created - Weekly review submitted
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+            Api-Version:
+              $ref: '#/components/headers/Api-Version'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyReviewSubmittedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Trends
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/trends:
+    get:
+      operationId: getGoalTrends
+      tags: [Goal Trends]
+      summary: Get goal completion trends and insights
+      description: |
+        Returns completion rates over time, per-dynamic trends, consistency score,
+        goal completion streaks, and correlation insights.
+      parameters:
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 30d
+          description: Lookback period
+        - name: dynamic
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [spiritual, physical, emotional, intellectual, relational]
+          description: Filter to a specific dynamic
+      responses:
+        '200':
+          description: OK - Trends retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalTrendsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # History
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/history:
+    get:
+      operationId: getGoalHistory
+      tags: [Weekly/Daily Goals]
+      summary: Browse past goals by date
+      description: |
+        Paginated history of goal instances with optional filtering
+        by dynamic, completion status, date range, and text search.
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start of date range (inclusive)
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End of date range (inclusive)
+        - name: dynamic
+          in: query
+          schema:
+            type: string
+            enum: [spiritual, physical, emotional, intellectual, relational]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [completed, pending, skipped, dismissed, carried]
+        - name: search
+          in: query
+          schema:
+            type: string
+            maxLength: 200
+          description: Full-text search on goal text
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        '200':
+          description: OK - Goal history retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalHistoryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/weekly-daily-goals/history/export:
+    post:
+      operationId: exportGoalHistory
+      tags: [Weekly/Daily Goals]
+      summary: Export goal history as CSV or PDF
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - format
+              properties:
+                format:
+                  type: string
+                  enum: [csv, pdf]
+                startDate:
+                  type: string
+                  format: date
+                endDate:
+                  type: string
+                  format: date
+                dynamic:
+                  type: string
+                  enum: [spiritual, physical, emotional, intellectual, relational]
+      responses:
+        '202':
+          description: Accepted - Export job started
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: URL to poll for export status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      exportId:
+                        type: string
+                      status:
+                        type: string
+                        enum: [pending, processing, completed, failed]
+                      links:
+                        $ref: '#/components/schemas/Links'
+                  meta:
+                    $ref: '#/components/schemas/Metadata'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Auto-Population Settings
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/settings:
+    get:
+      operationId: getGoalSettings
+      tags: [Goal Settings]
+      summary: Get goal auto-population and notification settings
+      responses:
+        '200':
+          description: OK - Settings retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalSettingsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      operationId: updateGoalSettings
+      tags: [Goal Settings]
+      summary: Update goal settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGoalSettingsRequest'
+      responses:
+        '200':
+          description: OK - Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalSettingsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─────────────────────────────────────────────
+  # Sponsor View (support network)
+  # ─────────────────────────────────────────────
+  /activities/weekly-daily-goals/users/{userId}/summary:
+    get:
+      operationId: getUserGoalSummary
+      tags: [Weekly/Daily Goals]
+      summary: Get a user's goal completion summary (support network)
+      description: |
+        Allows sponsors, counselors, and coaches to view a user's goal
+        completion patterns. Requires `goals` permission grant.
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 30d
+      responses:
+        '200':
+          description: OK - User goal summary retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserGoalSummaryResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  parameters:
+    GoalIdPath:
+      name: goalId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^wdg_[a-zA-Z0-9]+$'
+      description: Weekly/daily goal definition ID
+      example: wdg_22222
+
+    GoalInstanceIdPath:
+      name: goalInstanceId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^gi_[a-zA-Z0-9]+$'
+      description: Goal instance ID (materialized for a specific date)
+      example: gi_11111
+
+  headers:
+    Api-Version:
+      schema:
+        type: string
+      description: API version
+      example: "1.0.0"
+
+    X-Correlation-Id:
+      schema:
+        type: string
+        format: uuid
+      description: Correlation ID for request tracing
+
+  schemas:
+    # ───── Enums ─────
+    Dynamic:
+      type: string
+      enum: [spiritual, physical, emotional, intellectual, relational]
+      description: One of the five dynamics of holistic recovery
+
+    GoalScope:
+      type: string
+      enum: [daily, weekly]
+
+    GoalRecurrence:
+      type: string
+      enum: [one-time, daily, specific-days, weekly]
+
+    GoalPriority:
+      type: string
+      enum: [high, medium, low]
+
+    GoalInstanceStatus:
+      type: string
+      enum: [pending, completed, skipped, dismissed, carried]
+
+    DayOfWeek:
+      type: string
+      enum: [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+
+    DispositionAction:
+      type: string
+      enum: [carry-to-tomorrow, skipped, no-longer-relevant]
+
+    # ───── Request Schemas ─────
+    CreateWeeklyDailyGoalRequest:
+      type: object
+      required:
+        - text
+        - dynamics
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Goal description text
+        dynamics:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/Dynamic'
+          description: One or more dynamics this goal belongs to
+        scope:
+          $ref: '#/components/schemas/GoalScope'
+          default: daily
+        recurrence:
+          $ref: '#/components/schemas/GoalRecurrence'
+          default: one-time
+        daysOfWeek:
+          type: array
+          items:
+            $ref: '#/components/schemas/DayOfWeek'
+          description: Required when recurrence is specific-days
+        dayOfWeek:
+          $ref: '#/components/schemas/DayOfWeek'
+          description: Required when recurrence is weekly (the day it repeats)
+        priority:
+          $ref: '#/components/schemas/GoalPriority'
+          default: medium
+        notes:
+          type: string
+          maxLength: 500
+          description: Additional context or intention
+
+    UpdateWeeklyDailyGoalRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 200
+        dynamics:
+          type: array
+          minItems: 1
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/Dynamic'
+        scope:
+          $ref: '#/components/schemas/GoalScope'
+        recurrence:
+          $ref: '#/components/schemas/GoalRecurrence'
+        daysOfWeek:
+          type: array
+          items:
+            $ref: '#/components/schemas/DayOfWeek'
+        dayOfWeek:
+          $ref: '#/components/schemas/DayOfWeek'
+        priority:
+          $ref: '#/components/schemas/GoalPriority'
+        notes:
+          type: string
+          maxLength: 500
+        isActive:
+          type: boolean
+          description: Set to false to deactivate without deleting
+
+    SubmitDailyReviewRequest:
+      type: object
+      required:
+        - date
+        - dispositions
+      properties:
+        date:
+          type: string
+          format: date
+        dispositions:
+          type: array
+          items:
+            type: object
+            required:
+              - goalInstanceId
+              - action
+            properties:
+              goalInstanceId:
+                type: string
+              action:
+                $ref: '#/components/schemas/DispositionAction'
+        reflection:
+          type: string
+          maxLength: 2000
+          description: Optional free-text reflection
+
+    SubmitWeeklyReviewRequest:
+      type: object
+      required:
+        - weekOf
+      properties:
+        weekOf:
+          type: string
+          format: date
+        reflections:
+          type: object
+          properties:
+            biggestWin:
+              type: string
+              maxLength: 1000
+            dynamicNeedingAttention:
+              $ref: '#/components/schemas/Dynamic'
+            freeText:
+              type: string
+              maxLength: 2000
+
+    UpdateGoalSettingsRequest:
+      type: object
+      properties:
+        autoPopulateCommitments:
+          type: boolean
+        autoPopulateActivities:
+          type: boolean
+        autoPopulateCommitmentIds:
+          type: array
+          items:
+            type: string
+          description: Specific commitment IDs to auto-populate (empty = all)
+        autoPopulateActivityTypes:
+          type: array
+          items:
+            type: string
+          description: Specific activity types to auto-populate
+        nudgesEnabled:
+          type: boolean
+        nudgesDisabledDynamics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dynamic'
+          description: Dynamics for which nudges are disabled
+        notifications:
+          type: object
+          properties:
+            morningEnabled:
+              type: boolean
+            morningTime:
+              type: string
+              pattern: '^\d{2}:\d{2}$'
+              description: "HH:MM in 24-hour format"
+            middayEnabled:
+              type: boolean
+            eveningEnabled:
+              type: boolean
+            eveningTime:
+              type: string
+              pattern: '^\d{2}:\d{2}$'
+            weeklyEnabled:
+              type: boolean
+            weeklyReviewDay:
+              $ref: '#/components/schemas/DayOfWeek'
+            dynamicGapEnabled:
+              type: boolean
+
+    # ───── Response Schemas ─────
+    GoalInstance:
+      type: object
+      properties:
+        goalInstanceId:
+          type: string
+          description: Unique ID for this materialized goal instance
+        goalId:
+          type: string
+          description: Reference to the goal definition (null for auto-populated)
+          nullable: true
+        text:
+          type: string
+        dynamics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dynamic'
+        scope:
+          $ref: '#/components/schemas/GoalScope'
+        priority:
+          $ref: '#/components/schemas/GoalPriority'
+        status:
+          $ref: '#/components/schemas/GoalInstanceStatus'
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        source:
+          type: string
+          enum: [commitment, activity, post-mortem]
+          nullable: true
+          description: Non-null indicates auto-populated goal
+        sourceId:
+          type: string
+          nullable: true
+          description: ID of the source commitment/activity
+        carriedFrom:
+          type: string
+          format: date
+          nullable: true
+          description: Date this goal was carried from (if applicable)
+        notes:
+          type: string
+          nullable: true
+        date:
+          type: string
+          format: date
+          description: The date this instance belongs to
+        dueDay:
+          $ref: '#/components/schemas/DayOfWeek'
+          nullable: true
+          description: For weekly goals, the specific due day
+        links:
+          $ref: '#/components/schemas/Links'
+
+    GoalInstanceResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GoalInstance'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    DynamicBalance:
+      type: object
+      properties:
+        spiritual:
+          $ref: '#/components/schemas/DynamicCompletionCount'
+        physical:
+          $ref: '#/components/schemas/DynamicCompletionCount'
+        emotional:
+          $ref: '#/components/schemas/DynamicCompletionCount'
+        intellectual:
+          $ref: '#/components/schemas/DynamicCompletionCount'
+        relational:
+          $ref: '#/components/schemas/DynamicCompletionCount'
+
+    DynamicCompletionCount:
+      type: object
+      properties:
+        total:
+          type: integer
+        completed:
+          type: integer
+        completionRate:
+          type: number
+          format: float
+          description: Completion percentage (0-100), included in weekly views
+
+    DynamicNudge:
+      type: object
+      properties:
+        dynamic:
+          $ref: '#/components/schemas/Dynamic'
+        message:
+          type: string
+        dismissed:
+          type: boolean
+
+    DailyGoalsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+            goals:
+              type: array
+              items:
+                $ref: '#/components/schemas/GoalInstance'
+            summary:
+              type: object
+              properties:
+                totalGoals:
+                  type: integer
+                completedGoals:
+                  type: integer
+                dynamicBalance:
+                  $ref: '#/components/schemas/DynamicBalance'
+            nudges:
+              type: array
+              items:
+                $ref: '#/components/schemas/DynamicNudge'
+            links:
+              $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    WeeklyGoalsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            weekStart:
+              type: string
+              format: date
+            weekEnd:
+              type: string
+              format: date
+            goals:
+              type: array
+              items:
+                $ref: '#/components/schemas/GoalInstance'
+            summary:
+              type: object
+              properties:
+                totalGoals:
+                  type: integer
+                completedGoals:
+                  type: integer
+                completionRate:
+                  type: number
+                  format: float
+                dynamicBalance:
+                  $ref: '#/components/schemas/DynamicBalance'
+            links:
+              type: object
+              properties:
+                self:
+                  type: string
+                  format: uri
+                previousWeek:
+                  type: string
+                  format: uri
+                  nullable: true
+                nextWeek:
+                  type: string
+                  format: uri
+                  nullable: true
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    WeeklyDailyGoal:
+      type: object
+      description: Goal definition (template)
+      properties:
+        goalId:
+          type: string
+        text:
+          type: string
+        dynamics:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dynamic'
+        scope:
+          $ref: '#/components/schemas/GoalScope'
+        recurrence:
+          $ref: '#/components/schemas/GoalRecurrence'
+        daysOfWeek:
+          type: array
+          items:
+            $ref: '#/components/schemas/DayOfWeek'
+          nullable: true
+        dayOfWeek:
+          $ref: '#/components/schemas/DayOfWeek'
+          nullable: true
+        priority:
+          $ref: '#/components/schemas/GoalPriority'
+        notes:
+          type: string
+          nullable: true
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        links:
+          $ref: '#/components/schemas/Links'
+
+    WeeklyDailyGoalResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/WeeklyDailyGoal'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    WeeklyDailyGoalListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WeeklyDailyGoal'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+
+    DailyReviewResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+            goals:
+              type: array
+              items:
+                $ref: '#/components/schemas/GoalInstance'
+            summary:
+              type: object
+              properties:
+                totalGoals:
+                  type: integer
+                completedGoals:
+                  type: integer
+                dynamicBalance:
+                  $ref: '#/components/schemas/DynamicBalance'
+            previousReviewSubmitted:
+              type: boolean
+              description: Whether a review for this date has already been submitted
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    DailyReviewSubmittedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reviewId:
+              type: string
+            date:
+              type: string
+              format: date
+            dispositions:
+              type: array
+              items:
+                type: object
+                properties:
+                  goalInstanceId:
+                    type: string
+                  action:
+                    $ref: '#/components/schemas/DispositionAction'
+            reflection:
+              type: string
+              nullable: true
+            summary:
+              type: object
+              properties:
+                totalGoals:
+                  type: integer
+                completedGoals:
+                  type: integer
+                carriedGoals:
+                  type: integer
+                skippedGoals:
+                  type: integer
+                dynamicBalance:
+                  $ref: '#/components/schemas/DynamicBalance'
+            links:
+              $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    WeeklyReviewResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            weekStart:
+              type: string
+              format: date
+            weekEnd:
+              type: string
+              format: date
+            stats:
+              type: object
+              properties:
+                totalGoals:
+                  type: integer
+                completedGoals:
+                  type: integer
+                completionRate:
+                  type: number
+                  format: float
+                strongestDynamic:
+                  $ref: '#/components/schemas/Dynamic'
+                weakestDynamic:
+                  $ref: '#/components/schemas/Dynamic'
+                dynamicBalance:
+                  $ref: '#/components/schemas/DynamicBalance'
+                previousWeekComparison:
+                  type: object
+                  properties:
+                    previousCompletionRate:
+                      type: number
+                      format: float
+                    change:
+                      type: number
+                      format: float
+                      description: Positive = improvement, negative = decline
+            reflectionPrompts:
+              type: array
+              items:
+                type: string
+            previousReviewSubmitted:
+              type: boolean
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    WeeklyReviewSubmittedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reviewId:
+              type: string
+            weekOf:
+              type: string
+              format: date
+            reflections:
+              type: object
+            stats:
+              type: object
+            links:
+              $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    GoalTrendsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            period:
+              type: string
+            dailyCompletionRates:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  completionRate:
+                    type: number
+                    format: float
+                  totalGoals:
+                    type: integer
+                  completedGoals:
+                    type: integer
+            dynamicTrends:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    completionRate:
+                      type: number
+                      format: float
+            consistencyScore:
+              type: number
+              format: float
+              description: Percentage of days with goals completed across 3+ dynamics
+            streaks:
+              type: object
+              properties:
+                allGoalsCompleted:
+                  type: integer
+                  description: Consecutive days with all goals completed
+                weeklyEightyPercent:
+                  type: integer
+                  description: Consecutive weeks with 80%+ completion
+            correlationInsights:
+              type: array
+              items:
+                type: object
+                properties:
+                  insight:
+                    type: string
+                  confidence:
+                    type: number
+                    format: float
+            dynamicBalanceHistory:
+              type: array
+              items:
+                type: object
+                properties:
+                  weekStart:
+                    type: string
+                    format: date
+                  dynamicBalance:
+                    $ref: '#/components/schemas/DynamicBalance'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    GoalHistoryResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/GoalInstance'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          type: object
+          properties:
+            page:
+              $ref: '#/components/schemas/PageMetadata'
+            totalResults:
+              type: integer
+
+    GoalSettingsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            autoPopulateCommitments:
+              type: boolean
+            autoPopulateActivities:
+              type: boolean
+            autoPopulateCommitmentIds:
+              type: array
+              items:
+                type: string
+            autoPopulateActivityTypes:
+              type: array
+              items:
+                type: string
+            nudgesEnabled:
+              type: boolean
+            nudgesDisabledDynamics:
+              type: array
+              items:
+                $ref: '#/components/schemas/Dynamic'
+            notifications:
+              type: object
+              properties:
+                morningEnabled:
+                  type: boolean
+                morningTime:
+                  type: string
+                middayEnabled:
+                  type: boolean
+                eveningEnabled:
+                  type: boolean
+                eveningTime:
+                  type: string
+                weeklyEnabled:
+                  type: boolean
+                weeklyReviewDay:
+                  $ref: '#/components/schemas/DayOfWeek'
+                dynamicGapEnabled:
+                  type: boolean
+            links:
+              $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    UserGoalSummaryResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            userId:
+              type: string
+            period:
+              type: string
+            completionRate:
+              type: number
+              format: float
+            dynamicBalance:
+              $ref: '#/components/schemas/DynamicBalance'
+            consistencyScore:
+              type: number
+              format: float
+            weeklyCompletionRates:
+              type: array
+              items:
+                type: object
+                properties:
+                  weekStart:
+                    type: string
+                    format: date
+                  completionRate:
+                    type: number
+                    format: float
+            strongestDynamic:
+              $ref: '#/components/schemas/Dynamic'
+            weakestDynamic:
+              $ref: '#/components/schemas/Dynamic'
+        meta:
+          $ref: '#/components/schemas/Metadata'
+
+    # ───── Common Schemas ─────
+    Links:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+
+    PaginationLinks:
+      type: object
+      properties:
+        self:
+          type: string
+          format: uri
+        next:
+          type: string
+          format: uri
+          nullable: true
+
+    PageMetadata:
+      type: object
+      properties:
+        nextCursor:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+
+    Metadata:
+      type: object
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
+        retrievedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ErrorObject'
+
+    ErrorObject:
+      type: object
+      required:
+        - status
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        code:
+          type: string
+          pattern: '^rr:0x[0-9A-F]{8}$'
+        status:
+          type: integer
+        title:
+          type: string
+        detail:
+          type: string
+        correlationId:
+          type: string
+          format: uuid
+        source:
+          type: object
+        links:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Bad Request - Malformed request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found - Resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnprocessableEntity:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    InternalServerError:
+      description: Internal Server Error - Unexpected server failure
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
