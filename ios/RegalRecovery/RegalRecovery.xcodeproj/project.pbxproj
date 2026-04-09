@@ -178,6 +178,11 @@
 		10000907 /* GratitudeTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000907 /* GratitudeTabView.swift */; };
 		10000908 /* GratitudeWidgetCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000908 /* GratitudeWidgetCard.swift */; };
 		10000909 /* GratitudeSharingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000909 /* GratitudeSharingService.swift */; };
+		10000950 /* AffirmationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000950 /* AffirmationTypes.swift */; };
+		10000951 /* AffirmationsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000951 /* AffirmationsAPIClient.swift */; };
+		10000952 /* AffirmationAudioSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000952 /* AffirmationAudioSessionManager.swift */; };
+		10000953 /* AffirmationOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000953 /* AffirmationOfflineCache.swift */; };
+		10000954 /* AffirmationNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000954 /* AffirmationNavigationTests.swift */; };
 		10000701 /* FocusStatusMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000701 /* FocusStatusMonitor.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
 		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
@@ -260,6 +265,11 @@
 		20000907 /* GratitudeTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeTabView.swift; sourceTree = "<group>"; };
 		20000908 /* GratitudeWidgetCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeWidgetCard.swift; sourceTree = "<group>"; };
 		20000909 /* GratitudeSharingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeSharingService.swift; sourceTree = "<group>"; };
+		20000950 /* AffirmationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationTypes.swift; sourceTree = "<group>"; };
+		20000951 /* AffirmationsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsAPIClient.swift; sourceTree = "<group>"; };
+		20000952 /* AffirmationAudioSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationAudioSessionManager.swift; sourceTree = "<group>"; };
+		20000953 /* AffirmationOfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationOfflineCache.swift; sourceTree = "<group>"; };
+		20000954 /* AffirmationNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationNavigationTests.swift; sourceTree = "<group>"; };
 		20000701 /* FocusStatusMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStatusMonitor.swift; sourceTree = "<group>"; };
 		20000702 /* JournalEntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntryDetailView.swift; sourceTree = "<group>"; };
 		20000703 /* JournalHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalHistoryView.swift; sourceTree = "<group>"; };
@@ -437,6 +447,7 @@
 			children = (
 				20000116 /* ContentData.swift */,
 				20000117 /* ContentData.swift */,
+				20000950 /* AffirmationTypes.swift */,
 				20000900 /* GratitudeTypes.swift */,
 				20000006 /* MockData.swift */,
 				20000500 /* TimeJournalTypes.swift */,
@@ -487,6 +498,9 @@
 				20000213 /* FeatureFlagStore.swift */,
 				20000800 /* GratitudePromptService.swift */,
 				20000909 /* GratitudeSharingService.swift */,
+				20000951 /* AffirmationsAPIClient.swift */,
+				20000952 /* AffirmationAudioSessionManager.swift */,
+				20000953 /* AffirmationOfflineCache.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -764,9 +778,18 @@
 		50000060 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				50000062 /* Affirmations */,
 				50000061 /* Unit */,
 			);
 			path = Tests;
+			sourceTree = "<group>";
+		};
+		50000062 /* Affirmations */ = {
+			isa = PBXGroup;
+			children = (
+				20000954 /* AffirmationNavigationTests.swift */,
+			);
+			path = Affirmations;
 			sourceTree = "<group>";
 		};
 		50000061 /* Unit */ = {
@@ -1022,6 +1045,11 @@
 				10000907 /* GratitudeTabView.swift in Sources */,
 				10000908 /* GratitudeWidgetCard.swift in Sources */,
 				10000909 /* GratitudeSharingService.swift in Sources */,
+				10000950 /* AffirmationTypes.swift in Sources */,
+				10000951 /* AffirmationsAPIClient.swift in Sources */,
+				10000952 /* AffirmationAudioSessionManager.swift in Sources */,
+				10000953 /* AffirmationOfflineCache.swift in Sources */,
+				10000954 /* AffirmationNavigationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
