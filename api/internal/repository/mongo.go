@@ -144,6 +144,39 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "streakEligible", Value: 1}, {Key: "date", Value: -1}}},
 			{Keys: bson.D{{Key: "tenantId", Value: 1}, {Key: "userId", Value: 1}}},
 		},
+		"affirmationsLibrary": {
+			{Keys: bson.D{{Key: "level", Value: 1}, {Key: "category", Value: 1}, {Key: "track", Value: 1}}, Options: options.Index().SetName("level_category_track")},
+			{Keys: bson.D{{Key: "text", Value: "text"}}, Options: options.Index().SetName("text_search")},
+			{Keys: bson.D{{Key: "category", Value: 1}, {Key: "active", Value: 1}}, Options: options.Index().SetName("category_active")},
+			{Keys: bson.D{{Key: "affirmationId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
+		"affirmationSessions": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "sessionType", Value: 1}, {Key: "completedAt", Value: -1}}, Options: options.Index().SetName("userId_sessionType_completedAt")},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}, Options: options.Index().SetName("userId_createdAt")},
+			{Keys: bson.D{{Key: "sessionId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
+		"affirmationFavorites": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "affirmationId", Value: 1}}, Options: options.Index().SetUnique(true).SetName("userId_affirmationId_unique")},
+			{Keys: bson.D{{Key: "userId", Value: 1}}, Options: options.Index().SetName("userId")},
+		},
+		"affirmationHidden": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "affirmationId", Value: 1}}, Options: options.Index().SetUnique(true).SetName("userId_affirmationId_unique")},
+			{Keys: bson.D{{Key: "userId", Value: 1}}, Options: options.Index().SetName("userId")},
+		},
+		"affirmationCustom": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}, Options: options.Index().SetName("userId_createdAt")},
+			{Keys: bson.D{{Key: "customId", Value: 1}}, Options: options.Index().SetUnique(true).SetName("customId_unique")},
+		},
+		"affirmationAudioRecordings": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "affirmationId", Value: 1}}, Options: options.Index().SetName("userId_affirmationId")},
+			{Keys: bson.D{{Key: "recordingId", Value: 1}}, Options: options.Index().SetUnique(true)},
+		},
+		"affirmationSettings": {
+			{Keys: bson.D{{Key: "userId", Value: 1}}, Options: options.Index().SetUnique(true).SetName("userId_unique")},
+		},
+		"affirmationProgress": {
+			{Keys: bson.D{{Key: "userId", Value: 1}}, Options: options.Index().SetUnique(true).SetName("userId_unique")},
+		},
 	}
 
 	for collName, collIndexes := range indexes {

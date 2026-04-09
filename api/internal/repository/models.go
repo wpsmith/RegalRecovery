@@ -382,3 +382,135 @@ type TimeJournalDayDoc struct {
 	StreakEligible   bool      `bson:"streakEligible"`
 	LastUpdatedAt    time.Time `bson:"lastUpdatedAt"`
 }
+
+// --- Affirmations document models ---
+
+// AffirmationLibraryDoc is the MongoDB document for curated affirmation content.
+type AffirmationLibraryDoc struct {
+	BaseDocument `bson:",inline"`
+
+	AffirmationID string   `bson:"affirmationId"`
+	Text          string   `bson:"text"`
+	Level         int      `bson:"level"` // 1-4
+	CoreBeliefs   []int    `bson:"coreBeliefs"`
+	Category      string   `bson:"category"`
+	Track         string   `bson:"track"` // standard or faith-based
+	RecoveryStage string   `bson:"recoveryStage"`
+	ReadingLevel  int      `bson:"readingLevel"`
+	Active        bool     `bson:"active"`
+	UpdatedAt     *time.Time `bson:"updatedAt,omitempty"`
+}
+
+// AffirmationSessionDoc is the MongoDB document for completed affirmation sessions.
+type AffirmationSessionDoc struct {
+	BaseDocument `bson:",inline"`
+
+	SessionID              string     `bson:"sessionId"`
+	UserID                 string     `bson:"userId"`
+	SessionType            string     `bson:"sessionType"` // morning, evening, sos
+	AffirmationIDs         []string   `bson:"affirmationIds"`
+	LevelServed            int        `bson:"levelServed"`
+	Intention              *string    `bson:"intention,omitempty"`              // Morning only
+	DayRating              *int       `bson:"dayRating,omitempty"`              // Evening only
+	Reflection             *string    `bson:"reflection,omitempty"`             // Evening only
+	MorningIntention       *string    `bson:"morningIntention,omitempty"`       // Evening only
+	BreathingCompleted     *bool      `bson:"breathingCompleted,omitempty"`     // SOS only
+	ReachedOut             *bool      `bson:"reachedOut,omitempty"`             // SOS only
+	PostCheckInRating      *int       `bson:"postCheckInRating,omitempty"`      // SOS only
+	PostCheckInTimestamp   *time.Time `bson:"postCheckInTimestamp,omitempty"`   // SOS only
+	CompletedAt            time.Time  `bson:"completedAt"`
+	Skipped                bool       `bson:"skipped"`
+}
+
+// AffirmationFavoriteDoc is the MongoDB document for user-favorited affirmations.
+type AffirmationFavoriteDoc struct {
+	ID            string    `bson:"_id,omitempty"`
+	UserID        string    `bson:"userId"`
+	TenantID      string    `bson:"tenantId"`
+	AffirmationID string    `bson:"affirmationId"`
+	AddedAt       time.Time `bson:"addedAt"`
+}
+
+// AffirmationHiddenDoc is the MongoDB document for hidden affirmations.
+type AffirmationHiddenDoc struct {
+	ID               string    `bson:"_id,omitempty"`
+	UserID           string    `bson:"userId"`
+	TenantID         string    `bson:"tenantId"`
+	AffirmationID    string    `bson:"affirmationId"`
+	HiddenAt         time.Time `bson:"hiddenAt"`
+	SessionHideCount int       `bson:"sessionHideCount"`
+}
+
+// AffirmationCustomDoc is the MongoDB document for user-created affirmations.
+type AffirmationCustomDoc struct {
+	BaseDocument `bson:",inline"`
+
+	CustomID         string `bson:"customId"`
+	UserID           string `bson:"userId"`
+	Text             string `bson:"text"`
+	IncludeInRotation bool   `bson:"includeInRotation"`
+	UpdatedAt        time.Time `bson:"updatedAt"`
+}
+
+// AffirmationAudioDoc is the MongoDB document for audio recording metadata.
+type AffirmationAudioDoc struct {
+	BaseDocument `bson:",inline"`
+
+	RecordingID      string  `bson:"recordingId"`
+	UserID           string  `bson:"userId"`
+	AffirmationID    string  `bson:"affirmationId"`
+	LocalPath        string  `bson:"localPath"`
+	Format           string  `bson:"format"`
+	DurationSeconds  int     `bson:"durationSeconds"`
+	BackgroundMusic  string  `bson:"backgroundMusic"`
+	BackgroundVolume float64 `bson:"backgroundVolume"`
+}
+
+// AffirmationSettingsDoc is the MongoDB document for user affirmation settings.
+type AffirmationSettingsDoc struct {
+	ID                       string    `bson:"_id,omitempty"`
+	UserID                   string    `bson:"userId"`
+	TenantID                 string    `bson:"tenantId"`
+	MorningTime              string    `bson:"morningTime"`              // HH:MM format
+	EveningTime              string    `bson:"eveningTime"`              // HH:MM format
+	Track                    string    `bson:"track"`                    // standard or faithBased
+	LevelOverride            *int      `bson:"levelOverride,omitempty"`  // Manual level selection
+	EnabledCategories        []string  `bson:"enabledCategories"`
+	HealthySexualityEnabled  bool      `bson:"healthySexualityEnabled"`
+	NotificationsEnabled     bool      `bson:"notificationsEnabled"`
+	ReEngagementEnabled      bool      `bson:"reEngagementEnabled"`
+	AudioAutoPlay            bool      `bson:"audioAutoPlay"`
+	UpdatedAt                time.Time `bson:"updatedAt"`
+}
+
+// LevelHistoryEntryDoc represents a level history entry in the progress document.
+type LevelHistoryEntryDoc struct {
+	Level     int        `bson:"level"`
+	StartedAt time.Time  `bson:"startedAt"`
+	EndedAt   *time.Time `bson:"endedAt,omitempty"`
+}
+
+// MilestoneDoc represents a milestone achievement in the progress document.
+type MilestoneDoc struct {
+	Type       string    `bson:"type"`
+	AchievedAt time.Time `bson:"achievedAt"`
+}
+
+// AffirmationProgressDoc is the MongoDB document for user affirmation progress.
+type AffirmationProgressDoc struct {
+	ID                          string                 `bson:"_id,omitempty"`
+	UserID                      string                 `bson:"userId"`
+	TenantID                    string                 `bson:"tenantId"`
+	TotalSessions               int                    `bson:"totalSessions"`
+	TotalAffirmationsPracticed  int                    `bson:"totalAffirmationsPracticed"`
+	TotalSOSSessions            int                    `bson:"totalSOSSessions"`
+	TotalCustomCreated          int                    `bson:"totalCustomCreated"`
+	TotalAudioRecorded          int                    `bson:"totalAudioRecorded"`
+	CurrentLevel                int                    `bson:"currentLevel"`
+	DaysAtCurrentLevel          int                    `bson:"daysAtCurrentLevel"`
+	LevelHistory                []LevelHistoryEntryDoc `bson:"levelHistory"`
+	Milestones                  []MilestoneDoc         `bson:"milestones"`
+	LastSessionAt               *time.Time             `bson:"lastSessionAt,omitempty"`
+	LastServedAffirmationIds    []string               `bson:"lastServedAffirmationIds"`
+	UpdatedAt                   time.Time              `bson:"updatedAt"`
+}
