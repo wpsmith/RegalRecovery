@@ -1,7 +1,10 @@
 // internal/repository/interfaces.go
 package repository
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // UserRepository defines the interface for user data operations.
 type UserRepository interface {
@@ -202,4 +205,65 @@ type SessionRepository interface {
 
 	// DeleteSession deletes a session.
 	DeleteSession(ctx context.Context, userID, sessionID string) error
+}
+
+// AffirmationsRepository defines the interface for affirmation operations.
+type AffirmationsRepository interface {
+	// --- Library affirmations ---
+	GetLibraryAffirmations(ctx context.Context, level int, category, track string, active bool, limit int) ([]AffirmationLibraryDoc, error)
+	GetLibraryAffirmationByID(ctx context.Context, affirmationID string) (*AffirmationLibraryDoc, error)
+	SearchLibraryAffirmations(ctx context.Context, keyword string, active bool, limit int) ([]AffirmationLibraryDoc, error)
+
+	// --- Sessions ---
+	CreateSession(ctx context.Context, session *AffirmationSessionDoc) error
+	GetSession(ctx context.Context, sessionID string) (*AffirmationSessionDoc, error)
+	ListSessions(ctx context.Context, userID string, limit int) ([]AffirmationSessionDoc, error)
+	ListSessionsByTypeAndDateRange(ctx context.Context, userID, sessionType string, startDate, endDate time.Time, limit int) ([]AffirmationSessionDoc, error)
+	CountSessionsInDateRange(ctx context.Context, userID string, startDate, endDate time.Time) (int64, error)
+	GetRecentSessionAffirmationIDs(ctx context.Context, userID string, days int) ([]string, error)
+	GetEveningSessionsByDateRange(ctx context.Context, userID string, startDate, endDate time.Time) ([]AffirmationSessionDoc, error)
+	GetMorningSessionForDate(ctx context.Context, userID, date string) (*AffirmationSessionDoc, error)
+
+	// --- Settings ---
+	GetSettings(ctx context.Context, userID string) (*AffirmationSettingsDoc, error)
+	UpsertSettings(ctx context.Context, settings *AffirmationSettingsDoc) error
+
+	// --- Progress ---
+	GetProgress(ctx context.Context, userID string) (*AffirmationProgressDoc, error)
+	UpsertProgress(ctx context.Context, progress *AffirmationProgressDoc) error
+	IncrementSessionCount(ctx context.Context, userID string, sessionType string) error
+	IncrementAffirmationCount(ctx context.Context, userID string, count int) error
+	RecordMilestone(ctx context.Context, userID string, milestoneType string, achievedAt time.Time) error
+	UpdateLastServedAffirmations(ctx context.Context, userID string, affirmationIDs []string, timestamp time.Time) error
+	RecordLevelChange(ctx context.Context, userID string, newLevel int, timestamp time.Time) error
+
+	// --- Favorites ---
+	AddFavorite(ctx context.Context, userID, affirmationID string, tenantID string) error
+	RemoveFavorite(ctx context.Context, userID, affirmationID string) error
+	ListFavorites(ctx context.Context, userID string) ([]AffirmationFavoriteDoc, error)
+	IsFavorite(ctx context.Context, userID, affirmationID string) (bool, error)
+
+	// --- Hidden ---
+	HideAffirmation(ctx context.Context, userID, affirmationID string, tenantID string, sessionHideCount int) error
+	UnhideAffirmation(ctx context.Context, userID, affirmationID string) error
+	ListHidden(ctx context.Context, userID string) ([]AffirmationHiddenDoc, error)
+	IsHidden(ctx context.Context, userID, affirmationID string) (bool, error)
+	CountHiddenInSession(ctx context.Context, userID string, sessionStartTime time.Time) (int64, error)
+
+	// --- Custom affirmations ---
+	CreateCustom(ctx context.Context, custom *AffirmationCustomDoc) error
+	GetCustom(ctx context.Context, customID string) (*AffirmationCustomDoc, error)
+	ListCustom(ctx context.Context, userID string) ([]AffirmationCustomDoc, error)
+	UpdateCustom(ctx context.Context, custom *AffirmationCustomDoc) error
+	DeleteCustom(ctx context.Context, customID string) error
+	ToggleRotation(ctx context.Context, customID string, includeInRotation bool) error
+
+	// --- Audio recordings ---
+	SaveAudioMetadata(ctx context.Context, audio *AffirmationAudioDoc) error
+	GetAudioMetadata(ctx context.Context, userID, affirmationID string) (*AffirmationAudioDoc, error)
+	DeleteAudioMetadata(ctx context.Context, recordingID string) error
+	ListAudioByUser(ctx context.Context, userID string) ([]AffirmationAudioDoc, error)
+
+	// --- Calendar dual-write ---
+	WriteCalendarActivity(ctx context.Context, activity *Activity) error
 }

@@ -492,7 +492,8 @@ class RecoveryWorkViewModel {
         meetingLogs: [RRMeetingLog],
         spouseCheckIns: [RRSpouseCheckIn],
         stepWork: [RRStepWork],
-        goals: [RRGoal]
+        goals: [RRGoal],
+        affirmationSessions: [RRActivity] = []
     ) -> TileStatus {
         guard tile.implemented, tile.isEnabled else { return .none }
 
@@ -506,7 +507,8 @@ class RecoveryWorkViewModel {
             return .none
 
         case ActivityType.affirmationLog.rawValue:
-            // Affirmations don't have a single "completed" — just check if favorited today
+            let todayCount = affirmationSessions.filter { cal.isDateInToday($0.date) }.count
+            if todayCount > 0 { return .completed }
             return .none
 
         case ActivityType.urgeLog.rawValue:
