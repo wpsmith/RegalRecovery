@@ -1341,6 +1341,8 @@ enum RRModelConfiguration {
         RRRecoveryPlan.self,
         RRDailyPlanItem.self,
         RRDailyScore.self,
+        RRCachedAffirmation.self,
+        RROfflineAffirmationSession.self,
     ]
 
     static var schema: Schema {
