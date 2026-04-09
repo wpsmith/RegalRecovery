@@ -182,7 +182,7 @@
 		10000951 /* AffirmationsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000951 /* AffirmationsAPIClient.swift */; };
 		10000952 /* AffirmationAudioSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000952 /* AffirmationAudioSessionManager.swift */; };
 		10000953 /* AffirmationOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000953 /* AffirmationOfflineCache.swift */; };
-		10000954 /* AffirmationNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000954 /* AffirmationNavigationTests.swift */; };
+
 		10000701 /* FocusStatusMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000701 /* FocusStatusMonitor.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
 		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
@@ -1049,7 +1049,6 @@
 				10000951 /* AffirmationsAPIClient.swift in Sources */,
 				10000952 /* AffirmationAudioSessionManager.swift in Sources */,
 				10000953 /* AffirmationOfflineCache.swift in Sources */,
-				10000954 /* AffirmationNavigationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
