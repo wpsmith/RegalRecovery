@@ -8,15 +8,15 @@ import (
 
 // Sentinel errors
 var (
-	ErrInvalidLevel              = errors.New("invalid affirmation level")
-	ErrInvalidCategory           = errors.New("invalid category")
-	ErrInvalidCoreBelief         = errors.New("invalid core belief number")
-	ErrInvalidTrack              = errors.New("invalid track")
-	ErrInvalidRecoveryStage      = errors.New("invalid recovery stage")
-	ErrInsufficientSobriety      = errors.New("insufficient sobriety days for level increase")
-	ErrHealthySexualityNotGated  = errors.New("healthy sexuality category requires 60+ days and opt-in")
-	ErrNoContentAvailable        = errors.New("no content available matching criteria")
-	ErrInvalidIntensity          = errors.New("intensity must be between 1 and 10")
+	ErrInvalidLevel             = errors.New("invalid affirmation level")
+	ErrInvalidCategory          = errors.New("invalid category")
+	ErrInvalidCoreBelief        = errors.New("invalid core belief number")
+	ErrInvalidTrack             = errors.New("invalid track")
+	ErrInvalidRecoveryStage     = errors.New("invalid recovery stage")
+	ErrInsufficientSobriety     = errors.New("insufficient sobriety days for level increase")
+	ErrHealthySexualityNotGated = errors.New("healthy sexuality category requires 60+ days and opt-in")
+	ErrNoContentAvailable       = errors.New("no content available matching criteria")
+	ErrInvalidIntensity         = errors.New("intensity must be between 1 and 10")
 )
 
 // Level represents the progressive affirmation framework levels (1-4).
@@ -66,16 +66,16 @@ func (l Level) IsValid() bool {
 type Category string
 
 const (
-	CategorySelfWorth         Category = "selfWorth"
-	CategoryShameResilience   Category = "shameResilience"
+	CategorySelfWorth            Category = "selfWorth"
+	CategoryShameResilience      Category = "shameResilience"
 	CategoryHealthyRelationships Category = "healthyRelationships"
-	CategoryConnection        Category = "connection"
-	CategoryEmotionalRegulation Category = "emotionalRegulation"
-	CategoryPurpose           Category = "purpose"
-	CategoryIntegrity         Category = "integrity"
-	CategoryDailyStrength     Category = "dailyStrength"
-	CategoryHealthySexuality  Category = "healthySexuality"
-	CategorySOSCrisis         Category = "sosCrisis"
+	CategoryConnection           Category = "connection"
+	CategoryEmotionalRegulation  Category = "emotionalRegulation"
+	CategoryPurpose              Category = "purpose"
+	CategoryIntegrity            Category = "integrity"
+	CategoryDailyStrength        Category = "dailyStrength"
+	CategoryHealthySexuality     Category = "healthySexuality"
+	CategorySOSCrisis            Category = "sosCrisis"
 )
 
 // IsValid returns true if the category is recognized.
@@ -146,7 +146,7 @@ type Affirmation struct {
 	ID            string        `json:"affirmationId"`
 	Text          string        `json:"text"`
 	Level         Level         `json:"level"`
-	CoreBeliefs   []CoreBelief  `json:"coreBeliefs"`    // Which Carnes beliefs this counters
+	CoreBeliefs   []CoreBelief  `json:"coreBeliefs"` // Which Carnes beliefs this counters
 	Category      Category      `json:"category"`
 	Track         Track         `json:"track"`
 	RecoveryStage RecoveryStage `json:"recoveryStage"`
@@ -159,9 +159,9 @@ type Affirmation struct {
 // UserAffirmationPreferences contains user-specific affirmation preferences.
 type UserAffirmationPreferences struct {
 	UserID                   string    `json:"userId"`
-	PreferredTrack           Track     `json:"preferredTrack"`           // standard or faithBased
+	PreferredTrack           Track     `json:"preferredTrack"`                // standard or faithBased
 	ManualLevelOverride      *Level    `json:"manualLevelOverride,omitempty"` // User can manually select lower level
-	HealthySexualityOptIn    bool      `json:"healthySexualityOptIn"`    // Explicit opt-in required for Healthy Sexuality category
+	HealthySexualityOptIn    bool      `json:"healthySexualityOptIn"`         // Explicit opt-in required for Healthy Sexuality category
 	FavoriteAffirmationIDs   []string  `json:"favoriteAffirmationIds"`
 	HiddenAffirmationIDs     []string  `json:"hiddenAffirmationIds"`
 	LastLevelChangeTimestamp time.Time `json:"lastLevelChangeTimestamp"` // Tracks last automatic level increase
@@ -169,27 +169,27 @@ type UserAffirmationPreferences struct {
 
 // SessionContext provides context for content selection in a given session.
 type SessionContext struct {
-	UserID                 string
-	SobrietyDays           int
-	LastRelapseTimestamp   *time.Time
-	CurrentTime            time.Time
-	Track                  Track
-	ManualLevelOverride    *Level
-	HealthySexualityOptIn  bool
-	FavoriteIDs            []string
-	HiddenIDs              []string
-	RecentAffirmationIDs   []string // IDs shown in last 7 days (for no-repeat logic)
-	SessionType            SessionType
+	UserID                string
+	SobrietyDays          int
+	LastRelapseTimestamp  *time.Time
+	CurrentTime           time.Time
+	Track                 Track
+	ManualLevelOverride   *Level
+	HealthySexualityOptIn bool
+	FavoriteIDs           []string
+	HiddenIDs             []string
+	RecentAffirmationIDs  []string // IDs shown in last 7 days (for no-repeat logic)
+	SessionType           SessionType
 }
 
 // SessionType indicates the type of affirmation session.
 type SessionType string
 
 const (
-	SessionTypeMorning  SessionType = "morning"
-	SessionTypeEvening  SessionType = "evening"
-	SessionTypeSOS      SessionType = "sos"
-	SessionTypeBrowse   SessionType = "browse"
+	SessionTypeMorning SessionType = "morning"
+	SessionTypeEvening SessionType = "evening"
+	SessionTypeSOS     SessionType = "sos"
+	SessionTypeBrowse  SessionType = "browse"
 )
 
 // LevelDeterminationResult holds the result of level engine computation.
@@ -201,9 +201,9 @@ type LevelDeterminationResult struct {
 
 // ContentSelectionRequest represents a request for affirmation content.
 type ContentSelectionRequest struct {
-	Context         SessionContext
-	RequestedCount  int
-	AllowedLevels   []Level // if empty, use default 80/20 split
+	Context        SessionContext
+	RequestedCount int
+	AllowedLevels  []Level // if empty, use default 80/20 split
 }
 
 // ContentSelectionResult holds the selected affirmations and metadata.

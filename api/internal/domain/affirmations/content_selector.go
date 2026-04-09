@@ -78,10 +78,10 @@ func (cs *ContentSelector) SelectContent(pool []Affirmation, ctx SessionContext,
 	return ContentSelectionResult{
 		Affirmations: selected,
 		Meta: map[string]interface{}{
-			"currentLevel":      currentLevel,
-			"requestedCount":    requestedCount,
-			"availableInPool":   len(selectionPool),
-			"selectedCount":     len(selected),
+			"currentLevel":    currentLevel,
+			"requestedCount":  requestedCount,
+			"availableInPool": len(selectionPool),
+			"selectedCount":   len(selected),
 		},
 	}, nil
 }
