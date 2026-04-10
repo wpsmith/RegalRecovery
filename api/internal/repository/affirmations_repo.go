@@ -44,10 +44,16 @@ func NewAffirmationsRepo(client *MongoClient) *AffirmationsRepo {
 // AP-AFF-01: Get library affirmations by level + category + track
 func (r *AffirmationsRepo) GetLibraryAffirmations(ctx context.Context, level int, category, track string, active bool, limit int) ([]AffirmationLibraryDoc, error) {
 	filter := bson.M{
-		"level":    level,
-		"category": category,
-		"track":    track,
-		"active":   active,
+		"active": active,
+	}
+	if level > 0 {
+		filter["level"] = level
+	}
+	if category != "" {
+		filter["category"] = category
+	}
+	if track != "" {
+		filter["track"] = track
 	}
 
 	opts := options.Find().SetLimit(int64(limit))
