@@ -723,6 +723,7 @@ enum SeedData {
             ("feature.today-view", false, "Today view replaces Home dashboard"),
             ("feature.work-tab", true, "Work tab replaces Activities catalog"),
             ("feature.urge-surfing-timer", true, "Urge Surfing Timer on FAB tap"),
+            ("feature.activities", true, "Activity logging on Today screen"),
             // Assessments
             ("assessment.sast-r", false, "SAST-R"),
             ("assessment.family-impact", false, "Family impact"),
