@@ -100,7 +100,7 @@ final class ThreeCirclesBuilderViewModel {
     // MARK: - Flow State
 
     var mode: OnboardingMode = .guided
-    var currentStep: BuilderStep = .emotionalCheckin
+    var currentStep: BuilderStep = .modeSelection
     var emotionalCheckinScore: Int = 0 // 0 = not yet selected, 1-5
 
     // MARK: - Selections
