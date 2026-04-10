@@ -117,6 +117,7 @@ final class FeatureFlagStore {
         "feature.today-view": false,
         "feature.work-tab": true,
         "feature.urge-surfing-timer": true,
+        "feature.activities": true,
 
         // Recovery Work & Tools
         "feature.3circles": false,

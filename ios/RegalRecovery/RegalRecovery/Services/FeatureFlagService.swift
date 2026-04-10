@@ -131,6 +131,7 @@ final class FeatureFlagService {
         flags["feature.today-view"] = false
         flags["feature.work-tab"] = true
         flags["feature.urge-surfing-timer"] = true
+        flags["feature.activities"] = true
 
         // Recovery Work & Tools
         flags["feature.3circles"] = false
