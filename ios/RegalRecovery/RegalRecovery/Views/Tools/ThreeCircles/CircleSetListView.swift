@@ -74,7 +74,9 @@ struct CircleSetListView: View {
         .refreshable {
             await loadSets()
         }
-        .fullScreenCover(isPresented: $showCreateSheet) {
+        .fullScreenCover(isPresented: $showCreateSheet, onDismiss: {
+            Task { await loadSets() }
+        }) {
             NavigationStack {
                 ThreeCirclesBuilderView()
             }

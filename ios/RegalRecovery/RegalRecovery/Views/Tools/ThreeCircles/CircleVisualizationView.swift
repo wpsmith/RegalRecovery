@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Circle Visualization View
 
 /// Interactive concentric circles diagram with three rings (inner/red, middle/orange, outer/green).
-/// Tap a ring to expand it and show its items. Animated transitions and VoiceOver support.
+/// Tap a ring to filter the item list below to only that circle. Tap again to show all.
 struct CircleVisualizationView: View {
 
     // MARK: - Properties
@@ -14,7 +14,7 @@ struct CircleVisualizationView: View {
 
     // MARK: - State
 
-    @State private var expandedCircle: CircleType?
+    @State private var selectedCircle: CircleType?
 
     // MARK: - Constants
 
@@ -23,235 +23,227 @@ struct CircleVisualizationView: View {
         static let middleDiameter: CGFloat = 185
         static let innerDiameter: CGFloat = 95
         static let ringLineWidth: CGFloat = 3
-        static let expandedExtraWidth: CGFloat = 6
-        static let badgeSize: CGFloat = 26
-        static let itemListMaxHeight: CGFloat = 200
+        static let selectedLineWidth: CGFloat = 5
     }
 
     // MARK: - Body
 
     var body: some View {
         VStack(spacing: 16) {
+            // Concentric circles
             ZStack {
-                // Outer ring — green
-                circleRing(
-                    type: .outer,
-                    diameter: Layout.outerDiameter,
-                    color: .rrSuccess,
-                    items: outerItems,
-                    labelOffset: -(Layout.outerDiameter / 2 + 14)
-                )
-
-                // Middle ring — orange
-                circleRing(
-                    type: .middle,
-                    diameter: Layout.middleDiameter,
-                    color: .orange,
-                    items: middleItems,
-                    labelOffset: -(Layout.middleDiameter / 2 + 10)
-                )
-
-                // Inner ring — red
-                circleRing(
-                    type: .inner,
-                    diameter: Layout.innerDiameter,
-                    color: .rrDestructive,
-                    items: innerItems,
-                    labelOffset: 0
-                )
+                outerRing
+                middleRing
+                innerRing
             }
-            .frame(width: Layout.outerDiameter + 40, height: Layout.outerDiameter + 40)
+            .frame(width: Layout.outerDiameter + 20, height: Layout.outerDiameter + 20)
             .frame(maxWidth: .infinity)
 
-            // Expanded item list
-            if let expandedCircle {
-                expandedItemList(for: expandedCircle)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-
-            // Tap hint
-            if expandedCircle == nil {
-                Text("Tap a circle to see its items")
-                    .font(RRFont.caption)
-                    .foregroundStyle(Color.rrTextSecondary)
-            }
+            // Item list below
+            itemSections
         }
-        .animation(.easeInOut(duration: 0.3), value: expandedCircle)
+        .animation(.easeInOut(duration: 0.25), value: selectedCircle)
     }
 
-    // MARK: - Circle Ring
+    // MARK: - Rings
 
-    private func circleRing(
-        type: CircleType,
-        diameter: CGFloat,
-        color: Color,
-        items: [CircleItem],
-        labelOffset: CGFloat
-    ) -> some View {
-        let isExpanded = expandedCircle == type
-        let lineWidth = isExpanded
-            ? Layout.ringLineWidth + Layout.expandedExtraWidth
-            : Layout.ringLineWidth
+    private var outerRing: some View {
+        let isSelected = selectedCircle == .outer
+        return Circle()
+            .stroke(Color.rrSuccess.opacity(isSelected || selectedCircle == nil ? 1.0 : 0.3),
+                    lineWidth: isSelected ? Layout.selectedLineWidth : Layout.ringLineWidth)
+            .background(
+                Circle().fill(Color.rrSuccess.opacity(isSelected ? 0.1 : 0.03))
+            )
+            .frame(width: Layout.outerDiameter, height: Layout.outerDiameter)
+            .overlay(
+                ringLabel("Outer", count: outerItems.count, color: .rrSuccess)
+                    .offset(y: -Layout.outerDiameter / 2 + 28)
+            )
+            .contentShape(
+                ringShape(outer: Layout.outerDiameter, inner: Layout.middleDiameter)
+            )
+            .onTapGesture { toggle(.outer) }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Outer Circle, \(outerItems.count) items")
+            .accessibilityHint(isSelected ? "Double tap to show all circles" : "Double tap to filter to outer circle")
+            .accessibilityAddTraits(.isButton)
+    }
 
-        return ZStack {
-            // Ring stroke
-            Circle()
-                .stroke(
-                    color.opacity(isExpanded ? 1.0 : 0.7),
-                    lineWidth: lineWidth
-                )
-                .frame(width: diameter, height: diameter)
+    private var middleRing: some View {
+        let isSelected = selectedCircle == .middle
+        return Circle()
+            .stroke(Color.orange.opacity(isSelected || selectedCircle == nil ? 1.0 : 0.3),
+                    lineWidth: isSelected ? Layout.selectedLineWidth : Layout.ringLineWidth)
+            .background(
+                Circle().fill(Color.orange.opacity(isSelected ? 0.1 : 0.03))
+            )
+            .frame(width: Layout.middleDiameter, height: Layout.middleDiameter)
+            .overlay(
+                ringLabel("Middle", count: middleItems.count, color: .orange)
+                    .offset(y: -Layout.middleDiameter / 2 + 24)
+            )
+            .contentShape(
+                ringShape(outer: Layout.middleDiameter, inner: Layout.innerDiameter)
+            )
+            .onTapGesture { toggle(.middle) }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Middle Circle, \(middleItems.count) items")
+            .accessibilityHint(isSelected ? "Double tap to show all circles" : "Double tap to filter to middle circle")
+            .accessibilityAddTraits(.isButton)
+    }
 
-            // Filled background when expanded
-            if isExpanded {
-                Circle()
-                    .fill(color.opacity(0.08))
-                    .frame(width: diameter, height: diameter)
-            }
+    private var innerRing: some View {
+        let isSelected = selectedCircle == .inner
+        return Circle()
+            .stroke(Color.rrDestructive.opacity(isSelected || selectedCircle == nil ? 1.0 : 0.3),
+                    lineWidth: isSelected ? Layout.selectedLineWidth : Layout.ringLineWidth)
+            .background(
+                Circle().fill(Color.rrDestructive.opacity(isSelected ? 0.12 : 0.05))
+            )
+            .frame(width: Layout.innerDiameter, height: Layout.innerDiameter)
+            .overlay(
+                ringLabel("Inner", count: innerItems.count, color: .rrDestructive)
+            )
+            .contentShape(Circle())
+            .onTapGesture { toggle(.inner) }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Inner Circle, \(innerItems.count) items")
+            .accessibilityHint(isSelected ? "Double tap to show all circles" : "Double tap to filter to inner circle")
+            .accessibilityAddTraits(.isButton)
+    }
 
-            // Label (only on inner circle center, others at top)
-            if type == .inner {
-                VStack(spacing: 2) {
-                    Text(type.displayName)
-                        .font(RRFont.caption2)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(color)
-                    Text("\(items.count)")
-                        .font(RRFont.caption)
-                        .fontWeight(.bold)
-                        .foregroundStyle(color)
-                }
+    // MARK: - Ring Label (inside the ring)
+
+    private func ringLabel(_ name: String, count: Int, color: Color) -> some View {
+        VStack(spacing: 1) {
+            Text(name)
+                .font(RRFont.caption2)
+                .fontWeight(.semibold)
+                .foregroundStyle(color)
+            Text("\(count)")
+                .font(RRFont.caption)
+                .fontWeight(.bold)
+                .foregroundStyle(color)
+        }
+    }
+
+    // MARK: - Ring Hit Shape
+
+    /// Creates an annular (donut) hit-test shape so tapping between rings
+    /// targets the correct ring, not the one on top.
+    private func ringShape(outer: CGFloat, inner: CGFloat) -> some Shape {
+        RingShape(outerRadius: outer / 2, innerRadius: inner / 2)
+    }
+
+    // MARK: - Toggle
+
+    private func toggle(_ circle: CircleType) {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            if selectedCircle == circle {
+                selectedCircle = nil
             } else {
-                VStack(spacing: 2) {
-                    Text(type.displayName)
-                        .font(RRFont.caption2)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(color)
-                }
-                .offset(y: labelOffset)
-            }
-
-            // Count badge (for middle and outer, positioned at bottom of ring)
-            if type != .inner {
-                countBadge(count: items.count, color: color)
-                    .offset(y: diameter / 2 - Layout.badgeSize / 2)
+                selectedCircle = circle
             }
         }
-        .contentShape(Circle().size(CGSize(width: diameter, height: diameter)))
-        .onTapGesture {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                if expandedCircle == type {
-                    expandedCircle = nil
-                } else {
-                    expandedCircle = type
+    }
+
+    // MARK: - Item Sections
+
+    @ViewBuilder
+    private var itemSections: some View {
+        let sections = visibleSections
+
+        if sections.isEmpty {
+            Text("Tap a circle above to see its items")
+                .font(RRFont.caption)
+                .foregroundStyle(Color.rrTextSecondary)
+                .padding(.top, 4)
+        } else {
+            VStack(spacing: 12) {
+                ForEach(sections, id: \.type) { section in
+                    circleSection(section.type, items: section.items, color: section.color)
                 }
             }
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(type.displayName), \(items.count) items")
-        .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand and show items")
-        .accessibilityAddTraits(.isButton)
     }
 
-    // MARK: - Count Badge
-
-    private func countBadge(count: Int, color: Color) -> some View {
-        Text("\(count)")
-            .font(RRFont.caption2)
-            .fontWeight(.bold)
-            .foregroundStyle(.white)
-            .frame(width: Layout.badgeSize, height: Layout.badgeSize)
-            .background(color)
-            .clipShape(Circle())
-    }
-
-    // MARK: - Expanded Item List
-
-    private func expandedItemList(for circleType: CircleType) -> some View {
-        let items: [CircleItem]
-        let color: Color
-        let description: String
-
-        switch circleType {
-        case .inner:
-            items = innerItems
-            color = .rrDestructive
-            description = "Hard boundaries — behaviors to completely avoid"
-        case .middle:
-            items = middleItems
-            color = .orange
-            description = "Warning signs — not failure, but signals to act"
-        case .outer:
-            items = outerItems
-            color = .rrSuccess
-            description = "Healthy behaviors — self-care and recovery practices"
+    private var visibleSections: [(type: CircleType, items: [CircleItem], color: Color)] {
+        if let selected = selectedCircle {
+            switch selected {
+            case .inner: return [(.inner, innerItems, .rrDestructive)]
+            case .middle: return [(.middle, middleItems, .orange)]
+            case .outer: return [(.outer, outerItems, .rrSuccess)]
+            }
+        } else {
+            // Show all three
+            var result: [(type: CircleType, items: [CircleItem], color: Color)] = []
+            if !innerItems.isEmpty { result.append((.inner, innerItems, .rrDestructive)) }
+            if !middleItems.isEmpty { result.append((.middle, middleItems, .orange)) }
+            if !outerItems.isEmpty { result.append((.outer, outerItems, .rrSuccess)) }
+            return result
         }
+    }
 
-        return RRCard {
-            VStack(alignment: .leading, spacing: 8) {
+    private func circleSection(_ type: CircleType, items: [CircleItem], color: Color) -> some View {
+        RRCard {
+            DisclosureGroup {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(items) { item in
+                        HStack(spacing: 10) {
+                            RRColorDot(color, size: 6)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(item.behaviorName)
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                                if let notes = item.notes, !notes.isEmpty {
+                                    Text(notes)
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                        .lineLimit(1)
+                                }
+                            }
+                            Spacer()
+                            if item.flags?.uncertain == true {
+                                Image(systemName: "questionmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
+                            }
+                        }
+                        .padding(.vertical, 2)
+                    }
+                }
+                .padding(.top, 6)
+            } label: {
                 HStack(spacing: 8) {
-                    RRColorDot(color, size: 10)
-                    Text(circleType.displayName)
+                    Circle().fill(color).frame(width: 10, height: 10)
+                    Text(type.displayName)
                         .font(RRFont.headline)
                         .foregroundStyle(Color.rrText)
                     Spacer()
-                    Button {
-                        withAnimation { expandedCircle = nil }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.body)
-                            .foregroundStyle(Color.rrTextSecondary)
-                    }
-                    .accessibilityLabel("Close \(circleType.displayName) list")
-                }
-
-                Text(description)
-                    .font(RRFont.caption)
-                    .foregroundStyle(Color.rrTextSecondary)
-
-                Divider()
-
-                if items.isEmpty {
-                    Text("No items in this circle yet")
-                        .font(RRFont.body)
+                    Text("\(items.count)")
+                        .font(RRFont.caption)
                         .foregroundStyle(Color.rrTextSecondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 12)
-                } else {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 6) {
-                            ForEach(items) { item in
-                                HStack(spacing: 10) {
-                                    RRColorDot(color, size: 6)
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        Text(item.behaviorName)
-                                            .font(RRFont.body)
-                                            .foregroundStyle(Color.rrText)
-                                            .lineLimit(1)
-                                        if let notes = item.notes, !notes.isEmpty {
-                                            Text(notes)
-                                                .font(RRFont.caption)
-                                                .foregroundStyle(Color.rrTextSecondary)
-                                                .lineLimit(1)
-                                        }
-                                    }
-                                    Spacer()
-                                    if item.flags?.uncertain == true {
-                                        Image(systemName: "questionmark.circle.fill")
-                                            .font(.caption)
-                                            .foregroundStyle(.orange)
-                                            .accessibilityLabel("Uncertain")
-                                    }
-                                }
-                                .padding(.vertical, 4)
-                                .accessibilityElement(children: .combine)
-                            }
-                        }
-                    }
-                    .frame(maxHeight: Layout.itemListMaxHeight)
                 }
             }
+            .tint(color)
         }
+    }
+}
+
+// MARK: - Ring Shape (annular hit area)
+
+/// A donut-shaped path for hit-testing taps on concentric rings.
+struct RingShape: Shape {
+    let outerRadius: CGFloat
+    let innerRadius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let center = CGPoint(x: rect.midX, y: rect.midY)
+        var path = Path()
+        path.addArc(center: center, radius: outerRadius, startAngle: .zero, endAngle: .degrees(360), clockwise: false)
+        path.addArc(center: center, radius: innerRadius, startAngle: .zero, endAngle: .degrees(360), clockwise: true)
+        return path
     }
 }
 
@@ -284,11 +276,6 @@ struct CircleVisualizationView: View {
                     notes: nil, specificityDetail: nil, category: nil,
                     source: .user, flags: nil, createdAt: Date(), modifiedAt: nil
                 ),
-                CircleItem(
-                    itemId: "5", circle: .middle, behaviorName: "Skipping meetings",
-                    notes: nil, specificityDetail: nil, category: nil,
-                    source: .template, flags: nil, createdAt: Date(), modifiedAt: nil
-                ),
             ],
             outerItems: [
                 CircleItem(
@@ -299,16 +286,6 @@ struct CircleVisualizationView: View {
                 ),
                 CircleItem(
                     itemId: "7", circle: .outer, behaviorName: "Exercise",
-                    notes: nil, specificityDetail: nil, category: nil,
-                    source: .user, flags: nil, createdAt: Date(), modifiedAt: nil
-                ),
-                CircleItem(
-                    itemId: "8", circle: .outer, behaviorName: "Calling sponsor",
-                    notes: nil, specificityDetail: nil, category: nil,
-                    source: .user, flags: nil, createdAt: Date(), modifiedAt: nil
-                ),
-                CircleItem(
-                    itemId: "9", circle: .outer, behaviorName: "Attending meetings",
                     notes: nil, specificityDetail: nil, category: nil,
                     source: .user, flags: nil, createdAt: Date(), modifiedAt: nil
                 ),
