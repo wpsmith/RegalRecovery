@@ -151,11 +151,19 @@ struct CircleSetListView: View {
         error = nil
         defer { isLoading = false }
 
+        // Load from local storage first (always available offline)
+        let localSets = ThreeCirclesBuilderViewModel.loadSavedSets()
+
+        // Try API, fall back to local
         do {
             let response = try await apiClient.listCircleSets()
-            circleSets = response.data
+            // Merge: API sets take priority, append any local-only sets
+            let apiIds = Set(response.data.map(\.setId))
+            let localOnly = localSets.filter { !apiIds.contains($0.setId) }
+            circleSets = response.data + localOnly
         } catch {
-            self.error = error.localizedDescription
+            // API unavailable — use local storage
+            circleSets = localSets
         }
     }
 

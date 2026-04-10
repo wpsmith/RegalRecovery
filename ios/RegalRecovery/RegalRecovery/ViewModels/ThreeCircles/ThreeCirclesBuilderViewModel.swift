@@ -69,6 +69,40 @@ struct BuilderItem: Identifiable, Hashable, Sendable {
         self.source = source
         self.isUncertain = isUncertain
     }
+
+    /// Convert to API CircleItem for persistence.
+    func toCircleItem(circle: CircleType) -> CircleItem {
+        CircleItem(
+            itemId: id.uuidString,
+            circle: circle,
+            behaviorName: behaviorName,
+            notes: notes,
+            specificityDetail: nil,
+            category: category,
+            source: source,
+            flags: isUncertain ? CircleItemFlags(uncertain: true) : nil,
+            createdAt: Date(),
+            modifiedAt: nil
+        )
+    }
+}
+
+// MARK: - JSON Coding Helpers
+
+extension JSONEncoder {
+    static let regalRecovery: JSONEncoder = {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        return encoder
+    }()
+}
+
+extension JSONDecoder {
+    static let regalRecovery: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }()
 }
 
 // MARK: - Guardrail Nudge
@@ -471,20 +505,56 @@ final class ThreeCirclesBuilderViewModel {
 
     // MARK: - Commit
 
-    /// Options for committing the circle set.
+    private static let savedSetsKey = "threecircles.savedSets"
+
+    /// Commit the circle set — persists locally and sets state.
     func commit(option: CommitOption) {
         isCommitting = true
         commitError = nil
-        // The actual API call will be handled by the view layer with the API client.
-        // This just tracks the intent.
+
+        let status: CircleSetStatus = (option == .commitNow) ? .active : .draft
+        let now = Date()
+        let recoveryArea = selectedRecoveryAreas.first ?? .sexPornography
+
+        let circleSet = CircleSet(
+            setId: UUID().uuidString,
+            userId: "local",
+            name: recoveryArea.displayName,
+            recoveryArea: recoveryArea,
+            frameworkPreference: selectedFramework,
+            status: status,
+            innerCircle: innerCircleItems.map { $0.toCircleItem(circle: .inner) },
+            middleCircle: middleCircleItems.map { $0.toCircleItem(circle: .middle) },
+            outerCircle: outerCircleItems.map { $0.toCircleItem(circle: .outer) },
+            versionNumber: 1,
+            createdAt: now,
+            modifiedAt: now,
+            committedAt: status == .active ? now : nil
+        )
+
+        // Persist locally
+        var saved = Self.loadSavedSets()
+        saved.append(circleSet)
+        if let data = try? JSONEncoder.regalRecovery.encode(saved) {
+            UserDefaults.standard.set(data, forKey: Self.savedSetsKey)
+        }
     }
 
-    /// Reset commit state after API call completes.
+    /// Reset commit state after completion.
     func commitCompleted(success: Bool, error: String? = nil) {
         isCommitting = false
         if !success {
             commitError = error
         }
+    }
+
+    /// Load locally saved circle sets.
+    static func loadSavedSets() -> [CircleSet] {
+        guard let data = UserDefaults.standard.data(forKey: savedSetsKey),
+              let sets = try? JSONDecoder.regalRecovery.decode([CircleSet].self, from: data) else {
+            return []
+        }
+        return sets
     }
 
     // MARK: - Draft Persistence
