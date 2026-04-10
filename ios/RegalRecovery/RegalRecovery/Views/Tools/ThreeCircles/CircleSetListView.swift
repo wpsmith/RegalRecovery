@@ -74,6 +74,11 @@ struct CircleSetListView: View {
         .refreshable {
             await loadSets()
         }
+        .fullScreenCover(isPresented: $showCreateSheet) {
+            NavigationStack {
+                ThreeCirclesBuilderView()
+            }
+        }
     }
 
     // MARK: - Subviews
@@ -90,20 +95,27 @@ struct CircleSetListView: View {
     }
 
     private func errorView(_ message: String) -> some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundStyle(Color.rrDestructive)
-            Text(message)
+        VStack(spacing: 20) {
+            Image(systemName: "circles.hexagongrid")
+                .font(.system(size: 56))
+                .foregroundStyle(Color.rrPrimary.opacity(0.4))
+
+            Text("Build Your Three Circles")
+                .font(RRFont.title)
+                .foregroundStyle(Color.rrText)
+
+            Text("Define your inner, middle, and outer circles to create a personalized recovery plan.")
                 .font(RRFont.body)
                 .foregroundStyle(Color.rrTextSecondary)
                 .multilineTextAlignment(.center)
-            RRButton("Try Again", icon: "arrow.clockwise") {
-                Task { await loadSets() }
+                .padding(.horizontal)
+
+            RRButton("Create Your Circles", icon: "plus") {
+                showCreateSheet = true
             }
-            .frame(width: 180)
+            .frame(width: 260)
         }
-        .padding()
+        .padding(.vertical, 40)
     }
 
     private var emptyStateView: some View {
