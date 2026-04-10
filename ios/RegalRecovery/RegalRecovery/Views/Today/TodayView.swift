@@ -74,6 +74,7 @@ struct TodayView: View {
                 quickActions
                 timeJournalCard
                 gratitudeWidgetCard
+                affirmationCard
                 recoveryWorkCards
                 activityListHeader
                 activityList
@@ -217,6 +218,15 @@ struct TodayView: View {
     private var gratitudeWidgetCard: some View {
         if FeatureFlagStore.shared.isEnabled("activity.gratitude") {
             GratitudeWidgetCard()
+        }
+    }
+
+    // MARK: - Affirmation Card
+
+    @ViewBuilder
+    private var affirmationCard: some View {
+        if FeatureFlagStore.shared.isEnabled("activity.affirmations") {
+            AffirmationTodayCard()
         }
     }
 
