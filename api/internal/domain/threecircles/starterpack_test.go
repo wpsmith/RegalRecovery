@@ -272,20 +272,23 @@ func TestStarterPack_TC_SP_006_ApplyReplaceMode(t *testing.T) {
 //
 // Acceptance Criterion TC-SP-007: Duplicates detected case-insensitively.
 func TestStarterPack_TC_SP_007_DuplicateDetection(t *testing.T) {
-	// Given - Existing set with a behavior
+	// Given - Existing set with a behavior (only in inner circle, empty middle/outer)
 	existingSet := ApplyCircleSet{
 		InnerCircle: []CircleItem{
 			{ItemID: "i1", BehaviorName: "Viewing Pornography", Source: SourceUser},
 		},
+		MiddleCircle: []CircleItem{},
+		OuterCircle:  []CircleItem{},
 	}
 
-	// And - Starter pack with same behavior (different case)
+	// And - Valid starter pack with duplicate in inner circle
 	pack := createValidStarterPack()
 	pack.InnerCircle = []StarterPackItem{
-		{BehaviorName: "viewing pornography", Rationale: "Test", Category: "behavioral"},
-		{BehaviorName: "VIEWING PORNOGRAPHY", Rationale: "Test", Category: "behavioral"},
-		{BehaviorName: "Masturbation", Rationale: "Test", Category: "behavioral"},
+		{BehaviorName: "viewing pornography", Rationale: "Test", Category: "behavioral"}, // Duplicate
+		{BehaviorName: "VIEWING PORNOGRAPHY", Rationale: "Test", Category: "behavioral"}, // Duplicate
+		{BehaviorName: "Masturbation", Rationale: "Test", Category: "behavioral"},        // New
 	}
+	// Pack has valid middle and outer circles from createValidStarterPack()
 
 	// When - Applying pack in merge mode
 	result, err := ApplyStarterPack(pack, existingSet, ApplicationModeMerge)
@@ -295,12 +298,21 @@ func TestStarterPack_TC_SP_007_DuplicateDetection(t *testing.T) {
 		t.Fatalf("expected no error, got: %v", err)
 	}
 
-	// Then - Duplicates skipped
-	if result.ItemsSkipped != 2 {
-		t.Errorf("expected 2 items skipped, got %d", result.ItemsSkipped)
+	// Then - Duplicates skipped across all circles
+	// Inner: 2 duplicates, 1 added
+	// Middle: 0 duplicates (empty existing), all added
+	// Outer: 0 duplicates (empty existing), all added
+	middleCount := len(pack.MiddleCircle)
+	outerCount := len(pack.OuterCircle)
+	expectedSkipped := 2 // Only from inner circle
+	expectedAdded := 1 + middleCount + outerCount
+
+	if result.ItemsSkipped != expectedSkipped {
+		t.Errorf("expected %d items skipped, got %d", expectedSkipped, result.ItemsSkipped)
 	}
-	if result.ItemsAdded != 1 {
-		t.Errorf("expected 1 item added, got %d", result.ItemsAdded)
+	if result.ItemsAdded != expectedAdded {
+		t.Errorf("expected %d items added (1 inner + %d middle + %d outer), got %d",
+			expectedAdded, middleCount, outerCount, result.ItemsAdded)
 	}
 
 	// Then - Only unique items in result
@@ -572,12 +584,18 @@ func TestStarterPack_TC_SP_017_ApplicationMetrics(t *testing.T) {
 		t.Fatalf("expected no error, got: %v", err)
 	}
 
-	// Then - Metrics correct
+	// Then - Metrics correct (includes all circles)
+	// Skipped: 1 from inner (Duplicate Behavior)
+	// Added: 2 from inner (New Behavior 1, New Behavior 2) + 7 from middle + 2 from outer
+	middleCount := len(pack.MiddleCircle)
+	outerCount := len(pack.OuterCircle)
+	expectedAdded := 2 + middleCount + outerCount
+
 	if result.ItemsSkipped != 1 {
-		t.Errorf("expected 1 skipped (inner only), got %d", result.ItemsSkipped)
+		t.Errorf("expected 1 skipped, got %d", result.ItemsSkipped)
 	}
-	if result.ItemsAdded != 2 {
-		t.Errorf("expected 2 added (inner only), got %d", result.ItemsAdded)
+	if result.ItemsAdded != expectedAdded {
+		t.Errorf("expected %d added (2 inner + %d middle + %d outer), got %d", expectedAdded, middleCount, outerCount, result.ItemsAdded)
 	}
 }
 
