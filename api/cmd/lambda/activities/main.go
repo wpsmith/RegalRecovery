@@ -11,6 +11,7 @@ import (
 
 	appconfig "github.com/regalrecovery/api/internal/config"
 	"github.com/regalrecovery/api/internal/domain/activities"
+	"github.com/regalrecovery/api/internal/domain/affirmations"
 	"github.com/regalrecovery/api/internal/domain/timejournal"
 	"github.com/regalrecovery/api/internal/middleware"
 	"github.com/regalrecovery/api/internal/repository"
@@ -50,6 +51,12 @@ func main() {
 
 	// Register Time Journal routes
 	tjHandler.RegisterRoutes(mux)
+
+	// Wire Affirmations dependency chain:
+	// MongoClient -> AffirmationsRepo -> Handler
+	affRepo := repository.NewAffirmationsRepo(mongoClient)
+	affHandler := affirmations.NewHandler(affRepo, nil, nil)
+	affHandler.RegisterRoutes(mux)
 
 	// Generic activity routes (stub — not yet implemented)
 	mux.HandleFunc("POST /v1/activities/{type}", func(w http.ResponseWriter, r *http.Request) {
