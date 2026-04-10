@@ -267,3 +267,82 @@ type AffirmationsRepository interface {
 	// --- Calendar dual-write ---
 	WriteCalendarActivity(ctx context.Context, activity *Activity) error
 }
+
+// ThreeCirclesRepository defines the interface for Three Circles operations.
+type ThreeCirclesRepository interface {
+	// --- Circle Set CRUD ---
+	CreateCircleSet(ctx context.Context, set *CircleSetDoc) error
+	GetCircleSetByID(ctx context.Context, setID string) (*CircleSetDoc, error)
+	ListCircleSetsByUser(ctx context.Context, userID string, status *string) ([]CircleSetDoc, error)
+	ListCircleSetsByRecoveryArea(ctx context.Context, userID string, recoveryArea string) ([]CircleSetDoc, error)
+	ListCircleSetsDueForReview(ctx context.Context, userID string, nowISO string) ([]CircleSetDoc, error)
+	UpdateCircleSet(ctx context.Context, set *CircleSetDoc) error
+	DeleteCircleSet(ctx context.Context, setID string) error
+
+	// --- Version History ---
+	CreateCircleSetVersion(ctx context.Context, version *CircleSetVersionDoc) error
+	ListVersionsForSet(ctx context.Context, setID string) ([]CircleSetVersionDoc, error)
+	GetCircleSetVersion(ctx context.Context, setID string, versionNumber int) (*CircleSetVersionDoc, error)
+	GetLatestCircleSetVersion(ctx context.Context, setID string) (*CircleSetVersionDoc, error)
+
+	// --- Templates ---
+	GetCircleTemplateByID(ctx context.Context, templateID string) (*CircleTemplateDoc, error)
+	ListCircleTemplates(ctx context.Context, recoveryArea string, circle *string, active bool) ([]CircleTemplateDoc, error)
+	ListCircleTemplatesByFramework(ctx context.Context, recoveryArea string, frameworkVariant *string) ([]CircleTemplateDoc, error)
+
+	// --- Starter Packs ---
+	GetStarterPackByID(ctx context.Context, packID string) (*CircleStarterPackDoc, error)
+	ListStarterPacks(ctx context.Context, recoveryArea string, variant *string, active bool) ([]CircleStarterPackDoc, error)
+
+	// --- Onboarding Flows ---
+	CreateOnboardingFlow(ctx context.Context, flow *CircleOnboardingDoc) error
+	GetOnboardingFlowByID(ctx context.Context, flowID string) (*CircleOnboardingDoc, error)
+	GetActiveOnboardingFlow(ctx context.Context, userID string) (*CircleOnboardingDoc, error)
+	GetActiveOnboardingFlowForRecoveryArea(ctx context.Context, userID string, recoveryArea string) (*CircleOnboardingDoc, error)
+	UpdateOnboardingFlow(ctx context.Context, flow *CircleOnboardingDoc) error
+	DeleteOnboardingFlow(ctx context.Context, flowID string) error
+
+	// --- Share Links ---
+	CreateCircleShare(ctx context.Context, share *CircleShareDoc) error
+	GetCircleShareByCode(ctx context.Context, shareCode string) (*CircleShareDoc, error)
+	ListActiveSharesForSet(ctx context.Context, setID string) ([]CircleShareDoc, error)
+	UpdateCircleShare(ctx context.Context, share *CircleShareDoc) error
+	DeleteCircleShare(ctx context.Context, shareID string) error
+
+	// --- Sponsor Comments ---
+	CreateSponsorComment(ctx context.Context, comment *CircleSponsorCommentDoc) error
+	ListCommentsByShareCode(ctx context.Context, shareCode string) ([]CircleSponsorCommentDoc, error)
+	GetUnreadCommentsForSet(ctx context.Context, userID string, setID string) ([]CircleSponsorCommentDoc, error)
+	CountUnreadCommentsForSet(ctx context.Context, userID string, setID string) (int64, error)
+	MarkCommentsAsRead(ctx context.Context, userID string, setID string) error
+
+	// --- Pattern Timeline ---
+	CreateTimelineEntry(ctx context.Context, entry *CirclePatternTimelineDoc) error
+	GetTimelineForPeriod(ctx context.Context, userID string, setID string, startDate string, endDate string) ([]CirclePatternTimelineDoc, error)
+	CountDaysByCircleType(ctx context.Context, userID string, setID string, startDate string, endDate string) (map[string]int, error)
+	GetConsecutiveOuterDays(ctx context.Context, userID string, setID string) (int, error)
+	CountMiddleCircleDaysInWindow(ctx context.Context, userID string, setID string, startDate string) (int64, error)
+
+	// --- Insights ---
+	CreateInsight(ctx context.Context, insight *CircleInsightDoc) error
+	GetActiveInsightsForSet(ctx context.Context, userID string, setID string) ([]CircleInsightDoc, error)
+	GetInsightsByType(ctx context.Context, userID string, insightType string) ([]CircleInsightDoc, error)
+	UpdateInsight(ctx context.Context, insight *CircleInsightDoc) error
+
+	// --- Drift Alerts ---
+	CreateDriftAlert(ctx context.Context, alert *CircleDriftAlertDoc) error
+	GetActiveDriftAlerts(ctx context.Context, userID string, setID string) ([]CircleDriftAlertDoc, error)
+	GetRecentDriftEpisodes(ctx context.Context, userID string, limit int) ([]CircleDriftAlertDoc, error)
+	UpdateDriftAlert(ctx context.Context, alert *CircleDriftAlertDoc) error
+
+	// --- Quarterly Reviews ---
+	CreateCircleReview(ctx context.Context, review *CircleReviewDoc) error
+	GetCircleReviewByID(ctx context.Context, reviewID string) (*CircleReviewDoc, error)
+	ListReviewsForSet(ctx context.Context, userID string, setID string) ([]CircleReviewDoc, error)
+	GetIncompleteReviewForSet(ctx context.Context, userID string, setID string) (*CircleReviewDoc, error)
+	UpdateCircleReview(ctx context.Context, review *CircleReviewDoc) error
+	DeleteCircleReview(ctx context.Context, reviewID string) error
+
+	// --- Calendar dual-write ---
+	WriteCalendarActivity(ctx context.Context, activity *Activity) error
+}

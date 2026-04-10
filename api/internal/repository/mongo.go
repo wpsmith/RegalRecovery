@@ -177,6 +177,73 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 		"affirmationProgress": {
 			{Keys: bson.D{{Key: "userId", Value: 1}}, Options: options.Index().SetUnique(true).SetName("userId_unique")},
 		},
+		"circlesSets": {
+			{Keys: bson.D{{Key: "setId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "status", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "recoveryArea", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "nextReviewDue", Value: 1}}, Options: options.Index().SetSparse(true)},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesVersions": {
+			{Keys: bson.D{{Key: "versionId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "setId", Value: 1}, {Key: "versionNumber", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "changedAt", Value: -1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesTemplates": {
+			{Keys: bson.D{{Key: "templateId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "recoveryArea", Value: 1}, {Key: "circle", Value: 1}, {Key: "active", Value: 1}, {Key: "sortOrder", Value: 1}}},
+			{Keys: bson.D{{Key: "recoveryArea", Value: 1}, {Key: "frameworkVariant", Value: 1}}},
+			{Keys: bson.D{{Key: "tags", Value: 1}}},
+		},
+		"circlesStarterPacks": {
+			{Keys: bson.D{{Key: "packId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "recoveryArea", Value: 1}, {Key: "variant", Value: 1}, {Key: "active", Value: 1}}},
+		},
+		"circlesOnboarding": {
+			{Keys: bson.D{{Key: "flowId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "completed", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "recoveryArea", Value: 1}, {Key: "completed", Value: 1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesShares": {
+			{Keys: bson.D{{Key: "shareCode", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "setId", Value: 1}, {Key: "active", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetSparse(true).SetExpireAfterSeconds(0)},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesSponsorComments": {
+			{Keys: bson.D{{Key: "commentId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "shareCode", Value: 1}, {Key: "createdAt", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "setId", Value: 1}, {Key: "read", Value: 1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesPatternTimeline": {
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "setId", Value: 1}, {Key: "date", Value: -1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "setId", Value: 1}, {Key: "circle", Value: 1}, {Key: "date", Value: -1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "date", Value: -1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesInsights": {
+			{Keys: bson.D{{Key: "insightId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "setId", Value: 1}, {Key: "dismissed", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "type", Value: 1}, {Key: "detectedAt", Value: -1}}},
+			{Keys: bson.D{{Key: "expiresAt", Value: 1}}, Options: options.Index().SetExpireAfterSeconds(0)},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesDriftAlerts": {
+			{Keys: bson.D{{Key: "alertId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "setId", Value: 1}, {Key: "dismissed", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "windowEnd", Value: -1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
+		"circlesReviews": {
+			{Keys: bson.D{{Key: "reviewId", Value: 1}}, Options: options.Index().SetUnique(true)},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "setId", Value: 1}, {Key: "completed", Value: 1}}},
+			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "startedAt", Value: -1}}},
+			{Keys: bson.D{{Key: "tenantId", Value: 1}}},
+		},
 	}
 
 	for collName, collIndexes := range indexes {
