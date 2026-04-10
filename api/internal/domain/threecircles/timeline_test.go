@@ -22,8 +22,8 @@ func TestThreeCircles_Timeline_ComputesTimeline_7DayPeriod(t *testing.T) {
 			{Date: "2026-04-05", DominantCircle: CircleOuter, SetID: "set4"},
 			{Date: "2026-04-04", DominantCircle: CircleOuter, SetID: "set5"},
 			{Date: "2026-04-03", DominantCircle: CircleOuter, SetID: "set6"},
-			{Date: "2026-04-02", DominantCircle: CircleOuter, SetID: "set7"},
-			{Date: "2026-04-01", DominantCircle: CircleMiddle, SetID: "set8"}, // Should be included (7 days back)
+			{Date: "2026-04-02", DominantCircle: CircleOuter, SetID: "set7"}, // 7th day (04-02 to 04-08 = 7 days)
+			{Date: "2026-04-01", DominantCircle: CircleMiddle, SetID: "set8"}, // Outside window
 			{Date: "2026-03-31", DominantCircle: CircleOuter, SetID: "set9"},  // Outside window
 			{Date: "2026-03-30", DominantCircle: CircleInner, SetID: "set10"}, // Outside window
 		}
@@ -36,8 +36,8 @@ func TestThreeCircles_Timeline_ComputesTimeline_7DayPeriod(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		if len(filteredEntries) != 8 {
-			t.Errorf("expected 8 entries in 7-day window, got %d", len(filteredEntries))
+		if len(filteredEntries) != 7 {
+			t.Errorf("expected 7 entries in 7-day window, got %d", len(filteredEntries))
 		}
 
 		if summary.Period != "7d" {
@@ -48,8 +48,8 @@ func TestThreeCircles_Timeline_ComputesTimeline_7DayPeriod(t *testing.T) {
 			t.Errorf("expected 6 outer days, got %d", summary.OuterDays)
 		}
 
-		if summary.MiddleDays != 2 {
-			t.Errorf("expected 2 middle days, got %d", summary.MiddleDays)
+		if summary.MiddleDays != 1 {
+			t.Errorf("expected 1 middle day, got %d", summary.MiddleDays)
 		}
 	})
 }
@@ -166,8 +166,8 @@ func TestThreeCircles_Timeline_Handles30DayPeriod(t *testing.T) {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		if len(filteredEntries) != 31 { // 30 days back + current day
-			t.Errorf("expected 31 entries in 30-day window, got %d", len(filteredEntries))
+		if len(filteredEntries) != 30 { // 30 days total
+			t.Errorf("expected 30 entries in 30-day window, got %d", len(filteredEntries))
 		}
 
 		if summary.Period != "30d" {
