@@ -1,0 +1,2448 @@
+openapi: 3.1.0
+
+info:
+  title: Regal Recovery — Three Circles API
+  version: 1.0.0
+  description: |
+    Three Circles builder and pattern visualization API for Christian sexual addiction recovery.
+
+    The Three Circles Builder transforms the paper-worksheet exercise into an interactive, evolving recovery plan:
+    - Inner Circle: behaviors to completely avoid (hard boundaries)
+    - Middle Circle: warning signs, slippery behaviors, emotional states (not failure, but signals)
+    - Outer Circle: healthy behaviors, practices, and self-care (recovery life)
+
+    Features:
+    - Template-based or blank-canvas building
+    - Starter Packs for users facing the blank page
+    - Version history with restore
+    - Sponsor review flow (async comments)
+    - Pattern visualization (timeline, insights, drift alerts)
+    - Quarterly review prompts
+    - Multiple circle sets for co-occurring recovery areas
+
+    Feature flag: `feature.3circles` (fail closed: 404 when disabled)
+  contact:
+    name: Regal Recovery Engineering
+    email: platform@regalrecovery.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.regalrecovery.app/v1
+    description: Production
+  - url: https://api-staging.regalrecovery.app/v1
+    description: Staging
+  - url: http://localhost:8080/v1
+    description: Local development
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Circle Sets
+    description: Circle set creation, editing, and lifecycle management
+  - name: Circle Items
+    description: Individual item management within circles
+  - name: Version History
+    description: Circle version tracking and restore
+  - name: Templates
+    description: Template library browsing and preview
+  - name: Starter Packs
+    description: Pre-built complete circle sets for quick start
+  - name: Onboarding
+    description: Guided first-time circle creation flow
+  - name: Sponsor Review
+    description: Share circles for sponsor/therapist feedback
+  - name: Pattern Visualization
+    description: Timeline, insights, drift detection
+  - name: Quarterly Review
+    description: Periodic circle review workflow
+
+paths:
+  # ── Circle Set Management ──────────────────────────────────
+  /tools/three-circles/sets:
+    get:
+      operationId: listCircleSets
+      tags: [Circle Sets]
+      summary: List user's circle sets
+      description: |
+        Returns all circle sets for the authenticated user.
+        Users may have multiple sets for co-occurring recovery areas (sex/porn + alcohol, etc.).
+        Each set has independent circles.
+      parameters:
+        - name: status
+          in: query
+          description: Filter by set status
+          schema:
+            $ref: '#/components/schemas/CircleSetStatus'
+        - name: recoveryArea
+          in: query
+          description: Filter by recovery area
+          schema:
+            $ref: '#/components/schemas/RecoveryArea'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Circle sets retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+    post:
+      operationId: createCircleSet
+      tags: [Circle Sets]
+      summary: Create new circle set
+      description: |
+        Create a new circle set. May be created as draft or immediately active.
+        Recovery area selection triggers framework-appropriate terminology.
+        Initial creation typically happens through onboarding flow, but can be created directly.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCircleSetRequest'
+      responses:
+        '201':
+          description: Circle set created
+          headers:
+            Location:
+              description: URI of created circle set
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tools/three-circles/sets/{setId}:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+    get:
+      operationId: getCircleSet
+      tags: [Circle Sets]
+      summary: Get circle set detail
+      description: |
+        Returns full circle set with all items in inner, middle, and outer circles.
+        Includes version history summary and sponsor review status.
+      responses:
+        '200':
+          description: Circle set retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetDetailResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      operationId: replaceCircleSet
+      tags: [Circle Sets]
+      summary: Full update (creates version)
+      description: |
+        Replace entire circle set. Creates a new version snapshot.
+        All three circles must be provided (full replace semantics).
+        Use PATCH for partial updates.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplaceCircleSetRequest'
+      responses:
+        '200':
+          description: Circle set updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      operationId: updateCircleSet
+      tags: [Circle Sets]
+      summary: Partial update
+      description: |
+        Update specific fields without replacing entire circle set.
+        Uses JSON Merge Patch (RFC 7396).
+        Creates version snapshot only if circles themselves change.
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdateCircleSetRequest'
+      responses:
+        '200':
+          description: Circle set updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      operationId: deleteCircleSet
+      tags: [Circle Sets]
+      summary: Delete circle set
+      description: |
+        Soft delete. Circle set moves to archived status.
+        Version history preserved.
+        Associated pattern data retained but no longer visible in timeline.
+      responses:
+        '204':
+          description: Circle set deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/sets/{setId}/commit:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+    post:
+      operationId: commitCircleSet
+      tags: [Circle Sets]
+      summary: Commit draft to active
+      description: |
+        Transitions a draft circle set to active status.
+        Once active, circles are used for daily check-ins and pattern tracking.
+        Cannot commit if set has zero inner circle items.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                changeNote:
+                  type: string
+                  maxLength: 500
+                  description: Optional note explaining why committing now
+                  example: "Reviewed with sponsor and refined middle circle"
+      responses:
+        '200':
+          description: Circle set committed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+          description: Cannot commit (e.g., zero inner circle items)
+
+  # ── Circle Items ───────────────────────────────────────────
+  /tools/three-circles/sets/{setId}/items:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+    post:
+      operationId: addCircleItem
+      tags: [Circle Items]
+      summary: Add item to a circle
+      description: |
+        Add new behavior, warning sign, or practice to a specific circle.
+        Creates version snapshot.
+
+        Inner circle additions trigger gentle confirmation guidance (client-side).
+        Middle circle items may reference HALT+B categories or other structured warning signs.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCircleItemRequest'
+      responses:
+        '201':
+          description: Item added
+          headers:
+            Location:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleItemResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tools/three-circles/sets/{setId}/items/{itemId}:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+      - $ref: '#/components/parameters/ItemId'
+    put:
+      operationId: updateCircleItem
+      tags: [Circle Items]
+      summary: Update item
+      description: |
+        Update behavior name, notes, specificity, or flags.
+        Does not change which circle the item belongs to (use move endpoint).
+        Creates version snapshot.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCircleItemRequest'
+      responses:
+        '200':
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleItemResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    delete:
+      operationId: deleteCircleItem
+      tags: [Circle Items]
+      summary: Delete item
+      description: |
+        Remove item from circle. Creates version snapshot.
+        Removing inner circle items triggers stronger confirmation (client-side).
+      responses:
+        '204':
+          description: Item deleted
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/sets/{setId}/items/{itemId}/move:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+      - $ref: '#/components/parameters/ItemId'
+    post:
+      operationId: moveCircleItem
+      tags: [Circle Items]
+      summary: Move item between circles
+      description: |
+        Move item to a different circle. Creates version snapshot.
+        Common use case: moving items from inner to middle during quarterly review,
+        or tightening middle items into inner as recovery progresses.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetCircle]
+              properties:
+                targetCircle:
+                  $ref: '#/components/schemas/CircleType'
+                changeNote:
+                  type: string
+                  maxLength: 500
+                  example: "Sponsor recommended tightening this boundary"
+      responses:
+        '200':
+          description: Item moved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleItemResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  # ── Version History ────────────────────────────────────────
+  /tools/three-circles/sets/{setId}/versions:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+    get:
+      operationId: listCircleSetVersions
+      tags: [Version History]
+      summary: List versions
+      description: |
+        Returns version history timeline for a circle set.
+        Each version includes timestamp, change note, and item counts per circle.
+        Full snapshots available via individual version GET.
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Version list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/sets/{setId}/versions/{versionId}:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+      - name: versionId
+        in: path
+        required: true
+        description: Version number or 'latest'
+        schema:
+          type: string
+          pattern: '^(v\d+|latest)$'
+          example: "v3"
+    get:
+      operationId: getCircleSetVersion
+      tags: [Version History]
+      summary: Get specific version
+      description: |
+        Returns full snapshot of circles at a specific version.
+        Use for comparing versions or viewing history.
+      responses:
+        '200':
+          description: Version snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetVersionResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/sets/{setId}/versions/{versionId}/restore:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+      - name: versionId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^v\d+$'
+    post:
+      operationId: restoreCircleSetVersion
+      tags: [Version History]
+      summary: Restore version
+      description: |
+        Restore circle set to a previous version.
+        Creates a new version (does not rewind history).
+        Draft sets become active upon restore.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                changeNote:
+                  type: string
+                  maxLength: 500
+                  example: "Restoring v2 after discussion with sponsor"
+      responses:
+        '200':
+          description: Version restored
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Templates ──────────────────────────────────────────────
+  /tools/three-circles/templates:
+    get:
+      operationId: listTemplates
+      tags: [Templates]
+      summary: List templates by recovery area
+      description: |
+        Returns template items organized by recovery area and circle.
+        Templates are individual suggestions (not full sets — see Starter Packs for that).
+        Each template includes rationale text explaining why it's commonly included.
+
+        Templates are versioned independently of the API.
+        User circle data never auto-populates from templates without explicit action.
+      parameters:
+        - name: recoveryArea
+          in: query
+          required: true
+          description: Recovery area to filter templates
+          schema:
+            $ref: '#/components/schemas/RecoveryArea'
+        - name: circle
+          in: query
+          description: Filter by circle (inner/middle/outer)
+          schema:
+            $ref: '#/components/schemas/CircleType'
+        - name: framework
+          in: query
+          description: Filter for framework-specific variants
+          schema:
+            $ref: '#/components/schemas/FrameworkPreference'
+      responses:
+        '200':
+          description: Template list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateListResponse'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+
+  /tools/three-circles/templates/{templateId}:
+    parameters:
+      - name: templateId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^3c_tpl_[a-zA-Z0-9]+$'
+    get:
+      operationId: getTemplate
+      tags: [Templates]
+      summary: Get template detail
+      description: |
+        Returns template item with full rationale, examples, and usage guidance.
+      responses:
+        '200':
+          description: Template detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Starter Packs ──────────────────────────────────────────
+  /tools/three-circles/starter-packs:
+    get:
+      operationId: listStarterPacks
+      tags: [Starter Packs]
+      summary: List starter packs
+      description: |
+        Returns pre-built complete circle sets.
+        Starter Packs are curated, clinically reviewed combinations that provide
+        a coherent starting recovery plan for users facing the blank page.
+
+        Available in variants: secular, faith-based, LGBTQ+-affirming.
+      parameters:
+        - name: recoveryArea
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/RecoveryArea'
+        - name: variant
+          in: query
+          description: Pack variant
+          schema:
+            type: string
+            enum: [secular, faith-based, lgbtq-affirming]
+            default: secular
+      responses:
+        '200':
+          description: Starter pack list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StarterPackListResponse'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+
+  /tools/three-circles/starter-packs/{packId}:
+    parameters:
+      - name: packId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^3c_pack_[a-zA-Z0-9]+$'
+    get:
+      operationId: getStarterPack
+      tags: [Starter Packs]
+      summary: Get starter pack detail
+      description: |
+        Returns full starter pack with all inner, middle, and outer circle items.
+        Each item includes rationale.
+      responses:
+        '200':
+          description: Starter pack detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StarterPackResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/sets/{setId}/apply-starter-pack:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+    post:
+      operationId: applyStarterPack
+      tags: [Starter Packs]
+      summary: Apply starter pack to set
+      description: |
+        Populate an existing circle set with starter pack items.
+        If set is empty, replaces all circles.
+        If set has existing items, merges pack items (no duplicates).
+
+        All items tagged with source=starterPack for version history.
+        Creates version snapshot.
+        Set remains in draft status after application.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [packId]
+              properties:
+                packId:
+                  type: string
+                  pattern: '^3c_pack_[a-zA-Z0-9]+$'
+                mergeStrategy:
+                  type: string
+                  enum: [replace, merge]
+                  default: merge
+                  description: Replace clears existing items; merge adds without duplicates
+      responses:
+        '200':
+          description: Starter pack applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CircleSetResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  # ── Onboarding ─────────────────────────────────────────────
+  /tools/three-circles/onboarding/start:
+    post:
+      operationId: startOnboarding
+      tags: [Onboarding]
+      summary: Start onboarding flow
+      description: |
+        Initialize a new onboarding session for first-time circle creation.
+        Returns a flow ID and initial step configuration.
+
+        Three modes: guided (full explanations), starterPack (pre-built set), express (minimal).
+        Guided mode is default for new users.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [guided, starterPack, express]
+                  default: guided
+                emotionalCheckinScore:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  description: "1=struggling, 2=low, 3=okay, 4=good, 5=strong"
+                  example: 3
+      responses:
+        '201':
+          description: Onboarding flow started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingFlowResponse'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+
+  /tools/three-circles/onboarding/{flowId}:
+    parameters:
+      - name: flowId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^3c_flow_[a-zA-Z0-9]+$'
+    patch:
+      operationId: updateOnboarding
+      tags: [Onboarding]
+      summary: Update onboarding progress
+      description: |
+        Update current step, save progress, or switch modes mid-flow.
+        Onboarding state persists — users can exit and resume.
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              type: object
+              properties:
+                currentStep:
+                  type: string
+                  enum: [recoveryArea, framework, innerCircle, outerCircle, middleCircle, review]
+                recoveryArea:
+                  $ref: '#/components/schemas/RecoveryArea'
+                frameworkPreference:
+                  $ref: '#/components/schemas/FrameworkPreference'
+                progress:
+                  type: object
+                  description: Step-specific progress data (inner/middle/outer circle items)
+                mode:
+                  type: string
+                  enum: [guided, starterPack, express]
+      responses:
+        '200':
+          description: Onboarding updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingFlowResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tools/three-circles/onboarding/{flowId}/complete:
+    parameters:
+      - name: flowId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^3c_flow_[a-zA-Z0-9]+$'
+    post:
+      operationId: completeOnboarding
+      tags: [Onboarding]
+      summary: Complete onboarding
+      description: |
+        Finalize onboarding and create circle set.
+        Three commit options:
+        - commitNow: circle set becomes active immediately
+        - draft: save as draft, optionally generate sponsor share link
+        - draftNoShare: save as draft, review later
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [commitOption]
+              properties:
+                commitOption:
+                  type: string
+                  enum: [commitNow, draft, draftNoShare]
+                changeNote:
+                  type: string
+                  maxLength: 500
+                generateSponsorShare:
+                  type: boolean
+                  default: false
+                  description: If true, generate sponsor review link (only for draft)
+      responses:
+        '201':
+          description: Onboarding complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      circleSet:
+                        $ref: '#/components/schemas/CircleSet'
+                      sponsorShareLink:
+                        type: string
+                        format: uri
+                        nullable: true
+                        description: Share link if generateSponsorShare=true
+                      sponsorShareCode:
+                        type: string
+                        nullable: true
+                        description: Short code alternative to link
+                  links:
+                    type: object
+                    properties:
+                      circleSet:
+                        type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  # ── Sponsor Review ─────────────────────────────────────────
+  /tools/three-circles/sets/{setId}/share:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+    post:
+      operationId: shareCircleSet
+      tags: [Sponsor Review]
+      summary: Generate share link/code
+      description: |
+        Generate a shareable read-only view for sponsor/therapist review.
+        Link and code expire after user-defined window (24h/7d/never).
+        Sponsors can view via link without needing an account.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expiresIn:
+                  type: string
+                  enum: ['24h', '7d', 'never']
+                  default: '7d'
+                permissions:
+                  type: array
+                  items:
+                    type: string
+                    enum: [view, comment]
+                  default: [view, comment]
+      responses:
+        '201':
+          description: Share link generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      shareCode:
+                        type: string
+                        pattern: '^[A-Z0-9]{8}$'
+                        example: "AB3X9KL2"
+                      shareLink:
+                        type: string
+                        format: uri
+                        example: "https://app.regalrecovery.com/share/AB3X9KL2"
+                      expiresAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      permissions:
+                        type: array
+                        items:
+                          type: string
+                  links:
+                    type: object
+                    properties:
+                      shareView:
+                        type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/share/{shareCode}:
+    parameters:
+      - name: shareCode
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^[A-Z0-9]{8}$'
+    get:
+      operationId: viewSharedCircleSet
+      tags: [Sponsor Review]
+      summary: View shared circles (no auth)
+      description: |
+        Public endpoint. No authentication required.
+        Returns read-only view of circle set.
+        Sponsor can see all items with notes/context.
+      security: []
+      responses:
+        '200':
+          description: Shared circle set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      recoveryArea:
+                        $ref: '#/components/schemas/RecoveryArea'
+                      innerCircle:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CircleItem'
+                      middleCircle:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CircleItem'
+                      outerCircle:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CircleItem'
+                      sharedAt:
+                        type: string
+                        format: date-time
+                      expiresAt:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      canComment:
+                        type: boolean
+                  meta:
+                    type: object
+                    properties:
+                      readOnly:
+                        type: boolean
+                        default: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '410':
+          description: Share link expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /tools/three-circles/share/{shareCode}/comments:
+    parameters:
+      - name: shareCode
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^[A-Z0-9]{8}$'
+    post:
+      operationId: addSponsorComment
+      tags: [Sponsor Review]
+      summary: Add comment
+      description: |
+        Sponsor adds comment on a specific circle item.
+        No authentication required (public endpoint with share code).
+        User sees comments when viewing their own set.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemId, text]
+              properties:
+                itemId:
+                  type: string
+                  description: Circle item being commented on
+                text:
+                  type: string
+                  maxLength: 1000
+                commenterName:
+                  type: string
+                  maxLength: 100
+                  description: Optional name for sponsor (not required)
+                  example: "John (sponsor)"
+      responses:
+        '201':
+          description: Comment added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorCommentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /tools/three-circles/sets/{setId}/comments:
+    parameters:
+      - $ref: '#/components/parameters/SetId'
+    get:
+      operationId: getCircleSetComments
+      tags: [Sponsor Review]
+      summary: Get comments on set
+      description: |
+        Retrieve all sponsor/therapist comments on this circle set.
+        Only the set owner can view comments via this endpoint.
+      parameters:
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Comments retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Pattern Visualization ──────────────────────────────────
+  /tools/three-circles/patterns/timeline:
+    get:
+      operationId: getCircleTimeline
+      tags: [Pattern Visualization]
+      summary: Circle timeline (daily which-circle)
+      description: |
+        Returns timeline showing which circle the user logged each day.
+        Data sourced from daily check-ins.
+
+        Color-coded bands: red (inner), yellow (middle), green (outer), gray (no check-in).
+        Supports zoom: 7d, 30d, 90d, 1y, all.
+      parameters:
+        - name: setId
+          in: query
+          required: true
+          description: Circle set to visualize
+          schema:
+            type: string
+        - name: period
+          in: query
+          description: Time window
+          schema:
+            type: string
+            enum: ['7d', '30d', '90d', '1y', 'all']
+            default: '30d'
+        - name: startDate
+          in: query
+          description: Custom start date (overrides period)
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: Custom end date (overrides period)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Timeline data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineResponse'
+        '404':
+          $ref: '#/components/responses/FeatureDisabled'
+
+  /tools/three-circles/patterns/insights:
+    get:
+      operationId: getPatternInsights
+      tags: [Pattern Visualization]
+      summary: Pattern insight cards
+      description: |
+        Auto-generated insights based on check-in data (minimum 14 days).
+
+        Insights include:
+        - Day-of-week patterns
+        - Time patterns
+        - Trigger correlations (mood, SEEDS, etc.)
+        - Protective correlations (sponsor calls, exercise, etc.)
+        - Sleep correlations
+
+        All insights are observations, not predictions, with constructive next steps.
+        Insights never surface shaming correlations.
+      parameters:
+        - name: setId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: category
+          in: query
+          description: Filter insights by type
+          schema:
+            type: string
+            enum: [dayOfWeek, time, trigger, protective, sleep, seeds]
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Insight cards
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsightListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/patterns/summary:
+    get:
+      operationId: getPatternSummary
+      tags: [Pattern Visualization]
+      summary: Weekly/monthly summary
+      description: |
+        Returns summary of circle distribution over a period.
+        Includes outer days, middle days, inner days, no-check-in days.
+        Framing is descriptive, not grading (no percentages).
+
+        Shareable as image/PDF for sponsor/therapist.
+      parameters:
+        - name: setId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [week, month]
+        - name: startDate
+          in: query
+          description: Period start (defaults to current week/month)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Pattern summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SummaryResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/patterns/drift-alerts:
+    get:
+      operationId: getDriftAlerts
+      tags: [Pattern Visualization]
+      summary: Middle circle drift alerts
+      description: |
+        Returns active drift alerts (3+ middle circle days in 7-day window).
+        Alerts are gentle, non-punitive, one-time per drift episode.
+        User can dismiss alerts.
+      parameters:
+        - name: setId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, dismissed, all]
+            default: active
+      responses:
+        '200':
+          description: Drift alerts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DriftAlertListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/patterns/drift-alerts/{alertId}/dismiss:
+    parameters:
+      - name: alertId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^3c_alert_[a-zA-Z0-9]+$'
+    post:
+      operationId: dismissDriftAlert
+      tags: [Pattern Visualization]
+      summary: Dismiss alert
+      description: Alert will not reappear for this drift episode.
+      responses:
+        '204':
+          description: Alert dismissed
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Quarterly Review ───────────────────────────────────────
+  /tools/three-circles/reviews:
+    get:
+      operationId: listReviews
+      tags: [Quarterly Review]
+      summary: List review history
+      description: Returns past quarterly reviews with completion status.
+      parameters:
+        - name: setId
+          in: query
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Review list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewListResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      operationId: startReview
+      tags: [Quarterly Review]
+      summary: Start quarterly review
+      description: |
+        Initiate a quarterly review session.
+        Review walks through each circle with reflection prompts.
+        User can make changes directly during review.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [setId]
+              properties:
+                setId:
+                  type: string
+      responses:
+        '201':
+          description: Review started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/reviews/{reviewId}:
+    parameters:
+      - name: reviewId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^3c_rev_[a-zA-Z0-9]+$'
+    patch:
+      operationId: updateReview
+      tags: [Quarterly Review]
+      summary: Update review progress
+      description: Save progress through review flow. Can pause and resume.
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              type: object
+              properties:
+                currentStep:
+                  type: string
+                  enum: [innerReview, outerReview, middleReview, finalReview]
+                reflections:
+                  type: object
+                  description: Free-form reflection notes per circle
+                changesApplied:
+                  type: array
+                  description: List of changes made during review
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Review updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /tools/three-circles/reviews/{reviewId}/complete:
+    parameters:
+      - name: reviewId
+        in: path
+        required: true
+        schema:
+          type: string
+          pattern: '^3c_rev_[a-zA-Z0-9]+$'
+    post:
+      operationId: completeReview
+      tags: [Quarterly Review]
+      summary: Complete review
+      description: Finalize quarterly review. Sets next review date (90 days).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                summary:
+                  type: string
+                  maxLength: 1000
+                  description: Optional summary reflection
+      responses:
+        '200':
+          description: Review complete
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: AWS Cognito JWT access token
+
+  parameters:
+    SetId:
+      name: setId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^3c_set_[a-zA-Z0-9]+$'
+    ItemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^3c_item_[a-zA-Z0-9]+$'
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor for pagination
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      description: Max items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  schemas:
+    # ── Enums ──────────────────────────────────────────────
+    CircleType:
+      type: string
+      enum: [inner, middle, outer]
+      description: |
+        - inner: Hard boundaries, bottom lines (behaviors to completely avoid)
+        - middle: Warning signs, slippery behaviors (not failure, but signals)
+        - outer: Healthy behaviors, self-care, recovery practices
+
+    CircleSetStatus:
+      type: string
+      enum: [draft, active, archived]
+      description: |
+        - draft: Not yet committed, not used for check-ins
+        - active: Committed, used for daily check-ins and pattern tracking
+        - archived: Soft-deleted, version history preserved
+
+    RecoveryArea:
+      type: string
+      enum:
+        - sex-pornography
+        - alcohol
+        - drugs
+        - gambling
+        - food-eating
+        - internet-technology
+        - work
+        - shopping-debt
+        - love-relationships
+        - other
+      description: Primary recovery area this circle set addresses
+
+    FrameworkPreference:
+      type: string
+      enum:
+        - SAA
+        - SLAA
+        - AA
+        - NA
+        - SMART
+        - OA
+        - GA
+        - DA
+        - CoDA
+        - ITAA
+        - WA
+        - other
+        - none
+      description: Recovery fellowship or framework (affects terminology)
+
+    CircleItemSource:
+      type: string
+      enum: [user, template, starterPack]
+      description: Origin of this circle item
+
+    # ── Core Data ──────────────────────────────────────────
+    CircleSet:
+      type: object
+      required: [setId, userId, name, recoveryArea, status, innerCircle, middleCircle, outerCircle, createdAt, modifiedAt]
+      properties:
+        setId:
+          type: string
+          pattern: '^3c_set_[a-zA-Z0-9]+$'
+        userId:
+          type: string
+          description: User who owns this set
+        name:
+          type: string
+          maxLength: 100
+          example: "Sex/Pornography Recovery"
+        recoveryArea:
+          $ref: '#/components/schemas/RecoveryArea'
+        frameworkPreference:
+          $ref: '#/components/schemas/FrameworkPreference'
+        status:
+          $ref: '#/components/schemas/CircleSetStatus'
+        innerCircle:
+          type: array
+          items:
+            $ref: '#/components/schemas/CircleItem'
+          minItems: 0
+          maxItems: 20
+          description: Bottom line behaviors
+        middleCircle:
+          type: array
+          items:
+            $ref: '#/components/schemas/CircleItem'
+          maxItems: 50
+          description: Warning signs and slippery behaviors
+        outerCircle:
+          type: array
+          items:
+            $ref: '#/components/schemas/CircleItem'
+          maxItems: 50
+          description: Healthy behaviors and practices
+        versionNumber:
+          type: integer
+          minimum: 1
+          description: Current version number (increments on changes)
+        createdAt:
+          type: string
+          format: date-time
+          description: Immutable creation timestamp (FR2.7)
+        modifiedAt:
+          type: string
+          format: date-time
+        committedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When set became active
+
+    CircleItem:
+      type: object
+      required: [itemId, circle, behaviorName, createdAt]
+      properties:
+        itemId:
+          type: string
+          pattern: '^3c_item_[a-zA-Z0-9]+$'
+        circle:
+          $ref: '#/components/schemas/CircleType'
+        behaviorName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: "Viewing pornography"
+        notes:
+          type: string
+          maxLength: 1000
+          nullable: true
+          description: User's context or reasoning
+        specificityDetail:
+          type: string
+          maxLength: 500
+          nullable: true
+          description: "What exactly counts as this? (clarifies boundaries)"
+          example: "Includes browsing Instagram models, TikTok provocative content"
+        category:
+          type: string
+          maxLength: 50
+          nullable: true
+          description: For middle circle, may reference HALT+B or custom categories
+          example: "emotional-trigger"
+        source:
+          $ref: '#/components/schemas/CircleItemSource'
+        flags:
+          type: object
+          properties:
+            uncertain:
+              type: boolean
+              default: false
+              description: User marked this as uncertain (good for sponsor review)
+        createdAt:
+          type: string
+          format: date-time
+          description: Immutable (FR2.7)
+        modifiedAt:
+          type: string
+          format: date-time
+
+    CircleSetVersion:
+      type: object
+      properties:
+        versionNumber:
+          type: integer
+        snapshot:
+          type: object
+          description: Full circle set data at this version
+          properties:
+            innerCircle:
+              type: array
+              items:
+                $ref: '#/components/schemas/CircleItem'
+            middleCircle:
+              type: array
+              items:
+                $ref: '#/components/schemas/CircleItem'
+            outerCircle:
+              type: array
+              items:
+                $ref: '#/components/schemas/CircleItem'
+        changeNote:
+          type: string
+          maxLength: 500
+          nullable: true
+        changedAt:
+          type: string
+          format: date-time
+
+    Template:
+      type: object
+      properties:
+        templateId:
+          type: string
+          pattern: '^3c_tpl_[a-zA-Z0-9]+$'
+        recoveryArea:
+          $ref: '#/components/schemas/RecoveryArea'
+        circle:
+          $ref: '#/components/schemas/CircleType'
+        behaviorName:
+          type: string
+        rationale:
+          type: string
+          maxLength: 500
+          description: Why this item is commonly included
+          example: "Many people identify this as a primary behavior causing harm"
+        specificityGuidance:
+          type: string
+          nullable: true
+          description: Suggestions for making this specific
+        category:
+          type: string
+          nullable: true
+        frameworkVariant:
+          type: string
+          nullable: true
+          description: Specific to a recovery framework (SAA, SLAA, etc.)
+        version:
+          type: integer
+
+    StarterPack:
+      type: object
+      properties:
+        packId:
+          type: string
+          pattern: '^3c_pack_[a-zA-Z0-9]+$'
+        name:
+          type: string
+          maxLength: 100
+          example: "Sex Addiction Recovery — Faith-Based"
+        description:
+          type: string
+          maxLength: 1000
+        recoveryArea:
+          $ref: '#/components/schemas/RecoveryArea'
+        variant:
+          type: string
+          enum: [secular, faith-based, lgbtq-affirming]
+        innerCircle:
+          type: array
+          items:
+            $ref: '#/components/schemas/StarterPackItem'
+          description: 3-5 items (balanced, not overwhelming)
+        middleCircle:
+          type: array
+          items:
+            $ref: '#/components/schemas/StarterPackItem'
+          description: 6-10 items (behavioral, emotional, environmental, lifestyle)
+        outerCircle:
+          type: array
+          items:
+            $ref: '#/components/schemas/StarterPackItem'
+          description: SEEDS-based healthy practices
+        clinicalReviewer:
+          type: string
+          description: Name of clinician who reviewed this pack
+        communityReviewer:
+          type: string
+          description: Name of recovery community member who reviewed
+        version:
+          type: integer
+
+    StarterPackItem:
+      type: object
+      properties:
+        behaviorName:
+          type: string
+        rationale:
+          type: string
+          description: Why this item is in the pack
+        category:
+          type: string
+          nullable: true
+
+    OnboardingFlow:
+      type: object
+      properties:
+        flowId:
+          type: string
+          pattern: '^3c_flow_[a-zA-Z0-9]+$'
+        userId:
+          type: string
+        mode:
+          type: string
+          enum: [guided, starterPack, express]
+        currentStep:
+          type: string
+          enum: [recoveryArea, framework, innerCircle, outerCircle, middleCircle, review]
+        recoveryArea:
+          $ref: '#/components/schemas/RecoveryArea'
+        frameworkPreference:
+          $ref: '#/components/schemas/FrameworkPreference'
+        emotionalCheckinScore:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+        progress:
+          type: object
+          description: Step-specific progress data
+        createdAt:
+          type: string
+          format: date-time
+        lastUpdatedAt:
+          type: string
+          format: date-time
+
+    SponsorComment:
+      type: object
+      properties:
+        commentId:
+          type: string
+          pattern: '^3c_cmt_[a-zA-Z0-9]+$'
+        itemId:
+          type: string
+        text:
+          type: string
+          maxLength: 1000
+        commenterName:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    TimelineEntry:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        circle:
+          $ref: '#/components/schemas/CircleType'
+        checkinDetails:
+          type: object
+          nullable: true
+          description: Reference to full check-in data (mood, urge, notes)
+          properties:
+            mood:
+              type: integer
+              minimum: 1
+              maximum: 5
+            urgeIntensity:
+              type: integer
+              minimum: 0
+              maximum: 10
+            notes:
+              type: string
+
+    PatternInsight:
+      type: object
+      properties:
+        insightId:
+          type: string
+          pattern: '^3c_ins_[a-zA-Z0-9]+$'
+        type:
+          type: string
+          enum: [dayOfWeek, time, trigger, protective, sleep, seeds]
+        description:
+          type: string
+          maxLength: 500
+          example: "You tend to have middle circle contact on Fridays"
+        confidence:
+          type: string
+          enum: [low, medium, high]
+          description: Strength of correlation
+        actionSuggestion:
+          type: string
+          maxLength: 500
+          example: "Want to add Fridays to your weekly plan review?"
+        dataPoints:
+          type: integer
+          description: Number of days analyzed for this insight
+        detectedAt:
+          type: string
+          format: date-time
+
+    DriftAlert:
+      type: object
+      properties:
+        alertId:
+          type: string
+          pattern: '^3c_alert_[a-zA-Z0-9]+$'
+        windowStart:
+          type: string
+          format: date
+        windowEnd:
+          type: string
+          format: date
+        middleCircleDays:
+          type: integer
+          description: Number of middle circle days in window
+        message:
+          type: string
+          default: "You've been in your middle circle a few times this week. That's useful information — it means you're noticing. Would you like to [call your sponsor / review your circles / try a grounding exercise]?"
+        dismissed:
+          type: boolean
+          default: false
+        createdAt:
+          type: string
+          format: date-time
+
+    Summary:
+      type: object
+      properties:
+        period:
+          type: string
+          enum: [week, month]
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        outerDays:
+          type: integer
+        middleDays:
+          type: integer
+        innerDays:
+          type: integer
+        noCheckinDays:
+          type: integer
+        insights:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternInsight'
+          maxItems: 3
+          description: Top 3 insights for this period
+        moodTrend:
+          type: string
+          enum: [improving, stable, declining, insufficient-data]
+          nullable: true
+        framingMessage:
+          type: string
+          example: "You logged 22 outer circle days, 6 middle circle days, and 2 inner circle days this month. Each one is data for understanding your recovery."
+
+    Review:
+      type: object
+      properties:
+        reviewId:
+          type: string
+          pattern: '^3c_rev_[a-zA-Z0-9]+$'
+        setId:
+          type: string
+        currentStep:
+          type: string
+          enum: [innerReview, outerReview, middleReview, finalReview]
+        reflections:
+          type: object
+          description: User's reflections per circle
+        changesApplied:
+          type: array
+          items:
+            type: string
+        completed:
+          type: boolean
+          default: false
+        summary:
+          type: string
+          nullable: true
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+        nextReviewDue:
+          type: string
+          format: date
+          description: 90 days from completion
+
+    # ── Request Schemas ────────────────────────────────────
+    CreateCircleSetRequest:
+      type: object
+      required: [name, recoveryArea]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        recoveryArea:
+          $ref: '#/components/schemas/RecoveryArea'
+        frameworkPreference:
+          $ref: '#/components/schemas/FrameworkPreference'
+        status:
+          $ref: '#/components/schemas/CircleSetStatus'
+          default: draft
+        innerCircle:
+          type: array
+          items:
+            type: object
+            required: [behaviorName]
+            properties:
+              behaviorName:
+                type: string
+              notes:
+                type: string
+              specificityDetail:
+                type: string
+        middleCircle:
+          type: array
+          items:
+            type: object
+            required: [behaviorName]
+            properties:
+              behaviorName:
+                type: string
+              notes:
+                type: string
+              category:
+                type: string
+        outerCircle:
+          type: array
+          items:
+            type: object
+            required: [behaviorName]
+            properties:
+              behaviorName:
+                type: string
+              notes:
+                type: string
+
+    ReplaceCircleSetRequest:
+      type: object
+      required: [innerCircle, middleCircle, outerCircle]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        frameworkPreference:
+          $ref: '#/components/schemas/FrameworkPreference'
+        innerCircle:
+          type: array
+          items:
+            type: object
+        middleCircle:
+          type: array
+          items:
+            type: object
+        outerCircle:
+          type: array
+          items:
+            type: object
+        changeNote:
+          type: string
+          maxLength: 500
+
+    UpdateCircleSetRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        frameworkPreference:
+          $ref: '#/components/schemas/FrameworkPreference'
+        status:
+          $ref: '#/components/schemas/CircleSetStatus'
+
+    CreateCircleItemRequest:
+      type: object
+      required: [circle, behaviorName]
+      properties:
+        circle:
+          $ref: '#/components/schemas/CircleType'
+        behaviorName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        notes:
+          type: string
+          maxLength: 1000
+        specificityDetail:
+          type: string
+          maxLength: 500
+        category:
+          type: string
+          maxLength: 50
+        flags:
+          type: object
+          properties:
+            uncertain:
+              type: boolean
+              default: false
+
+    UpdateCircleItemRequest:
+      type: object
+      properties:
+        behaviorName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        notes:
+          type: string
+          maxLength: 1000
+        specificityDetail:
+          type: string
+          maxLength: 500
+        category:
+          type: string
+          maxLength: 50
+        flags:
+          type: object
+
+    # ── Response Envelopes ─────────────────────────────────
+    CircleSetListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CircleSet'
+        meta:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+            cursor:
+              type: string
+              nullable: true
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+            next:
+              type: string
+              format: uri
+              nullable: true
+
+    CircleSetResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CircleSet'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            versions:
+              type: string
+            share:
+              type: string
+            timeline:
+              type: string
+
+    CircleSetDetailResponse:
+      type: object
+      properties:
+        data:
+          allOf:
+            - $ref: '#/components/schemas/CircleSet'
+            - type: object
+              properties:
+                versionHistory:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      versionNumber:
+                        type: integer
+                      changedAt:
+                        type: string
+                        format: date-time
+                      changeNote:
+                        type: string
+                  maxItems: 5
+                  description: Last 5 versions (summary)
+                sponsorCommentCount:
+                  type: integer
+                  description: Number of unread sponsor comments
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            versions:
+              type: string
+            comments:
+              type: string
+            timeline:
+              type: string
+
+    CircleItemResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CircleItem'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            set:
+              type: string
+
+    VersionListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              versionNumber:
+                type: integer
+              changedAt:
+                type: string
+                format: date-time
+              changeNote:
+                type: string
+              innerCount:
+                type: integer
+              middleCount:
+                type: integer
+              outerCount:
+                type: integer
+        meta:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    CircleSetVersionResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CircleSetVersion'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            restore:
+              type: string
+
+    TemplateListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Template'
+        meta:
+          type: object
+          properties:
+            recoveryArea:
+              $ref: '#/components/schemas/RecoveryArea'
+            circle:
+              $ref: '#/components/schemas/CircleType'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    TemplateResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Template'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    StarterPackListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              packId:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              variant:
+                type: string
+              itemCounts:
+                type: object
+                properties:
+                  inner:
+                    type: integer
+                  middle:
+                    type: integer
+                  outer:
+                    type: integer
+        meta:
+          type: object
+          properties:
+            recoveryArea:
+              $ref: '#/components/schemas/RecoveryArea'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    StarterPackResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/StarterPack'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            apply:
+              type: string
+
+    OnboardingFlowResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/OnboardingFlow'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            complete:
+              type: string
+
+    SponsorCommentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/SponsorComment'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            item:
+              type: string
+
+    CommentListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsorComment'
+        meta:
+          type: object
+          properties:
+            totalCount:
+              type: integer
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    TimelineResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            entries:
+              type: array
+              items:
+                $ref: '#/components/schemas/TimelineEntry'
+            summary:
+              type: object
+              properties:
+                outerDays:
+                  type: integer
+                middleDays:
+                  type: integer
+                innerDays:
+                  type: integer
+                noCheckinDays:
+                  type: integer
+                currentConsecutiveOuterDays:
+                  type: integer
+                  description: Context, not primary streak counter
+        meta:
+          type: object
+          properties:
+            period:
+              type: string
+            startDate:
+              type: string
+              format: date
+            endDate:
+              type: string
+              format: date
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            insights:
+              type: string
+            summary:
+              type: string
+
+    InsightListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PatternInsight'
+        meta:
+          type: object
+          properties:
+            minimumDataDays:
+              type: integer
+              default: 14
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    SummaryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Summary'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            timeline:
+              type: string
+
+    DriftAlertListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DriftAlert'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    ReviewListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              reviewId:
+                type: string
+              startedAt:
+                type: string
+                format: date-time
+              completedAt:
+                type: string
+                format: date-time
+                nullable: true
+              completed:
+                type: boolean
+        meta:
+          type: object
+          properties:
+            nextReviewDue:
+              type: string
+              format: date
+              description: Date next review is suggested
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+
+    ReviewResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Review'
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+            complete:
+              type: string
+            circleSet:
+              type: string
+
+    # ── Error Schemas ──────────────────────────────────────
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [code, title, status]
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Unique identifier for this error occurrence
+              code:
+                type: string
+                pattern: '^rr:0x000B[0-9A-F]{4}$'
+                description: Three Circles domain error code (0x000B prefix)
+                example: "rr:0x000B0001"
+              status:
+                type: integer
+                description: HTTP status code
+              title:
+                type: string
+                description: Human-readable error summary
+              detail:
+                type: string
+                description: Occurrence-specific description
+              correlationId:
+                type: string
+                format: uuid
+                description: Correlation ID for distributed tracing
+              source:
+                type: object
+                properties:
+                  pointer:
+                    type: string
+                    description: JSON Pointer (RFC 6901) to request field
+                  parameter:
+                    type: string
+                    description: Query/path parameter name
+                  header:
+                    type: string
+                    description: Header name
+              links:
+                type: object
+                properties:
+                  about:
+                    type: string
+                    format: uri
+                    description: URI for this error occurrence
+                  type:
+                    type: string
+                    format: uri
+                    description: URI for error type documentation
+
+  responses:
+    Unauthorized:
+      description: Unauthorized - Missing or invalid authentication
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+            example: Bearer realm="Regal Recovery"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "eec33bf0-6bcc-4813-ae7e-0a70e8e53c3b"
+                code: "rr:0x000B0401"
+                status: 401
+                title: "Unauthorized"
+                detail: "Missing or invalid access token"
+                correlationId: "fe8793b2-1bf0-4d29-bf10-adcf72640ec5"
+                links:
+                  about: "https://api.regalrecovery.app/errors/auth"
+
+    NotFound:
+      description: Not Found - Resource does not exist or user lacks permission
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "7f3a8b2c-1e4d-4c9b-b0a1-5e6f7a8b9c0d"
+                code: "rr:0x000B0404"
+                status: 404
+                title: "Not Found"
+                detail: "Circle set does not exist"
+                correlationId: "8e2b9a3c-2f5e-5d0c-c1b2-6f7g8h9i0j1k"
+
+    FeatureDisabled:
+      description: Feature flag `feature.3circles` is disabled (fail closed)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "9a4b5c6d-3f7e-6d1e-d2c3-7g8h9i0j1k2l"
+                code: "rr:0x000B0404"
+                status: 404
+                title: "Feature Not Available"
+                detail: "Three Circles feature is not enabled for this account"
+                correlationId: "0f1g2h3i-4j5k-7l8m-e3d4-8h9i0j1k2l3m"
+
+    ValidationError:
+      description: Unprocessable Entity - Request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            errors:
+              - id: "1b5c6d7e-4g8h-8e2f-f4e5-9i0j1k2l3m4n"
+                code: "rr:0x000B0422"
+                status: 422
+                title: "Validation Error"
+                detail: "Inner circle requires at least one behavior to commit"
+                correlationId: "2c6d7e8f-5h9i-9f3g-g5f6-0j1k2l3m4n5o"
+                source:
+                  pointer: "/innerCircle"
