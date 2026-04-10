@@ -184,6 +184,16 @@
 		10000953 /* AffirmationOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000953 /* AffirmationOfflineCache.swift */; };
 		10000954 /* AffirmationNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000954 /* AffirmationNavigationTests.swift */; };
 		10000960 /* AffirmationTodayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000960 /* AffirmationTodayCard.swift */; };
+		10001100 /* AffirmationSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001100 /* AffirmationSessionViewModel.swift */; };
+		10001101 /* AffirmationsHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001101 /* AffirmationsHubView.swift */; };
+		10001102 /* MorningSessionFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001102 /* MorningSessionFlowView.swift */; };
+		10001103 /* EveningReflectionFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001103 /* EveningReflectionFlowView.swift */; };
+		10001104 /* AffirmationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001104 /* AffirmationCardView.swift */; };
+		10001105 /* IntentionPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001105 /* IntentionPromptView.swift */; };
+		10001106 /* DayRatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001106 /* DayRatingView.swift */; };
+		10001107 /* IntentionRecallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001107 /* IntentionRecallView.swift */; };
+		10001108 /* EveningReflectionTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001108 /* EveningReflectionTextView.swift */; };
+		10001109 /* SessionCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001109 /* SessionCompleteView.swift */; };
 		10000701 /* FocusStatusMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000701 /* FocusStatusMonitor.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
 		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
@@ -272,6 +282,16 @@
 		20000953 /* AffirmationOfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationOfflineCache.swift; sourceTree = "<group>"; };
 		20000954 /* AffirmationNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationNavigationTests.swift; sourceTree = "<group>"; };
 		20000960 /* AffirmationTodayCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationTodayCard.swift; sourceTree = "<group>"; };
+		20001100 /* AffirmationSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSessionViewModel.swift; sourceTree = "<group>"; };
+		20001101 /* AffirmationsHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsHubView.swift; sourceTree = "<group>"; };
+		20001102 /* MorningSessionFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorningSessionFlowView.swift; sourceTree = "<group>"; };
+		20001103 /* EveningReflectionFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReflectionFlowView.swift; sourceTree = "<group>"; };
+		20001104 /* AffirmationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationCardView.swift; sourceTree = "<group>"; };
+		20001105 /* IntentionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentionPromptView.swift; sourceTree = "<group>"; };
+		20001106 /* DayRatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRatingView.swift; sourceTree = "<group>"; };
+		20001107 /* IntentionRecallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentionRecallView.swift; sourceTree = "<group>"; };
+		20001108 /* EveningReflectionTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReflectionTextView.swift; sourceTree = "<group>"; };
+		20001109 /* SessionCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCompleteView.swift; sourceTree = "<group>"; };
 		20000701 /* FocusStatusMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStatusMonitor.swift; sourceTree = "<group>"; };
 		20000702 /* JournalEntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntryDetailView.swift; sourceTree = "<group>"; };
 		20000703 /* JournalHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalHistoryView.swift; sourceTree = "<group>"; };
@@ -541,6 +561,7 @@
 		50000030 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				20001100 /* AffirmationSessionViewModel.swift */,
 				20000024 /* ActivityError.swift */,
 				20000025 /* ActivityViewModel.swift */,
 				20000026 /* AffirmationsViewModel.swift */,
@@ -630,9 +651,26 @@
 			path = FASTER;
 			sourceTree = "<group>";
 		};
+		50001100 /* Affirmations */ = {
+			isa = PBXGroup;
+			children = (
+				20001101 /* AffirmationsHubView.swift */,
+				20001104 /* AffirmationCardView.swift */,
+				20001106 /* DayRatingView.swift */,
+				20001103 /* EveningReflectionFlowView.swift */,
+				20001108 /* EveningReflectionTextView.swift */,
+				20001105 /* IntentionPromptView.swift */,
+				20001107 /* IntentionRecallView.swift */,
+				20001102 /* MorningSessionFlowView.swift */,
+				20001109 /* SessionCompleteView.swift */,
+			);
+			path = Affirmations;
+			sourceTree = "<group>";
+		};
 		50000041 /* Activities */ = {
 			isa = PBXGroup;
 			children = (
+				50001100 /* Affirmations */,
 				20000053 /* ActivitiesListView.swift */,
 				20000054 /* AffirmationLogView.swift */,
 				20000055 /* EmotionalJournalView.swift */,
@@ -1054,6 +1092,16 @@
 				10000953 /* AffirmationOfflineCache.swift in Sources */,
 				10000954 /* AffirmationNavigationTests.swift in Sources */,
 				10000960 /* AffirmationTodayCard.swift in Sources */,
+				10001100 /* AffirmationSessionViewModel.swift in Sources */,
+				10001101 /* AffirmationsHubView.swift in Sources */,
+				10001102 /* MorningSessionFlowView.swift in Sources */,
+				10001103 /* EveningReflectionFlowView.swift in Sources */,
+				10001104 /* AffirmationCardView.swift in Sources */,
+				10001105 /* IntentionPromptView.swift in Sources */,
+				10001106 /* DayRatingView.swift in Sources */,
+				10001107 /* IntentionRecallView.swift in Sources */,
+				10001108 /* EveningReflectionTextView.swift in Sources */,
+				10001109 /* SessionCompleteView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

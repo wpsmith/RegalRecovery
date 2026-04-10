@@ -25,7 +25,7 @@ struct AffirmationLogView: View {
                             .font(.title2)
                             .foregroundStyle(Color.rrSecondary)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Affirmation Streak")
+                            Text("Affirmations")
                                 .font(RRFont.caption)
                                 .foregroundStyle(Color.rrTextSecondary)
                             Text("\(favorites.count) favorites saved")

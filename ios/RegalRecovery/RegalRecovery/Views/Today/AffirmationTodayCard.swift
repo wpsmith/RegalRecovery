@@ -37,7 +37,7 @@ struct AffirmationTodayCard: View {
 
     var body: some View {
         NavigationLink {
-            AffirmationLogView()
+            AffirmationsHubView()
         } label: {
             HStack(spacing: 12) {
                 // Left icon
