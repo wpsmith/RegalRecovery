@@ -24,42 +24,47 @@ struct CircleSetListView: View {
     // MARK: - Body
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            ScrollView {
-                LazyVStack(spacing: 16) {
-                    if isLoading && circleSets.isEmpty {
-                        loadingView
-                    } else if let error {
-                        errorView(error)
-                    } else if circleSets.isEmpty {
-                        emptyStateView
-                    } else {
-                        ForEach(circleSets) { circleSet in
-                            NavigationLink(value: circleSet.setId) {
-                                CircleSetCard(circleSet: circleSet)
-                            }
-                            .buttonStyle(.plain)
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                if circleSet.status != .archived {
-                                    Button(role: .destructive) {
-                                        Task { await archiveSet(circleSet) }
-                                    } label: {
-                                        Label("Archive", systemImage: "archivebox")
-                                    }
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                if isLoading && circleSets.isEmpty {
+                    loadingView
+                } else if let error {
+                    errorView(error)
+                } else if circleSets.isEmpty {
+                    emptyStateView
+                } else {
+                    ForEach(circleSets) { circleSet in
+                        NavigationLink(value: circleSet.setId) {
+                            CircleSetCard(circleSet: circleSet)
+                        }
+                        .buttonStyle(.plain)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            if circleSet.status != .archived {
+                                Button(role: .destructive) {
+                                    Task { await archiveSet(circleSet) }
+                                } label: {
+                                    Label("Archive", systemImage: "archivebox")
                                 }
                             }
                         }
                     }
                 }
-                .padding()
             }
-            .background(Color.rrBackground)
-
-            // Create new FAB
-            createButton
-                .padding(24)
+            .padding()
         }
+        .background(Color.rrBackground)
         .navigationTitle("Three Circles")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showCreateSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                        .foregroundStyle(Color.rrPrimary)
+                }
+                .accessibilityLabel("Create new circle set")
+            }
+        }
         .navigationDestination(for: String.self) { setId in
             CircleSetDetailView(apiClient: apiClient, setId: setId)
         }
@@ -123,22 +128,6 @@ struct CircleSetListView: View {
             .frame(width: 260)
         }
         .padding(.vertical, 40)
-    }
-
-    private var createButton: some View {
-        Button {
-            showCreateSheet = true
-        } label: {
-            Image(systemName: "plus")
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
-                .background(Color.rrPrimary)
-                .clipShape(Circle())
-                .shadow(color: Color.rrPrimary.opacity(0.3), radius: 8, x: 0, y: 4)
-        }
-        .accessibilityLabel("Create new circle set")
-        .accessibilityHint("Opens a form to create a new set of three circles")
     }
 
     // MARK: - Actions
