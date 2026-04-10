@@ -13,8 +13,8 @@ func TestThreeCircles_Summary_GeneratesWeeklySummary(t *testing.T) {
 	t.Run("generates_complete_weekly_summary", func(t *testing.T) {
 		// Given
 		engine := NewSummaryEngine()
-		currentTime := time.Date(2026, 4, 8, 12, 0, 0, 0, time.UTC)
-		weekStart := time.Date(2026, 4, 7, 0, 0, 0, 0, time.UTC) // Monday
+		currentTime := time.Date(2026, 4, 13, 12, 0, 0, 0, time.UTC) // Sunday (end of week)
+		weekStart := time.Date(2026, 4, 7, 0, 0, 0, 0, time.UTC)     // Monday
 
 		entries := []TimelineEntry{
 			{Date: "2026-04-07", DominantCircle: CircleOuter, SetID: "set1", MoodScore: 8},

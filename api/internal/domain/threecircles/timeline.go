@@ -68,15 +68,19 @@ func (te *TimelineEngine) calculateDateRange(period Period, currentTime time.Tim
 func (te *TimelineEngine) filterEntriesByDateRange(entries []TimelineEntry, startDate, endDate time.Time) []TimelineEntry {
 	filtered := make([]TimelineEntry, 0)
 
+	// Normalize dates to midnight UTC for comparison
+	startDateOnly := time.Date(startDate.Year(), startDate.Month(), startDate.Day(), 0, 0, 0, 0, time.UTC)
+	endDateOnly := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 0, 0, 0, 0, time.UTC)
+
 	for _, entry := range entries {
 		entryDate, err := time.Parse("2006-01-02", entry.Date)
 		if err != nil {
 			continue // Skip invalid dates
 		}
 
-		// Check if entry is within range (inclusive)
-		if (startDate.IsZero() || entryDate.After(startDate) || entryDate.Equal(startDate)) &&
-			(entryDate.Before(endDate) || entryDate.Equal(endDate)) {
+		// Check if entry is within range (inclusive, date-only comparison)
+		if (startDate.IsZero() || !entryDate.Before(startDateOnly)) &&
+			!entryDate.After(endDateOnly) {
 			filtered = append(filtered, entry)
 		}
 	}
