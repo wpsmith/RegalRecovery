@@ -182,7 +182,6 @@
 		10000951 /* AffirmationsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000951 /* AffirmationsAPIClient.swift */; };
 		10000952 /* AffirmationAudioSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000952 /* AffirmationAudioSessionManager.swift */; };
 		10000953 /* AffirmationOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000953 /* AffirmationOfflineCache.swift */; };
-		10000954 /* AffirmationNavigationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000954 /* AffirmationNavigationTests.swift */; };
 		10000960 /* AffirmationTodayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000960 /* AffirmationTodayCard.swift */; };
 		10001000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* ThreeCirclesTypes.swift */; };
 		10001001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* ThreeCirclesAPIClient.swift */; };
@@ -1208,7 +1207,6 @@
 				10001026 /* SummaryShareView.swift in Sources */,
 				10001027 /* QuarterlyReviewView.swift in Sources */,
 				10001028 /* ReviewReflectionView.swift in Sources */,
-				10000954 /* AffirmationNavigationTests.swift in Sources */,
 				10000960 /* AffirmationTodayCard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
