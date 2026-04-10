@@ -514,3 +514,232 @@ type AffirmationProgressDoc struct {
 	LastServedAffirmationIds    []string               `bson:"lastServedAffirmationIds"`
 	UpdatedAt                   time.Time              `bson:"updatedAt"`
 }
+
+// --- Three Circles document models ---
+
+// CircleItemDoc represents a single item within a circle (subdocument).
+type CircleItemDoc struct {
+	ItemID            string    `bson:"itemId"`
+	BehaviorName      string    `bson:"behaviorName"`
+	Notes             string    `bson:"notes,omitempty"`
+	SpecificityDetail string    `bson:"specificityDetail,omitempty"`
+	Category          string    `bson:"category,omitempty"`
+	Source            string    `bson:"source"` // user, template, starterPack
+	Flags             bson.M    `bson:"flags,omitempty"` // { uncertain: Boolean }
+	CreatedAt         time.Time `bson:"createdAt"`
+	ModifiedAt        time.Time `bson:"modifiedAt"`
+}
+
+// CircleSetDoc is the MongoDB document for a circle set.
+type CircleSetDoc struct {
+	BaseDocument `bson:",inline"`
+
+	SetID               string          `bson:"setId"`
+	EntityType          string          `bson:"entityType"` // Always "CIRCLE_SET"
+	UserID              string          `bson:"userId"`
+	Name                string          `bson:"name"`
+	RecoveryArea        string          `bson:"recoveryArea"`
+	FrameworkPreference *string         `bson:"frameworkPreference,omitempty"`
+	Status              string          `bson:"status"` // draft, active, archived
+	InnerCircle         []CircleItemDoc `bson:"innerCircle"`
+	MiddleCircle        []CircleItemDoc `bson:"middleCircle"`
+	OuterCircle         []CircleItemDoc `bson:"outerCircle"`
+	VersionNumber       int             `bson:"versionNumber"`
+	StarterPackID       *string         `bson:"starterPackId,omitempty"`
+	CommittedAt         *time.Time      `bson:"committedAt,omitempty"`
+	LastReviewedAt      *time.Time      `bson:"lastReviewedAt,omitempty"`
+	NextReviewDue       *string         `bson:"nextReviewDue,omitempty"` // ISO 8601 date
+}
+
+// CircleSetSnapshotDoc represents the snapshot field within a version document.
+type CircleSetSnapshotDoc struct {
+	InnerCircle  []CircleItemDoc `bson:"innerCircle"`
+	MiddleCircle []CircleItemDoc `bson:"middleCircle"`
+	OuterCircle  []CircleItemDoc `bson:"outerCircle"`
+}
+
+// CircleSetVersionDoc is the MongoDB document for circle set version history.
+type CircleSetVersionDoc struct {
+	BaseDocument `bson:",inline"`
+
+	VersionID     string               `bson:"versionId"`
+	EntityType    string               `bson:"entityType"` // Always "CIRCLE_SET_VERSION"
+	SetID         string               `bson:"setId"`
+	UserID        string               `bson:"userId"`
+	VersionNumber int                  `bson:"versionNumber"`
+	Snapshot      CircleSetSnapshotDoc `bson:"snapshot"`
+	ChangeNote    string               `bson:"changeNote,omitempty"`
+	ChangeType    string               `bson:"changeType"` // itemAdded, itemUpdated, itemDeleted, etc.
+	ChangedItems  []string             `bson:"changedItems,omitempty"`
+	InnerCount    int                  `bson:"innerCount"`
+	MiddleCount   int                  `bson:"middleCount"`
+	OuterCount    int                  `bson:"outerCount"`
+	ChangedAt     time.Time            `bson:"changedAt"`
+}
+
+// CircleTemplateDoc is the MongoDB document for circle templates.
+type CircleTemplateDoc struct {
+	ID                  string     `bson:"_id,omitempty"`
+	TemplateID          string     `bson:"templateId"`
+	EntityType          string     `bson:"entityType"` // Always "CIRCLE_TEMPLATE"
+	RecoveryArea        string     `bson:"recoveryArea"`
+	Circle              string     `bson:"circle"` // inner, middle, outer
+	BehaviorName        string     `bson:"behaviorName"`
+	Rationale           string     `bson:"rationale"`
+	SpecificityGuidance string     `bson:"specificityGuidance,omitempty"`
+	Category            string     `bson:"category,omitempty"`
+	FrameworkVariant    *string    `bson:"frameworkVariant,omitempty"`
+	Tags                []string   `bson:"tags,omitempty"`
+	SortOrder           int        `bson:"sortOrder"`
+	Version             int        `bson:"version"`
+	Active              bool       `bson:"active"`
+	CreatedAt           time.Time  `bson:"createdAt"`
+	UpdatedAt           time.Time  `bson:"updatedAt"`
+}
+
+// StarterPackItemDoc represents a single item in a starter pack (subdocument).
+type StarterPackItemDoc struct {
+	BehaviorName string `bson:"behaviorName"`
+	Rationale    string `bson:"rationale"`
+	Category     string `bson:"category,omitempty"`
+}
+
+// CircleStarterPackDoc is the MongoDB document for starter packs.
+type CircleStarterPackDoc struct {
+	ID                string               `bson:"_id,omitempty"`
+	PackID            string               `bson:"packId"`
+	EntityType        string               `bson:"entityType"` // Always "CIRCLE_STARTER_PACK"
+	Name              string               `bson:"name"`
+	Description       string               `bson:"description"`
+	RecoveryArea      string               `bson:"recoveryArea"`
+	Variant           string               `bson:"variant"` // secular, faith-based, lgbtq-affirming
+	InnerCircle       []StarterPackItemDoc `bson:"innerCircle"`
+	MiddleCircle      []StarterPackItemDoc `bson:"middleCircle"`
+	OuterCircle       []StarterPackItemDoc `bson:"outerCircle"`
+	ClinicalReviewer  string               `bson:"clinicalReviewer"`
+	CommunityReviewer string               `bson:"communityReviewer"`
+	Version           int                  `bson:"version"`
+	Active            bool                 `bson:"active"`
+	CreatedAt         time.Time            `bson:"createdAt"`
+	UpdatedAt         time.Time            `bson:"updatedAt"`
+}
+
+// CircleOnboardingDoc is the MongoDB document for onboarding flows.
+type CircleOnboardingDoc struct {
+	BaseDocument `bson:",inline"`
+
+	FlowID                 string                 `bson:"flowId"`
+	EntityType             string                 `bson:"entityType"` // Always "CIRCLE_ONBOARDING"
+	UserID                 string                 `bson:"userId"`
+	Mode                   string                 `bson:"mode"` // guided, starterPack, express
+	CurrentStep            string                 `bson:"currentStep"` // recoveryArea, framework, innerCircle, outerCircle, middleCircle, review
+	EmotionalCheckinScore  *int                   `bson:"emotionalCheckinScore,omitempty"` // 1-5
+	RecoveryArea           string                 `bson:"recoveryArea,omitempty"`
+	FrameworkPreference    *string                `bson:"frameworkPreference,omitempty"`
+	Progress               map[string]interface{} `bson:"progress"` // Step-specific progress data
+	DraftSetID             *string                `bson:"draftSetId,omitempty"`
+	Completed              bool                   `bson:"completed"`
+	StartedAt              time.Time              `bson:"startedAt"`
+	LastUpdatedAt          time.Time              `bson:"lastUpdatedAt"`
+	CompletedAt            *time.Time             `bson:"completedAt,omitempty"`
+}
+
+// CircleShareDoc is the MongoDB document for share links.
+type CircleShareDoc struct {
+	BaseDocument `bson:",inline"`
+
+	ShareID      string     `bson:"shareId"`
+	EntityType   string     `bson:"entityType"` // Always "CIRCLE_SHARE"
+	SetID        string     `bson:"setId"`
+	UserID       string     `bson:"userId"`
+	ShareCode    string     `bson:"shareCode"` // 8-char alphanumeric
+	ShareLink    string     `bson:"shareLink"`
+	Permissions  []string   `bson:"permissions"` // view, comment
+	ExpiresAt    *time.Time `bson:"expiresAt,omitempty"`
+	Active       bool       `bson:"active"`
+	CommentCount int        `bson:"commentCount"`
+}
+
+// CircleSponsorCommentDoc is the MongoDB document for sponsor comments.
+type CircleSponsorCommentDoc struct {
+	BaseDocument `bson:",inline"`
+
+	CommentID     string    `bson:"commentId"`
+	EntityType    string    `bson:"entityType"` // Always "CIRCLE_SPONSOR_COMMENT"
+	ShareID       string    `bson:"shareId"`
+	ShareCode     string    `bson:"shareCode"`
+	SetID         string    `bson:"setId"`
+	UserID        string    `bson:"userId"`
+	ItemID        string    `bson:"itemId"`
+	Text          string    `bson:"text"`
+	CommenterName string    `bson:"commenterName,omitempty"`
+	Read          bool      `bson:"read"`
+}
+
+// CirclePatternTimelineDoc is the MongoDB document for pattern timeline entries.
+type CirclePatternTimelineDoc struct {
+	BaseDocument `bson:",inline"`
+
+	TimelineID      string                 `bson:"timelineId"`
+	EntityType      string                 `bson:"entityType"` // Always "CIRCLE_PATTERN_TIMELINE"
+	UserID          string                 `bson:"userId"`
+	SetID           string                 `bson:"setId"`
+	Date            string                 `bson:"date"` // YYYY-MM-DD
+	Circle          string                 `bson:"circle"` // inner, middle, outer
+	CheckinDetails  map[string]interface{} `bson:"checkinDetails,omitempty"`
+}
+
+// CircleInsightDoc is the MongoDB document for pattern insights.
+type CircleInsightDoc struct {
+	BaseDocument `bson:",inline"`
+
+	InsightID        string     `bson:"insightId"`
+	EntityType       string     `bson:"entityType"` // Always "CIRCLE_INSIGHT"
+	UserID           string     `bson:"userId"`
+	SetID            string     `bson:"setId"`
+	Type             string     `bson:"type"` // dayOfWeek, time, trigger, protective, sleep, seeds
+	Description      string     `bson:"description"`
+	Confidence       string     `bson:"confidence"` // low, medium, high
+	ActionSuggestion string     `bson:"actionSuggestion"`
+	DataPoints       int        `bson:"dataPoints"`
+	Dismissed        bool       `bson:"dismissed"`
+	DismissedAt      *time.Time `bson:"dismissedAt,omitempty"`
+	DetectedAt       time.Time  `bson:"detectedAt"`
+	ExpiresAt        time.Time  `bson:"expiresAt"`
+}
+
+// CircleDriftAlertDoc is the MongoDB document for drift alerts.
+type CircleDriftAlertDoc struct {
+	BaseDocument `bson:",inline"`
+
+	AlertID          string     `bson:"alertId"`
+	EntityType       string     `bson:"entityType"` // Always "CIRCLE_DRIFT_ALERT"
+	UserID           string     `bson:"userId"`
+	SetID            string     `bson:"setId"`
+	WindowStart      string     `bson:"windowStart"` // YYYY-MM-DD
+	WindowEnd        string     `bson:"windowEnd"`   // YYYY-MM-DD
+	MiddleCircleDays int        `bson:"middleCircleDays"`
+	MiddleCircleDates []string  `bson:"middleCircleDates"`
+	Message          string     `bson:"message"`
+	Dismissed        bool       `bson:"dismissed"`
+	DismissedAt      *time.Time `bson:"dismissedAt,omitempty"`
+	ActionTaken      *string    `bson:"actionTaken,omitempty"`
+}
+
+// CircleReviewDoc is the MongoDB document for quarterly reviews.
+type CircleReviewDoc struct {
+	BaseDocument `bson:",inline"`
+
+	ReviewID       string                 `bson:"reviewId"`
+	EntityType     string                 `bson:"entityType"` // Always "CIRCLE_REVIEW"
+	UserID         string                 `bson:"userId"`
+	SetID          string                 `bson:"setId"`
+	CurrentStep    string                 `bson:"currentStep"` // innerReview, outerReview, middleReview, finalReview
+	Reflections    map[string]interface{} `bson:"reflections,omitempty"`
+	ChangesApplied []string               `bson:"changesApplied,omitempty"`
+	Completed      bool                   `bson:"completed"`
+	Summary        *string                `bson:"summary,omitempty"`
+	StartedAt      time.Time              `bson:"startedAt"`
+	CompletedAt    *time.Time             `bson:"completedAt,omitempty"`
+	NextReviewDue  *string                `bson:"nextReviewDue,omitempty"` // ISO 8601 date
+}
