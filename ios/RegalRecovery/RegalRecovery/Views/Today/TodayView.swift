@@ -426,7 +426,7 @@ struct TodayView: View {
         case "devotional":
             DevotionalView()
         case ActivityType.affirmationLog.rawValue:
-            AffirmationLogView()
+            AffirmationsHubView()
         case ActivityType.phoneCalls.rawValue:
             PhoneCallLogView()
         case ActivityType.meetingsAttended.rawValue:
