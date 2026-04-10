@@ -11,7 +11,7 @@ import SwiftUI
 /// - Tap a day to reveal check-in details via sheet callback
 /// - Current consecutive outer days shown subtly, not primary metric
 /// - Optional mood/urge overlay dots
-struct TimelineView: View {
+struct PatternTimelineView: View {
 
     let entries: [TimelineEntry]
     let showMoodOverlay: Bool
@@ -253,7 +253,7 @@ struct TimelineView: View {
 }
 
 #Preview {
-    TimelineView(
+    PatternTimelineView(
         entries: [
             TimelineEntry(date: "2026-04-01", circle: .outer, checkinDetails: .init(mood: 8, urgeIntensity: 2, notes: nil)),
             TimelineEntry(date: "2026-04-02", circle: .outer, checkinDetails: .init(mood: 7, urgeIntensity: 3, notes: nil)),

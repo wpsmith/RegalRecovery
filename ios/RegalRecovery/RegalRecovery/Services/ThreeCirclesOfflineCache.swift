@@ -304,7 +304,7 @@ final class ThreeCirclesOfflineCache: @unchecked Sendable {
 
     /// Remove a cached circle set.
     @MainActor
-    func removeCachedCircleSet(setId: String) throws {
+    func removeCachedCircleSet(setId: String) async throws {
         let context = modelContainer.mainContext
         let descriptor = FetchDescriptor<RRCachedCircleSet>(
             predicate: #Predicate { $0.setId == setId }

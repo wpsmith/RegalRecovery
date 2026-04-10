@@ -44,7 +44,7 @@ struct PatternDashboardView: View {
                 }
 
                 // MARK: - Timeline
-                TimelineView(
+                PatternTimelineView(
                     entries: viewModel.timelineData?.entries ?? [],
                     showMoodOverlay: viewModel.showMoodOverlay,
                     showUrgeOverlay: viewModel.showUrgeOverlay,
@@ -332,7 +332,7 @@ extension CircleType {
     NavigationStack {
         PatternDashboardView(
             viewModel: PatternViewModel(
-                apiClient: ThreeCirclesAPIClient(apiClient: APIClient.shared),
+                apiClient: ThreeCirclesAPIClient(apiClient: APIClient(configuration: .local)),
                 setId: "preview-set"
             )
         )

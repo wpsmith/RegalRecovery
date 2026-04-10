@@ -310,6 +310,6 @@ struct QuarterlyReviewView: View {
             modifiedAt: Date(),
             committedAt: Date()
         ),
-        apiClient: ThreeCirclesAPIClient(apiClient: APIClient.shared)
+        apiClient: ThreeCirclesAPIClient(apiClient: APIClient(configuration: .local))
     )
 }

@@ -182,6 +182,35 @@
 		10000951 /* AffirmationsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000951 /* AffirmationsAPIClient.swift */; };
 		10000952 /* AffirmationAudioSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000952 /* AffirmationAudioSessionManager.swift */; };
 		10000953 /* AffirmationOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000953 /* AffirmationOfflineCache.swift */; };
+		10001000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* ThreeCirclesTypes.swift */; };
+		10001001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* ThreeCirclesAPIClient.swift */; };
+		10001002 /* ThreeCirclesOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001002 /* ThreeCirclesOfflineCache.swift */; };
+		10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001003 /* ThreeCirclesBuilderViewModel.swift */; };
+		10001004 /* CircleSetDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001004 /* CircleSetDetailViewModel.swift */; };
+		10001005 /* PatternViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001005 /* PatternViewModel.swift */; };
+		10001006 /* CircleSetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001006 /* CircleSetListView.swift */; };
+		10001007 /* CircleSetDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001007 /* CircleSetDetailView.swift */; };
+		10001008 /* CircleVisualizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001008 /* CircleVisualizationView.swift */; };
+		10001009 /* CircleItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001009 /* CircleItemDetailView.swift */; };
+		10001010 /* AddCircleItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001010 /* AddCircleItemView.swift */; };
+		10001011 /* VersionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001011 /* VersionHistoryView.swift */; };
+		10001012 /* SponsorReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001012 /* SponsorReviewView.swift */; };
+		10001013 /* CrisisSupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001013 /* CrisisSupportView.swift */; };
+		10001014 /* ThreeCirclesBuilderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001014 /* ThreeCirclesBuilderView.swift */; };
+		10001015 /* EmotionalCheckinView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001015 /* EmotionalCheckinView.swift */; };
+		10001016 /* ModeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001016 /* ModeSelectionView.swift */; };
+		10001017 /* RecoveryAreaSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001017 /* RecoveryAreaSelectionView.swift */; };
+		10001018 /* FrameworkSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001018 /* FrameworkSelectionView.swift */; };
+		10001019 /* CircleBuildingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001019 /* CircleBuildingView.swift */; };
+		10001020 /* StarterPackSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001020 /* StarterPackSelectionView.swift */; };
+		10001021 /* ReviewCommitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001021 /* ReviewCommitView.swift */; };
+		10001022 /* PatternDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001022 /* PatternDashboardView.swift */; };
+		10001023 /* TimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001023 /* TimelineView.swift */; };
+		10001024 /* InsightCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001024 /* InsightCardView.swift */; };
+		10001025 /* DriftAlertBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001025 /* DriftAlertBannerView.swift */; };
+		10001026 /* SummaryShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001026 /* SummaryShareView.swift */; };
+		10001027 /* QuarterlyReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001027 /* QuarterlyReviewView.swift */; };
+		10001028 /* ReviewReflectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001028 /* ReviewReflectionView.swift */; };
 
 		10000701 /* FocusStatusMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000701 /* FocusStatusMonitor.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
@@ -270,6 +299,35 @@
 		20000952 /* AffirmationAudioSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationAudioSessionManager.swift; sourceTree = "<group>"; };
 		20000953 /* AffirmationOfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationOfflineCache.swift; sourceTree = "<group>"; };
 		20000954 /* AffirmationNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationNavigationTests.swift; sourceTree = "<group>"; };
+		20001000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
+		20001001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
+		20001002 /* ThreeCirclesOfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesOfflineCache.swift; sourceTree = "<group>"; };
+		20001003 /* ThreeCirclesBuilderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesBuilderViewModel.swift; sourceTree = "<group>"; };
+		20001004 /* CircleSetDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleSetDetailViewModel.swift; sourceTree = "<group>"; };
+		20001005 /* PatternViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternViewModel.swift; sourceTree = "<group>"; };
+		20001006 /* CircleSetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleSetListView.swift; sourceTree = "<group>"; };
+		20001007 /* CircleSetDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleSetDetailView.swift; sourceTree = "<group>"; };
+		20001008 /* CircleVisualizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleVisualizationView.swift; sourceTree = "<group>"; };
+		20001009 /* CircleItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleItemDetailView.swift; sourceTree = "<group>"; };
+		20001010 /* AddCircleItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddCircleItemView.swift; sourceTree = "<group>"; };
+		20001011 /* VersionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionHistoryView.swift; sourceTree = "<group>"; };
+		20001012 /* SponsorReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SponsorReviewView.swift; sourceTree = "<group>"; };
+		20001013 /* CrisisSupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrisisSupportView.swift; sourceTree = "<group>"; };
+		20001014 /* ThreeCirclesBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesBuilderView.swift; sourceTree = "<group>"; };
+		20001015 /* EmotionalCheckinView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalCheckinView.swift; sourceTree = "<group>"; };
+		20001016 /* ModeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeSelectionView.swift; sourceTree = "<group>"; };
+		20001017 /* RecoveryAreaSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryAreaSelectionView.swift; sourceTree = "<group>"; };
+		20001018 /* FrameworkSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameworkSelectionView.swift; sourceTree = "<group>"; };
+		20001019 /* CircleBuildingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleBuildingView.swift; sourceTree = "<group>"; };
+		20001020 /* StarterPackSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterPackSelectionView.swift; sourceTree = "<group>"; };
+		20001021 /* ReviewCommitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewCommitView.swift; sourceTree = "<group>"; };
+		20001022 /* PatternDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternDashboardView.swift; sourceTree = "<group>"; };
+		20001023 /* TimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineView.swift; sourceTree = "<group>"; };
+		20001024 /* InsightCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightCardView.swift; sourceTree = "<group>"; };
+		20001025 /* DriftAlertBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftAlertBannerView.swift; sourceTree = "<group>"; };
+		20001026 /* SummaryShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryShareView.swift; sourceTree = "<group>"; };
+		20001027 /* QuarterlyReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuarterlyReviewView.swift; sourceTree = "<group>"; };
+		20001028 /* ReviewReflectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewReflectionView.swift; sourceTree = "<group>"; };
 		20000701 /* FocusStatusMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStatusMonitor.swift; sourceTree = "<group>"; };
 		20000702 /* JournalEntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntryDetailView.swift; sourceTree = "<group>"; };
 		20000703 /* JournalHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalHistoryView.swift; sourceTree = "<group>"; };
@@ -450,6 +508,7 @@
 				20000950 /* AffirmationTypes.swift */,
 				20000900 /* GratitudeTypes.swift */,
 				20000006 /* MockData.swift */,
+				20001000 /* ThreeCirclesTypes.swift */,
 				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
 			);
@@ -501,6 +560,8 @@
 				20000951 /* AffirmationsAPIClient.swift */,
 				20000952 /* AffirmationAudioSessionManager.swift */,
 				20000953 /* AffirmationOfflineCache.swift */,
+				20001001 /* ThreeCirclesAPIClient.swift */,
+				20001002 /* ThreeCirclesOfflineCache.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -578,8 +639,19 @@
 				20000306 /* TodayViewModel.swift */,
 				20000307 /* DailyScoreCalculator.swift */,
 				20000600 /* TimeJournalEntryViewModel.swift */,
+				50001000 /* ThreeCircles */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		50001000 /* ThreeCircles */ = {
+			isa = PBXGroup;
+			children = (
+				20001003 /* ThreeCirclesBuilderViewModel.swift */,
+				20001004 /* CircleSetDetailViewModel.swift */,
+				20001005 /* PatternViewModel.swift */,
+			);
+			path = ThreeCircles;
 			sourceTree = "<group>";
 		};
 		50000040 /* Views */ = {
@@ -769,10 +841,65 @@
 				20000105 /* FASTERScaleToolView.swift */,
 				20000106 /* MeetingFinderView.swift */,
 				20000107 /* PanicButtonView.swift */,
+				50001001 /* ThreeCircles */,
 				20000108 /* ThreeCirclesView.swift */,
 				20000109 /* ToolsView.swift */,
 			);
 			path = Tools;
+			sourceTree = "<group>";
+		};
+		50001001 /* ThreeCircles */ = {
+			isa = PBXGroup;
+			children = (
+				20001006 /* CircleSetListView.swift */,
+				20001007 /* CircleSetDetailView.swift */,
+				20001008 /* CircleVisualizationView.swift */,
+				20001009 /* CircleItemDetailView.swift */,
+				20001010 /* AddCircleItemView.swift */,
+				20001011 /* VersionHistoryView.swift */,
+				20001012 /* SponsorReviewView.swift */,
+				20001013 /* CrisisSupportView.swift */,
+				50001002 /* Builder */,
+				50001003 /* Pattern */,
+				50001004 /* Review */,
+			);
+			path = ThreeCircles;
+			sourceTree = "<group>";
+		};
+		50001002 /* Builder */ = {
+			isa = PBXGroup;
+			children = (
+				20001014 /* ThreeCirclesBuilderView.swift */,
+				20001015 /* EmotionalCheckinView.swift */,
+				20001016 /* ModeSelectionView.swift */,
+				20001017 /* RecoveryAreaSelectionView.swift */,
+				20001018 /* FrameworkSelectionView.swift */,
+				20001019 /* CircleBuildingView.swift */,
+				20001020 /* StarterPackSelectionView.swift */,
+				20001021 /* ReviewCommitView.swift */,
+			);
+			path = Builder;
+			sourceTree = "<group>";
+		};
+		50001003 /* Pattern */ = {
+			isa = PBXGroup;
+			children = (
+				20001022 /* PatternDashboardView.swift */,
+				20001023 /* TimelineView.swift */,
+				20001024 /* InsightCardView.swift */,
+				20001025 /* DriftAlertBannerView.swift */,
+				20001026 /* SummaryShareView.swift */,
+			);
+			path = Pattern;
+			sourceTree = "<group>";
+		};
+		50001004 /* Review */ = {
+			isa = PBXGroup;
+			children = (
+				20001027 /* QuarterlyReviewView.swift */,
+				20001028 /* ReviewReflectionView.swift */,
+			);
+			path = Review;
 			sourceTree = "<group>";
 		};
 		50000060 /* Tests */ = {
@@ -1049,6 +1176,35 @@
 				10000951 /* AffirmationsAPIClient.swift in Sources */,
 				10000952 /* AffirmationAudioSessionManager.swift in Sources */,
 				10000953 /* AffirmationOfflineCache.swift in Sources */,
+				10001000 /* ThreeCirclesTypes.swift in Sources */,
+				10001001 /* ThreeCirclesAPIClient.swift in Sources */,
+				10001002 /* ThreeCirclesOfflineCache.swift in Sources */,
+				10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */,
+				10001004 /* CircleSetDetailViewModel.swift in Sources */,
+				10001005 /* PatternViewModel.swift in Sources */,
+				10001006 /* CircleSetListView.swift in Sources */,
+				10001007 /* CircleSetDetailView.swift in Sources */,
+				10001008 /* CircleVisualizationView.swift in Sources */,
+				10001009 /* CircleItemDetailView.swift in Sources */,
+				10001010 /* AddCircleItemView.swift in Sources */,
+				10001011 /* VersionHistoryView.swift in Sources */,
+				10001012 /* SponsorReviewView.swift in Sources */,
+				10001013 /* CrisisSupportView.swift in Sources */,
+				10001014 /* ThreeCirclesBuilderView.swift in Sources */,
+				10001015 /* EmotionalCheckinView.swift in Sources */,
+				10001016 /* ModeSelectionView.swift in Sources */,
+				10001017 /* RecoveryAreaSelectionView.swift in Sources */,
+				10001018 /* FrameworkSelectionView.swift in Sources */,
+				10001019 /* CircleBuildingView.swift in Sources */,
+				10001020 /* StarterPackSelectionView.swift in Sources */,
+				10001021 /* ReviewCommitView.swift in Sources */,
+				10001022 /* PatternDashboardView.swift in Sources */,
+				10001023 /* TimelineView.swift in Sources */,
+				10001024 /* InsightCardView.swift in Sources */,
+				10001025 /* DriftAlertBannerView.swift in Sources */,
+				10001026 /* SummaryShareView.swift in Sources */,
+				10001027 /* QuarterlyReviewView.swift in Sources */,
+				10001028 /* ReviewReflectionView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

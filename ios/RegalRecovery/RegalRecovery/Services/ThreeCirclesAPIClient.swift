@@ -309,7 +309,7 @@ final class ThreeCirclesAPIClient: Sendable {
     /// Start an onboarding flow.
     func startOnboarding(
         request: StartOnboardingRequest? = nil
-    ) async throws -> ThreeCirclesDataResponse<OnboardingFlow> {
+    ) async throws -> ThreeCirclesDataResponse<TCOnboardingFlow> {
         let endpoint = ThreeCirclesEndpoint.startOnboarding(request: request)
         return try await performRequest(endpoint)
     }
@@ -319,7 +319,7 @@ final class ThreeCirclesAPIClient: Sendable {
     func updateOnboarding(
         flowId: String,
         request: UpdateOnboardingRequest
-    ) async throws -> ThreeCirclesDataResponse<OnboardingFlow> {
+    ) async throws -> ThreeCirclesDataResponse<TCOnboardingFlow> {
         let endpoint = ThreeCirclesEndpoint.updateOnboarding(flowId: flowId, request: request)
         return try await performRequest(endpoint)
     }

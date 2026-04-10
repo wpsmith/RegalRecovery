@@ -156,7 +156,7 @@ enum OnboardingMode: String, Codable, Sendable, CaseIterable {
 // MARK: - Onboarding Step
 
 /// Steps in the onboarding flow.
-enum OnboardingStep: String, Codable, Sendable, CaseIterable {
+enum TCOnboardingStep: String, Codable, Sendable, CaseIterable {
     case recoveryArea
     case framework
     case innerCircle
@@ -387,11 +387,11 @@ struct StarterPackItem: Codable, Sendable {
 }
 
 /// Onboarding flow state for first-time circle creation.
-struct OnboardingFlow: Codable, Sendable, Identifiable {
+struct TCOnboardingFlow: Codable, Sendable, Identifiable {
     let flowId: String
     let userId: String?
     let mode: OnboardingMode
-    let currentStep: OnboardingStep?
+    let currentStep: TCOnboardingStep?
     let recoveryArea: RecoveryArea?
     let frameworkPreference: FrameworkPreference?
     let emotionalCheckinScore: Int?
@@ -738,14 +738,14 @@ struct StartOnboardingRequest: Codable, Sendable {
 
 /// Request body for updating onboarding progress (PATCH).
 struct UpdateOnboardingRequest: Codable, Sendable {
-    let currentStep: OnboardingStep?
+    let currentStep: TCOnboardingStep?
     let recoveryArea: RecoveryArea?
     let frameworkPreference: FrameworkPreference?
     let progress: [String: AnyCodable]?
     let mode: OnboardingMode?
 
     init(
-        currentStep: OnboardingStep? = nil,
+        currentStep: TCOnboardingStep? = nil,
         recoveryArea: RecoveryArea? = nil,
         frameworkPreference: FrameworkPreference? = nil,
         progress: [String: AnyCodable]? = nil,
