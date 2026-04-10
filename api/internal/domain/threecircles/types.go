@@ -396,3 +396,95 @@ type VersionHistoryResponse struct {
 	Meta  map[string]interface{} `json:"meta,omitempty"`
 	Links map[string]string      `json:"links,omitempty"`
 }
+
+// ── Sponsor Review (Sharing) Types ──
+
+// CircleSetShare represents a shared circle set for sponsor/mentor review.
+type CircleSetShare struct {
+	ShareID    string     `json:"shareId"`
+	SetID      string     `json:"setId"`
+	UserID     string     `json:"userId"`
+	ShareCode  string     `json:"shareCode"` // 8-char alphanumeric code
+	ExpiresAt  time.Time  `json:"expiresAt"` // 7 days from creation
+	CreatedAt  time.Time  `json:"createdAt"`
+	AccessedAt *time.Time `json:"accessedAt,omitempty"` // First access timestamp
+}
+
+// ShareComment represents a comment on a shared circle set.
+type ShareComment struct {
+	CommentID     string    `json:"commentId"`
+	ShareID       string    `json:"shareId"`
+	SetID         string    `json:"setId"`
+	CommenterName string    `json:"commenterName"` // Can be anonymous (sponsor/mentor name)
+	CommentText   string    `json:"commentText"`
+	IsOwner       bool      `json:"isOwner"` // True if comment is from set owner
+	CreatedAt     time.Time `json:"createdAt"`
+}
+
+// CreateShareRequest represents a request to create a share link.
+type CreateShareRequest struct {
+	ExpiresInHours int `json:"expiresInHours"` // Default: 168 (7 days), max: 336 (14 days)
+}
+
+// AddCommentRequest represents a request to add a comment to a shared set.
+type AddCommentRequest struct {
+	CommenterName string `json:"commenterName"` // Required: sponsor/mentor name
+	CommentText   string `json:"commentText"`   // Required: comment content
+}
+
+// ── Scheduled Review Types ──
+
+// ReviewStatus represents the status of a scheduled review.
+type ReviewStatus string
+
+const (
+	ReviewStatusPending   ReviewStatus = "pending"
+	ReviewStatusActive    ReviewStatus = "active"
+	ReviewStatusCompleted ReviewStatus = "completed"
+	ReviewStatusCancelled ReviewStatus = "cancelled"
+)
+
+// IsValid returns true if the review status is recognized.
+func (rs ReviewStatus) IsValid() bool {
+	switch rs {
+	case ReviewStatusPending, ReviewStatusActive, ReviewStatusCompleted, ReviewStatusCancelled:
+		return true
+	default:
+		return false
+	}
+}
+
+// ScheduledReview represents a scheduled review of a circle set.
+type ScheduledReview struct {
+	ReviewID          string       `json:"reviewId"`
+	UserID            string       `json:"userId"`
+	TenantID          string       `json:"tenantId"`
+	SetID             string       `json:"setId"`
+	Status            ReviewStatus `json:"status"`
+	ScheduledFor      time.Time    `json:"scheduledFor"` // When the review is due
+	StartedAt         *time.Time   `json:"startedAt,omitempty"`
+	CompletedAt       *time.Time   `json:"completedAt,omitempty"`
+	Changes           []string     `json:"changes,omitempty"`           // Summary of changes made
+	ReflectionNotes   string       `json:"reflectionNotes,omitempty"`   // User's reflection
+	ChangesApplied    bool         `json:"changesApplied"`              // Whether changes were applied
+	SnapshotVersionID string       `json:"snapshotVersionId,omitempty"` // Snapshot taken at review start
+	CreatedAt         time.Time    `json:"createdAt"`
+	ModifiedAt        time.Time    `json:"modifiedAt"`
+}
+
+// StartReviewRequest represents a request to start a scheduled review.
+type StartReviewRequest struct {
+	ScheduledFor time.Time `json:"scheduledFor"` // When to schedule the review
+}
+
+// UpdateReviewRequest represents a request to update a review in progress.
+type UpdateReviewRequest struct {
+	ReflectionNotes string   `json:"reflectionNotes,omitempty"`
+	Changes         []string `json:"changes,omitempty"`
+}
+
+// CompleteReviewRequest represents a request to complete a review.
+type CompleteReviewRequest struct {
+	ReflectionNotes string `json:"reflectionNotes,omitempty"`
+	ChangesApplied  bool   `json:"changesApplied"`
+}
