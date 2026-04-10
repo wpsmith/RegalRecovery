@@ -93,8 +93,10 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 
 // HandleCreateMorningSession handles POST /activities/affirmations/sessions/morning.
 func (h *Handler) HandleCreateMorningSession(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r.Context())
-	_ = middleware.GetTenantID(r.Context()) // tenantID for future use
+	ctx := r.Context()
+	userID := middleware.GetUserID(ctx)
+	tenantID := middleware.GetTenantID(ctx)
+	correlationID := middleware.GetCorrelationID(ctx)
 	if userID == "" {
 		writeError(w, http.StatusUnauthorized, "rr:0x40010001", "Authentication required")
 		return
@@ -106,23 +108,165 @@ func (h *Handler) HandleCreateMorningSession(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// TODO: Call domain logic to create morning session
-	// This would involve:
-	// 1. Get user settings and progress
-	// 2. Determine level
-	// 3. Select 3 affirmations using ContentSelector
-	// 4. Create session record
-	// 5. Update progress
-	// 6. Write calendar activity
-	// 7. Publish event
+	now := time.Now().UTC()
 
-	writeError(w, http.StatusNotImplemented, "rr:0x50010001", "Not yet implemented")
+	// 1. Get settings (defaults if not found)
+	track := TrackStandard
+	healthySexualityEnabled := false
+	var manualOverride *Level
+	settings, err := h.repo.GetSettings(ctx, userID)
+	if err == nil {
+		track = Track(settings.Track)
+		healthySexualityEnabled = settings.HealthySexualityEnabled
+		if settings.LevelOverride != nil {
+			lvl := Level(*settings.LevelOverride)
+			manualOverride = &lvl
+		}
+	}
+
+	// 2. Get progress for recent affirmation IDs
+	sobrietyDays := 30
+	daysAtCurrentLevel := 0
+	var recentIDs []string
+	progress, err := h.repo.GetProgress(ctx, userID)
+	if err == nil {
+		daysAtCurrentLevel = progress.DaysAtCurrentLevel
+		recentIDs = progress.LastServedAffirmationIds
+		if progress.CurrentLevel > 0 {
+			sobrietyDays = progress.DaysAtCurrentLevel
+		}
+	}
+
+	// 3. Get favorites and hidden lists
+	var favoriteIDs []string
+	favDocs, err := h.repo.ListFavorites(ctx, userID)
+	if err == nil {
+		for _, f := range favDocs {
+			favoriteIDs = append(favoriteIDs, f.AffirmationID)
+		}
+	}
+
+	var hiddenIDs []string
+	hiddenDocs, err := h.repo.ListHidden(ctx, userID)
+	if err == nil {
+		for _, hDoc := range hiddenDocs {
+			hiddenIDs = append(hiddenIDs, hDoc.AffirmationID)
+		}
+	}
+
+	// 4. Determine level
+	levelResult := NewLevelEngine().DetermineLevel(sobrietyDays, nil, now, manualOverride, daysAtCurrentLevel)
+	level := levelResult.DeterminedLevel
+
+	// 5. Load library affirmations
+	libraryDocs, err := h.repo.GetLibraryAffirmations(ctx, int(level), "", string(track), true, 200)
+	if err != nil || len(libraryDocs) == 0 {
+		// Fallback to level 0
+		libraryDocs, err = h.repo.GetLibraryAffirmations(ctx, 0, "", string(track), true, 200)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+	}
+
+	// 6. Convert library docs to domain Affirmation slice
+	pool := make([]Affirmation, 0, len(libraryDocs))
+	for _, doc := range libraryDocs {
+		pool = append(pool, Affirmation{
+			ID:       doc.AffirmationID,
+			Text:     doc.Text,
+			Level:    Level(doc.Level),
+			Category: Category(doc.Category),
+			Track:    Track(doc.Track),
+		})
+	}
+
+	// 7. Build session context and select content
+	sessionCtx := SessionContext{
+		UserID:                userID,
+		SobrietyDays:          sobrietyDays,
+		CurrentTime:           now,
+		Track:                 track,
+		ManualLevelOverride:   manualOverride,
+		HealthySexualityOptIn: healthySexualityEnabled,
+		FavoriteIDs:           favoriteIDs,
+		HiddenIDs:             hiddenIDs,
+		RecentAffirmationIDs:  recentIDs,
+		SessionType:           SessionTypeMorning,
+	}
+
+	selectionResult, err := NewContentSelector().SelectContent(pool, sessionCtx, 3)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+
+	// 8. Create session
+	sessionID := generateID()
+	affIDs := make([]string, 0, len(selectionResult.Affirmations))
+	for _, a := range selectionResult.Affirmations {
+		affIDs = append(affIDs, a.ID)
+	}
+
+	var intention *string
+	if req.Intention != "" {
+		intention = &req.Intention
+	}
+
+	session := &repository.AffirmationSessionDoc{
+		SessionID:      sessionID,
+		UserID:         userID,
+		SessionType:    "morning",
+		AffirmationIDs: affIDs,
+		LevelServed:    int(level),
+		Intention:      intention,
+		CompletedAt:    now,
+		Skipped:        req.Skipped,
+	}
+	session.TenantID = tenantID
+
+	if err := h.repo.CreateSession(ctx, session); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+
+	// 9. Update progress (only if not skipped)
+	if !req.Skipped {
+		_ = h.repo.IncrementSessionCount(ctx, userID, "morning")
+		_ = h.repo.IncrementAffirmationCount(ctx, userID, len(affIDs))
+		_ = h.repo.UpdateLastServedAffirmations(ctx, userID, affIDs, now)
+	}
+
+	// 10. Publish event
+	if h.events != nil {
+		evt := events.NewSessionCompletedEvent(userID, tenantID, correlationID, "morning", sessionID)
+		_ = h.events.Publish(ctx, evt)
+	}
+
+	// 11. Return 201
+	w.Header().Set("Location", fmt.Sprintf("/activities/affirmations/sessions/%s", sessionID))
+	writeJSON(w, http.StatusCreated, map[string]interface{}{
+		"data": map[string]interface{}{
+			"sessionId":    sessionID,
+			"sessionType":  "morning",
+			"affirmations": selectionResult.Affirmations,
+			"levelServed":  int(level),
+			"intention":    req.Intention,
+			"skipped":      req.Skipped,
+			"completedAt":  now,
+		},
+		"meta": map[string]interface{}{
+			"created": true,
+		},
+	})
 }
 
 // HandleCreateEveningSession handles POST /activities/affirmations/sessions/evening.
 func (h *Handler) HandleCreateEveningSession(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r.Context())
-	_ = middleware.GetTenantID(r.Context()) // tenantID for future use
+	ctx := r.Context()
+	userID := middleware.GetUserID(ctx)
+	tenantID := middleware.GetTenantID(ctx)
+	correlationID := middleware.GetCorrelationID(ctx)
 	if userID == "" {
 		writeError(w, http.StatusUnauthorized, "rr:0x40010001", "Authentication required")
 		return
@@ -134,31 +278,261 @@ func (h *Handler) HandleCreateEveningSession(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// TODO: Call domain logic to create evening session
-	// Similar to morning session but with 1 affirmation and evening-specific fields
+	// Validate day rating
+	if req.DayRating < 1 || req.DayRating > 5 {
+		writeError(w, http.StatusBadRequest, "rr:0x000A0002", "Day rating must be between 1 and 5")
+		return
+	}
 
-	writeError(w, http.StatusNotImplemented, "rr:0x50010001", "Not yet implemented")
+	now := time.Now().UTC()
+
+	// 1. Get morning intention for today
+	var morningIntention *string
+	morningSession, err := h.repo.GetMorningSessionForDate(ctx, userID, now.Format("2006-01-02"))
+	if err == nil && morningSession.Intention != nil {
+		morningIntention = morningSession.Intention
+	}
+
+	// 2. Get settings for track
+	track := TrackStandard
+	settings, err := h.repo.GetSettings(ctx, userID)
+	if err == nil {
+		track = Track(settings.Track)
+	}
+
+	// 3. Load library affirmations
+	sobrietyDays := 30
+	var manualOverride *Level
+	daysAtCurrentLevel := 0
+	progress, err := h.repo.GetProgress(ctx, userID)
+	if err == nil {
+		daysAtCurrentLevel = progress.DaysAtCurrentLevel
+	}
+	if settings != nil && settings.LevelOverride != nil {
+		lvl := Level(*settings.LevelOverride)
+		manualOverride = &lvl
+	}
+
+	levelResult := NewLevelEngine().DetermineLevel(sobrietyDays, nil, now, manualOverride, daysAtCurrentLevel)
+	level := levelResult.DeterminedLevel
+
+	libraryDocs, err := h.repo.GetLibraryAffirmations(ctx, int(level), "", string(track), true, 200)
+	if err != nil || len(libraryDocs) == 0 {
+		libraryDocs, err = h.repo.GetLibraryAffirmations(ctx, 0, "", string(track), true, 200)
+		if err != nil {
+			writeServiceError(w, err)
+			return
+		}
+	}
+
+	// 4. Convert to domain slice
+	pool := make([]Affirmation, 0, len(libraryDocs))
+	for _, doc := range libraryDocs {
+		pool = append(pool, Affirmation{
+			ID:       doc.AffirmationID,
+			Text:     doc.Text,
+			Level:    Level(doc.Level),
+			Category: Category(doc.Category),
+			Track:    Track(doc.Track),
+		})
+	}
+
+	// 5. Select 1 affirmation
+	sessionCtx := SessionContext{
+		UserID:       userID,
+		SobrietyDays: sobrietyDays,
+		CurrentTime:  now,
+		Track:        track,
+		SessionType:  SessionTypeEvening,
+	}
+
+	selectionResult, err := NewContentSelector().SelectContent(pool, sessionCtx, 1)
+	if err != nil {
+		writeServiceError(w, err)
+		return
+	}
+
+	// 6. Create session
+	sessionID := generateID()
+	affIDs := make([]string, 0, len(selectionResult.Affirmations))
+	for _, a := range selectionResult.Affirmations {
+		affIDs = append(affIDs, a.ID)
+	}
+
+	var reflection *string
+	if req.Reflection != "" {
+		reflection = &req.Reflection
+	}
+
+	session := &repository.AffirmationSessionDoc{
+		SessionID:        sessionID,
+		UserID:           userID,
+		SessionType:      "evening",
+		AffirmationIDs:   affIDs,
+		LevelServed:      int(level),
+		DayRating:        &req.DayRating,
+		Reflection:       reflection,
+		MorningIntention: morningIntention,
+		CompletedAt:      now,
+		Skipped:          false,
+	}
+	session.TenantID = tenantID
+
+	if err := h.repo.CreateSession(ctx, session); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+
+	// 7. Update progress
+	_ = h.repo.IncrementSessionCount(ctx, userID, "evening")
+	_ = h.repo.IncrementAffirmationCount(ctx, userID, len(affIDs))
+
+	// 8. Publish event
+	if h.events != nil {
+		evt := events.NewSessionCompletedEvent(userID, tenantID, correlationID, "evening", sessionID)
+		_ = h.events.Publish(ctx, evt)
+	}
+
+	// 9. Return 201
+	w.Header().Set("Location", fmt.Sprintf("/activities/affirmations/sessions/%s", sessionID))
+	writeJSON(w, http.StatusCreated, map[string]interface{}{
+		"data": map[string]interface{}{
+			"sessionId":        sessionID,
+			"sessionType":      "evening",
+			"affirmations":     selectionResult.Affirmations,
+			"levelServed":      int(level),
+			"dayRating":        req.DayRating,
+			"reflection":       req.Reflection,
+			"morningIntention": morningIntention,
+			"completedAt":      now,
+		},
+		"meta": map[string]interface{}{
+			"created": true,
+		},
+	})
 }
 
 // HandleStartSOSSession handles POST /activities/affirmations/sos.
 func (h *Handler) HandleStartSOSSession(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r.Context())
-	_ = middleware.GetTenantID(r.Context()) // tenantID for future use
+	ctx := r.Context()
+	userID := middleware.GetUserID(ctx)
+	tenantID := middleware.GetTenantID(ctx)
+	correlationID := middleware.GetCorrelationID(ctx)
 	if userID == "" {
 		writeError(w, http.StatusUnauthorized, "rr:0x40010001", "Authentication required")
 		return
 	}
 
+	// SOS can be bodyless - decode gracefully
 	var req CreateSOSSessionRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, http.StatusBadRequest, "rr:0x000A000A", "Invalid request body: "+err.Error())
+	_ = json.NewDecoder(r.Body).Decode(&req)
+
+	now := time.Now().UTC()
+
+	// 1. Publish SOS activated event immediately
+	if h.events != nil {
+		evt := events.NewSOSActivatedEvent(userID, tenantID, correlationID)
+		_ = h.events.Publish(ctx, evt)
+	}
+
+	// 2. Get settings for track
+	track := TrackStandard
+	settings, err := h.repo.GetSettings(ctx, userID)
+	if err == nil {
+		track = Track(settings.Track)
+	}
+
+	// 3. Load SOS pool: level 1 + level 2, category "sosCrisis"
+	level1Docs, _ := h.repo.GetLibraryAffirmations(ctx, 1, string(CategorySOSCrisis), string(track), true, 100)
+	level2Docs, _ := h.repo.GetLibraryAffirmations(ctx, 2, string(CategorySOSCrisis), string(track), true, 100)
+
+	allDocs := append(level1Docs, level2Docs...)
+
+	pool := make([]Affirmation, 0, len(allDocs))
+	for _, doc := range allDocs {
+		pool = append(pool, Affirmation{
+			ID:       doc.AffirmationID,
+			Text:     doc.Text,
+			Level:    Level(doc.Level),
+			Category: Category(doc.Category),
+			Track:    Track(doc.Track),
+		})
+	}
+
+	// 4. Select 3 affirmations
+	sessionCtx := SessionContext{
+		UserID:       userID,
+		SobrietyDays: 0,
+		CurrentTime:  now,
+		Track:        track,
+		SessionType:  SessionTypeSOS,
+	}
+
+	selectionResult, err := NewContentSelector().SelectContent(pool, sessionCtx, 3)
+	if err != nil {
+		writeServiceError(w, err)
 		return
 	}
 
-	// TODO: Call domain logic to create SOS session
-	// Must restrict to Level 1-2 only
+	// 5. Validate via NewSOSSession (ensures Level <= 2)
+	sosSession, err := NewSOSSession(selectionResult.Affirmations)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "rr:0x000A0002", err.Error())
+		return
+	}
 
-	writeError(w, http.StatusNotImplemented, "rr:0x50010001", "Not yet implemented")
+	// 6. Create session
+	sessionID := generateID()
+	affIDs := make([]string, 0, len(selectionResult.Affirmations))
+	for _, a := range selectionResult.Affirmations {
+		affIDs = append(affIDs, a.ID)
+	}
+
+	session := &repository.AffirmationSessionDoc{
+		SessionID:          sessionID,
+		UserID:             userID,
+		SessionType:        "sos",
+		AffirmationIDs:     affIDs,
+		LevelServed:        1,
+		BreathingCompleted: &req.BreathingCompleted,
+		ReachedOut:         &req.ReachedOut,
+		PostCheckInRating:  req.PostCheckInRating,
+		CompletedAt:        now,
+		Skipped:            false,
+	}
+	session.TenantID = tenantID
+
+	if err := h.repo.CreateSession(ctx, session); err != nil {
+		writeServiceError(w, err)
+		return
+	}
+
+	// 7. Update progress
+	_ = h.repo.IncrementSessionCount(ctx, userID, "sos")
+	_ = h.repo.IncrementAffirmationCount(ctx, userID, len(affIDs))
+
+	// 8. Publish SOS completed event
+	if h.events != nil {
+		evt := events.NewSOSCompletedEvent(userID, tenantID, correlationID, sessionID)
+		_ = h.events.Publish(ctx, evt)
+	}
+
+	// 9. Return 201
+	w.Header().Set("Location", fmt.Sprintf("/activities/affirmations/sessions/%s", sessionID))
+	writeJSON(w, http.StatusCreated, map[string]interface{}{
+		"data": map[string]interface{}{
+			"sessionId":         sessionID,
+			"sessionType":       "sos",
+			"affirmations":      selectionResult.Affirmations,
+			"levelServed":       1,
+			"breathingExercise": sosSession.BreathingExercise,
+			"reachOutAction":    sosSession.OffersAccountabilityPartnerReachOut,
+			"completedAt":       now,
+		},
+		"meta": map[string]interface{}{
+			"created": true,
+		},
+	})
 }
 
 // HandleListSessions handles GET /activities/affirmations/sessions.
@@ -1069,16 +1443,58 @@ func (h *Handler) HandleUpdateSettings(w http.ResponseWriter, r *http.Request) {
 
 // HandleGetLevel handles GET /activities/affirmations/level.
 func (h *Handler) HandleGetLevel(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r.Context())
+	ctx := r.Context()
+	userID := middleware.GetUserID(ctx)
 	if userID == "" {
 		writeError(w, http.StatusUnauthorized, "rr:0x40010001", "Authentication required")
 		return
 	}
 
-	// TODO: Get user sobriety data and settings to determine level
-	// This would call LevelEngine to compute the current level
+	now := time.Now().UTC()
 
-	writeError(w, http.StatusNotImplemented, "rr:0x50010001", "Not yet implemented")
+	// 1. Get progress
+	sobrietyDays := 30
+	daysAtCurrentLevel := 0
+	var levelHistory []map[string]interface{}
+
+	progress, err := h.repo.GetProgress(ctx, userID)
+	if err == nil {
+		daysAtCurrentLevel = progress.DaysAtCurrentLevel
+		// Build level history array
+		levelHistory = make([]map[string]interface{}, 0, len(progress.LevelHistory))
+		for _, entry := range progress.LevelHistory {
+			histEntry := map[string]interface{}{
+				"level":     entry.Level,
+				"startedAt": entry.StartedAt,
+			}
+			if entry.EndedAt != nil {
+				histEntry["endedAt"] = entry.EndedAt
+			}
+			levelHistory = append(levelHistory, histEntry)
+		}
+	}
+
+	// 2. Get settings for level override
+	var manualOverride *Level
+	settings, err := h.repo.GetSettings(ctx, userID)
+	if err == nil && settings.LevelOverride != nil {
+		lvl := Level(*settings.LevelOverride)
+		manualOverride = &lvl
+	}
+
+	// 3. Run level engine
+	levelResult := NewLevelEngine().DetermineLevel(sobrietyDays, nil, now, manualOverride, daysAtCurrentLevel)
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"data": map[string]interface{}{
+			"currentLevel":       int(levelResult.DeterminedLevel),
+			"levelName":          levelResult.DeterminedLevel.String(),
+			"reason":             levelResult.Reason,
+			"isLocked":           levelResult.IsLocked,
+			"daysAtCurrentLevel": daysAtCurrentLevel,
+			"levelHistory":       levelHistory,
+		},
+	})
 }
 
 // --- Request/Response types ---
