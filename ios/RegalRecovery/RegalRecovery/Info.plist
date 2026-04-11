@@ -18,6 +18,14 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Regal Recovery uses Face ID to protect your recovery data so only you can access your journal, logs, and personal information.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Regal Recovery accesses your contacts to help you quickly add your sponsor, counselor, and accountability partners to your support network.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Regal Recovery uses your location to find SA and Celebrate Recovery meetings near you and to provide context in your time journal.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Regal Recovery uses the camera to let you capture photos for your gratitude journal and recovery milestones.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

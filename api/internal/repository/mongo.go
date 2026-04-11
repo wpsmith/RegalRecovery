@@ -104,9 +104,6 @@ func (m *MongoClient) EnsureIndexes(ctx context.Context) error {
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "contactId", Value: 1}}},
 			{Keys: bson.D{{Key: "userId", Value: 1}, {Key: "contactId", Value: 1}, {Key: "dataCategory", Value: 1}}, Options: options.Index().SetUnique(true)},
 		},
-		"flags": {
-			{Keys: bson.D{{Key: "flagKey", Value: 1}}, Options: options.Index().SetUnique(true)},
-		},
 		"affirmation_packs": {
 			{Keys: bson.D{{Key: "packId", Value: 1}}, Options: options.Index().SetUnique(true)},
 		},

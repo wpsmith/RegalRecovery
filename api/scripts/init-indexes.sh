@@ -60,9 +60,6 @@ db.permissions.createIndex({ userId: 1 });
 db.permissions.createIndex({ userId: 1, contactId: 1 });
 db.permissions.createIndex({ userId: 1, contactId: 1, dataCategory: 1 }, { unique: true });
 
-// Feature Flags
-db.flags.createIndex({ flagKey: 1 }, { unique: true });
-
 // Affirmation Packs
 db.affirmation_packs.createIndex({ packId: 1 }, { unique: true });
 

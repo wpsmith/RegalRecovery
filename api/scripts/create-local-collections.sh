@@ -32,10 +32,6 @@ db.content.createIndex({ "PK": 1, "SK": 1 }, { unique: true, name: "pk_sk_unique
 db.content.createIndex({ "EntityType": 1 }, { name: "entity_type_index" });
 db.content.createIndex({ "TenantId": 1 }, { name: "tenant_id_index" });
 
-db.flags.createIndex({ "PK": 1, "SK": 1 }, { unique: true, name: "pk_sk_unique" });
-db.flags.createIndex({ "EntityType": 1 }, { name: "entity_type_index" });
-db.flags.createIndex({ "TenantId": 1 }, { name: "tenant_id_index" });
-
 db.goals.createIndex({ "PK": 1, "SK": 1 }, { unique: true, name: "pk_sk_unique" });
 db.goals.createIndex({ "EntityType": 1 }, { name: "entity_type_index" });
 db.goals.createIndex({ "TenantId": 1 }, { name: "tenant_id_index" });

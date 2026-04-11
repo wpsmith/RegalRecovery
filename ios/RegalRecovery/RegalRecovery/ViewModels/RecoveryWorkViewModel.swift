@@ -111,6 +111,26 @@ class RecoveryWorkViewModel {
                 implemented: false,
                 activityTypeKey: nil
             ),
+            WorkTileItem(
+                id: "foundation.support-network",
+                title: "Support Network",
+                icon: "person.2.fill",
+                iconColor: .rrPrimary,
+                category: .foundationTools,
+                featureFlagKey: nil,
+                implemented: true,
+                activityTypeKey: "supportNetwork"
+            ),
+            WorkTileItem(
+                id: "foundation.recovery-plan",
+                title: "My Recovery Plan",
+                icon: "calendar.badge.clock",
+                iconColor: .rrSecondary,
+                category: .foundationTools,
+                featureFlagKey: nil,
+                implemented: true,
+                activityTypeKey: "recoveryPlan"
+            ),
         ])
 
         // ── Activities ──
@@ -196,14 +216,24 @@ class RecoveryWorkViewModel {
                 activityTypeKey: ActivityType.timeJournal.rawValue
             ),
             WorkTileItem(
-                id: "activity.spouse-checkin-prep",
-                title: "Spouse Check-in",
+                id: "activity.fanos",
+                title: "FANOS",
                 icon: "heart.fill",
                 iconColor: .pink,
                 category: .activities,
-                featureFlagKey: "activity.spouse-checkin-prep",
+                featureFlagKey: "feature.fanos",
                 implemented: true,
-                activityTypeKey: ActivityType.spouseCheckIn.rawValue
+                activityTypeKey: "fanos"
+            ),
+            WorkTileItem(
+                id: "activity.fitnap",
+                title: "FITNAP",
+                icon: "heart.text.clipboard",
+                iconColor: .pink,
+                category: .activities,
+                featureFlagKey: "feature.fitnap",
+                implemented: true,
+                activityTypeKey: "fitnap"
             ),
             WorkTileItem(
                 id: "activity.person-check-ins",
@@ -247,7 +277,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.goals",
-                title: "Goals",
+                title: "Weekly Goals",
                 icon: "target",
                 iconColor: .rrSecondary,
                 category: .activities,
@@ -544,14 +574,19 @@ class RecoveryWorkViewModel {
             if todayCount > 0 { return .hasEntries("\(todayCount)") }
             return .none
 
-        case ActivityType.spouseCheckIn.rawValue:
-            if spouseCheckIns.first(where: { cal.isDateInToday($0.date) }) != nil {
+        case "fanos":
+            if spouseCheckIns.first(where: { cal.isDateInToday($0.date) && $0.framework == "FANOS" }) != nil {
+                return .completed
+            }
+            return .none
+
+        case "fitnap":
+            if spouseCheckIns.first(where: { cal.isDateInToday($0.date) && $0.framework == "FITNAP" }) != nil {
                 return .completed
             }
             return .none
 
         case "personCheckInSpouse":
-            // Person check-ins use spouse check-in data
             if spouseCheckIns.first(where: { cal.isDateInToday($0.date) }) != nil {
                 return .hasEntries("1")
             }
@@ -597,9 +632,8 @@ class RecoveryWorkViewModel {
             return .none
 
         case ActivityType.prayer.rawValue:
-            if let p = prayerLogs.first(where: { cal.isDateInToday($0.date) }) {
-                return .hasEntries("\(p.durationMinutes)m")
-            }
+            let todayPrayers = prayerLogs.filter { cal.isDateInToday($0.date) }.count
+            if todayPrayers > 0 { return .hasEntries("\(todayPrayers)") }
             return .none
 
         case ActivityType.postMortem.rawValue:

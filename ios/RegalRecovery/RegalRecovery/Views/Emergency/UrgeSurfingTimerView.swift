@@ -258,6 +258,7 @@ struct UrgeSurfingTimerView: View {
             } else if viewModel.phase == .completed {
                 Button {
                     timerCancellable?.cancel()
+                    viewModel.markSurfed(modelContext: modelContext)
                     viewModel.stop()
                     isPresented = false
                 } label: {
@@ -275,6 +276,7 @@ struct UrgeSurfingTimerView: View {
             } else {
                 Button {
                     timerCancellable?.cancel()
+                    viewModel.markSurfed(modelContext: modelContext)
                     viewModel.stop()
                     isPresented = false
                 } label: {

@@ -38,7 +38,7 @@ struct ActivityHistoryView: View {
             all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: ActivityType.mood.icon, iconColor: ActivityType.mood.iconColor)))
         }
         for p in prayerLogs {
-            all.append((p.date, RecentActivity(title: "Prayer", detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: ActivityType.prayer.icon, iconColor: ActivityType.prayer.iconColor)))
+            all.append((p.date, RecentActivity(title: "Prayer", detail: p.prayerType, time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: ActivityType.prayer.icon, iconColor: ActivityType.prayer.iconColor)))
         }
         for e in exerciseLogs {
             all.append((e.date, RecentActivity(title: "Exercise", detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: ActivityType.exercise.icon, iconColor: ActivityType.exercise.iconColor)))

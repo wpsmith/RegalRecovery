@@ -92,47 +92,6 @@ db.tracking.insertOne({
 });
 print("✓ Created streak record (270 days)");
 
-// Feature flag: tracking enabled
-db.flags.insertOne({
-  "PK": "FLAGS",
-  "SK": "feature.tracking",
-  "EntityType": "FEATURE_FLAG",
-  "TenantId": "SYSTEM",
-  "CreatedAt": "2026-01-01T00:00:00Z",
-  "ModifiedAt": "2026-03-31T00:00:00Z",
-  "enabled": true,
-  "rolloutPercentage": 100,
-  "description": "Streak and milestone tracking"
-});
-print("✓ Created feature flag: feature.tracking");
-
-// Feature flag: activities enabled
-db.flags.insertOne({
-  "PK": "FLAGS",
-  "SK": "feature.activities",
-  "EntityType": "FEATURE_FLAG",
-  "TenantId": "SYSTEM",
-  "CreatedAt": "2026-01-01T00:00:00Z",
-  "ModifiedAt": "2026-03-31T00:00:00Z",
-  "enabled": true,
-  "rolloutPercentage": 100,
-  "description": "Activity logging (check-ins, urges, journals)"
-});
-print("✓ Created feature flag: feature.activities");
-
-// Feature flag: recovery-agent (partially rolled out)
-db.flags.insertOne({
-  "PK": "FLAGS",
-  "SK": "feature.recovery-agent",
-  "EntityType": "FEATURE_FLAG",
-  "TenantId": "SYSTEM",
-  "CreatedAt": "2026-01-01T00:00:00Z",
-  "ModifiedAt": "2026-03-31T00:00:00Z",
-  "enabled": true,
-  "rolloutPercentage": 50,
-  "description": "AI-powered Recovery Agent"
-});
-print("✓ Created feature flag: feature.recovery-agent");
 '
 
 echo ""

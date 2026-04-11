@@ -8,7 +8,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sns v1.39.15
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/uuid v1.6.0
-	github.com/hashicorp/go-version v1.9.0
 	github.com/valkey-io/valkey-go v1.0.73
 	go.mongodb.org/mongo-driver/v2 v2.5.0
 )

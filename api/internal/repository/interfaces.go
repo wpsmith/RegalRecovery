@@ -105,18 +105,6 @@ type ActivityRepository interface {
 	GetActivitiesByDateRange(ctx context.Context, userID, startDate, endDate string) ([]Activity, error)
 }
 
-// FlagRepository defines the interface for feature flag operations.
-type FlagRepository interface {
-	// GetFlag retrieves a single feature flag by key.
-	GetFlag(ctx context.Context, flagKey string) (*Flag, error)
-
-	// GetAllFlags retrieves all feature flags.
-	GetAllFlags(ctx context.Context) ([]Flag, error)
-
-	// SetFlag creates or updates a feature flag.
-	SetFlag(ctx context.Context, flag *Flag) error
-}
-
 // ContentRepository defines the interface for content operations.
 type ContentRepository interface {
 	// GetAffirmationPack retrieves an affirmation pack by ID.

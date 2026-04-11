@@ -5,6 +5,7 @@ struct SpouseCheckInPrepView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
+    var initialFormat: Int = 0
     @State private var selectedFormat = 0
     @State private var showSummary = false
 
@@ -57,6 +58,7 @@ struct SpouseCheckInPrepView: View {
             }
             .padding(.vertical)
         }
+        .onAppear { selectedFormat = initialFormat }
         .background(Color.rrBackground)
         .sheet(isPresented: $showSummary) {
             summarySheet

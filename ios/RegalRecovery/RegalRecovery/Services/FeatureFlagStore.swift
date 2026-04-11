@@ -53,7 +53,7 @@ final class FeatureFlagStore {
         "feature.commitments": true,
         "feature.themes": true,
         "feature.offline-first": true,
-        "feature.dsr": true,
+        "feature.dsr": false,
 
         // Features - P1
         "feature.analytics-dashboard": true,
@@ -91,9 +91,10 @@ final class FeatureFlagStore {
         "activity.check-ins": true,
 
         // Activities - P1
-        "activity.emotional-journaling": true,
+        "activity.emotional-journaling": false,
         "activity.time-journal": true,
-        "activity.spouse-checkin-prep": true,
+        "feature.fanos": false,
+        "feature.fitnap": false,
         "activity.person-check-ins": false,
         "activity.meetings": true,
         "activity.post-mortem": true,
@@ -124,7 +125,7 @@ final class FeatureFlagStore {
         "feature.vision": false,
         "feature.partners.redemptiveliving.backbone": false,
         "feature.relapse-prevention-plan": false,
-        "feature.post-mortem": true,
+        "feature.post-mortem": false,
 
         // Assessments
         "assessment.sast-r": false,

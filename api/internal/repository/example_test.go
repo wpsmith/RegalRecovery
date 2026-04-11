@@ -121,21 +121,6 @@ func ExampleTrackingRepo_GetStreak() {
 	fmt.Printf("Current streak: %d days\n", streak.CurrentStreakDays)
 }
 
-// ExampleFlagRepo_GetAllFlags demonstrates how to retrieve all feature flags.
-func ExampleFlagRepo_GetAllFlags() {
-	ctx := context.Background()
-	client, _ := repository.NewMongoClient(ctx, "mongodb://localhost:27017", "regal-recovery")
-	defer client.Disconnect(ctx)
-	flagRepo := repository.NewFlagRepo(client)
-
-	flags, err := flagRepo.GetAllFlags(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("Retrieved %d feature flags\n", len(flags))
-}
-
 // ExampleContentRepo_GetDevotional demonstrates how to retrieve a devotional.
 func ExampleContentRepo_GetDevotional() {
 	ctx := context.Background()

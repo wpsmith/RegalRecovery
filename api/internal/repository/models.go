@@ -218,22 +218,6 @@ type Permission struct {
 	GrantedAt     time.Time `bson:"grantedAt"`
 }
 
-// Flag represents a feature flag.
-type Flag struct {
-	BaseDocument
-
-	FlagKey           string    `bson:"flagKey"`
-	Enabled           bool      `bson:"enabled"`
-	RolloutPercentage int       `bson:"rolloutPercentage"`
-	Tiers             []string  `bson:"tiers,omitempty"`
-	Tenants           []string  `bson:"tenants,omitempty"`
-	Platforms         []string  `bson:"platforms,omitempty"`
-	MinAppVersion     string    `bson:"minAppVersion,omitempty"`
-	Description       string    `bson:"description"`
-	UpdatedAt         time.Time `bson:"updatedAt"`
-	UpdatedBy         string    `bson:"updatedBy"`
-}
-
 // AffirmationPack represents metadata for an affirmation pack.
 type AffirmationPack struct {
 	BaseDocument

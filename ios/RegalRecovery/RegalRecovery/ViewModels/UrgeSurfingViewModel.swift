@@ -93,6 +93,18 @@ class UrgeSurfingViewModel {
         wavePhaseOffset = 0
     }
 
+    /// Mark the auto-logged urge as successfully surfed.
+    func markSurfed(modelContext: ModelContext) {
+        guard let urgeId = autoLoggedUrgeId else { return }
+        let descriptor = FetchDescriptor<RRUrgeLog>(
+            predicate: #Predicate { $0.id == urgeId }
+        )
+        if let urgeLog = try? modelContext.fetch(descriptor).first {
+            urgeLog.resolution = "Urge surfed (\(secondsElapsed / 60)m)"
+        }
+        try? modelContext.save()
+    }
+
     func tick() {
         guard isRunning, secondsRemaining > 0 else { return }
 

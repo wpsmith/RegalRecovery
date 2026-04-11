@@ -128,25 +128,6 @@ func main() {
 	})
 
 	// ========================================================================
-	// Flags Routes (/v1/flags/*)
-	// ========================================================================
-	mux.HandleFunc("GET /v1/flags", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotImplemented)
-		w.Write([]byte(`{"errors":[{"status":501,"title":"Not Implemented","detail":"Flag service not yet implemented"}]}`))
-	})
-	mux.HandleFunc("GET /v1/flags/{key}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotImplemented)
-		w.Write([]byte(`{"errors":[{"status":501,"title":"Not Implemented","detail":"Flag service not yet implemented"}]}`))
-	})
-	mux.HandleFunc("PUT /v1/flags/{key}", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotImplemented)
-		w.Write([]byte(`{"errors":[{"status":501,"title":"Not Implemented","detail":"Flag service not yet implemented"}]}`))
-	})
-
-	// ========================================================================
 	// Health Check Routes (for local debugging)
 	// ========================================================================
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +175,6 @@ func main() {
 			slog.String("tracking", "/v1/tracking/*"),
 			slog.String("activities", "/v1/activities/*"),
 			slog.String("content", "/v1/content/*"),
-			slog.String("flags", "/v1/flags/*"),
 			slog.String("health", "/healthz"),
 		)
 		slog.Info("Local API server listening", slog.String("address", "http://localhost:"+port))

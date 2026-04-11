@@ -72,7 +72,7 @@ final class FeatureFlagService {
         flags["feature.commitments"] = true
         flags["feature.themes"] = true
         flags["feature.offline-first"] = true
-        flags["feature.dsr"] = true
+        flags["feature.dsr"] = false
 
         // Features - P1
         flags["feature.analytics-dashboard"] = true
@@ -110,9 +110,10 @@ final class FeatureFlagService {
         flags["activity.check-ins"] = true
 
         // Activities - P1
-        flags["activity.emotional-journaling"] = true
+        flags["activity.emotional-journaling"] = false
         flags["activity.time-journal"] = true
-        flags["activity.spouse-checkin-prep"] = true
+        flags["feature.fanos"] = false
+        flags["feature.fitnap"] = false
         flags["activity.person-check-ins"] = false
         flags["activity.meetings"] = true
         flags["activity.post-mortem"] = true
@@ -138,7 +139,7 @@ final class FeatureFlagService {
         flags["feature.vision"] = false
         flags["feature.partners.redemptiveliving.backbone"] = false
         flags["feature.relapse-prevention-plan"] = false
-        flags["feature.post-mortem"] = true
+        flags["feature.post-mortem"] = false
 
         // Assessments
         flags["assessment.sast-r"] = false

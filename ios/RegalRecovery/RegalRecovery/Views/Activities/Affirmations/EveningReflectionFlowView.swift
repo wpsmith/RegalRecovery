@@ -129,7 +129,7 @@ struct EveningReflectionFlowView: View {
     EveningReflectionFlowView(
         viewModel: {
             let vm = AffirmationSessionViewModel(
-                apiClient: AffirmationsAPIClient(baseURL: "https://example.com", authProvider: { nil })
+                apiClient: AffirmationsAPIClient(apiClient: APIClient(configuration: .local))
             )
             vm.eveningSessionData = EveningSessionData(
                 sessionId: "preview-session",
