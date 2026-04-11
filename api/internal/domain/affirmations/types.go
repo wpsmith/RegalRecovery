@@ -66,16 +66,16 @@ func (l Level) IsValid() bool {
 type Category string
 
 const (
-	CategorySelfWorth            Category = "selfWorth"
-	CategoryShameResilience      Category = "shameResilience"
-	CategoryHealthyRelationships Category = "healthyRelationships"
+	CategorySelfWorth            Category = "self-worth"
+	CategoryShameResilience      Category = "shame-resilience"
+	CategoryHealthyRelationships Category = "healthy-relationships"
 	CategoryConnection           Category = "connection"
-	CategoryEmotionalRegulation  Category = "emotionalRegulation"
-	CategoryPurpose              Category = "purpose"
-	CategoryIntegrity            Category = "integrity"
-	CategoryDailyStrength        Category = "dailyStrength"
-	CategoryHealthySexuality     Category = "healthySexuality"
-	CategorySOSCrisis            Category = "sosCrisis"
+	CategoryEmotionalRegulation  Category = "emotional-regulation"
+	CategoryPurpose              Category = "purpose-meaning"
+	CategoryIntegrity            Category = "integrity-honesty"
+	CategoryDailyStrength        Category = "daily-strength"
+	CategoryHealthySexuality     Category = "healthy-sexuality"
+	CategorySOSCrisis            Category = "sos-crisis"
 )
 
 // IsValid returns true if the category is recognized.
@@ -119,7 +119,7 @@ type Track string
 
 const (
 	TrackStandard   Track = "standard"
-	TrackFaithBased Track = "faithBased"
+	TrackFaithBased Track = "faith-based"
 )
 
 // IsValid returns true if the track is recognized.

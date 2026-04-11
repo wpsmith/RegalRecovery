@@ -63,7 +63,7 @@ final class AuthService: @unchecked Sendable {
     private let isDevMode: Bool
 
     init(
-        baseURL: URL = URL(string: "https://api.regalrecovery.com/v1")!,
+        baseURL: URL = URL(string: "https://api.regalrecovery.com")!,
         urlSession: URLSession = .shared
     ) {
         #if DEBUG
@@ -71,7 +71,7 @@ final class AuthService: @unchecked Sendable {
            let url = URL(string: devURL) {
             self.baseURL = url
         } else {
-            self.baseURL = URL(string: "http://localhost:8080/v1")!
+            self.baseURL = URL(string: "http://localhost:8080")!
         }
         self.isDevMode = ProcessInfo.processInfo.environment["RR_DEV_MODE"] == "1"
         #else
@@ -102,7 +102,7 @@ final class AuthService: @unchecked Sendable {
             )
         ]
 
-        var request = makeRequest(path: "/auth/register", method: "POST")
+        var request = makeRequest(path: "/v1/auth/register", method: "POST")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await urlSession.data(for: request)
@@ -144,7 +144,7 @@ final class AuthService: @unchecked Sendable {
             "deviceName": deviceName
         ]
 
-        var request = makeRequest(path: "/auth/login", method: "POST")
+        var request = makeRequest(path: "/v1/auth/login", method: "POST")
         request.httpBody = try JSONEncoder().encode(body)
 
         let (data, response) = try await urlSession.data(for: request)
@@ -252,7 +252,7 @@ final class AuthService: @unchecked Sendable {
         }
 
         let body = ["refreshToken": refresh]
-        var request = makeRequest(path: "/auth/refresh", method: "POST")
+        var request = makeRequest(path: "/v1/auth/refresh", method: "POST")
         request.httpBody = try JSONEncoder().encode(body)
 
         let (data, response) = try await urlSession.data(for: request)
@@ -283,7 +283,7 @@ final class AuthService: @unchecked Sendable {
     // MARK: - Private Helpers
 
     private func performSocialLogin(body: [String: String], provider: String) async throws -> AuthUser {
-        var request = makeRequest(path: "/auth/login", method: "POST")
+        var request = makeRequest(path: "/v1/auth/login", method: "POST")
         request.httpBody = try JSONEncoder().encode(body)
 
         let (data, response) = try await urlSession.data(for: request)

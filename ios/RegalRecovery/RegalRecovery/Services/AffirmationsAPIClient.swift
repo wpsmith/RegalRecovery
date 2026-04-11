@@ -155,7 +155,7 @@ final class AffirmationsAPIClient: Sendable {
 
     // MARK: - Base Path
 
-    private static let basePath = "/activities/affirmations"
+    private static let basePath = "/v1/activities/affirmations"
 
     // MARK: - Init
 
@@ -615,7 +615,7 @@ private enum AffirmationEndpoint: Sendable {
     // Sharing
     case getSharingSummary
 
-    private static let base = "/activities/affirmations"
+    private static let base = "/v1/activities/affirmations"
 
     var path: String {
         switch self {

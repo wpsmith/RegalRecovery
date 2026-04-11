@@ -35,7 +35,7 @@ final class FeatureFlagService {
 
     /// Fetch latest flags from the server. Falls back to local values on failure.
     func syncFromServer(baseURL: URL, accessToken: String) async throws {
-        var request = URLRequest(url: baseURL.appendingPathComponent("/config/feature-flags"))
+        var request = URLRequest(url: baseURL.appendingPathComponent("/v1/config/feature-flags"))
         request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 

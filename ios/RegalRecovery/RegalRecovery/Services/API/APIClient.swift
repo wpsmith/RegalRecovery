@@ -24,21 +24,21 @@ struct APIClientConfiguration: Sendable {
     let requestTimeout: TimeInterval
 
     static let local = APIClientConfiguration(
-        baseURL: URL(string: "http://localhost:8080/v1")!,
+        baseURL: URL(string: "http://localhost:8080")!,
         maxRetries: 3,
         initialRetryDelay: 1.0,
         requestTimeout: 30
     )
 
     static let staging = APIClientConfiguration(
-        baseURL: URL(string: "https://api.staging.regalrecovery.com/v1")!,
+        baseURL: URL(string: "https://api.staging.regalrecovery.com")!,
         maxRetries: 3,
         initialRetryDelay: 1.0,
         requestTimeout: 30
     )
 
     static let production = APIClientConfiguration(
-        baseURL: URL(string: "https://api.regalrecovery.com/v1")!,
+        baseURL: URL(string: "https://api.regalrecovery.com")!,
         maxRetries: 3,
         initialRetryDelay: 1.0,
         requestTimeout: 30
