@@ -729,19 +729,6 @@ struct DailyEligibleActivity {
             section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
-            activityType: ActivityType.affirmationLog.rawValue,
-            displayName: "Christian Affirmations",
-            icon: "text.quote",
-            multiplePerDay: false,
-            maxPerDay: 1,
-            defaultEnabled: false,
-            typicalHour: 7,
-            typicalMinute: 0,
-            typicalBlock: "Morning",
-            featureFlagKey: "activity.affirmations",
-            section: .sobrietyCommitment
-        ),
-        DailyEligibleActivity(
             activityType: ActivityType.journal.rawValue,
             displayName: "Journaling / Jotting",
             icon: "note.text",

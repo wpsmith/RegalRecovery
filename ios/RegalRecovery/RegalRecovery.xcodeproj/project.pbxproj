@@ -308,7 +308,6 @@
 		20000951 /* AffirmationsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsAPIClient.swift; sourceTree = "<group>"; };
 		20000952 /* AffirmationAudioSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationAudioSessionManager.swift; sourceTree = "<group>"; };
 		20000953 /* AffirmationOfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationOfflineCache.swift; sourceTree = "<group>"; };
-		20000954 /* AffirmationNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationNavigationTests.swift; sourceTree = "<group>"; };
 		20000960 /* AffirmationTodayCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationTodayCard.swift; sourceTree = "<group>"; };
 		20001000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
 		20001001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
@@ -954,7 +953,6 @@
 		50000062 /* Affirmations */ = {
 			isa = PBXGroup;
 			children = (
-				20000954 /* AffirmationNavigationTests.swift */,
 			);
 			path = Affirmations;
 			sourceTree = "<group>";

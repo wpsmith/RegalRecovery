@@ -530,14 +530,6 @@ class TodayViewModel {
         if activityType == ActivityType.spouseCheckIn.rawValue {
             return fetchDates(RRSpouseCheckIn.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
-        if activityType == ActivityType.affirmationLog.rawValue {
-            return fetchDates(
-                RRActivity.self,
-                predicate: #Predicate { $0.activityType == "Affirmation Log" && $0.date >= todayStart && $0.date < tomorrow },
-                dateKeyPath: \.date,
-                context: context
-            )
-        }
         if activityType == "devotional" {
             let descriptor = FetchDescriptor<RRDevotionalProgress>(
                 predicate: #Predicate { $0.completedAt != nil }
@@ -668,14 +660,6 @@ class TodayViewModel {
             return hasRecord(
                 RRSpouseCheckIn.self,
                 predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
-                context: context
-            )
-        }
-
-        if activityType == ActivityType.affirmationLog.rawValue {
-            return hasRecord(
-                RRActivity.self,
-                predicate: #Predicate { $0.activityType == "Affirmation Log" && $0.date >= todayStart && $0.date < tomorrow },
                 context: context
             )
         }
