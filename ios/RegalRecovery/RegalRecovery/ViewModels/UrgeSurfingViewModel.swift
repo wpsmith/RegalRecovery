@@ -140,8 +140,6 @@ class UrgeSurfingViewModel {
     // MARK: - Private
 
     private func checkMilestone() {
-        let minutesElapsed = secondsElapsed / 60
-
         switch secondsElapsed {
         case 300: // 5 minutes
             currentMilestone = 5
