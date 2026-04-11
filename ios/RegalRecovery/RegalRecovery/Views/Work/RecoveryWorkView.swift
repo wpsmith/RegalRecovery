@@ -21,10 +21,6 @@ struct RecoveryWorkView: View {
     @Query(sort: \RRSpouseCheckIn.date, order: .reverse) private var spouseCheckIns: [RRSpouseCheckIn]
     @Query(sort: \RRStepWork.stepNumber) private var stepWork: [RRStepWork]
     @Query(sort: \RRGoal.title) private var goals: [RRGoal]
-    @Query(filter: #Predicate<RRActivity> { $0.activityType == "Affirmation Log" },
-           sort: \RRActivity.date, order: .reverse)
-    private var affirmationSessions: [RRActivity]
-
     @State private var showUrgeSurfingTimer = false
 
     private let columns = [
@@ -128,8 +124,7 @@ struct RecoveryWorkView: View {
             meetingLogs: meetingLogs,
             spouseCheckIns: spouseCheckIns,
             stepWork: stepWork,
-            goals: goals,
-            affirmationSessions: affirmationSessions
+            goals: goals
         )
     }
 
@@ -158,8 +153,6 @@ struct RecoveryWorkView: View {
             FASTERScaleView()
         case "devotional":
             DevotionalView()
-        case ActivityType.affirmationLog.rawValue:
-            AffirmationsHubView()
         case ActivityType.phoneCalls.rawValue:
             PhoneCallLogView()
         case ActivityType.meetingsAttended.rawValue:

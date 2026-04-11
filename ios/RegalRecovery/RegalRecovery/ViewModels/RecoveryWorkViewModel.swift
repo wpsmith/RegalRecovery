@@ -146,16 +146,6 @@ class RecoveryWorkViewModel {
                 activityTypeKey: ActivityType.sobrietyCommitment.rawValue
             ),
             WorkTileItem(
-                id: "activity.affirmations",
-                title: "Affirmations",
-                icon: "text.quote",
-                iconColor: .rrPrimary,
-                category: .activities,
-                featureFlagKey: "activity.affirmations",
-                implemented: true,
-                activityTypeKey: ActivityType.affirmationLog.rawValue
-            ),
-            WorkTileItem(
                 id: "activity.urge-logging",
                 title: "Urge Logging",
                 icon: "exclamationmark.triangle.fill",
@@ -522,8 +512,7 @@ class RecoveryWorkViewModel {
         meetingLogs: [RRMeetingLog],
         spouseCheckIns: [RRSpouseCheckIn],
         stepWork: [RRStepWork],
-        goals: [RRGoal],
-        affirmationSessions: [RRActivity] = []
+        goals: [RRGoal]
     ) -> TileStatus {
         guard tile.implemented, tile.isEnabled else { return .none }
 
@@ -534,11 +523,6 @@ class RecoveryWorkViewModel {
             if commitments.contains(where: { $0.type == "morning" && cal.isDateInToday($0.date) }) {
                 return .completed
             }
-            return .none
-
-        case ActivityType.affirmationLog.rawValue:
-            let todayCount = affirmationSessions.filter { cal.isDateInToday($0.date) }.count
-            if todayCount > 0 { return .completed }
             return .none
 
         case ActivityType.urgeLog.rawValue:
