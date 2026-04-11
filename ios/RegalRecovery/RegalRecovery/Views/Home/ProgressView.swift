@@ -6,12 +6,12 @@ struct RecoveryProgressView: View {
     @Query private var streaks: [RRStreak]
     @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
     @Query(sort: \RRFASTEREntry.date, order: .reverse) private var fasterEntries: [RRFASTEREntry]
-    @Query(sort: \RREmotionalJournal.date, order: .reverse) private var emotionalEntries: [RREmotionalJournal]
     @Query(sort: \RRActivity.timestamp, order: .reverse) private var activities: [RRActivity]
     @Query private var stepWork: [RRStepWork]
     @Query(sort: \RRMeetingLog.date, order: .reverse) private var meetings: [RRMeetingLog]
     @Query(sort: \RRPhoneCallLog.date, order: .reverse) private var phoneCalls: [RRPhoneCallLog]
     @Query(sort: \RRUrgeLog.date, order: .reverse) private var urges: [RRUrgeLog]
+    @Query(sort: \RRMoodEntry.date, order: .reverse) private var moodEntries: [RRMoodEntry]
     @Query(sort: \RRDevotionalProgress.day) private var devotionalProgress: [RRDevotionalProgress]
 
     private var primaryStreak: RRStreak? { streaks.first }
@@ -58,9 +58,9 @@ struct RecoveryProgressView: View {
     }
 
     private var moodAverage: Double {
-        let intensities = Array(emotionalEntries.prefix(7)).map { Double($0.intensity) }
-        guard !intensities.isEmpty else { return 0 }
-        return intensities.reduce(0, +) / Double(intensities.count)
+        let scores = Array(moodEntries.prefix(7)).map { Double($0.score) }
+        guard !scores.isEmpty else { return 0 }
+        return scores.reduce(0, +) / Double(scores.count)
     }
 
     private var weeklyActivityCount: Int {
