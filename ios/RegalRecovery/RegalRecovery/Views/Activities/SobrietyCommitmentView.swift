@@ -7,25 +7,12 @@ struct SobrietyCommitmentView: View {
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
     @State private var selectedSegment = 0
-
-    private static let morningQuestionTexts: [String] = [
-        "I commit to sexual sobriety today \u{2014} no sex with self, no sex outside of marriage.",
-        "I will reach out to my sponsor or accountability partner if I am struggling.",
-        "I will attend my scheduled recovery meeting.",
-        "I will spend time in prayer and scripture today.",
-        "I will be honest with myself and others today.",
-        "I surrender this day to God and trust His plan for my recovery.",
-    ]
-
-    private static let eveningQuestionTexts: [String] = [
-        "Did I maintain my sobriety commitment today?",
-        "Was I honest in all my interactions today?",
-        "Did I reach out for support when I needed it?",
-        "What am I grateful for today?",
-    ]
-
-    @State private var morningToggles: [Bool] = Array(repeating: false, count: 6)
-    @State private var eveningToggles: [Bool] = Array(repeating: false, count: 4)
+    @State private var morningStatements: [String] = CommitmentStatementsManager.shared.morningStatements
+    @State private var eveningStatements: [String] = CommitmentStatementsManager.shared.eveningStatements
+    @State private var morningToggles: [Bool] = []
+    @State private var eveningToggles: [Bool] = []
+    @State private var showEditMorning = false
+    @State private var showEditEvening = false
 
     private var latestMorning: RRCommitment? {
         commitments.first { $0.type == "morning" && Calendar.current.isDateInToday($0.date) }
@@ -55,17 +42,26 @@ struct SobrietyCommitmentView: View {
                                     .font(RRFont.headline)
                                     .foregroundStyle(Color.rrText)
                                 Spacer()
+                                Button {
+                                    showEditMorning = true
+                                } label: {
+                                    Image(systemName: "pencil.circle")
+                                        .font(.title3)
+                                        .foregroundStyle(Color.rrPrimary)
+                                }
                                 let time = latestMorning?.completedAt?.formatted(date: .omitted, time: .shortened)
                                 RRBadge(text: time ?? "Pending", color: time != nil ? .rrSuccess : .rrTextSecondary)
                             }
 
-                            ForEach(Array(Self.morningQuestionTexts.enumerated()), id: \.offset) { index, question in
+                            ForEach(Array(morningStatements.enumerated()), id: \.offset) { index, question in
                                 HStack(alignment: .top, spacing: 12) {
                                     Button {
-                                        morningToggles[index].toggle()
+                                        if index < morningToggles.count {
+                                            morningToggles[index].toggle()
+                                        }
                                     } label: {
-                                        Image(systemName: morningToggles[index] ? "checkmark.circle.fill" : "circle")
-                                            .foregroundStyle(morningToggles[index] ? Color.rrSuccess : Color.rrTextSecondary)
+                                        Image(systemName: (index < morningToggles.count && morningToggles[index]) ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle((index < morningToggles.count && morningToggles[index]) ? Color.rrSuccess : Color.rrTextSecondary)
                                             .font(.title3)
                                     }
 
@@ -93,17 +89,26 @@ struct SobrietyCommitmentView: View {
                                     .font(RRFont.headline)
                                     .foregroundStyle(Color.rrText)
                                 Spacer()
+                                Button {
+                                    showEditEvening = true
+                                } label: {
+                                    Image(systemName: "pencil.circle")
+                                        .font(.title3)
+                                        .foregroundStyle(Color.rrPrimary)
+                                }
                                 let time = latestEvening?.completedAt?.formatted(date: .omitted, time: .shortened)
                                 RRBadge(text: time ?? "Not yet", color: time != nil ? .rrSuccess : .rrTextSecondary)
                             }
 
-                            ForEach(Array(Self.eveningQuestionTexts.enumerated()), id: \.offset) { index, question in
+                            ForEach(Array(eveningStatements.enumerated()), id: \.offset) { index, question in
                                 HStack(alignment: .top, spacing: 12) {
                                     Button {
-                                        eveningToggles[index].toggle()
+                                        if index < eveningToggles.count {
+                                            eveningToggles[index].toggle()
+                                        }
                                     } label: {
-                                        Image(systemName: eveningToggles[index] ? "checkmark.circle.fill" : "circle")
-                                            .foregroundStyle(eveningToggles[index] ? Color.rrSuccess : Color.rrTextSecondary)
+                                        Image(systemName: (index < eveningToggles.count && eveningToggles[index]) ? "checkmark.circle.fill" : "circle")
+                                            .foregroundStyle((index < eveningToggles.count && eveningToggles[index]) ? Color.rrSuccess : Color.rrTextSecondary)
                                             .font(.title3)
                                     }
 
@@ -126,62 +131,95 @@ struct SobrietyCommitmentView: View {
             .padding(.vertical)
         }
         .background(Color.rrBackground)
+        .sheet(isPresented: $showEditMorning) {
+            EditCommitmentStatementsView(
+                title: "Edit Morning Commitments",
+                statements: $morningStatements,
+                defaults: CommitmentStatementsManager.defaultMorningStatements
+            ) { saved in
+                CommitmentStatementsManager.shared.morningStatements = saved
+                resizeMorningToggles()
+            }
+        }
+        .sheet(isPresented: $showEditEvening) {
+            EditCommitmentStatementsView(
+                title: "Edit Evening Commitments",
+                statements: $eveningStatements,
+                defaults: CommitmentStatementsManager.defaultEveningStatements
+            ) { saved in
+                CommitmentStatementsManager.shared.eveningStatements = saved
+                resizeEveningToggles()
+            }
+        }
         .onAppear {
+            morningStatements = CommitmentStatementsManager.shared.morningStatements
+            eveningStatements = CommitmentStatementsManager.shared.eveningStatements
+            resizeMorningToggles()
+            resizeEveningToggles()
+
             if let existing = latestMorning {
                 let answers = existing.answers.data
-                morningToggles = [
-                    answers["sobrietyCommit"]?.boolValue ?? false,
-                    answers["reachOut"]?.boolValue ?? false,
-                    answers["attendMeeting"]?.boolValue ?? false,
-                    answers["prayerScripture"]?.boolValue ?? false,
-                    answers["honest"]?.boolValue ?? false,
-                    answers["surrender"]?.boolValue ?? false,
-                ]
+                for i in 0..<morningToggles.count {
+                    morningToggles[i] = answers["statement_\(i)"]?.boolValue ?? false
+                }
             }
             if let existing = latestEvening {
                 let answers = existing.answers.data
-                eveningToggles = [
-                    answers["sobrietyMaintained"]?.boolValue ?? false,
-                    answers["honest"]?.boolValue ?? false,
-                    answers["reachedOut"]?.boolValue ?? false,
-                    answers["grateful"]?.boolValue ?? false,
-                ]
+                for i in 0..<eveningToggles.count {
+                    eveningToggles[i] = answers["statement_\(i)"]?.boolValue ?? false
+                }
             }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func resizeMorningToggles() {
+        let needed = morningStatements.count
+        if morningToggles.count < needed {
+            morningToggles.append(contentsOf: Array(repeating: false, count: needed - morningToggles.count))
+        } else if morningToggles.count > needed {
+            morningToggles = Array(morningToggles.prefix(needed))
+        }
+    }
+
+    private func resizeEveningToggles() {
+        let needed = eveningStatements.count
+        if eveningToggles.count < needed {
+            eveningToggles.append(contentsOf: Array(repeating: false, count: needed - eveningToggles.count))
+        } else if eveningToggles.count > needed {
+            eveningToggles = Array(eveningToggles.prefix(needed))
         }
     }
 
     private func submitMorning() {
         let userId = users.first?.id ?? UUID()
+        var answersDict: [String: AnyCodableValue] = [:]
+        for i in 0..<min(morningToggles.count, morningStatements.count) {
+            answersDict["statement_\(i)"] = .bool(morningToggles[i])
+        }
         let commitment = RRCommitment(
             userId: userId,
             date: Date(),
             type: "morning",
             completedAt: Date(),
-            answers: JSONPayload([
-                "sobrietyCommit": .bool(morningToggles[0]),
-                "reachOut": .bool(morningToggles[1]),
-                "attendMeeting": .bool(morningToggles[2]),
-                "prayerScripture": .bool(morningToggles[3]),
-                "honest": .bool(morningToggles[4]),
-                "surrender": .bool(morningToggles[5]),
-            ])
+            answers: JSONPayload(answersDict)
         )
         modelContext.insert(commitment)
     }
 
     private func submitEvening() {
         let userId = users.first?.id ?? UUID()
+        var answersDict: [String: AnyCodableValue] = [:]
+        for i in 0..<min(eveningToggles.count, eveningStatements.count) {
+            answersDict["statement_\(i)"] = .bool(eveningToggles[i])
+        }
         let commitment = RRCommitment(
             userId: userId,
             date: Date(),
             type: "evening",
             completedAt: Date(),
-            answers: JSONPayload([
-                "sobrietyMaintained": .bool(eveningToggles[0]),
-                "honest": .bool(eveningToggles[1]),
-                "reachedOut": .bool(eveningToggles[2]),
-                "grateful": .bool(eveningToggles[3]),
-            ])
+            answers: JSONPayload(answersDict)
         )
         modelContext.insert(commitment)
     }

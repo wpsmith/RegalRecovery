@@ -7,16 +7,9 @@ struct MorningCommitmentView: View {
     @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
-    private static let questionTexts: [String] = [
-        "I commit to sexual sobriety today \u{2014} no sex with self, no sex outside of marriage.",
-        "I will reach out to my sponsor or accountability partner if I am struggling.",
-        "I will attend my scheduled recovery meeting.",
-        "I will spend time in prayer and scripture today.",
-        "I will be honest with myself and others today.",
-        "I surrender this day to God and trust His plan for my recovery.",
-    ]
-
-    @State private var toggles: [Bool] = Array(repeating: false, count: 6)
+    @State private var statements: [String] = CommitmentStatementsManager.shared.morningStatements
+    @State private var toggles: [Bool] = []
+    @State private var showEditSheet = false
 
     private var latestMorning: RRCommitment? {
         commitments.first { $0.type == "morning" && Calendar.current.isDateInToday($0.date) }
@@ -38,19 +31,28 @@ struct MorningCommitmentView: View {
                                 .font(RRFont.headline)
                                 .foregroundStyle(Color.rrText)
                             Spacer()
+                            Button {
+                                showEditSheet = true
+                            } label: {
+                                Image(systemName: "pencil.circle")
+                                    .font(.title3)
+                                    .foregroundStyle(Color.rrPrimary)
+                            }
                             RRBadge(
                                 text: completedTime ?? "Pending",
                                 color: completedTime != nil ? .rrSuccess : .rrTextSecondary
                             )
                         }
 
-                        ForEach(Array(Self.questionTexts.enumerated()), id: \.offset) { index, question in
+                        ForEach(Array(statements.enumerated()), id: \.offset) { index, question in
                             Button {
-                                toggles[index].toggle()
+                                if index < toggles.count {
+                                    toggles[index].toggle()
+                                }
                             } label: {
                                 HStack(alignment: .top, spacing: 12) {
-                                    Image(systemName: toggles[index] ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(toggles[index] ? Color.rrSuccess : Color.rrTextSecondary)
+                                    Image(systemName: (index < toggles.count && toggles[index]) ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle((index < toggles.count && toggles[index]) ? Color.rrSuccess : Color.rrTextSecondary)
                                         .font(.title3)
 
                                     Text(question)
@@ -74,36 +76,52 @@ struct MorningCommitmentView: View {
             .padding(.vertical)
         }
         .background(Color.rrBackground)
+        .sheet(isPresented: $showEditSheet) {
+            EditCommitmentStatementsView(
+                title: "Edit Morning Commitments",
+                statements: $statements,
+                defaults: CommitmentStatementsManager.defaultMorningStatements
+            ) { saved in
+                CommitmentStatementsManager.shared.morningStatements = saved
+                resizeToggles()
+            }
+        }
         .onAppear {
+            statements = CommitmentStatementsManager.shared.morningStatements
+            resizeToggles()
+
             if let existing = latestMorning {
                 let answers = existing.answers.data
-                toggles = [
-                    answers["sobrietyCommit"]?.boolValue ?? false,
-                    answers["reachOut"]?.boolValue ?? false,
-                    answers["attendMeeting"]?.boolValue ?? false,
-                    answers["prayerScripture"]?.boolValue ?? false,
-                    answers["honest"]?.boolValue ?? false,
-                    answers["surrender"]?.boolValue ?? false,
-                ]
+                for i in 0..<toggles.count {
+                    toggles[i] = answers["statement_\(i)"]?.boolValue ?? false
+                }
             }
+        }
+    }
+
+    // MARK: - Helpers
+
+    private func resizeToggles() {
+        let needed = statements.count
+        if toggles.count < needed {
+            toggles.append(contentsOf: Array(repeating: false, count: needed - toggles.count))
+        } else if toggles.count > needed {
+            toggles = Array(toggles.prefix(needed))
         }
     }
 
     private func submitCommitment() {
         let userId = users.first?.id ?? UUID()
+        var answersDict: [String: AnyCodableValue] = [:]
+        for i in 0..<min(toggles.count, statements.count) {
+            answersDict["statement_\(i)"] = .bool(toggles[i])
+        }
         let commitment = RRCommitment(
             userId: userId,
             date: Date(),
             type: "morning",
             completedAt: Date(),
-            answers: JSONPayload([
-                "sobrietyCommit": .bool(toggles[0]),
-                "reachOut": .bool(toggles[1]),
-                "attendMeeting": .bool(toggles[2]),
-                "prayerScripture": .bool(toggles[3]),
-                "honest": .bool(toggles[4]),
-                "surrender": .bool(toggles[5]),
-            ])
+            answers: JSONPayload(answersDict)
         )
         modelContext.insert(commitment)
         dismiss()
