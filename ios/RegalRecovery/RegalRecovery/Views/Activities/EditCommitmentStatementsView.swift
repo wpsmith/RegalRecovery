@@ -11,8 +11,11 @@ struct EditCommitmentStatementsView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft: [String]
-    @State private var showResetConfirmation = false
     @FocusState private var focusedIndex: Int?
+
+    private var missingRecommended: [String] {
+        defaults.filter { rec in !draft.contains(where: { $0.trimmingCharacters(in: .whitespacesAndNewlines) == rec.trimmingCharacters(in: .whitespacesAndNewlines) }) }
+    }
 
     init(
         title: String,
@@ -73,6 +76,24 @@ struct EditCommitmentStatementsView: View {
                         }
                     }
 
+                    if !missingRecommended.isEmpty {
+                        Section {
+                            Button {
+                                withAnimation {
+                                    draft.append(contentsOf: missingRecommended)
+                                }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "star.fill")
+                                    Text("Add \(missingRecommended.count) Recommended")
+                                }
+                                .font(RRFont.body)
+                                .fontWeight(.medium)
+                                .foregroundStyle(Color.rrSecondary)
+                            }
+                        }
+                    }
+
                     Section {
                         Button {
                             withAnimation {
@@ -87,19 +108,6 @@ struct EditCommitmentStatementsView: View {
                             .font(RRFont.body)
                             .fontWeight(.medium)
                             .foregroundStyle(Color.rrPrimary)
-                        }
-                    }
-
-                    Section {
-                        Button {
-                            showResetConfirmation = true
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.counterclockwise")
-                                Text("Reset to Defaults")
-                            }
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrTextSecondary)
                         }
                     }
                 }
@@ -129,20 +137,6 @@ struct EditCommitmentStatementsView: View {
                     }
                     .foregroundStyle(Color.rrTextSecondary)
                 }
-            }
-            .confirmationDialog(
-                "Reset to Defaults",
-                isPresented: $showResetConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Reset", role: .destructive) {
-                    withAnimation {
-                        draft = defaults
-                    }
-                }
-                Button("Cancel", role: .cancel) {}
-            } message: {
-                Text("This will replace all your current statements with the original defaults.")
             }
         }
     }

@@ -406,6 +406,11 @@ final class AuthService: @unchecked Sendable {
         KeychainHelper.deleteAll()
     }
 
+    /// Enables local-only mode: auto-authenticates with a dev user, no API calls.
+    func enableLocalMode() {
+        applyDevUser()
+    }
+
     @discardableResult
     private func applyDevUser() -> AuthUser {
         let user = AuthUser(

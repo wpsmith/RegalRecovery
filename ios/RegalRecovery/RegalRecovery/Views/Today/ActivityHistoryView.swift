@@ -3,9 +3,7 @@ import SwiftData
 
 struct ActivityHistoryView: View {
     @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
-    @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
     @Query(sort: \RRJournalEntry.date, order: .reverse) private var journals: [RRJournalEntry]
-    @Query(sort: \RREmotionalJournal.date, order: .reverse) private var emotionalJournals: [RREmotionalJournal]
     @Query(sort: \RRFASTEREntry.date, order: .reverse) private var fasterEntries: [RRFASTEREntry]
     @Query(sort: \RRUrgeLog.date, order: .reverse) private var urgeLogs: [RRUrgeLog]
     @Query(sort: \RRMoodEntry.date, order: .reverse) private var moodEntries: [RRMoodEntry]
@@ -30,9 +28,6 @@ struct ActivityHistoryView: View {
             let color: Color = c.type == "morning" ? .rrSecondary : .rrPrimary
             all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: color)))
         }
-        for ci in checkIns {
-            all.append((ci.date, RecentActivity(title: "Recovery Check-in", detail: "Score: \(ci.score)", time: fmt.localizedString(for: ci.date, relativeTo: Date()), icon: ActivityType.recoveryCheckIn.icon, iconColor: ActivityType.recoveryCheckIn.iconColor)))
-        }
         for m in moodEntries {
             let emoji = m.score >= 7 ? "\u{1F60A}" : m.score >= 5 ? "\u{1F610}" : "\u{1F61F}"
             all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: ActivityType.mood.icon, iconColor: ActivityType.mood.iconColor)))
@@ -51,9 +46,6 @@ struct ActivityHistoryView: View {
             let snippet = String(j.content.prefix(40))
             all.append((j.date, RecentActivity(title: "Journal", detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: ActivityType.journal.icon, iconColor: ActivityType.journal.iconColor)))
         }
-        for ej in emotionalJournals {
-            all.append((ej.date, RecentActivity(title: "Emotional Journal", detail: "\(ej.emotion), \(ej.intensity)/10", time: fmt.localizedString(for: ej.date, relativeTo: Date()), icon: ActivityType.emotionalJournal.icon, iconColor: ActivityType.emotionalJournal.iconColor)))
-        }
         for g in gratitudeEntries {
             all.append((g.date, RecentActivity(title: "Gratitude", detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: ActivityType.gratitude.icon, iconColor: ActivityType.gratitude.iconColor)))
         }
@@ -67,7 +59,8 @@ struct ActivityHistoryView: View {
             all.append((ml.date, RecentActivity(title: "Meeting", detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: ActivityType.meetingsAttended.icon, iconColor: ActivityType.meetingsAttended.iconColor)))
         }
         for sc in spouseCheckIns {
-            all.append((sc.date, RecentActivity(title: "Spouse Check-in", detail: sc.framework, time: fmt.localizedString(for: sc.date, relativeTo: Date()), icon: ActivityType.spouseCheckIn.icon, iconColor: ActivityType.spouseCheckIn.iconColor)))
+            let type: ActivityType = sc.framework == "FANOS" ? .fanos : .fitnap
+            all.append((sc.date, RecentActivity(title: "\(sc.framework) Check-in", detail: sc.framework, time: fmt.localizedString(for: sc.date, relativeTo: Date()), icon: type.icon, iconColor: type.iconColor)))
         }
 
         return all.sorted { $0.date > $1.date }

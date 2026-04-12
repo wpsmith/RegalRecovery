@@ -6,7 +6,6 @@ struct QuickActionsRow: View {
     private let actions: [(title: String, icon: String)] = [
         ("Log Urge", "exclamationmark.triangle.fill"),
         ("Journal", "note.text"),
-        ("Check-In", "checkmark.circle"),
         ("Prayer", "hands.clap.fill"),
         ("Mood", "face.smiling"),
         ("Gratitude", "leaf.fill"),

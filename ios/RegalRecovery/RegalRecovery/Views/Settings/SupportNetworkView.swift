@@ -52,8 +52,6 @@ struct SupportNetworkView: View {
     @State private var prefillPhone = ""
     @State private var editingContact: RRSupportContact?
 
-    private let dataCategories = ["Sobriety", "Check-ins", "Activities", "Journal", "Financial"]
-
     var body: some View {
         List {
             if contacts.isEmpty {
@@ -102,27 +100,6 @@ struct SupportNetworkView: View {
                                     .foregroundStyle(Color.rrPrimary)
                             }
                             .padding(.vertical, 4)
-                        }
-
-                        // Data access toggles
-                        ForEach(dataCategories, id: \.self) { category in
-                            Toggle(isOn: Binding(
-                                get: { contact.permissions.contains(category) },
-                                set: { enabled in
-                                    if enabled {
-                                        if !contact.permissions.contains(category) {
-                                            contact.permissions.append(category)
-                                        }
-                                    } else {
-                                        contact.permissions.removeAll { $0 == category }
-                                    }
-                                    contact.modifiedAt = Date()
-                                }
-                            )) {
-                                Text(category)
-                                    .font(RRFont.body)
-                            }
-                            .tint(Color.rrPrimary)
                         }
                     }
                 }
@@ -176,21 +153,11 @@ struct SupportNetworkView: View {
 
     private func addContact(name: String, role: String, phone: String) {
         let userId = users.first?.id ?? UUID()
-        let defaultPermissions: [String]
-        switch role {
-        case "spouse", "counselor":
-            defaultPermissions = dataCategories
-        case "sponsor", "accountabilityPartner":
-            defaultPermissions = ["Sobriety", "Check-ins", "Activities"]
-        default:
-            defaultPermissions = ["Sobriety"]
-        }
         let contact = RRSupportContact(
             userId: userId,
             name: name,
             role: role,
             phone: phone,
-            permissions: defaultPermissions,
             linkedDate: Date()
         )
         modelContext.insert(contact)

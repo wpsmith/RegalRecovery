@@ -16,9 +16,7 @@ private func makeTodayStatus(
     RecoveryWorkViewModel.todayStatus(
         for: tile,
         commitments: [],
-        checkIns: [],
         journals: [],
-        emotionalJournals: [],
         timeBlocks: [],
         fasterEntries: [],
         urgeLogs: [],

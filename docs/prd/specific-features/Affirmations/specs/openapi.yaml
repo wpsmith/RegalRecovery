@@ -1,45 +1,20 @@
 openapi: 3.1.0
-
 info:
-  title: Regal Recovery Affirmations API
-  version: 1.0.0
+  title: Regal Recovery — Declarations of Truth (Affirmations v2) API
+  version: 2.0.0
   description: |
-    Affirmations experience API for Regal Recovery.
-
-    Provides a clinically-informed, four-level progressive affirmation practice
-    with morning sessions, evening reflections, SOS crisis mode, a curated
-    content library, custom affirmations, own-voice audio recordings, and
-    cumulative progress tracking.
-
-    **Core Mechanisms:**
-    - Four-level progressive framework (Permission, Process, Tempered Identity, Full Identity)
-    - 80/20 level serving: 80% current level, 20% one level above
-    - 10 content categories with faith-based and standard tracks
-    - Morning session (3 affirmations + daily intention)
-    - Evening reflection (1 affirmation + day rating 1-5)
-    - SOS mode with Level 1-2 crisis affirmations and 4-7-8 breathing
-    - Custom affirmations (Day 14+ gate, 24-hour edit window)
-    - Own-voice audio recordings with ambient backgrounds
-    - Cumulative (not streak-based) progress metrics
-    - 7-day no-repeat content engine
-
-    **Clinical Foundation:**
-    Based on Patrick Carnes' core belief model and directed abstraction therapy.
-    Healthy Sexuality category requires 60+ days AND explicit opt-in. Post-relapse
-    windows automatically restrict to Level 1. Crisis language detection routes to
-    professional resources.
-
-    All session timestamps are immutable (FR2.7). Feature gated behind
-    `activity.affirmations` flag. When disabled, all endpoints return 404.
+    Pack-based, Scripture-rooted affirmation system for Christian sexual addiction recovery.
+    All declarations are mapped to Carnes' four core beliefs and progressive levels (1-4).
+    Feature flag: `activity.affirmations` (fail closed: 404 when disabled).
   contact:
-    name: Regal Recovery Platform Team
+    name: Regal Recovery Engineering
   license:
     name: Proprietary
 
 servers:
   - url: https://api.regalrecovery.app/v1
     description: Production
-  - url: https://api.staging.regalrecovery.app/v1
+  - url: https://api-staging.regalrecovery.app/v1
     description: Staging
   - url: http://localhost:3000/v1
     description: Local development
@@ -48,1513 +23,568 @@ security:
   - bearerAuth: []
 
 tags:
-  - name: Affirmation Sessions
-    description: Morning and evening affirmation sessions
+  - name: Packs
+    description: Pack browsing, custom pack management, and premium purchases
+  - name: Sessions
+    description: Morning and evening declaration sessions
   - name: SOS Mode
-    description: Crisis-mode affirmations with breathing exercises
-  - name: Affirmation Library
-    description: Browse and search the curated affirmation content library
+    description: Emergency declaration delivery during urge/crisis
+  - name: Library
+    description: Browse and search individual declarations
   - name: Favorites & Hidden
-    description: Manage favorite and hidden affirmations
-  - name: Custom Affirmations
-    description: User-created affirmations (Day 14+ gate)
+    description: Curate personal declaration preferences
+  - name: Custom Declarations
+    description: User-written declarations within custom packs
   - name: Audio Recordings
-    description: Own-voice audio recordings with ambient backgrounds
+    description: Own-voice recordings of declarations
   - name: Progress & Settings
-    description: Cumulative progress metrics, level info, and user settings
+    description: Cumulative progress, level info, and user preferences
   - name: Sharing
-    description: Privacy-safe sharing summaries for accountability partners
+    description: Privacy-safe sharing summary for accountability
 
 paths:
-  # ──────────────────────────────────────────────────────────────────────
-  # Sessions
-  # ──────────────────────────────────────────────────────────────────────
+  # ── Packs ──────────────────────────────────────────────
+  /activities/affirmations/packs:
+    get:
+      operationId: listPacks
+      tags: [Packs]
+      summary: List all packs
+      description: Returns default (free), premium (locked/owned), and custom packs. Feature flag gated.
+      parameters:
+        - $ref: '#/components/parameters/PackTypeFilter'
+        - $ref: '#/components/parameters/CategoryFilter'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Pack list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackListResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/FeatureDisabled' }
+    post:
+      operationId: createCustomPack
+      tags: [Packs]
+      summary: Create a custom pack
+      description: Available from Day 14+. Max 20 custom packs per user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomPackRequest'
+      responses:
+        '201':
+          description: Custom pack created
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackResponse'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/FeatureDisabled' }
+        '422': { $ref: '#/components/responses/ValidationError' }
 
+  /activities/affirmations/packs/{packId}:
+    parameters:
+      - $ref: '#/components/parameters/PackId'
+    get:
+      operationId: getPack
+      tags: [Packs]
+      summary: Get pack details
+      description: Returns pack with declarations. Premium packs show 3 preview declarations if not owned.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackDetailResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      operationId: updateCustomPack
+      tags: [Packs]
+      summary: Update a custom pack
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomPackRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PackResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+    delete:
+      operationId: deleteCustomPack
+      tags: [Packs]
+      summary: Delete a custom pack
+      description: Only custom packs can be deleted.
+      responses:
+        '204': { description: Pack deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /activities/affirmations/packs/{packId}/purchase:
+    parameters:
+      - $ref: '#/components/parameters/PackId'
+    post:
+      operationId: purchasePack
+      tags: [Packs]
+      summary: Record premium pack purchase
+      description: Server-side receipt validation. One-time purchase, owned forever.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchasePackRequest'
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurchaseResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  # ── Sessions ───────────────────────────────────────────
   /activities/affirmations/session/morning:
     get:
       operationId: getMorningSession
-      tags: [Affirmation Sessions]
-      summary: Get morning affirmation session
-      description: |
-        Returns a morning session containing 3 level-appropriate affirmations
-        and a daily intention prompt.
-
-        The content engine applies the 80/20 rule: ~80% of affirmations are drawn
-        from the user's current level, ~20% from the next level up. For a 3-card
-        session this means 2 at current level, 1 at the next level (or all current
-        level for Level 4 users).
-
-        Affirmations served within the last 7 days are excluded unless favorited.
-        Hidden affirmations are permanently excluded.
-
-        **Offline:** Loads from locally cached pool (minimum 30 affirmations).
-
-        Requires feature flag: `activity.affirmations`
+      tags: [Sessions]
+      summary: Get morning declaration session
+      description: Returns 3-5 declarations from active packs at user's current level (80/20 ratio).
       responses:
         '200':
-          description: OK - Morning session assembled
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/MorningSessionResponse'
-              example:
-                data:
-                  sessionId: aff_s1a2b3c4d5
-                  sessionType: morning
-                  affirmations:
-                    - id: aff_lib001
-                      text: "It is OK for me to talk to others about what I think and feel."
-                      level: 1
-                      coreBeliefs: [1]
-                      category: self-worth
-                      track: standard
-                      recoveryStage: early
-                      isFavorite: false
-                      hasAudio: false
-                    - id: aff_lib042
-                      text: "I am working my recovery. I am striving for progress, not perfection."
-                      level: 1
-                      coreBeliefs: [1, 4]
-                      category: daily-strength
-                      track: standard
-                      recoveryStage: early
-                      isFavorite: true
-                      hasAudio: true
-                    - id: aff_lib099
-                      text: "Asking for help is a sign of strength, not weakness."
-                      level: 2
-                      coreBeliefs: [3]
-                      category: connection
-                      track: standard
-                      recoveryStage: early
-                      isFavorite: false
-                      hasAudio: false
-                  intentionPrompt: "Today I choose to..."
-                  createdAt: "2026-04-08T07:00:00Z"
-                  links:
-                    self: /v1/activities/affirmations/session/morning
-                    complete: /v1/activities/affirmations/session/morning
-                meta:
-                  createdAt: "2026-04-08T07:00:00Z"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/FeatureDisabled' }
     post:
       operationId: completeMorningSession
-      tags: [Affirmation Sessions]
-      summary: Complete morning affirmation session
-      description: |
-        Records completion of a morning session. Captures the daily intention
-        (optional) and per-affirmation interactions (favorite, hide, duration).
-
-        The intention text is also written to the journal module as a pre-filled
-        prompt for the day. Session completion increments the cumulative session count.
-
-        Requires feature flag: `activity.affirmations`
+      tags: [Sessions]
+      summary: Complete morning session
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CompleteMorningRequest'
-            example:
-              sessionId: aff_s1a2b3c4d5
-              intention: "Today I choose to be patient with myself and reach out to my sponsor."
-              affirmationInteractions:
-                - affirmationId: aff_lib001
-                  favorited: false
-                  hidden: false
-                  durationViewed: 45
-                - affirmationId: aff_lib042
-                  favorited: true
-                  hidden: false
-                  durationViewed: 60
-                - affirmationId: aff_lib099
-                  favorited: false
-                  hidden: false
-                  durationViewed: 30
       responses:
         '201':
-          description: Created - Morning session recorded
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionCompletionResponse'
-              example:
-                data:
-                  sessionId: aff_s1a2b3c4d5
-                  sessionType: morning
-                  completedAt: "2026-04-08T07:05:00Z"
-                  totalSessions: 48
-                  milestone: null
-                  links:
-                    self: /v1/activities/affirmations/session/morning
-                    progress: /v1/activities/affirmations/progress
-                meta:
-                  createdAt: "2026-04-08T07:05:00Z"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '422': { $ref: '#/components/responses/ValidationError' }
 
   /activities/affirmations/session/evening:
     get:
       operationId: getEveningSession
-      tags: [Affirmation Sessions]
-      summary: Get evening reflection session
-      description: |
-        Returns an evening reflection containing one calming, level-appropriate
-        affirmation and the morning's daily intention (if recorded).
-
-        If the user skipped the morning session, the evening session loads without
-        the intention section. No shame messaging about missing the morning session.
-
-        **Offline:** Loads from locally cached affirmations; morning intention
-        stored locally.
-
-        Requires feature flag: `activity.affirmations`
+      tags: [Sessions]
+      summary: Get evening reflection
+      description: Returns 1 calming declaration (Level 1-2) plus morning intention recall.
       responses:
         '200':
-          description: OK - Evening session assembled
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EveningSessionResponse'
-              example:
-                data:
-                  sessionId: aff_s6e7f8g9h0
-                  sessionType: evening
-                  affirmation:
-                    id: aff_lib155
-                    text: "Today was enough. I was enough."
-                    level: 1
-                    coreBeliefs: [1]
-                    category: daily-strength
-                    track: standard
-                    recoveryStage: early
-                    isFavorite: false
-                    hasAudio: true
-                  morningIntention: "Today I choose to be patient with myself and reach out to my sponsor."
-                  ratingPrompt: "How did today feel?"
-                  createdAt: "2026-04-08T21:00:00Z"
-                  links:
-                    self: /v1/activities/affirmations/session/evening
-                    complete: /v1/activities/affirmations/session/evening
-                meta:
-                  createdAt: "2026-04-08T21:00:00Z"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
+        '404': { $ref: '#/components/responses/FeatureDisabled' }
     post:
       operationId: completeEveningSession
-      tags: [Affirmation Sessions]
-      summary: Complete evening reflection session
-      description: |
-        Records completion of an evening reflection. Captures the day rating (1-5)
-        and optional free-text reflection.
-
-        The day rating feeds into the mood trend chart using the same 1-5 scale as
-        the Mood Ratings activity. Compassionate, non-evaluative framing only.
-
-        Requires feature flag: `activity.affirmations`
+      tags: [Sessions]
+      summary: Complete evening reflection
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CompleteEveningRequest'
-            example:
-              sessionId: aff_s6e7f8g9h0
-              dayRating: 4
-              reflection: "Grateful for my sponsor's call today. Felt strong."
       responses:
         '201':
-          description: Created - Evening session recorded
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionCompletionResponse'
-              example:
-                data:
-                  sessionId: aff_s6e7f8g9h0
-                  sessionType: evening
-                  completedAt: "2026-04-08T21:05:00Z"
-                  totalSessions: 49
-                  milestone: null
-                  links:
-                    self: /v1/activities/affirmations/session/evening
-                    progress: /v1/activities/affirmations/progress
-                meta:
-                  createdAt: "2026-04-08T21:05:00Z"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '422': { $ref: '#/components/responses/ValidationError' }
 
-  # ──────────────────────────────────────────────────────────────────────
-  # SOS Mode
-  # ──────────────────────────────────────────────────────────────────────
-
+  # ── SOS Mode ───────────────────────────────────────────
   /activities/affirmations/sos:
     post:
       operationId: startSOSSession
       tags: [SOS Mode]
-      summary: Start SOS affirmation session
-      description: |
-        Immediately starts an SOS crisis session. Returns a Level 1-2 affirmation
-        from the SOS/Crisis category and a 4-7-8 breathing exercise.
-
-        SOS affirmations are always Level 1 or Level 2 regardless of the user's
-        current progression level. The response loads within 0-5 seconds.
-
-        **Offline:** Loads entirely from locally cached SOS pool and breathing
-        animation assets.
-
-        **Privacy:** SOS activation is never auto-shared with accountability
-        partners, sponsors, or therapists.
-
-        Requires feature flag: `activity.affirmations`
+      summary: Start SOS declaration session
+      description: Returns Level 1-2 declaration + breathing exercise. Never above Level 2.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartSOSRequest'
       responses:
         '201':
-          description: Created - SOS session started
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SOSSessionResponse'
-              example:
-                data:
-                  sosId: aff_sos_x1y2z3
-                  affirmation:
-                    id: aff_lib180
-                    text: "Right now, in this moment, I am safe. I can breathe."
-                    level: 1
-                    coreBeliefs: [1, 3]
-                    category: sos-crisis
-                    track: standard
-                    recoveryStage: early
-                    isFavorite: false
-                    hasAudio: false
-                  breathingExercise:
-                    pattern: "4-7-8"
-                    inhaleSeconds: 4
-                    holdSeconds: 7
-                    exhaleSeconds: 8
-                    cycles: 3
-                    durationSeconds: 57
-                  additionalAffirmations:
-                    - id: aff_lib182
-                      text: "This urge will pass. I have survived every urge before this one."
-                      level: 1
-                      coreBeliefs: [1]
-                      category: sos-crisis
-                      track: standard
-                      recoveryStage: early
-                      isFavorite: false
-                      hasAudio: false
-                    - id: aff_lib185
-                      text: "I can reach out. Someone cares about my struggle."
-                      level: 2
-                      coreBeliefs: [3]
-                      category: sos-crisis
-                      track: standard
-                      recoveryStage: early
-                      isFavorite: false
-                      hasAudio: false
-                  createdAt: "2026-04-08T14:30:00Z"
-                  links:
-                    self: /v1/activities/affirmations/sos
-                    complete: /v1/activities/affirmations/sos/aff_sos_x1y2z3/complete
-                meta:
-                  createdAt: "2026-04-08T14:30:00Z"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '404': { $ref: '#/components/responses/FeatureDisabled' }
 
   /activities/affirmations/sos/{sosId}/complete:
+    parameters:
+      - name: sosId
+        in: path
+        required: true
+        schema: { type: string, pattern: '^aff_sos_[a-zA-Z0-9]+$' }
     post:
       operationId: completeSOSSession
       tags: [SOS Mode]
       summary: Complete SOS session
-      description: |
-        Records completion of an SOS session. Captures whether the breathing
-        exercise was completed, whether the user reached out to their accountability
-        partner, and an optional post-check-in rating.
-
-        A gentle 10-minute follow-up notification ("How are you feeling now?") is
-        scheduled automatically. The post-check-in rating feeds into mood trend data.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: sosId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_sos_[a-zA-Z0-9]+$'
-          description: SOS session identifier
-          example: aff_sos_x1y2z3
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CompleteSOSRequest'
-            example:
-              breathingCompleted: true
-              reachedOut: false
-              postCheckInRating: 3
       responses:
-        '201':
-          description: Created - SOS session completion recorded
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
+        '200':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionCompletionResponse'
-              example:
-                data:
-                  sessionId: aff_sos_x1y2z3
-                  sessionType: sos
-                  completedAt: "2026-04-08T14:35:00Z"
-                  totalSessions: 50
-                  milestone:
-                    type: session-count
-                    threshold: 50
-                    message: "50 moments you chose recovery. That is real work."
-                  links:
-                    self: /v1/activities/affirmations/sos/aff_sos_x1y2z3/complete
-                    progress: /v1/activities/affirmations/progress
-                meta:
-                  createdAt: "2026-04-08T14:35:00Z"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '404': { $ref: '#/components/responses/NotFound' }
 
-  # ──────────────────────────────────────────────────────────────────────
-  # Library
-  # ──────────────────────────────────────────────────────────────────────
-
+  # ── Library ────────────────────────────────────────────
   /activities/affirmations/library:
     get:
-      operationId: browseAffirmationLibrary
-      tags: [Affirmation Library]
-      summary: Browse affirmation library
-      description: |
-        Browse the curated affirmation content library with filtering by category,
-        level, track, and keyword search. Hidden affirmations are excluded from
-        results. Returns paginated results with cursor-based pagination.
-
-        Requires feature flag: `activity.affirmations`
+      operationId: browseLibrary
+      tags: [Library]
+      summary: Browse declarations
       parameters:
         - name: category
           in: query
-          schema:
-            $ref: '#/components/schemas/AffirmationCategory'
-          description: Filter by content category
+          schema: { $ref: '#/components/schemas/AffirmationCategory' }
         - name: level
           in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 4
-          description: Filter by affirmation level (1-4)
-        - name: track
+          schema: { type: integer, minimum: 1, maximum: 4 }
+        - name: packId
           in: query
-          schema:
-            $ref: '#/components/schemas/Track'
-          description: Filter by content track
+          schema: { type: string }
         - name: keyword
           in: query
-          schema:
-            type: string
-            maxLength: 100
-          description: Free-text keyword search within affirmation text
-        - name: cursor
-          in: query
-          schema:
-            type: string
-          description: Pagination cursor from previous response
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
-          description: Maximum number of results per page
+          schema: { type: string, maxLength: 100 }
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: OK - Affirmations retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AffirmationListResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '404': { $ref: '#/components/responses/FeatureDisabled' }
 
   /activities/affirmations/library/{affirmationId}:
+    parameters:
+      - $ref: '#/components/parameters/AffirmationId'
     get:
       operationId: getAffirmation
-      tags: [Affirmation Library]
-      summary: Get a single affirmation
-      description: |
-        Retrieve a single affirmation by ID. Includes user-specific state
-        (favorite, hidden, audio availability).
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Affirmation identifier
-          example: aff_lib001
+      tags: [Library]
+      summary: Get single declaration
       responses:
         '200':
-          description: OK - Affirmation retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AffirmationResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '404': { $ref: '#/components/responses/NotFound' }
 
-  # ──────────────────────────────────────────────────────────────────────
-  # Favorites & Hidden
-  # ──────────────────────────────────────────────────────────────────────
-
+  # ── Favorites ──────────────────────────────────────────
   /activities/affirmations/favorites:
-    post:
-      operationId: addFavorite
-      tags: [Favorites & Hidden]
-      summary: Add affirmation to favorites
-      description: |
-        Adds an affirmation to the user's favorites collection. Favorited
-        affirmations receive priority weighting in the session selection algorithm
-        and are exempt from the 7-day no-repeat window.
-
-        Requires feature flag: `activity.affirmations`
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - affirmationId
-              properties:
-                affirmationId:
-                  type: string
-                  pattern: '^aff_[a-zA-Z0-9]+$'
-                  description: ID of the affirmation to favorite
-            example:
-              affirmationId: aff_lib042
-      responses:
-        '201':
-          description: Created - Affirmation favorited
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      affirmationId:
-                        type: string
-                      favoritedAt:
-                        type: string
-                        format: date-time
-                      links:
-                        $ref: '#/components/schemas/Links'
-                  meta:
-                    $ref: '#/components/schemas/Metadata'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
     get:
       operationId: listFavorites
       tags: [Favorites & Hidden]
-      summary: List favorite affirmations
-      description: |
-        Returns all affirmations the user has favorited, with cursor-based
-        pagination.
-
-        Requires feature flag: `activity.affirmations`
+      summary: List favorite declarations
       parameters:
-        - name: cursor
-          in: query
-          schema:
-            type: string
-          description: Pagination cursor
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
-          description: Maximum results per page
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: OK - Favorites retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AffirmationListResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: addFavorite
+      tags: [Favorites & Hidden]
+      summary: Add declaration to favorites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FavoriteRequest'
+      responses:
+        '201': { description: Added to favorites }
+        '409': { description: Already favorited }
 
   /activities/affirmations/favorites/{affirmationId}:
+    parameters:
+      - $ref: '#/components/parameters/AffirmationId'
     delete:
       operationId: removeFavorite
       tags: [Favorites & Hidden]
-      summary: Remove affirmation from favorites
-      description: |
-        Removes an affirmation from the user's favorites. The affirmation remains
-        in the library and in session rotation but loses priority weighting.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Affirmation identifier
-          example: aff_lib042
+      summary: Remove from favorites
       responses:
-        '204':
-          description: No Content - Favorite removed
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '204': { description: Removed }
+        '404': { $ref: '#/components/responses/NotFound' }
 
+  # ── Hidden ─────────────────────────────────────────────
   /activities/affirmations/hidden:
-    post:
-      operationId: hideAffirmation
-      tags: [Favorites & Hidden]
-      summary: Hide an affirmation
-      description: |
-        Hides an affirmation permanently for this user. Hidden affirmations are
-        excluded from all future sessions, library browsing, and content delivery.
-        No explanation is required from the user.
-
-        If 5+ affirmations are hidden within a single session, a clinical safeguard
-        flag is logged internally.
-
-        Requires feature flag: `activity.affirmations`
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - affirmationId
-              properties:
-                affirmationId:
-                  type: string
-                  pattern: '^aff_[a-zA-Z0-9]+$'
-                  description: ID of the affirmation to hide
-                sessionId:
-                  type: string
-                  description: Session ID if hiding during an active session (for replacement tracking)
-            example:
-              affirmationId: aff_lib099
-              sessionId: aff_s1a2b3c4d5
-      responses:
-        '201':
-          description: Created - Affirmation hidden
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      affirmationId:
-                        type: string
-                      hiddenAt:
-                        type: string
-                        format: date-time
-                      replacement:
-                        description: Replacement affirmation if hidden during a session
-                        $ref: '#/components/schemas/Affirmation'
-                      links:
-                        $ref: '#/components/schemas/Links'
-                  meta:
-                    $ref: '#/components/schemas/Metadata'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
     get:
       operationId: listHidden
       tags: [Favorites & Hidden]
-      summary: List hidden affirmations
-      description: |
-        Returns all affirmations the user has hidden, with cursor-based pagination.
-        Useful for the settings screen where users can review and un-hide.
-
-        Requires feature flag: `activity.affirmations`
+      summary: List hidden declarations
       parameters:
-        - name: cursor
-          in: query
-          schema:
-            type: string
-          description: Pagination cursor
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
-          description: Maximum results per page
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: OK - Hidden affirmations retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AffirmationListResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /activities/affirmations/hidden/{affirmationId}:
-    delete:
-      operationId: unhideAffirmation
-      tags: [Favorites & Hidden]
-      summary: Un-hide an affirmation
-      description: |
-        Removes an affirmation from the hidden list, restoring it to library
-        browsing and session eligibility.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Affirmation identifier
-          example: aff_lib099
-      responses:
-        '204':
-          description: No Content - Affirmation un-hidden
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  # ──────────────────────────────────────────────────────────────────────
-  # Custom Affirmations
-  # ──────────────────────────────────────────────────────────────────────
-
-  /activities/affirmations/custom:
     post:
-      operationId: createCustomAffirmation
-      tags: [Custom Affirmations]
-      summary: Create a custom affirmation
-      description: |
-        Creates a user-authored affirmation. Requires Day 14+ sobriety gate.
-
-        Custom affirmations are editable within 24 hours of creation (AFF-NFR-003).
-        After 24 hours the text becomes read-only; users can still hide, favorite,
-        or delete.
-
-        The response includes directed abstraction prompts and present-tense
-        positive framing guidance. Custom affirmations are not reviewed by staff.
-
-        Requires feature flag: `activity.affirmations`
+      operationId: hideAffirmation
+      tags: [Favorites & Hidden]
+      summary: Hide a declaration
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateCustomAffirmationRequest'
-            example:
-              text: "I am learning to trust myself again, one choice at a time."
-              includeInRotation: true
+              $ref: '#/components/schemas/HideRequest'
       responses:
-        '201':
-          description: Created - Custom affirmation saved
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CustomAffirmationResponse'
-              example:
-                data:
-                  customId: aff_cust_a1b2c3
-                  text: "I am learning to trust myself again, one choice at a time."
-                  includeInRotation: true
-                  isEditable: true
-                  editableUntil: "2026-04-09T07:10:00Z"
-                  createdAt: "2026-04-08T07:10:00Z"
-                  modifiedAt: "2026-04-08T07:10:00Z"
-                  links:
-                    self: /v1/activities/affirmations/custom/aff_cust_a1b2c3
-                meta:
-                  createdAt: "2026-04-08T07:10:00Z"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '201': { description: Hidden }
 
+  /activities/affirmations/hidden/{affirmationId}:
+    parameters:
+      - $ref: '#/components/parameters/AffirmationId'
+    delete:
+      operationId: unhideAffirmation
+      tags: [Favorites & Hidden]
+      summary: Unhide a declaration
+      responses:
+        '204': { description: Unhidden }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Custom Declarations ────────────────────────────────
+  /activities/affirmations/custom:
     get:
-      operationId: listCustomAffirmations
-      tags: [Custom Affirmations]
-      summary: List custom affirmations
-      description: |
-        Returns all user-created custom affirmations with cursor-based pagination.
-        Includes rotation and editability state.
-
-        Requires feature flag: `activity.affirmations`
+      operationId: listCustomDeclarations
+      tags: [Custom Declarations]
+      summary: List user's custom declarations
       parameters:
-        - name: cursor
+        - name: packId
           in: query
-          schema:
-            type: string
-          description: Pagination cursor
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
-          description: Maximum results per page
+          schema: { type: string }
+          description: Filter by custom pack
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
-          description: OK - Custom affirmations retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomAffirmationListResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: '#/components/schemas/CustomDeclarationListResponse'
+    post:
+      operationId: createCustomDeclaration
+      tags: [Custom Declarations]
+      summary: Create a custom declaration
+      description: Available from Day 14+. Max 280 characters. Must belong to a custom pack.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomDeclarationRequest'
+      responses:
+        '201':
+          headers:
+            Location: { schema: { type: string } }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomDeclarationResponse'
+        '422': { $ref: '#/components/responses/ValidationError' }
 
   /activities/affirmations/custom/{affirmationId}:
+    parameters:
+      - $ref: '#/components/parameters/AffirmationId'
     patch:
-      operationId: updateCustomAffirmation
-      tags: [Custom Affirmations]
-      summary: Update a custom affirmation
-      description: |
-        Updates a custom affirmation. Text is editable only within 24 hours of
-        creation (AFF-NFR-003). After 24 hours, only `includeInRotation` can be
-        modified.
-
-        The `createdAt` timestamp is immutable; only `modifiedAt` changes.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_cust_[a-zA-Z0-9]+$'
-          description: Custom affirmation identifier
-          example: aff_cust_a1b2c3
+      operationId: updateCustomDeclaration
+      tags: [Custom Declarations]
+      summary: Update a custom declaration
       requestBody:
         required: true
         content:
           application/merge-patch+json:
             schema:
-              $ref: '#/components/schemas/UpdateCustomAffirmationRequest'
-            example:
-              text: "I am learning to trust myself again, one honest choice at a time."
-              includeInRotation: true
+              $ref: '#/components/schemas/UpdateCustomDeclarationRequest'
       responses:
         '200':
-          description: OK - Custom affirmation updated
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CustomAffirmationResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
+                $ref: '#/components/schemas/CustomDeclarationResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
+        '422': { $ref: '#/components/responses/ValidationError' }
     delete:
-      operationId: deleteCustomAffirmation
-      tags: [Custom Affirmations]
-      summary: Delete a custom affirmation
-      description: |
-        Permanently deletes a custom affirmation from the user's library and
-        session rotation.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_cust_[a-zA-Z0-9]+$'
-          description: Custom affirmation identifier
-          example: aff_cust_a1b2c3
+      operationId: deleteCustomDeclaration
+      tags: [Custom Declarations]
+      summary: Delete a custom declaration
       responses:
-        '204':
-          description: No Content - Custom affirmation deleted
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
 
-  # ──────────────────────────────────────────────────────────────────────
-  # Audio Recordings
-  # ──────────────────────────────────────────────────────────────────────
-
+  # ── Audio Recordings ───────────────────────────────────
   /activities/affirmations/{affirmationId}/audio:
+    parameters:
+      - $ref: '#/components/parameters/AffirmationId'
+    get:
+      operationId: getAudioRecording
+      tags: [Audio Recordings]
+      summary: Get audio recording metadata
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudioRecordingResponse'
+        '404': { $ref: '#/components/responses/NotFound' }
     post:
       operationId: uploadAudioRecording
       tags: [Audio Recordings]
-      summary: Upload an audio recording for an affirmation
-      description: |
-        Uploads an own-voice audio recording for an affirmation. Accepts AAC-encoded
-        .m4a files (64kbps minimum). Maximum recording length is 60 seconds.
-
-        Audio is stored locally by default. Cloud sync requires explicit opt-in.
-        Audio recordings are never shared with accountability partners.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Affirmation identifier (curated or custom)
-          example: aff_lib042
+      summary: Upload own-voice recording
+      description: Max 60 seconds. AAC 64kbps .m4a. Local-first storage.
       requestBody:
         required: true
         content:
           multipart/form-data:
             schema:
-              type: object
-              required:
-                - file
-                - backgroundMusic
-              properties:
-                file:
-                  type: string
-                  format: binary
-                  description: AAC-encoded .m4a audio file (max 60 seconds, 64kbps minimum)
-                backgroundMusic:
-                  $ref: '#/components/schemas/BackgroundMusic'
-            encoding:
-              file:
-                contentType: audio/mp4, audio/x-m4a
+              $ref: '#/components/schemas/UploadAudioRequest'
       responses:
         '201':
-          description: Created - Audio recording uploaded
-          headers:
-            Location:
-              schema:
-                type: string
-                format: uri
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AudioRecordingResponse'
-              example:
-                data:
-                  recordingId: aff_rec_r1s2t3
-                  affirmationId: aff_lib042
-                  format: m4a
-                  durationSeconds: 12
-                  backgroundMusic: nature
-                  sizeBytes: 96000
-                  createdAt: "2026-04-08T07:15:00Z"
-                  links:
-                    self: /v1/activities/affirmations/aff_lib042/audio
-                    playback: /v1/activities/affirmations/aff_lib042/audio
-                meta:
-                  createdAt: "2026-04-08T07:15:00Z"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-    get:
-      operationId: getAudioRecording
-      tags: [Audio Recordings]
-      summary: Get audio recording metadata and playback URL
-      description: |
-        Returns metadata and a playback URL for the audio recording associated
-        with an affirmation. If no recording exists, returns 404.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Affirmation identifier
-          example: aff_lib042
-      responses:
-        '200':
-          description: OK - Audio recording metadata retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AudioRecordingResponse'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
+        '422': { $ref: '#/components/responses/ValidationError' }
     delete:
       operationId: deleteAudioRecording
       tags: [Audio Recordings]
       summary: Delete audio recording
-      description: |
-        Permanently removes the audio recording from local storage (and cloud if
-        synced). The affirmation text remains.
-
-        Requires feature flag: `activity.affirmations`
-      parameters:
-        - name: affirmationId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Affirmation identifier
-          example: aff_lib042
       responses:
-        '204':
-          description: No Content - Audio recording deleted
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
 
-  # ──────────────────────────────────────────────────────────────────────
-  # Progress & Settings
-  # ──────────────────────────────────────────────────────────────────────
-
+  # ── Progress & Settings ────────────────────────────────
   /activities/affirmations/progress:
     get:
-      operationId: getAffirmationProgress
+      operationId: getProgress
       tags: [Progress & Settings]
-      summary: Get cumulative progress metrics
-      description: |
-        Returns cumulative (not streak-based) progress metrics for the affirmation
-        practice. Includes total sessions, total affirmations practiced, total SOS
-        sessions, 30-day consistency calendar, and milestones achieved.
-
-        Empty days on the consistency calendar use neutral colors only. No attention
-        is drawn to missed days (AFF-AC-099).
-
-        Requires feature flag: `activity.affirmations`
+      summary: Get cumulative progress
+      description: All metrics are cumulative. No streak counters.
       responses:
         '200':
-          description: OK - Progress metrics retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AffirmationProgressResponse'
-              example:
-                data:
-                  totalSessions: 49
-                  totalMorningSessions: 30
-                  totalEveningSessions: 15
-                  totalSOSSessions: 4
-                  totalAffirmationsPracticed: 134
-                  totalCustomCreated: 3
-                  totalAudioRecordings: 2
-                  totalFavorites: 7
-                  totalHidden: 2
-                  consistency30d:
-                    - date: "2026-03-09"
-                      sessions: 2
-                    - date: "2026-03-10"
-                      sessions: 0
-                    - date: "2026-03-11"
-                      sessions: 1
-                  milestones:
-                    - type: session-count
-                      threshold: 1
-                      achievedAt: "2026-02-20T07:05:00Z"
-                    - type: session-count
-                      threshold: 10
-                      achievedAt: "2026-02-28T07:03:00Z"
-                    - type: session-count
-                      threshold: 25
-                      achievedAt: "2026-03-15T07:04:00Z"
-                    - type: first-custom
-                      threshold: 1
-                      achievedAt: "2026-03-10T08:00:00Z"
-                    - type: first-audio
-                      threshold: 1
-                      achievedAt: "2026-03-20T07:15:00Z"
-                  links:
-                    self: /v1/activities/affirmations/progress
-                meta:
-                  generatedAt: "2026-04-08T12:00:00Z"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: '#/components/schemas/ProgressResponse'
+        '404': { $ref: '#/components/responses/FeatureDisabled' }
 
   /activities/affirmations/settings:
     get:
-      operationId: getAffirmationSettings
+      operationId: getSettings
       tags: [Progress & Settings]
-      summary: Get affirmation settings
-      description: |
-        Returns the user's affirmation feature settings including delivery times,
-        track selection, level override, enabled categories, and healthy sexuality
-        opt-in status.
-
-        Requires feature flag: `activity.affirmations`
+      summary: Get user settings
       responses:
         '200':
-          description: OK - Settings retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AffirmationSettingsResponse'
-              example:
-                data:
-                  morningTime: "07:00"
-                  eveningTime: "21:00"
-                  track: standard
-                  levelOverride: null
-                  enabledCategories:
-                    - self-worth
-                    - shame-resilience
-                    - healthy-relationships
-                    - connection
-                    - emotional-regulation
-                    - purpose-meaning
-                    - integrity-honesty
-                    - daily-strength
-                    - sos-crisis
-                  healthySexualityEnabled: false
-                  audioAutoPlay: false
-                  cloudAudioSync: false
-                  links:
-                    self: /v1/activities/affirmations/settings
-                meta:
-                  modifiedAt: "2026-03-01T10:00:00Z"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
+                $ref: '#/components/schemas/SettingsResponse'
     patch:
-      operationId: updateAffirmationSettings
+      operationId: updateSettings
       tags: [Progress & Settings]
-      summary: Update affirmation settings
-      description: |
-        Partially updates the user's affirmation settings using JSON Merge Patch
-        (RFC 7396). Only fields present in the request body are modified.
-
-        The Healthy Sexuality category requires 60+ sobriety days AND explicit opt-in.
-        Attempting to enable it before 60 days returns 422.
-
-        Requires feature flag: `activity.affirmations`
+      summary: Update settings
       requestBody:
         required: true
         content:
           application/merge-patch+json:
             schema:
-              $ref: '#/components/schemas/UpdateAffirmationSettingsRequest'
-            example:
-              morningTime: "06:30"
-              track: faith-based
+              $ref: '#/components/schemas/UpdateSettingsRequest'
       responses:
         '200':
-          description: OK - Settings updated
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AffirmationSettingsResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: '#/components/schemas/SettingsResponse'
+        '422': { $ref: '#/components/responses/ValidationError' }
 
   /activities/affirmations/level:
     get:
       operationId: getLevelInfo
       tags: [Progress & Settings]
-      summary: Get current level information
-      description: |
-        Returns the user's current affirmation level, time at level, days in
-        recovery, next-level eligibility, and whether they can request a manual
-        level upgrade (requires 30+ days at current level).
-
-        Requires feature flag: `activity.affirmations`
+      summary: Get current level and progression info
       responses:
         '200':
-          description: OK - Level information retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LevelInfoResponse'
-              example:
-                data:
-                  currentLevel: 2
-                  levelName: process
-                  daysAtLevel: 46
-                  daysInRecovery: 60
-                  nextLevelEligible: true
-                  nextLevelName: tempered-identity
-                  nextLevelAutoUnlockDay: 60
-                  canRequestUpgrade: true
-                  upgradeEligibleAt: null
-                  levelHistory:
-                    - level: 1
-                      startedAt: "2026-02-07T00:00:00Z"
-                      endedAt: "2026-02-21T00:00:00Z"
-                      trigger: auto
-                    - level: 2
-                      startedAt: "2026-02-21T00:00:00Z"
-                      endedAt: null
-                      trigger: auto
-                  links:
-                    self: /v1/activities/affirmations/level
-                    override: /v1/activities/affirmations/level/override
-                meta:
-                  evaluatedAt: "2026-04-08T12:00:00Z"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
 
   /activities/affirmations/level/override:
     post:
       operationId: requestLevelOverride
       tags: [Progress & Settings]
-      summary: Request a level change
-      description: |
-        Requests a manual level change. Upgrades require 30+ days at the current
-        level (AFF-AC-006). Downgrades to any lower level are always allowed
-        (AFF-AC-005).
-
-        Level changes are logged with a timestamp for clinical review.
-
-        Requires feature flag: `activity.affirmations`
+      summary: Request level change
+      description: Can always move down. Upgrade requires 30 days at current level.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/LevelOverrideRequest'
-            example:
-              targetLevel: 3
-              direction: upgrade
       responses:
         '200':
-          description: OK - Level change applied
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LevelInfoResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        '422': { $ref: '#/components/responses/ValidationError' }
 
-  # ──────────────────────────────────────────────────────────────────────
-  # Sharing
-  # ──────────────────────────────────────────────────────────────────────
-
+  # ── Sharing ────────────────────────────────────────────
   /activities/affirmations/sharing/summary:
     get:
       operationId: getSharingSummary
       tags: [Sharing]
       summary: Get privacy-safe sharing summary
-      description: |
-        Returns a privacy-safe summary of the user's affirmation practice for
-        accountability partners. Contains session counts ONLY. No affirmation text,
-        custom content, audio recordings, journal reflections, or mood ratings.
-
-        Requires feature flag: `activity.affirmations`
+      description: Session count only. Never declaration content.
       responses:
         '200':
-          description: OK - Sharing summary retrieved
-          headers:
-            Api-Version:
-              $ref: '#/components/headers/Api-Version'
-            X-Correlation-Id:
-              $ref: '#/components/headers/X-Correlation-Id'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SharingSummaryResponse'
-              example:
-                data:
-                  sessionsThisWeek: 5
-                  sessionsThisMonth: 18
-                  totalSessions: 49
-                  lastSessionAt: "2026-04-08T07:05:00Z"
-                  links:
-                    self: /v1/activities/affirmations/sharing/summary
-                meta:
-                  generatedAt: "2026-04-08T12:00:00Z"
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-# ════════════════════════════════════════════════════════════════════════
-# Components
-# ════════════════════════════════════════════════════════════════════════
 
 components:
   securitySchemes:
@@ -1562,28 +592,46 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: AWS Cognito JWT access token
 
-  headers:
-    Api-Version:
-      description: Semantic version of the API
+  parameters:
+    PackId:
+      name: packId
+      in: path
+      required: true
       schema:
         type: string
-        example: "1.0.0"
-    X-Correlation-Id:
-      description: Request correlation ID for distributed tracing
+        pattern: '^aff_pack_[a-zA-Z0-9]+$'
+    AffirmationId:
+      name: affirmationId
+      in: path
+      required: true
       schema:
         type: string
-        format: uuid
-
-  # ────────────────────────────────────────────────────────────────────
-  # Schemas
-  # ────────────────────────────────────────────────────────────────────
+        pattern: '^aff_(lib|cust)_[a-zA-Z0-9]+$'
+    PackTypeFilter:
+      name: type
+      in: query
+      schema:
+        type: string
+        enum: [default, premium, custom, all]
+        default: all
+    CategoryFilter:
+      name: category
+      in: query
+      schema:
+        $ref: '#/components/schemas/AffirmationCategory'
+    Cursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+      description: Opaque cursor for pagination
+    Limit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
 
   schemas:
-
-    # ── Enums ────────────────────────────────────────────────────────
-
+    # ── Enums ──────────────────────────────────────────
     AffirmationCategory:
       type: string
       enum:
@@ -1597,1056 +645,620 @@ components:
         - daily-strength
         - healthy-sexuality
         - sos-crisis
-      description: |
-        Content category for affirmations. 10 categories based on Patrick Carnes'
-        core belief model and clinical recovery domains.
 
     AffirmationLevel:
       type: integer
       minimum: 1
       maximum: 4
-      description: |
-        Clinical progression level:
-        - 1: Permission (Day 0+)
-        - 2: Process (Day 14+)
-        - 3: Tempered Identity (Day 60+)
-        - 4: Full Identity (Day 180+)
+      description: "1=Permission, 2=Process, 3=Tempered Identity, 4=Full Identity"
 
-    Track:
+    PackType:
       type: string
-      enum:
-        - standard
-        - faith-based
-      description: Content track selection. Default is standard.
+      enum: [default, premium, custom]
 
-    RecoveryStage:
+    SessionType:
       type: string
-      enum:
-        - early
-        - middle
-        - established
-      description: Recovery stage classification for the affirmation
+      enum: [morning, evening, sos, on-demand]
+
+    EntryPath:
+      type: string
+      enum: [today, work, sos, notification, widget, post-relapse]
 
     BackgroundMusic:
       type: string
-      enum:
-        - nature
-        - ocean
-        - rain
-        - soft-tones
-        - silence
-      description: Ambient background music preset for audio recordings
+      enum: [worship, nature, hymns, atmospheric, silence]
 
-    # ── Core Models ──────────────────────────────────────────────────
-
+    # ── Core Data ──────────────────────────────────────
     Affirmation:
       type: object
-      description: A single affirmation from the curated library
-      required:
-        - id
-        - text
-        - level
-        - coreBeliefs
-        - category
-        - track
-        - recoveryStage
+      required: [affirmationId, text, scriptureReference, level, coreBeliefs, category]
       properties:
-        id:
-          type: string
-          pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Unique affirmation identifier
-          example: aff_lib001
-        text:
-          type: string
-          maxLength: 500
-          description: Affirmation text content
-          example: "It is OK for me to talk to others about what I think and feel."
-        level:
-          $ref: '#/components/schemas/AffirmationLevel'
+        affirmationId: { type: string, pattern: '^aff_lib_[a-zA-Z0-9]+$' }
+        packId: { type: string }
+        text: { type: string, maxLength: 500 }
+        scriptureReference: { type: string, description: "e.g., 'Romans 8:1'" }
+        scriptureText: { type: string, description: "Full verse text" }
+        expansion: { type: string, description: "1-2 sentence reflection" }
+        prayer: { type: string, nullable: true, description: "Short prayer related to this truth" }
+        level: { $ref: '#/components/schemas/AffirmationLevel' }
         coreBeliefs:
           type: array
-          items:
-            type: integer
-            minimum: 1
-            maximum: 4
+          items: { type: integer, minimum: 1, maximum: 4 }
           minItems: 1
-          maxItems: 4
-          description: Which of Carnes' 4 core beliefs this affirmation counters (1-4)
-          example: [1, 3]
-        category:
-          $ref: '#/components/schemas/AffirmationCategory'
-        track:
-          $ref: '#/components/schemas/Track'
-        recoveryStage:
-          $ref: '#/components/schemas/RecoveryStage'
-        isFavorite:
-          type: boolean
-          description: Whether this affirmation is in the user's favorites
-          default: false
-        hasAudio:
-          type: boolean
-          description: Whether the user has an audio recording for this affirmation
-          default: false
+          description: "Carnes' core beliefs countered (1-4)"
+        category: { $ref: '#/components/schemas/AffirmationCategory' }
+        tags:
+          type: array
+          items: { type: string }
+        audioAvailable: { type: boolean, default: false }
+        isFavorited: { type: boolean }
+        isHidden: { type: boolean }
 
-    CustomAffirmation:
+    Pack:
       type: object
-      description: A user-created custom affirmation
-      required:
-        - customId
-        - text
-        - includeInRotation
-        - createdAt
+      required: [packId, name, type, category, affirmationCount]
       properties:
-        customId:
-          type: string
-          pattern: '^aff_cust_[a-zA-Z0-9]+$'
-          description: Unique custom affirmation identifier
-          example: aff_cust_a1b2c3
-        text:
-          type: string
-          maxLength: 500
-          description: User-authored affirmation text
-          example: "I am learning to trust myself again, one choice at a time."
-        includeInRotation:
-          type: boolean
-          description: Whether to include in daily session rotation alongside curated affirmations
-          default: true
-        isEditable:
-          type: boolean
-          description: Whether the text can still be edited (within 24-hour window)
-        editableUntil:
-          type: string
-          format: date-time
-          description: Timestamp after which text becomes read-only
-        isFavorite:
-          type: boolean
-          description: Whether this custom affirmation is favorited
-          default: false
-        isHidden:
-          type: boolean
-          description: Whether this custom affirmation is hidden from rotation
-          default: false
-        hasAudio:
-          type: boolean
-          description: Whether the user has an audio recording
-          default: false
-        createdAt:
-          type: string
-          format: date-time
-          description: Creation timestamp (immutable per FR2.7)
-        modifiedAt:
-          type: string
-          format: date-time
-          description: Last modification timestamp
-
-    AudioRecordingMetadata:
-      type: object
-      description: Metadata for an own-voice audio recording
-      required:
-        - recordingId
-        - affirmationId
-        - format
-        - durationSeconds
-        - backgroundMusic
-      properties:
-        recordingId:
-          type: string
-          pattern: '^aff_rec_[a-zA-Z0-9]+$'
-          description: Unique recording identifier
-          example: aff_rec_r1s2t3
-        affirmationId:
-          type: string
-          pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Associated affirmation identifier
-          example: aff_lib042
-        format:
-          type: string
-          enum: [m4a]
-          description: Audio file format (AAC-encoded .m4a, 64kbps minimum)
-        durationSeconds:
+        packId: { type: string, pattern: '^aff_pack_[a-zA-Z0-9]+$' }
+        name: { type: string, maxLength: 50 }
+        description: { type: string, maxLength: 500 }
+        coverImage: { type: string, format: uri }
+        type: { $ref: '#/components/schemas/PackType' }
+        category: { $ref: '#/components/schemas/AffirmationCategory' }
+        primaryLevel: { $ref: '#/components/schemas/AffirmationLevel' }
+        affirmationCount: { type: integer }
+        price:
           type: number
-          format: float
-          minimum: 0.1
-          maximum: 60
-          description: Recording duration in seconds (max 60)
-          example: 12.5
-        backgroundMusic:
-          $ref: '#/components/schemas/BackgroundMusic'
-        sizeBytes:
-          type: integer
-          minimum: 0
-          description: File size in bytes
-          example: 96000
-        playbackUrl:
-          type: string
-          format: uri
-          description: Signed URL for audio playback (time-limited)
-        cloudSynced:
-          type: boolean
-          description: Whether the recording has been synced to cloud storage
-          default: false
-        createdAt:
-          type: string
-          format: date-time
-          description: Recording creation timestamp (immutable per FR2.7)
+          nullable: true
+          description: "null for default/custom; amount in USD for premium"
+        isOwned: { type: boolean, description: "true for default, custom, or purchased premium" }
+        isLocked: { type: boolean, description: "true for unpurchased premium packs" }
+        previewAffirmations:
+          type: array
+          items: { $ref: '#/components/schemas/Affirmation' }
+          maxItems: 3
+          description: "3 sample declarations for premium preview"
+        includeInRotation: { type: boolean }
+        schedule: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
 
-    AffirmationProgress:
+    CustomDeclaration:
       type: object
-      description: Cumulative progress metrics (never streak-based)
+      required: [customId, packId, text]
       properties:
-        totalSessions:
-          type: integer
-          minimum: 0
-          description: Total cumulative session count (morning + evening + SOS)
-          example: 49
-        totalMorningSessions:
-          type: integer
-          minimum: 0
-          description: Total morning sessions completed
-        totalEveningSessions:
-          type: integer
-          minimum: 0
-          description: Total evening sessions completed
-        totalSOSSessions:
-          type: integer
-          minimum: 0
-          description: Total SOS sessions completed
-        totalAffirmationsPracticed:
-          type: integer
-          minimum: 0
-          description: Total individual affirmations practiced across all sessions
-          example: 134
-        totalCustomCreated:
-          type: integer
-          minimum: 0
-          description: Total custom affirmations created
-        totalAudioRecordings:
-          type: integer
-          minimum: 0
-          description: Total audio recordings saved
-        totalFavorites:
-          type: integer
-          minimum: 0
-          description: Current number of favorited affirmations
-        totalHidden:
-          type: integer
-          minimum: 0
-          description: Current number of hidden affirmations
+        customId: { type: string, pattern: '^aff_cust_[a-zA-Z0-9]+$' }
+        packId: { type: string, description: "Custom pack this belongs to" }
+        text: { type: string, maxLength: 280 }
+        scriptureReference: { type: string, nullable: true }
+        scriptureText: { type: string, nullable: true }
+        includeInRotation: { type: boolean, default: true }
+        createdAt: { type: string, format: date-time, description: "Immutable (FR2.7)" }
+        updatedAt: { type: string, format: date-time }
+
+    AudioRecording:
+      type: object
+      properties:
+        recordingId: { type: string, pattern: '^aff_rec_[a-zA-Z0-9]+$' }
+        affirmationId: { type: string }
+        format: { type: string, enum: [m4a] }
+        durationSeconds: { type: integer, maximum: 60 }
+        backgroundMusic: { $ref: '#/components/schemas/BackgroundMusic' }
+        backgroundVolume: { type: number, minimum: 0.0, maximum: 1.0, default: 0.4 }
+        createdAt: { type: string, format: date-time }
+
+    # ── Session Schemas ────────────────────────────────
+    MorningSessionData:
+      type: object
+      properties:
+        affirmations:
+          type: array
+          items: { $ref: '#/components/schemas/Affirmation' }
+          minItems: 3
+          maxItems: 5
+        intentionPrompt: { type: string, default: "Today, empowered by the Spirit, I choose to..." }
+        levelServed: { $ref: '#/components/schemas/AffirmationLevel' }
+        centeringText: { type: string, default: "Take a breath. God is with you." }
+
+    EveningSessionData:
+      type: object
+      properties:
+        affirmation: { $ref: '#/components/schemas/Affirmation' }
+        morningIntention: { type: string, nullable: true }
+        levelServed: { $ref: '#/components/schemas/AffirmationLevel' }
+
+    SOSSessionData:
+      type: object
+      properties:
+        sosId: { type: string, pattern: '^aff_sos_[a-zA-Z0-9]+$' }
+        affirmations:
+          type: array
+          items: { $ref: '#/components/schemas/Affirmation' }
+          minItems: 3
+          maxItems: 3
+        breathingExercise:
+          type: object
+          properties:
+            pattern: { type: string, default: "4-7-8" }
+            inhaleSeconds: { type: integer, default: 4 }
+            holdSeconds: { type: integer, default: 7 }
+            exhaleSeconds: { type: integer, default: 8 }
+            durationSeconds: { type: integer, default: 30 }
+            scripture: { type: string, default: "God is our refuge and strength. (Psalm 46:1)" }
+        levelServed: { $ref: '#/components/schemas/AffirmationLevel' }
+
+    SessionCompletion:
+      type: object
+      properties:
+        sessionId: { type: string, pattern: '^aff_sess_[a-zA-Z0-9]+$' }
+        sessionType: { $ref: '#/components/schemas/SessionType' }
+        completedAt: { type: string, format: date-time }
+        totalSessions: { type: integer, description: "Updated cumulative total" }
+        milestone:
+          type: object
+          nullable: true
+          properties:
+            type: { type: string }
+            message: { type: string }
+
+    # ── Progress & Settings ────────────────────────────
+    ProgressData:
+      type: object
+      properties:
+        totalSessions: { type: integer }
+        totalDeclarationsPracticed: { type: integer }
+        totalSOSSessions: { type: integer }
+        totalCustomCreated: { type: integer }
+        totalAudioRecorded: { type: integer }
+        packsExplored: { type: integer }
+        currentLevel: { $ref: '#/components/schemas/AffirmationLevel' }
         consistency30d:
           type: array
           items:
-            $ref: '#/components/schemas/DayConsistency'
+            type: object
+            properties:
+              date: { type: string, format: date }
+              sessionCount: { type: integer }
           maxItems: 30
-          description: |
-            30-day calendar of session counts. Neutral representation only;
-            days with 0 sessions have no failure indicator.
         milestones:
           type: array
           items:
-            $ref: '#/components/schemas/Milestone'
-          description: All milestones achieved
+            type: object
+            properties:
+              type: { type: string }
+              achievedAt: { type: string, format: date-time }
+              message: { type: string }
+        lastSessionAt: { type: string, format: date-time, nullable: true }
 
-    DayConsistency:
+    SettingsData:
       type: object
       properties:
-        date:
-          type: string
-          format: date
-          description: Calendar date
-          example: "2026-04-08"
-        sessions:
-          type: integer
-          minimum: 0
-          description: Number of sessions completed on this date
-          example: 2
-
-    Milestone:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - session-count
-            - first-custom
-            - first-audio
-            - first-sos
-          description: Milestone category
-        threshold:
-          type: integer
-          description: Numeric threshold for session-count milestones (1, 10, 25, 50, 100, 250)
-        message:
-          type: string
-          description: Growth-mindset milestone message (no superlatives)
-          example: "That is real work. You showed up."
-        achievedAt:
-          type: string
-          format: date-time
-          description: When the milestone was achieved
-
-    AffirmationSettings:
-      type: object
-      description: User affirmation feature settings
-      properties:
-        morningTime:
-          type: string
-          pattern: '^\d{2}:\d{2}$'
-          description: Morning session notification time (HH:MM in user's local timezone)
-          example: "07:00"
-        eveningTime:
-          type: string
-          pattern: '^\d{2}:\d{2}$'
-          description: Evening reflection notification time (HH:MM in user's local timezone)
-          example: "21:00"
-        track:
-          $ref: '#/components/schemas/Track'
-        levelOverride:
-          type: integer
-          minimum: 1
-          maximum: 4
-          nullable: true
-          description: Manual level override (null means auto-determined by sobriety days)
-        enabledCategories:
+        morningTime: { type: string, pattern: '^\d{2}:\d{2}$', default: "07:00" }
+        eveningTime: { type: string, pattern: '^\d{2}:\d{2}$', default: "21:00" }
+        activePackIds:
           type: array
-          items:
-            $ref: '#/components/schemas/AffirmationCategory'
-          description: Categories enabled for session content selection
-        healthySexualityEnabled:
-          type: boolean
-          description: |
-            Whether the Healthy Sexuality category is enabled. Requires 60+ sobriety
-            days AND explicit opt-in. Off by default.
-          default: false
-        audioAutoPlay:
-          type: boolean
-          description: Auto-play audio recordings when a favorited affirmation with audio appears in sessions
-          default: false
-        cloudAudioSync:
-          type: boolean
-          description: Sync audio recordings to encrypted cloud storage
-          default: false
+          items: { type: string }
+          minItems: 1
+        levelOverride: { type: integer, nullable: true, minimum: 1, maximum: 4 }
+        healthySexualityEnabled: { type: boolean, default: false }
+        notificationsEnabled: { type: boolean, default: true }
+        reEngagementEnabled: { type: boolean, default: true }
+        preferredBackground: { type: string, nullable: true }
+        preferredAudio: { $ref: '#/components/schemas/BackgroundMusic' }
+        audioAutoPlay: { type: boolean, default: false }
 
-    LevelInfo:
+    LevelInfoData:
       type: object
-      description: Current affirmation level information
       properties:
-        currentLevel:
-          $ref: '#/components/schemas/AffirmationLevel'
-        levelName:
-          type: string
-          enum:
-            - permission
-            - process
-            - tempered-identity
-            - full-identity
-          description: Human-readable level name
-        daysAtLevel:
-          type: integer
-          minimum: 0
-          description: Number of days at the current level
-        daysInRecovery:
-          type: integer
-          minimum: 0
-          description: Total sobriety days (drives auto-unlock gates)
-        nextLevelEligible:
-          type: boolean
-          description: Whether the next level is eligible based on sobriety days
-        nextLevelName:
-          type: string
-          nullable: true
-          description: Name of the next level (null if at Level 4)
-        nextLevelAutoUnlockDay:
-          type: integer
-          nullable: true
-          description: Sobriety day count that auto-unlocks the next level (null if at Level 4)
-        canRequestUpgrade:
-          type: boolean
-          description: Whether the user can request a manual upgrade (requires 30+ days at current level)
-        upgradeEligibleAt:
-          type: string
-          format: date-time
-          nullable: true
-          description: Date when manual upgrade becomes available (null if already eligible or at Level 4)
+        currentLevel: { $ref: '#/components/schemas/AffirmationLevel' }
+        daysAtCurrentLevel: { type: integer }
+        daysInRecovery: { type: integer }
+        nextLevelEligible: { type: boolean }
+        nextLevelRequiresDays: { type: integer, nullable: true }
+        canRequestUpgrade: { type: boolean }
+        manualOverride: { type: integer, nullable: true }
+        isPostRelapse: { type: boolean }
+        postRelapseExpiresAt: { type: string, format: date-time, nullable: true }
         levelHistory:
           type: array
           items:
-            $ref: '#/components/schemas/LevelHistoryEntry'
-          description: Chronological history of level changes
+            type: object
+            properties:
+              level: { $ref: '#/components/schemas/AffirmationLevel' }
+              startedAt: { type: string, format: date-time }
+              endedAt: { type: string, format: date-time, nullable: true }
+              trigger: { type: string, enum: [automatic, manual, post-relapse] }
 
-    LevelHistoryEntry:
+    SharingSummaryData:
+      type: object
+      description: "Privacy-safe: session count only, never declaration content"
+      properties:
+        sessionsThisWeek: { type: integer }
+        sessionsThisMonth: { type: integer }
+        totalSessions: { type: integer }
+        currentLevel: { $ref: '#/components/schemas/AffirmationLevel' }
+
+    # ── Request Schemas ────────────────────────────────
+    CreateCustomPackRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, maxLength: 50 }
+        description: { type: string, maxLength: 500 }
+        coverColor: { type: string }
+        schedule: { type: string, nullable: true }
+        includeInRotation: { type: boolean, default: true }
+
+    UpdateCustomPackRequest:
       type: object
       properties:
-        level:
-          $ref: '#/components/schemas/AffirmationLevel'
-        startedAt:
-          type: string
-          format: date-time
-        endedAt:
-          type: string
-          format: date-time
-          nullable: true
-        trigger:
-          type: string
-          enum:
-            - auto
-            - manual-upgrade
-            - manual-downgrade
-            - relapse-reset
-          description: What triggered the level change
+        name: { type: string, maxLength: 50 }
+        description: { type: string, maxLength: 500 }
+        coverColor: { type: string }
+        schedule: { type: string, nullable: true }
+        includeInRotation: { type: boolean }
 
-    # ── Request Schemas ──────────────────────────────────────────────
+    PurchasePackRequest:
+      type: object
+      required: [platform, receiptId]
+      properties:
+        platform: { type: string, enum: [ios, android] }
+        receiptId: { type: string }
+        bundleId: { type: string, nullable: true }
 
     CompleteMorningRequest:
       type: object
-      required:
-        - sessionId
+      required: [affirmationInteractions]
       properties:
-        sessionId:
-          type: string
-          description: Session ID from getMorningSession response
-        intention:
-          type: string
-          maxLength: 1000
-          nullable: true
-          description: Daily intention text ("Today I choose to..."). Optional; session completes without it.
+        intention: { type: string, maxLength: 500 }
         affirmationInteractions:
           type: array
           items:
-            $ref: '#/components/schemas/AffirmationInteraction'
-          minItems: 0
-          maxItems: 10
-          description: Per-affirmation interactions during the session
-
-    AffirmationInteraction:
-      type: object
-      required:
-        - affirmationId
-      properties:
-        affirmationId:
-          type: string
-          pattern: '^aff_[a-zA-Z0-9]+$'
-          description: Affirmation identifier
-        favorited:
-          type: boolean
-          description: Whether the user favorited this affirmation during the session
-          default: false
-        hidden:
-          type: boolean
-          description: Whether the user hid this affirmation during the session
-          default: false
-        durationViewed:
-          type: integer
-          minimum: 0
-          description: Seconds the user viewed this affirmation card
-          example: 45
+            type: object
+            properties:
+              affirmationId: { type: string }
+              durationViewedSeconds: { type: integer }
+              favorited: { type: boolean }
+              hidden: { type: boolean }
+              expandedVerse: { type: boolean }
+              expandedPrayer: { type: boolean }
+              usedBreathing: { type: boolean }
+        durationSeconds: { type: integer }
+        entryPath: { $ref: '#/components/schemas/EntryPath' }
 
     CompleteEveningRequest:
       type: object
-      required:
-        - sessionId
-        - dayRating
+      required: [dayRating]
       properties:
-        sessionId:
-          type: string
-          description: Session ID from getEveningSession response
-        dayRating:
-          type: integer
-          minimum: 1
-          maximum: 5
-          description: |
-            Day rating on a compassionate 1-5 scale. Uses non-evaluative labels
-            (e.g., "How did today feel?" not "Did you stay sober today?").
-          example: 4
-        reflection:
-          type: string
-          maxLength: 2000
-          nullable: true
-          description: Optional free-text evening reflection
+        dayRating: { type: integer, minimum: 1, maximum: 5 }
+        reflection: { type: string, maxLength: 2000, nullable: true }
+        affirmationInteraction:
+          type: object
+          properties:
+            affirmationId: { type: string }
+            durationViewedSeconds: { type: integer }
+            favorited: { type: boolean }
+        durationSeconds: { type: integer }
+        entryPath: { $ref: '#/components/schemas/EntryPath' }
+
+    StartSOSRequest:
+      type: object
+      properties:
+        entryPath: { type: string, enum: [fab, urge-report, faster-scale] }
 
     CompleteSOSRequest:
       type: object
+      required: [breathingCompleted]
       properties:
-        breathingCompleted:
-          type: boolean
-          description: Whether the user completed the full breathing exercise
-          default: false
-        reachedOut:
-          type: boolean
-          description: Whether the user reached out to their accountability partner
-          default: false
-        postCheckInRating:
-          type: integer
-          minimum: 1
-          maximum: 5
-          nullable: true
-          description: Optional post-SOS mood rating (feeds into mood trend data)
+        breathingCompleted: { type: boolean }
+        reachedOut: { type: boolean, default: false }
+        prayedWith: { type: boolean, default: false }
+        postCheckInRating: { type: integer, minimum: 1, maximum: 5, nullable: true }
+        durationSeconds: { type: integer }
 
-    CreateCustomAffirmationRequest:
+    CreateCustomDeclarationRequest:
       type: object
-      required:
-        - text
+      required: [packId, text]
       properties:
-        text:
-          type: string
-          minLength: 1
-          maxLength: 500
-          description: |
-            User-authored affirmation text. Present tense, positive framing
-            recommended. A gentle suggestion is shown if negation patterns
-            are detected, but the user can override and save anyway.
-        includeInRotation:
-          type: boolean
-          description: Whether to include in daily session rotation
-          default: true
+        packId: { type: string, description: "Custom pack to add this to" }
+        text: { type: string, maxLength: 280 }
+        scriptureReference: { type: string, nullable: true }
+        scriptureText: { type: string, nullable: true }
+        includeInRotation: { type: boolean, default: true }
 
-    UpdateCustomAffirmationRequest:
+    UpdateCustomDeclarationRequest:
       type: object
-      description: JSON Merge Patch (RFC 7396) for custom affirmation updates
       properties:
-        text:
-          type: string
-          minLength: 1
-          maxLength: 500
-          description: Updated affirmation text (only editable within 24 hours of creation)
-        includeInRotation:
-          type: boolean
-          description: Whether to include in daily session rotation
+        text: { type: string, maxLength: 280 }
+        scriptureReference: { type: string, nullable: true }
+        scriptureText: { type: string, nullable: true }
+        includeInRotation: { type: boolean }
+
+    FavoriteRequest:
+      type: object
+      required: [affirmationId]
+      properties:
+        affirmationId: { type: string }
+        packId: { type: string, description: "Source pack" }
+
+    HideRequest:
+      type: object
+      required: [affirmationId]
+      properties:
+        affirmationId: { type: string }
+        packId: { type: string }
+
+    UploadAudioRequest:
+      type: object
+      required: [audio]
+      properties:
+        audio: { type: string, format: binary }
+        backgroundMusic: { $ref: '#/components/schemas/BackgroundMusic' }
+        backgroundVolume: { type: number, minimum: 0.0, maximum: 1.0, default: 0.4 }
+
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        morningTime: { type: string, pattern: '^\d{2}:\d{2}$' }
+        eveningTime: { type: string, pattern: '^\d{2}:\d{2}$' }
+        activePackIds:
+          type: array
+          items: { type: string }
+          minItems: 1
+        levelOverride: { type: integer, nullable: true, minimum: 1, maximum: 4 }
+        healthySexualityEnabled: { type: boolean }
+        notificationsEnabled: { type: boolean }
+        reEngagementEnabled: { type: boolean }
+        preferredBackground: { type: string, nullable: true }
+        preferredAudio: { $ref: '#/components/schemas/BackgroundMusic' }
+        audioAutoPlay: { type: boolean }
 
     LevelOverrideRequest:
       type: object
-      required:
-        - targetLevel
-        - direction
+      required: [requestedLevel]
       properties:
-        targetLevel:
-          $ref: '#/components/schemas/AffirmationLevel'
-        direction:
-          type: string
-          enum:
-            - upgrade
-            - downgrade
-          description: |
-            Direction of the level change. Upgrades require 30+ days at current
-            level. Downgrades are always allowed.
+        requestedLevel: { $ref: '#/components/schemas/AffirmationLevel' }
 
-    UpdateAffirmationSettingsRequest:
+    # ── Response Envelopes ─────────────────────────────
+    PackListResponse:
       type: object
-      description: JSON Merge Patch (RFC 7396) for settings updates
       properties:
-        morningTime:
-          type: string
-          pattern: '^\d{2}:\d{2}$'
-          description: Morning notification time (HH:MM)
-        eveningTime:
-          type: string
-          pattern: '^\d{2}:\d{2}$'
-          description: Evening notification time (HH:MM)
-        track:
-          $ref: '#/components/schemas/Track'
-        levelOverride:
-          type: integer
-          minimum: 1
-          maximum: 4
-          nullable: true
-          description: Manual level override (set to null to return to auto)
-        enabledCategories:
+        data:
           type: array
-          items:
-            $ref: '#/components/schemas/AffirmationCategory'
-        healthySexualityEnabled:
-          type: boolean
-          description: Requires 60+ sobriety days. Returns 422 if attempted before.
-        audioAutoPlay:
-          type: boolean
-        cloudAudioSync:
-          type: boolean
-
-    # ── Response Envelopes ───────────────────────────────────────────
-
-    MorningSessionResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            sessionId:
-              type: string
-              description: Session identifier for completion tracking
-            sessionType:
-              type: string
-              enum: [morning]
-            affirmations:
-              type: array
-              items:
-                $ref: '#/components/schemas/Affirmation'
-              minItems: 3
-              maxItems: 3
-              description: Three level-appropriate affirmations (80/20 rule applied)
-            intentionPrompt:
-              type: string
-              description: Daily intention prompt text
-              example: "Today I choose to..."
-            createdAt:
-              type: string
-              format: date-time
-            links:
-              $ref: '#/components/schemas/Links'
+          items: { $ref: '#/components/schemas/Pack' }
         meta:
-          $ref: '#/components/schemas/Metadata'
+          type: object
+          properties:
+            totalCount: { type: integer }
+            cursor: { type: string, nullable: true }
+        links:
+          type: object
+          properties:
+            self: { type: string }
+            next: { type: string, nullable: true }
 
-    EveningSessionResponse:
+    PackResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/Pack' }
+        links:
+          type: object
+          properties:
+            self: { type: string }
+
+    PackDetailResponse:
       type: object
       properties:
         data:
-          type: object
-          properties:
-            sessionId:
-              type: string
-              description: Session identifier for completion tracking
-            sessionType:
-              type: string
-              enum: [evening]
-            affirmation:
-              $ref: '#/components/schemas/Affirmation'
-            morningIntention:
-              type: string
-              nullable: true
-              description: Morning intention text (null if morning session was skipped)
-            ratingPrompt:
-              type: string
-              description: Compassionate, non-evaluative rating prompt
-              example: "How did today feel?"
-            createdAt:
-              type: string
-              format: date-time
-            links:
-              $ref: '#/components/schemas/Links'
-        meta:
-          $ref: '#/components/schemas/Metadata'
-
-    SOSSessionResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            sosId:
-              type: string
-              pattern: '^aff_sos_[a-zA-Z0-9]+$'
-              description: SOS session identifier
-            affirmation:
-              $ref: '#/components/schemas/Affirmation'
-            breathingExercise:
-              type: object
+          allOf:
+            - $ref: '#/components/schemas/Pack'
+            - type: object
               properties:
-                pattern:
-                  type: string
-                  description: Breathing pattern name
-                  example: "4-7-8"
-                inhaleSeconds:
-                  type: integer
-                  description: Inhale duration in seconds
-                  example: 4
-                holdSeconds:
-                  type: integer
-                  description: Hold duration in seconds
-                  example: 7
-                exhaleSeconds:
-                  type: integer
-                  description: Exhale duration in seconds
-                  example: 8
-                cycles:
-                  type: integer
-                  description: Number of breathing cycles
-                  example: 3
-                durationSeconds:
-                  type: integer
-                  description: Total breathing exercise duration in seconds
-                  example: 57
-            additionalAffirmations:
-              type: array
-              items:
-                $ref: '#/components/schemas/Affirmation'
-              minItems: 2
-              maxItems: 2
-              description: Two additional Level 1-2 affirmations shown after breathing
-            createdAt:
-              type: string
-              format: date-time
-            links:
-              $ref: '#/components/schemas/Links'
-        meta:
-          $ref: '#/components/schemas/Metadata'
+                affirmations:
+                  type: array
+                  items: { $ref: '#/components/schemas/Affirmation' }
+                  description: "Full list if owned; 3 preview if locked"
+        links:
+          type: object
+          properties:
+            self: { type: string }
 
-    SessionCompletionResponse:
+    PurchaseResponse:
       type: object
       properties:
         data:
           type: object
           properties:
-            sessionId:
-              type: string
-              description: Completed session identifier
-            sessionType:
-              type: string
-              enum: [morning, evening, sos]
-            completedAt:
-              type: string
-              format: date-time
-              description: Session completion timestamp (immutable per FR2.7)
-            totalSessions:
-              type: integer
-              description: Updated cumulative session count
-            milestone:
-              nullable: true
-              description: Milestone achieved by this session (null if none)
-              $ref: '#/components/schemas/Milestone'
-            links:
-              $ref: '#/components/schemas/Links'
-        meta:
-          $ref: '#/components/schemas/Metadata'
-
-    AffirmationResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/Affirmation'
-        meta:
-          $ref: '#/components/schemas/Metadata'
+            purchaseId: { type: string }
+            packId: { type: string }
+            purchasedAt: { type: string, format: date-time }
+            platform: { type: string }
+        links:
+          type: object
+          properties:
+            pack: { type: string }
 
     AffirmationListResponse:
       type: object
       properties:
         data:
           type: array
-          items:
-            $ref: '#/components/schemas/Affirmation'
-        links:
-          $ref: '#/components/schemas/PaginationLinks'
+          items: { $ref: '#/components/schemas/Affirmation' }
         meta:
           type: object
           properties:
-            page:
-              $ref: '#/components/schemas/PageMetadata'
-            totalCount:
-              type: integer
-              description: Total number of matching affirmations
+            totalCount: { type: integer }
+            cursor: { type: string, nullable: true }
+        links:
+          type: object
+          properties:
+            self: { type: string }
+            next: { type: string, nullable: true }
 
-    CustomAffirmationResponse:
+    AffirmationResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/CustomAffirmation'
-        meta:
-          $ref: '#/components/schemas/Metadata'
+        data: { $ref: '#/components/schemas/Affirmation' }
+        links:
+          type: object
+          properties:
+            self: { type: string }
+            pack: { type: string }
 
-    CustomAffirmationListResponse:
+    CustomDeclarationListResponse:
       type: object
       properties:
         data:
           type: array
-          items:
-            $ref: '#/components/schemas/CustomAffirmation'
-        links:
-          $ref: '#/components/schemas/PaginationLinks'
+          items: { $ref: '#/components/schemas/CustomDeclaration' }
         meta:
           type: object
           properties:
-            page:
-              $ref: '#/components/schemas/PageMetadata'
+            totalCount: { type: integer }
+            cursor: { type: string, nullable: true }
+
+    CustomDeclarationResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/CustomDeclaration' }
+        links:
+          type: object
+          properties:
+            self: { type: string }
+            pack: { type: string }
 
     AudioRecordingResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/AudioRecordingMetadata'
-        meta:
-          $ref: '#/components/schemas/Metadata'
-
-    AffirmationProgressResponse:
-      type: object
-      properties:
-        data:
-          $ref: '#/components/schemas/AffirmationProgress'
-        meta:
+        data: { $ref: '#/components/schemas/AudioRecording' }
+        links:
           type: object
           properties:
-            generatedAt:
-              type: string
-              format: date-time
+            self: { type: string }
+            affirmation: { type: string }
 
-    AffirmationSettingsResponse:
+    MorningSessionResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/AffirmationSettings'
-        meta:
+        data: { $ref: '#/components/schemas/MorningSessionData' }
+        links:
           type: object
           properties:
-            modifiedAt:
-              type: string
-              format: date-time
+            complete: { type: string }
+
+    EveningSessionResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/EveningSessionData' }
+        links:
+          type: object
+          properties:
+            complete: { type: string }
+
+    SOSSessionResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/SOSSessionData' }
+        links:
+          type: object
+          properties:
+            complete: { type: string }
+
+    SessionCompletionResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/SessionCompletion' }
+        links:
+          type: object
+          properties:
+            progress: { type: string }
+
+    ProgressResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/ProgressData' }
+        links:
+          type: object
+          properties:
+            self: { type: string }
+
+    SettingsResponse:
+      type: object
+      properties:
+        data: { $ref: '#/components/schemas/SettingsData' }
+        links:
+          type: object
+          properties:
+            self: { type: string }
 
     LevelInfoResponse:
       type: object
       properties:
-        data:
-          $ref: '#/components/schemas/LevelInfo'
-        meta:
+        data: { $ref: '#/components/schemas/LevelInfoData' }
+        links:
           type: object
           properties:
-            evaluatedAt:
-              type: string
-              format: date-time
+            self: { type: string }
+            override: { type: string }
 
     SharingSummaryResponse:
       type: object
       properties:
-        data:
-          type: object
-          properties:
-            sessionsThisWeek:
-              type: integer
-              minimum: 0
-              description: Sessions completed in the current week
-            sessionsThisMonth:
-              type: integer
-              minimum: 0
-              description: Sessions completed in the current month
-            totalSessions:
-              type: integer
-              minimum: 0
-              description: Total cumulative sessions
-            lastSessionAt:
-              type: string
-              format: date-time
-              nullable: true
-              description: Timestamp of the most recent session
-            links:
-              $ref: '#/components/schemas/Links'
-        meta:
-          type: object
-          properties:
-            generatedAt:
-              type: string
-              format: date-time
-
-    # ── Common Schemas ───────────────────────────────────────────────
-
-    Links:
-      type: object
-      properties:
-        self:
-          type: string
-          format: uri
-
-    PaginationLinks:
-      type: object
-      properties:
-        self:
-          type: string
-          format: uri
-        next:
-          type: string
-          format: uri
-          nullable: true
-        prev:
-          type: string
-          format: uri
-          nullable: true
-        first:
-          type: string
-          format: uri
-          nullable: true
-        last:
-          type: string
-          format: uri
-          nullable: true
-
-    PageMetadata:
-      type: object
-      properties:
-        nextCursor:
-          type: string
-          nullable: true
-        prevCursor:
-          type: string
-          nullable: true
-        limit:
-          type: integer
-
-    Metadata:
-      type: object
-      properties:
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
-
-    ErrorResponse:
-      type: object
-      required:
-        - errors
-      properties:
-        errors:
-          type: array
-          minItems: 1
-          items:
-            $ref: '#/components/schemas/ErrorObject'
-
-    ErrorObject:
-      type: object
-      required:
-        - status
-        - title
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique error instance identifier
-        code:
-          type: string
-          pattern: '^rr:0x000A[0-9A-F]{4}$'
-          description: |
-            Affirmation domain error code in `rr:0x000Axxxx` format.
-
-            Known codes:
-            - `rr:0x000A0001` - Feature flag `activity.affirmations` is disabled
-            - `rr:0x000A0002` - Affirmation not found
-            - `rr:0x000A0003` - SOS session not found
-            - `rr:0x000A0004` - Custom affirmation not found
-            - `rr:0x000A0005` - Audio recording not found
-            - `rr:0x000A0010` - Day 14 sobriety gate not met for custom creation
-            - `rr:0x000A0011` - 24-hour edit window expired for custom affirmation
-            - `rr:0x000A0012` - 30-day minimum at current level not met for upgrade
-            - `rr:0x000A0013` - Healthy Sexuality requires 60+ sobriety days
-            - `rr:0x000A0014` - Cannot upgrade beyond Level 4
-            - `rr:0x000A0015` - Cannot downgrade below Level 1
-            - `rr:0x000A0020` - Invalid audio format (must be AAC .m4a)
-            - `rr:0x000A0021` - Audio recording exceeds 60-second limit
-            - `rr:0x000A0022` - Audio file too large
-            - `rr:0x000A0030` - Invalid day rating (must be 1-5)
-            - `rr:0x000A0031` - Affirmation already favorited
-            - `rr:0x000A0032` - Affirmation already hidden
-            - `rr:0x000A0033` - Affirmation not in favorites
-            - `rr:0x000A0034` - Affirmation not hidden
-            - `rr:0x000A00FF` - Internal affirmation service error
-        status:
-          type: integer
-          description: HTTP status code
-          example: 400
-        title:
-          type: string
-          description: Short human-readable error title
-          example: "Validation Error"
-        detail:
-          type: string
-          description: Detailed compassionate error description
-          example: "Custom affirmations unlock at Day 14 to ensure you have a foundation of curated content first. You are 6 days away."
-        correlationId:
-          type: string
-          format: uuid
-          description: Request correlation ID for support reference
-        source:
-          type: object
-          properties:
-            pointer:
-              type: string
-              description: JSON Pointer to the request field that caused the error
-              example: "/dayRating"
-            parameter:
-              type: string
-              description: Query parameter that caused the error
-          description: Source of the error in the request
+        data: { $ref: '#/components/schemas/SharingSummaryData' }
         links:
           type: object
           properties:
-            about:
-              type: string
-              format: uri
-              description: Link to documentation about this error
+            self: { type: string }
 
-  # ────────────────────────────────────────────────────────────────────
-  # Reusable Responses
-  # ────────────────────────────────────────────────────────────────────
+    # ── Error Schemas ──────────────────────────────────
+    ErrorResponse:
+      type: object
+      required: [errors]
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required: [code, title, status]
+            properties:
+              code: { type: string, pattern: '^rr:0x000A[0-9a-fA-F]{4}$' }
+              title: { type: string }
+              detail: { type: string }
+              status: { type: integer }
+              source:
+                type: object
+                properties:
+                  pointer: { type: string }
+                  parameter: { type: string }
+          correlationId: { type: string, format: uuid }
 
   responses:
     BadRequest:
-      description: Bad Request - Malformed request syntax or invalid parameters
+      description: Invalid request
       content:
         application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            errors:
-              - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                code: "rr:0x000A0030"
-                status: 400
-                title: "Validation Error"
-                detail: "Day rating must be between 1 and 5."
-                correlationId: "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
-                source:
-                  pointer: "/dayRating"
-
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
     Unauthorized:
-      description: Unauthorized - Missing or invalid JWT authentication
-      headers:
-        WWW-Authenticate:
-          schema:
-            type: string
+      description: Missing or invalid authentication
       content:
         application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            errors:
-              - status: 401
-                title: "Unauthorized"
-                detail: "Authentication required. Please sign in to continue."
-                correlationId: "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
-
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
     NotFound:
-      description: Not Found - Resource does not exist or feature flag is disabled
+      description: Resource not found (or hidden per permission model)
       content:
         application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            errors:
-              - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                code: "rr:0x000A0002"
-                status: 404
-                title: "Not Found"
-                detail: "The requested affirmation could not be found."
-                correlationId: "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
-
-    UnprocessableEntity:
-      description: Unprocessable Entity - Business rule validation failed
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    FeatureDisabled:
+      description: Feature flag `activity.affirmations` is disabled (fail closed)
       content:
         application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            errors:
-              - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                code: "rr:0x000A0010"
-                status: 422
-                title: "Sobriety Gate Not Met"
-                detail: "Custom affirmations unlock at Day 14 to ensure you have a foundation of curated content first. You are 6 days away."
-                correlationId: "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
-
-    InternalServerError:
-      description: Internal Server Error - Unexpected server failure
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ValidationError:
+      description: Request validation failed
       content:
         application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-          example:
-            errors:
-              - id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-                code: "rr:0x000A00FF"
-                status: 500
-                title: "Internal Error"
-                detail: "Something went wrong on our end. Your data is safe. Please try again in a moment."
-                correlationId: "f1e2d3c4-b5a6-7890-abcd-ef1234567890"
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }

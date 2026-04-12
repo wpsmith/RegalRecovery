@@ -107,13 +107,11 @@ final class FeatureFlagService {
         flags["activity.urge-logging"] = true
         flags["activity.journaling"] = true
         flags["activity.faster-scale"] = true
-        flags["activity.check-ins"] = true
 
         // Activities - P1
-        flags["activity.emotional-journaling"] = false
         flags["activity.time-journal"] = true
-        flags["feature.fanos"] = false
-        flags["feature.fitnap"] = false
+        flags["activity.fanos"] = false
+        flags["activity.fitnap"] = false
         flags["activity.person-check-ins"] = false
         flags["activity.meetings"] = true
         flags["activity.post-mortem"] = true

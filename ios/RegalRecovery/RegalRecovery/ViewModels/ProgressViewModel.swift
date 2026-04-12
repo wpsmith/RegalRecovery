@@ -4,7 +4,6 @@ import SwiftData
 @Observable
 class ProgressViewModel {
     var streak: StreakData?
-    var weeklyCheckInAverage: Int = 0
     var fasterScaleMode: String = "Green"
     var moodAverage: Double = 0
     var weeklyActivityCount: Int = 0
@@ -52,12 +51,6 @@ class ProgressViewModel {
             )
         }
 
-        // Check-in average (last 7)
-        let checkInDescriptor = FetchDescriptor<RRCheckIn>(sortBy: [SortDescriptor(\.date, order: .reverse)])
-        let allCheckIns = try context.fetch(checkInDescriptor)
-        let weekScores = Array(allCheckIns.prefix(7)).map(\.score)
-        weeklyCheckInAverage = weekScores.isEmpty ? 0 : weekScores.reduce(0, +) / weekScores.count
-
         // FASTER Scale mode (latest entry)
         let fasterDescriptor = FetchDescriptor<RRFASTEREntry>(sortBy: [SortDescriptor(\.date, order: .reverse)])
         let fasterEntries = try context.fetch(fasterDescriptor)
@@ -71,12 +64,6 @@ class ProgressViewModel {
                 fasterScaleMode = "Red"
             }
         }
-
-        // Mood average (from emotional journal intensity, last 7)
-        let emotionalDescriptor = FetchDescriptor<RREmotionalJournal>(sortBy: [SortDescriptor(\.date, order: .reverse)])
-        let emotionalEntries = try context.fetch(emotionalDescriptor)
-        let intensities = Array(emotionalEntries.prefix(7)).map { Double($0.intensity) }
-        moodAverage = intensities.isEmpty ? 0 : intensities.reduce(0, +) / Double(intensities.count)
 
         // Weekly activity count
         let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()

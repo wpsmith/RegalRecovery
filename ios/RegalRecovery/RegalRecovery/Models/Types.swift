@@ -39,7 +39,6 @@ struct SupportContact: Identifiable {
     let id = UUID()
     let name: String
     let role: ContactRole
-    let permissionSummary: String
     let linkedDaysAgo: Int
     let phone: String
 }
@@ -75,9 +74,7 @@ struct ActivityEntry: Identifiable {
 
 enum ActivityType: String, CaseIterable {
     case sobrietyCommitment = "Daily Sobriety Commitment"
-    case recoveryCheckIn = "Recovery Check-in"
     case journal = "Journal / Jotting"
-    case emotionalJournal = "Emotional Journal"
     case timeJournal = "Time Journal"
     case fasterScale = "FASTER Scale"
     case postMortem = "Post-Mortem Analysis"
@@ -88,7 +85,8 @@ enum ActivityType: String, CaseIterable {
     case exercise = "Exercise"
     case phoneCalls = "Phone Calls"
     case meetingsAttended = "Meetings Attended"
-    case spouseCheckIn = "Spouse Check-in Prep"
+    case fanos = "FANOS Check-in"
+    case fitnap = "FITNAP Check-in"
     case stepWork = "12-Step Work"
     case weeklyGoals = "Weekly Goals"
     case affirmationLog = "Affirmation Log"
@@ -96,9 +94,7 @@ enum ActivityType: String, CaseIterable {
     var icon: String {
         switch self {
         case .sobrietyCommitment: return "sun.max.fill"
-        case .recoveryCheckIn: return "heart.text.clipboard"
         case .journal: return "note.text"
-        case .emotionalJournal: return "heart.circle.fill"
         case .timeJournal: return "clock.fill"
         case .fasterScale: return "gauge.with.needle"
         case .postMortem: return "magnifyingglass.circle"
@@ -109,7 +105,8 @@ enum ActivityType: String, CaseIterable {
         case .exercise: return "figure.run"
         case .phoneCalls: return "phone.fill"
         case .meetingsAttended: return "person.3.fill"
-        case .spouseCheckIn: return "heart.fill"
+        case .fanos: return "heart.fill"
+        case .fitnap: return "heart.text.clipboard"
         case .stepWork: return "stairs"
         case .weeklyGoals: return "target"
         case .affirmationLog: return "text.quote"
@@ -119,8 +116,7 @@ enum ActivityType: String, CaseIterable {
     var iconColor: Color {
         switch self {
         case .sobrietyCommitment: return .rrSecondary
-        case .recoveryCheckIn: return .rrPrimary
-        case .journal, .emotionalJournal, .timeJournal: return .purple
+        case .journal, .timeJournal: return .purple
         case .fasterScale: return .rrSuccess
         case .postMortem: return .rrDestructive
         case .urgeLog: return .orange
@@ -130,7 +126,8 @@ enum ActivityType: String, CaseIterable {
         case .exercise: return .blue
         case .phoneCalls: return .green
         case .meetingsAttended: return .rrPrimary
-        case .spouseCheckIn: return .pink
+        case .fanos: return .pink
+        case .fitnap: return .pink
         case .stepWork: return .rrSecondary
         case .weeklyGoals: return .rrPrimary
         case .affirmationLog: return .rrSecondary
@@ -139,13 +136,13 @@ enum ActivityType: String, CaseIterable {
 
     var section: ActivitySection {
         switch self {
-        case .sobrietyCommitment, .recoveryCheckIn:
+        case .sobrietyCommitment:
             return .sobrietyCommitment
-        case .journal, .emotionalJournal, .timeJournal, .fasterScale, .postMortem:
+        case .journal, .timeJournal, .fasterScale, .postMortem:
             return .journalingReflection
         case .urgeLog, .mood, .gratitude, .prayer, .exercise:
             return .selfCare
-        case .phoneCalls, .meetingsAttended, .spouseCheckIn:
+        case .phoneCalls, .meetingsAttended, .fanos, .fitnap:
             return .connection
         case .stepWork, .weeklyGoals, .affirmationLog:
             return .growth
@@ -534,9 +531,7 @@ struct CommitmentStatus {
 enum HistoryItemType: String {
     case morningCommitment
     case eveningReview
-    case recoveryCheckIn
     case journal
-    case emotionalJournal
     case fasterScale
     case urgeLog
     case mood
@@ -545,7 +540,8 @@ enum HistoryItemType: String {
     case exercise
     case phoneCall
     case meeting
-    case spouseCheckIn
+    case fanos
+    case fitnap
 }
 
 struct RecentActivity: Identifiable {
@@ -794,19 +790,6 @@ struct DailyEligibleActivity {
             section: .journalingReflection
         ),
         DailyEligibleActivity(
-            activityType: ActivityType.emotionalJournal.rawValue,
-            displayName: "Emotional Journaling",
-            icon: "heart.circle.fill",
-            multiplePerDay: true,
-            maxPerDay: 5,
-            defaultEnabled: false,
-            typicalHour: 12,
-            typicalMinute: 0,
-            typicalBlock: "Midday",
-            featureFlagKey: "activity.emotional-journaling",
-            section: .journalingReflection
-        ),
-        DailyEligibleActivity(
             activityType: ActivityType.mood.rawValue,
             displayName: "Mood Rating",
             icon: "face.smiling",
@@ -911,8 +894,8 @@ struct DailyEligibleActivity {
             section: .connection
         ),
         DailyEligibleActivity(
-            activityType: ActivityType.spouseCheckIn.rawValue,
-            displayName: "Spouse Check-in Preparation",
+            activityType: ActivityType.fanos.rawValue,
+            displayName: "FANOS Check-in",
             icon: "heart.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -920,12 +903,12 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.spouse-checkin-prep",
+            featureFlagKey: "activity.fanos",
             section: .connection
         ),
         DailyEligibleActivity(
-            activityType: ActivityType.recoveryCheckIn.rawValue,
-            displayName: "Recovery Check-in",
+            activityType: ActivityType.fitnap.rawValue,
+            displayName: "FITNAP Check-in",
             icon: "heart.text.clipboard",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -933,8 +916,8 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.check-ins",
-            section: .sobrietyCommitment
+            featureFlagKey: "activity.fitnap",
+            section: .connection
         ),
         DailyEligibleActivity(
             activityType: ActivityType.fasterScale.rawValue,

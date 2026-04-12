@@ -1,10 +1,8 @@
 import SwiftUI
 import SwiftData
-import Charts
 
 struct RecoveryProgressView: View {
     @Query private var streaks: [RRStreak]
-    @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
     @Query(sort: \RRFASTEREntry.date, order: .reverse) private var fasterEntries: [RRFASTEREntry]
     @Query(sort: \RRActivity.timestamp, order: .reverse) private var activities: [RRActivity]
     @Query private var stepWork: [RRStepWork]
@@ -42,12 +40,6 @@ struct RecoveryProgressView: View {
     }
 
     // Weekly data helpers
-    private var weeklyCheckInAverage: Int {
-        let weekScores = Array(checkIns.prefix(7)).map(\.score)
-        guard !weekScores.isEmpty else { return 0 }
-        return weekScores.reduce(0, +) / weekScores.count
-    }
-
     private var fasterScaleMode: String {
         guard let latest = fasterEntries.first else { return "Green" }
         switch latest.stage {
@@ -91,13 +83,6 @@ struct RecoveryProgressView: View {
         return urges.filter { $0.date >= monthAgo }.count
     }
 
-    // 7-Day Trend helpers
-    private var trendScores: [Int] {
-        Array(checkIns.prefix(7).reversed().map { $0.score })
-    }
-
-    private let dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-
     private func isFlagEnabled(_ key: String) -> Bool {
         FeatureFlagStore.shared.isEnabled(key)
     }
@@ -112,7 +97,6 @@ struct RecoveryProgressView: View {
                         devotionalSection
                     }
                     weeklySummarySection
-                    checkInTrendSection
                     monthlyStatsSection
                     stepProgressSection
                 }
@@ -221,15 +205,6 @@ struct RecoveryProgressView: View {
 
     private var weeklySummaryCards: [(flag: String?, view: AnyView)] {
         var cards: [(flag: String?, view: AnyView)] = []
-        if isFlagEnabled("activity.check-ins") {
-            cards.append((flag: "activity.check-ins", view: AnyView(summaryCard(
-                title: "Check-in Average",
-                value: "\(weeklyCheckInAverage)/100",
-                detail: nil,
-                icon: "arrow.up.right",
-                iconColor: .rrSuccess
-            ))))
-        }
         if isFlagEnabled("activity.faster-scale") {
             cards.append((flag: "activity.faster-scale", view: AnyView(summaryCard(
                 title: "FASTER Scale",
@@ -298,42 +273,6 @@ struct RecoveryProgressView: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-        }
-    }
-
-    // MARK: - 7-Day Check-in Trend
-
-    @ViewBuilder
-    private var checkInTrendSection: some View {
-        if isFlagEnabled("activity.check-ins") && trendScores.count >= 2 {
-            VStack(alignment: .leading, spacing: 12) {
-                RRSectionHeader(title: "7-Day Check-in Trend")
-
-                RRCard {
-                    Chart {
-                        ForEach(Array(trendScores.enumerated()), id: \.offset) { index, score in
-                            let label = index < dayLabels.count ? dayLabels[index] : "\(index)"
-                            LineMark(
-                                x: .value("Day", label),
-                                y: .value("Score", score)
-                            )
-                            .foregroundStyle(Color.rrPrimary)
-                            .interpolationMethod(.catmullRom)
-
-                            PointMark(
-                                x: .value("Day", label),
-                                y: .value("Score", score)
-                            )
-                            .foregroundStyle(Color.rrPrimary)
-                        }
-                    }
-                    .chartYScale(domain: 50...100)
-                    .chartYAxis {
-                        AxisMarks(position: .leading, values: [50, 75, 100])
-                    }
-                    .frame(height: 160)
-                }
-            }
         }
     }
 

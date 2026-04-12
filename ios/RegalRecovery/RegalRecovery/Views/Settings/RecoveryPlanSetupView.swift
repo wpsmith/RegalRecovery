@@ -5,10 +5,16 @@ struct RecoveryPlanSetupView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = RecoveryPlanViewModel()
+    @Query(sort: \RRAddiction.sortOrder) private var addictions: [RRAddiction]
+    @Query(filter: #Predicate<RRDailyPlanItem> { $0.isEnabled == true }) private var planItems: [RRDailyPlanItem]
+
     @State private var showingActivityPicker = false
     @State private var showUnsavedAlert = false
     @State private var showAlgorithmDebug = false
     @State private var editMode: EditMode = .active
+    @State private var showCommitmentSetupPrompt = false
+    @State private var pendingActivity: DailyEligibleActivity?
+    @State private var showCommitmentSetup = false
 
     var body: some View {
         List {
@@ -116,7 +122,13 @@ struct RecoveryPlanSetupView: View {
             ActivityPickerSheet(
                 availableActivities: viewModel.availableActivities,
                 onSelect: { activity in
-                    viewModel.addActivity(activity)
+                    if activity.activityType == ActivityType.sobrietyCommitment.rawValue
+                        && !CommitmentStatementsManager.shared.hasCustomized {
+                        pendingActivity = activity
+                        showCommitmentSetupPrompt = true
+                    } else {
+                        viewModel.addActivity(activity)
+                    }
                     showingActivityPicker = false
                 }
             )
@@ -150,6 +162,37 @@ struct RecoveryPlanSetupView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("You have unsaved changes to your recovery plan.")
+        }
+        .alert("Set Up Commitments", isPresented: $showCommitmentSetupPrompt) {
+            Button("Use Recommended") {
+                if let activity = pendingActivity {
+                    let addictionNames = addictions.map(\.name)
+                    let today = Calendar.current.component(.weekday, from: Date())
+                    let hasMeeting = planItems.contains { $0.activityType == "Meetings Attended" && $0.daysOfWeek.contains(today) }
+                    CommitmentStatementsManager.shared.morningStatements = CommitmentStatementsManager.dynamicMorningDefaults(addictions: addictionNames, hasMeetingToday: hasMeeting)
+                    viewModel.addActivity(activity)
+                    pendingActivity = nil
+                }
+            }
+            Button("Set My Own") {
+                showCommitmentSetup = true
+            }
+            Button("Cancel", role: .cancel) {
+                pendingActivity = nil
+            }
+        } message: {
+            Text("Your morning commitment statements haven't been configured yet. Would you like to use the recommended defaults or set your own?")
+        }
+        .fullScreenCover(isPresented: $showCommitmentSetup) {
+            NavigationStack {
+                CommitmentSetupView {
+                    showCommitmentSetup = false
+                    if let activity = pendingActivity {
+                        viewModel.addActivity(activity)
+                        pendingActivity = nil
+                    }
+                }
+            }
         }
         .interactiveDismissDisabled(viewModel.hasUnsavedChanges)
         .navigationBarBackButtonHidden(viewModel.hasUnsavedChanges)

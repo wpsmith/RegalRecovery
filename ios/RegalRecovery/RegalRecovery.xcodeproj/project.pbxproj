@@ -54,7 +54,6 @@
 		10000024 /* ActivityError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000024 /* ActivityError.swift */; };
 		10000025 /* ActivityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000025 /* ActivityViewModel.swift */; };
 		10000026 /* AffirmationsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000026 /* AffirmationsViewModel.swift */; };
-		10000027 /* CheckInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000027 /* CheckInViewModel.swift */; };
 		10000028 /* CommitmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000028 /* CommitmentViewModel.swift */; };
 		10000029 /* DevotionalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000029 /* DevotionalViewModel.swift */; };
 		10000030 /* EmotionalJournalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000030 /* EmotionalJournalViewModel.swift */; };
@@ -94,9 +93,13 @@
 		10000064 /* PhoneCallLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000064 /* PhoneCallLogView.swift */; };
 		10000065 /* PostMortemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000065 /* PostMortemView.swift */; };
 		10000066 /* PrayerLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000066 /* PrayerLogView.swift */; };
-		10000067 /* RecoveryCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000067 /* RecoveryCheckInView.swift */; };
 		10000068 /* SobrietyCommitmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000068 /* SobrietyCommitmentView.swift */; };
 		10000069 /* SpouseCheckInPrepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000069 /* SpouseCheckInPrepView.swift */; };
+		10000970 /* FANOSCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000970 /* FANOSCheckInView.swift */; };
+		10000971 /* FITNAPCheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000971 /* FITNAPCheckInView.swift */; };
+		10000972 /* CommitmentStatementsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000972 /* CommitmentStatementsManager.swift */; };
+		10000973 /* EditCommitmentStatementsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000973 /* EditCommitmentStatementsView.swift */; };
+		10000980 /* CommitmentSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000980 /* CommitmentSetupView.swift */; };
 		10000070 /* StepWorkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000070 /* StepWorkView.swift */; };
 		10000071 /* TimeJournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000071 /* TimeJournalView.swift */; };
 		10000072 /* UrgeLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000072 /* UrgeLogView.swift */; };
@@ -165,9 +168,9 @@
 		10000603 /* PeopleField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000603 /* PeopleField.swift */; };
 		10000604 /* EmotionPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000604 /* EmotionPicker.swift */; };
 		10000605 /* TimeJournalQuickEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000605 /* TimeJournalQuickEntrySheet.swift */; };
-		10000700 /* TimeJournalReminderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000700 /* TimeJournalReminderManager.swift */; };
 		10000800 /* GratitudePromptService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000800 /* GratitudePromptService.swift */; };
 		10000801 /* gratitude-prompts.json in Resources */ = {isa = PBXBuildFile; fileRef = 20000801 /* gratitude-prompts.json */; };
+		10001111 /* aa-bigbook-2nd-edition.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 20001111 /* aa-bigbook-2nd-edition.pdf */; };
 		10000900 /* GratitudeTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000900 /* GratitudeTypes.swift */; };
 		10000901 /* GratitudeEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000901 /* GratitudeEntryViewModel.swift */; };
 		10000902 /* GratitudeHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000902 /* GratitudeHistoryViewModel.swift */; };
@@ -180,12 +183,9 @@
 		10000909 /* GratitudeSharingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000909 /* GratitudeSharingService.swift */; };
 		10000950 /* AffirmationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000950 /* AffirmationTypes.swift */; };
 		10000951 /* AffirmationsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000951 /* AffirmationsAPIClient.swift */; };
-		10000952 /* AffirmationAudioSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000952 /* AffirmationAudioSessionManager.swift */; };
-		10000953 /* AffirmationOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000953 /* AffirmationOfflineCache.swift */; };
 		10000960 /* AffirmationTodayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000960 /* AffirmationTodayCard.swift */; };
 		10001000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* ThreeCirclesTypes.swift */; };
 		10001001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* ThreeCirclesAPIClient.swift */; };
-		10001002 /* ThreeCirclesOfflineCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001002 /* ThreeCirclesOfflineCache.swift */; };
 		10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001003 /* ThreeCirclesBuilderViewModel.swift */; };
 		10001004 /* CircleSetDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001004 /* CircleSetDetailViewModel.swift */; };
 		10001005 /* PatternViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001005 /* PatternViewModel.swift */; };
@@ -222,9 +222,38 @@
 		10001107 /* IntentionRecallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001107 /* IntentionRecallView.swift */; };
 		10001108 /* EveningReflectionTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001108 /* EveningReflectionTextView.swift */; };
 		10001109 /* SessionCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001109 /* SessionCompleteView.swift */; };
-		10000701 /* FocusStatusMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000701 /* FocusStatusMonitor.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
 		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
+		10002002 /* 00-foreword.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002002 /* 00-foreword.txt */; };
+		10002003 /* 01-the-doctors-opinion.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002003 /* 01-the-doctors-opinion.txt */; };
+		10002004 /* 02-bills-story.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002004 /* 02-bills-story.txt */; };
+		10002005 /* 03-there-is-a-solution.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002005 /* 03-there-is-a-solution.txt */; };
+		10002006 /* 04-more-about-alcoholism.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002006 /* 04-more-about-alcoholism.txt */; };
+		10002007 /* 05-we-agnostics.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002007 /* 05-we-agnostics.txt */; };
+		10002008 /* 06-how-it-works.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002008 /* 06-how-it-works.txt */; };
+		10002009 /* 07-into-action.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002009 /* 07-into-action.txt */; };
+		10002010 /* 08-working-with-others.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002010 /* 08-working-with-others.txt */; };
+		10002011 /* 09-to-wives.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002011 /* 09-to-wives.txt */; };
+		10002012 /* 10-the-family-afterward.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002012 /* 10-the-family-afterward.txt */; };
+		10002013 /* 11-to-employers.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002013 /* 11-to-employers.txt */; };
+		10002014 /* 12-a-vision-for-you.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002014 /* 12-a-vision-for-you.txt */; };
+		10002015 /* 13-doctor-bobs-nightmare.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002015 /* 13-doctor-bobs-nightmare.txt */; };
+		10002016 /* 14-spiritual-experience.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002016 /* 14-spiritual-experience.txt */; };
+			10003000 /* BookData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003000 /* BookData.swift */; };
+			10003001 /* BookCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003001 /* BookCatalog.swift */; };
+			10003002 /* BookLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003002 /* BookLibraryView.swift */; };
+			10003003 /* BookTableOfContentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003003 /* BookTableOfContentsView.swift */; };
+			10003004 /* BookChapterReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003004 /* BookChapterReaderView.swift */; };
+		10003000 /* BookData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003000 /* BookData.swift */; };
+		10003001 /* BookCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003001 /* BookCatalog.swift */; };
+		10003002 /* BookLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003002 /* BookLibraryView.swift */; };
+		10003003 /* BookTableOfContentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003003 /* BookTableOfContentsView.swift */; };
+		10003004 /* BookChapterReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003004 /* BookChapterReaderView.swift */; };
+		10003150 /* Confessions in Resources */ = {isa = PBXBuildFile; fileRef = 20003150 /* Confessions */; };
+		10003250 /* Humility in Resources */ = {isa = PBXBuildFile; fileRef = 20003250 /* Humility */; };
+		10003350 /* AbsoluteSurrender in Resources */ = {isa = PBXBuildFile; fileRef = 20003350 /* AbsoluteSurrender */; };
+		10003450 /* SchoolOfPrayer in Resources */ = {isa = PBXBuildFile; fileRef = 20003450 /* SchoolOfPrayer */; };
+		10003550 /* WaitingOnGod in Resources */ = {isa = PBXBuildFile; fileRef = 20003550 /* WaitingOnGod */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -291,9 +320,9 @@
 		20000603 /* PeopleField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeopleField.swift; sourceTree = "<group>"; };
 		20000604 /* EmotionPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionPicker.swift; sourceTree = "<group>"; };
 		20000605 /* TimeJournalQuickEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalQuickEntrySheet.swift; sourceTree = "<group>"; };
-		20000700 /* TimeJournalReminderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalReminderManager.swift; sourceTree = "<group>"; };
 		20000800 /* GratitudePromptService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudePromptService.swift; sourceTree = "<group>"; };
 		20000801 /* gratitude-prompts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "gratitude-prompts.json"; sourceTree = "<group>"; };
+		20001111 /* aa-bigbook-2nd-edition.pdf */ = {isa = PBXFileReference; lastKnownFileType = document.pdf; path = "aa-bigbook-2nd-edition.pdf"; sourceTree = "<group>"; };
 		20000900 /* GratitudeTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeTypes.swift; sourceTree = "<group>"; };
 		20000901 /* GratitudeEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeEntryViewModel.swift; sourceTree = "<group>"; };
 		20000902 /* GratitudeHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeHistoryViewModel.swift; sourceTree = "<group>"; };
@@ -306,13 +335,10 @@
 		20000909 /* GratitudeSharingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeSharingService.swift; sourceTree = "<group>"; };
 		20000950 /* AffirmationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationTypes.swift; sourceTree = "<group>"; };
 		20000951 /* AffirmationsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsAPIClient.swift; sourceTree = "<group>"; };
-		20000952 /* AffirmationAudioSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationAudioSessionManager.swift; sourceTree = "<group>"; };
-		20000953 /* AffirmationOfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationOfflineCache.swift; sourceTree = "<group>"; };
 		20000954 /* AffirmationNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationNavigationTests.swift; sourceTree = "<group>"; };
 		20000960 /* AffirmationTodayCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationTodayCard.swift; sourceTree = "<group>"; };
 		20001000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
 		20001001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
-		20001002 /* ThreeCirclesOfflineCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesOfflineCache.swift; sourceTree = "<group>"; };
 		20001003 /* ThreeCirclesBuilderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesBuilderViewModel.swift; sourceTree = "<group>"; };
 		20001004 /* CircleSetDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleSetDetailViewModel.swift; sourceTree = "<group>"; };
 		20001005 /* PatternViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternViewModel.swift; sourceTree = "<group>"; };
@@ -349,13 +375,11 @@
 		20001107 /* IntentionRecallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentionRecallView.swift; sourceTree = "<group>"; };
 		20001108 /* EveningReflectionTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReflectionTextView.swift; sourceTree = "<group>"; };
 		20001109 /* SessionCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCompleteView.swift; sourceTree = "<group>"; };
-		20000701 /* FocusStatusMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusStatusMonitor.swift; sourceTree = "<group>"; };
 		20000702 /* JournalEntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntryDetailView.swift; sourceTree = "<group>"; };
 		20000703 /* JournalHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalHistoryView.swift; sourceTree = "<group>"; };
 		20000024 /* ActivityError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityError.swift; sourceTree = "<group>"; };
 		20000025 /* ActivityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityViewModel.swift; sourceTree = "<group>"; };
 		20000026 /* AffirmationsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsViewModel.swift; sourceTree = "<group>"; };
-		20000027 /* CheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInViewModel.swift; sourceTree = "<group>"; };
 		20000028 /* CommitmentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentViewModel.swift; sourceTree = "<group>"; };
 		20000029 /* DevotionalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevotionalViewModel.swift; sourceTree = "<group>"; };
 		20000030 /* EmotionalJournalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalJournalViewModel.swift; sourceTree = "<group>"; };
@@ -396,9 +420,13 @@
 		20000064 /* PhoneCallLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCallLogView.swift; sourceTree = "<group>"; };
 		20000065 /* PostMortemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemView.swift; sourceTree = "<group>"; };
 		20000066 /* PrayerLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerLogView.swift; sourceTree = "<group>"; };
-		20000067 /* RecoveryCheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryCheckInView.swift; sourceTree = "<group>"; };
 		20000068 /* SobrietyCommitmentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SobrietyCommitmentView.swift; sourceTree = "<group>"; };
 		20000069 /* SpouseCheckInPrepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpouseCheckInPrepView.swift; sourceTree = "<group>"; };
+		20000970 /* FANOSCheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FANOSCheckInView.swift; sourceTree = "<group>"; };
+		20000971 /* FITNAPCheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FITNAPCheckInView.swift; sourceTree = "<group>"; };
+		20000972 /* CommitmentStatementsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentStatementsManager.swift; sourceTree = "<group>"; };
+		20000973 /* EditCommitmentStatementsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCommitmentStatementsView.swift; sourceTree = "<group>"; };
+		20000980 /* CommitmentSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentSetupView.swift; sourceTree = "<group>"; };
 		20000070 /* StepWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepWorkView.swift; sourceTree = "<group>"; };
 		20000071 /* TimeJournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalView.swift; sourceTree = "<group>"; };
 		20000072 /* UrgeLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogView.swift; sourceTree = "<group>"; };
@@ -442,7 +470,6 @@
 		20000108 /* ThreeCirclesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesView.swift; sourceTree = "<group>"; };
 		20000109 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
 		20000110 /* AffirmationsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsViewModelTests.swift; sourceTree = "<group>"; };
-		20000111 /* CheckInViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckInViewModelTests.swift; sourceTree = "<group>"; };
 		20000112 /* EmotionalJournalViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalJournalViewModelTests.swift; sourceTree = "<group>"; };
 		20000113 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
 		20000114 /* StreakViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModelTests.swift; sourceTree = "<group>"; };
@@ -455,6 +482,36 @@
 		20000210 /* RecoveryWorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkViewModel.swift; sourceTree = "<group>"; };
 		20000211 /* RecoveryFoundationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFoundationView.swift; sourceTree = "<group>"; };
 		20000212 /* TestingModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingModeView.swift; sourceTree = "<group>"; };
+		20002002 /* 00-foreword.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "00-foreword.txt"; sourceTree = "<group>"; };
+		20002003 /* 01-the-doctors-opinion.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "01-the-doctors-opinion.txt"; sourceTree = "<group>"; };
+		20002004 /* 02-bills-story.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "02-bills-story.txt"; sourceTree = "<group>"; };
+		20002005 /* 03-there-is-a-solution.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "03-there-is-a-solution.txt"; sourceTree = "<group>"; };
+		20002006 /* 04-more-about-alcoholism.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "04-more-about-alcoholism.txt"; sourceTree = "<group>"; };
+		20002007 /* 05-we-agnostics.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "05-we-agnostics.txt"; sourceTree = "<group>"; };
+		20002008 /* 06-how-it-works.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "06-how-it-works.txt"; sourceTree = "<group>"; };
+		20002009 /* 07-into-action.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "07-into-action.txt"; sourceTree = "<group>"; };
+		20002010 /* 08-working-with-others.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "08-working-with-others.txt"; sourceTree = "<group>"; };
+		20002011 /* 09-to-wives.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "09-to-wives.txt"; sourceTree = "<group>"; };
+		20002012 /* 10-the-family-afterward.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "10-the-family-afterward.txt"; sourceTree = "<group>"; };
+		20002013 /* 11-to-employers.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "11-to-employers.txt"; sourceTree = "<group>"; };
+		20002014 /* 12-a-vision-for-you.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "12-a-vision-for-you.txt"; sourceTree = "<group>"; };
+		20002015 /* 13-doctor-bobs-nightmare.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "13-doctor-bobs-nightmare.txt"; sourceTree = "<group>"; };
+		20002016 /* 14-spiritual-experience.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "14-spiritual-experience.txt"; sourceTree = "<group>"; };
+			20003000 /* BookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookData.swift; sourceTree = "<group>"; };
+			20003001 /* BookCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCatalog.swift; sourceTree = "<group>"; };
+			20003002 /* BookLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLibraryView.swift; sourceTree = "<group>"; };
+			20003003 /* BookTableOfContentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookTableOfContentsView.swift; sourceTree = "<group>"; };
+			20003004 /* BookChapterReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookChapterReaderView.swift; sourceTree = "<group>"; };
+		20003000 /* BookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookData.swift; sourceTree = "<group>"; };
+		20003001 /* BookCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCatalog.swift; sourceTree = "<group>"; };
+		20003002 /* BookLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLibraryView.swift; sourceTree = "<group>"; };
+		20003003 /* BookTableOfContentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookTableOfContentsView.swift; sourceTree = "<group>"; };
+		20003004 /* BookChapterReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookChapterReaderView.swift; sourceTree = "<group>"; };
+		20003150 /* Confessions */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Confessions; sourceTree = "<group>"; };
+		20003250 /* Humility */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Humility; sourceTree = "<group>"; };
+		20003350 /* AbsoluteSurrender */ = {isa = PBXFileReference; lastKnownFileType = folder; path = AbsoluteSurrender; sourceTree = "<group>"; };
+		20003450 /* SchoolOfPrayer */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SchoolOfPrayer; sourceTree = "<group>"; };
+		20003550 /* WaitingOnGod */ = {isa = PBXFileReference; lastKnownFileType = folder; path = WaitingOnGod; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -532,6 +589,8 @@
 				20001000 /* ThreeCirclesTypes.swift */,
 				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
+				20003000 /* BookData.swift */,
+				20003001 /* BookCatalog.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -570,8 +629,6 @@
 				50000021 /* API */,
 				50000022 /* Auth */,
 				50000023 /* Sync */,
-				20000700 /* TimeJournalReminderManager.swift */,
-				20000701 /* FocusStatusMonitor.swift */,
 				20000204 /* PlanNotificationScheduler.swift */,
 				20000022 /* ServiceContainer.swift */,
 				20000023 /* FeatureFlagService.swift */,
@@ -579,10 +636,7 @@
 				20000800 /* GratitudePromptService.swift */,
 				20000909 /* GratitudeSharingService.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
-				20000952 /* AffirmationAudioSessionManager.swift */,
-				20000953 /* AffirmationOfflineCache.swift */,
 				20001001 /* ThreeCirclesAPIClient.swift */,
-				20001002 /* ThreeCirclesOfflineCache.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -625,7 +679,6 @@
 				20000024 /* ActivityError.swift */,
 				20000025 /* ActivityViewModel.swift */,
 				20000026 /* AffirmationsViewModel.swift */,
-				20000027 /* CheckInViewModel.swift */,
 				20000028 /* CommitmentViewModel.swift */,
 				20000029 /* DevotionalViewModel.swift */,
 				20000030 /* EmotionalJournalViewModel.swift */,
@@ -763,9 +816,13 @@
 				20000064 /* PhoneCallLogView.swift */,
 				20000065 /* PostMortemView.swift */,
 				20000066 /* PrayerLogView.swift */,
-				20000067 /* RecoveryCheckInView.swift */,
 				20000068 /* SobrietyCommitmentView.swift */,
 				20000069 /* SpouseCheckInPrepView.swift */,
+				20000970 /* FANOSCheckInView.swift */,
+				20000971 /* FITNAPCheckInView.swift */,
+				20000972 /* CommitmentStatementsManager.swift */,
+				20000973 /* EditCommitmentStatementsView.swift */,
+				20000980 /* CommitmentSetupView.swift */,
 				20000070 /* StepWorkView.swift */,
 				50000302 /* TimeJournal */,
 				20000071 /* TimeJournalView.swift */,
@@ -785,6 +842,9 @@
 				20000078 /* GlossaryView.swift */,
 				20000079 /* PrayersView.swift */,
 				20000080 /* ResourcesView.swift */,
+				20003002 /* BookLibraryView.swift */,
+				20003003 /* BookTableOfContentsView.swift */,
+				20003004 /* BookChapterReaderView.swift */,
 			);
 			path = Content;
 			sourceTree = "<group>";
@@ -963,7 +1023,6 @@
 			isa = PBXGroup;
 			children = (
 				20000110 /* AffirmationsViewModelTests.swift */,
-				20000111 /* CheckInViewModelTests.swift */,
 				20000112 /* EmotionalJournalViewModelTests.swift */,
 				20000113 /* ProfileViewModelTests.swift */,
 				20000114 /* StreakViewModelTests.swift */,
@@ -975,9 +1034,38 @@
 		50000070 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				20001111 /* aa-bigbook-2nd-edition.pdf */,
+				50002000 /* BigBook */,
 				20000801 /* gratitude-prompts.json */,
+				20003150 /* Confessions */,
+				20003250 /* Humility */,
+				20003350 /* AbsoluteSurrender */,
+				20003450 /* SchoolOfPrayer */,
+				20003550 /* WaitingOnGod */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		50002000 /* BigBook */ = {
+			isa = PBXGroup;
+			children = (
+				20002002 /* 00-foreword.txt */,
+				20002003 /* 01-the-doctors-opinion.txt */,
+				20002004 /* 02-bills-story.txt */,
+				20002005 /* 03-there-is-a-solution.txt */,
+				20002006 /* 04-more-about-alcoholism.txt */,
+				20002007 /* 05-we-agnostics.txt */,
+				20002008 /* 06-how-it-works.txt */,
+				20002009 /* 07-into-action.txt */,
+				20002010 /* 08-working-with-others.txt */,
+				20002011 /* 09-to-wives.txt */,
+				20002012 /* 10-the-family-afterward.txt */,
+				20002013 /* 11-to-employers.txt */,
+				20002014 /* 12-a-vision-for-you.txt */,
+				20002015 /* 13-doctor-bobs-nightmare.txt */,
+				20002016 /* 14-spiritual-experience.txt */,
+			);
+			path = BigBook;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1030,6 +1118,27 @@
 			files = (
 				10000200 /* Assets.xcassets in Resources */,
 				10000801 /* gratitude-prompts.json in Resources */,
+				10001111 /* aa-bigbook-2nd-edition.pdf in Resources */,
+				10002002 /* 00-foreword.txt in Resources */,
+				10002003 /* 01-the-doctors-opinion.txt in Resources */,
+				10002004 /* 02-bills-story.txt in Resources */,
+				10002005 /* 03-there-is-a-solution.txt in Resources */,
+				10002006 /* 04-more-about-alcoholism.txt in Resources */,
+				10002007 /* 05-we-agnostics.txt in Resources */,
+				10002008 /* 06-how-it-works.txt in Resources */,
+				10002009 /* 07-into-action.txt in Resources */,
+				10002010 /* 08-working-with-others.txt in Resources */,
+				10002011 /* 09-to-wives.txt in Resources */,
+				10002012 /* 10-the-family-afterward.txt in Resources */,
+				10002013 /* 11-to-employers.txt in Resources */,
+				10002014 /* 12-a-vision-for-you.txt in Resources */,
+				10002015 /* 13-doctor-bobs-nightmare.txt in Resources */,
+				10002016 /* 14-spiritual-experience.txt in Resources */,
+				10003150 /* Confessions in Resources */,
+				10003250 /* Humility in Resources */,
+				10003350 /* AbsoluteSurrender in Resources */,
+				10003450 /* SchoolOfPrayer in Resources */,
+				10003550 /* WaitingOnGod in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1101,7 +1210,6 @@
 				10000024 /* ActivityError.swift in Sources */,
 				10000025 /* ActivityViewModel.swift in Sources */,
 				10000026 /* AffirmationsViewModel.swift in Sources */,
-				10000027 /* CheckInViewModel.swift in Sources */,
 				10000028 /* CommitmentViewModel.swift in Sources */,
 				10000029 /* DevotionalViewModel.swift in Sources */,
 				10000030 /* EmotionalJournalViewModel.swift in Sources */,
@@ -1141,9 +1249,13 @@
 				10000064 /* PhoneCallLogView.swift in Sources */,
 				10000065 /* PostMortemView.swift in Sources */,
 				10000066 /* PrayerLogView.swift in Sources */,
-				10000067 /* RecoveryCheckInView.swift in Sources */,
 				10000068 /* SobrietyCommitmentView.swift in Sources */,
 				10000069 /* SpouseCheckInPrepView.swift in Sources */,
+				10000970 /* FANOSCheckInView.swift in Sources */,
+				10000971 /* FITNAPCheckInView.swift in Sources */,
+				10000972 /* CommitmentStatementsManager.swift in Sources */,
+				10000973 /* EditCommitmentStatementsView.swift in Sources */,
+				10000980 /* CommitmentSetupView.swift in Sources */,
 				10000070 /* StepWorkView.swift in Sources */,
 				10000071 /* TimeJournalView.swift in Sources */,
 				10000072 /* UrgeLogView.swift in Sources */,
@@ -1197,8 +1309,6 @@
 				10000603 /* PeopleField.swift in Sources */,
 				10000604 /* EmotionPicker.swift in Sources */,
 				10000605 /* TimeJournalQuickEntrySheet.swift in Sources */,
-				10000700 /* TimeJournalReminderManager.swift in Sources */,
-				10000701 /* FocusStatusMonitor.swift in Sources */,
 				10000702 /* JournalEntryDetailView.swift in Sources */,
 				10000703 /* JournalHistoryView.swift in Sources */,
 				10000800 /* GratitudePromptService.swift in Sources */,
@@ -1214,11 +1324,8 @@
 				10000909 /* GratitudeSharingService.swift in Sources */,
 				10000950 /* AffirmationTypes.swift in Sources */,
 				10000951 /* AffirmationsAPIClient.swift in Sources */,
-				10000952 /* AffirmationAudioSessionManager.swift in Sources */,
-				10000953 /* AffirmationOfflineCache.swift in Sources */,
 				10001000 /* ThreeCirclesTypes.swift in Sources */,
 				10001001 /* ThreeCirclesAPIClient.swift in Sources */,
-				10001002 /* ThreeCirclesOfflineCache.swift in Sources */,
 				10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */,
 				10001004 /* CircleSetDetailViewModel.swift in Sources */,
 				10001005 /* PatternViewModel.swift in Sources */,
@@ -1256,6 +1363,11 @@
 				10001107 /* IntentionRecallView.swift in Sources */,
 				10001108 /* EveningReflectionTextView.swift in Sources */,
 				10001109 /* SessionCompleteView.swift in Sources */,
+				10003000 /* BookData.swift in Sources */,
+				10003001 /* BookCatalog.swift in Sources */,
+				10003002 /* BookLibraryView.swift in Sources */,
+				10003003 /* BookTableOfContentsView.swift in Sources */,
+				10003004 /* BookChapterReaderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

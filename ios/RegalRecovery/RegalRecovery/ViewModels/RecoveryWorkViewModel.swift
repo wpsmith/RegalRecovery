@@ -186,26 +186,6 @@ class RecoveryWorkViewModel {
                 activityTypeKey: ActivityType.fasterScale.rawValue
             ),
             WorkTileItem(
-                id: "activity.check-ins",
-                title: "Recovery Check-in",
-                icon: "heart.text.clipboard",
-                iconColor: .rrPrimary,
-                category: .activities,
-                featureFlagKey: "activity.check-ins",
-                implemented: true,
-                activityTypeKey: ActivityType.recoveryCheckIn.rawValue
-            ),
-            WorkTileItem(
-                id: "activity.emotional-journaling",
-                title: "Emotional Journal",
-                icon: "heart.circle.fill",
-                iconColor: .purple,
-                category: .activities,
-                featureFlagKey: "activity.emotional-journaling",
-                implemented: true,
-                activityTypeKey: ActivityType.emotionalJournal.rawValue
-            ),
-            WorkTileItem(
                 id: "activity.time-journal",
                 title: "Time Journal",
                 icon: "clock.fill",
@@ -221,7 +201,7 @@ class RecoveryWorkViewModel {
                 icon: "heart.fill",
                 iconColor: .pink,
                 category: .activities,
-                featureFlagKey: "feature.fanos",
+                featureFlagKey: "activity.fanos",
                 implemented: true,
                 activityTypeKey: "fanos"
             ),
@@ -231,7 +211,7 @@ class RecoveryWorkViewModel {
                 icon: "heart.text.clipboard",
                 iconColor: .pink,
                 category: .activities,
-                featureFlagKey: "feature.fitnap",
+                featureFlagKey: "activity.fitnap",
                 implemented: true,
                 activityTypeKey: "fitnap"
             ),
@@ -508,9 +488,7 @@ class RecoveryWorkViewModel {
     static func todayStatus(
         for tile: WorkTileItem,
         commitments: [RRCommitment],
-        checkIns: [RRCheckIn],
         journals: [RRJournalEntry],
-        emotionalJournals: [RREmotionalJournal],
         timeBlocks: [RRTimeBlock],
         fasterEntries: [RRFASTEREntry],
         urgeLogs: [RRUrgeLog],
@@ -556,17 +534,6 @@ class RecoveryWorkViewModel {
                 let stage = FASTERStage(rawValue: e.stage) ?? .restoration
                 return .hasEntries(stage.shortName)
             }
-            return .none
-
-        case ActivityType.recoveryCheckIn.rawValue:
-            if let c = checkIns.first(where: { cal.isDateInToday($0.date) }) {
-                return .hasEntries("\(c.score)")
-            }
-            return .none
-
-        case ActivityType.emotionalJournal.rawValue:
-            let todayCount = emotionalJournals.filter { cal.isDateInToday($0.date) }.count
-            if todayCount > 0 { return .hasEntries("\(todayCount)") }
             return .none
 
         case ActivityType.timeJournal.rawValue:

@@ -88,13 +88,11 @@ final class FeatureFlagStore {
         "activity.urge-logging": true,
         "activity.journaling": true,
         "activity.faster-scale": true,
-        "activity.check-ins": true,
 
         // Activities - P1
-        "activity.emotional-journaling": false,
         "activity.time-journal": true,
-        "feature.fanos": false,
-        "feature.fitnap": false,
+        "activity.fanos": false,
+        "activity.fitnap": false,
         "activity.person-check-ins": false,
         "activity.meetings": true,
         "activity.post-mortem": true,

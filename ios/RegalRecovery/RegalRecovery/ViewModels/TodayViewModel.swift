@@ -331,17 +331,6 @@ class TodayViewModel {
             }
         }
 
-        // Check-ins
-        let checkInDesc = FetchDescriptor<RRCheckIn>(
-            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-        if let results = try? context.fetch(checkInDesc) {
-            for ci in results {
-                all.append((ci.date, RecentActivity(title: "Recovery Check-in", detail: "Score: \(ci.score)", time: fmt.localizedString(for: ci.date, relativeTo: now), icon: "heart.text.clipboard", iconColor: .rrPrimary)))
-            }
-        }
-
         // Mood
         let moodDesc = FetchDescriptor<RRMoodEntry>(
             predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
@@ -397,17 +386,6 @@ class TodayViewModel {
             for j in results {
                 let snippet = String(j.content.prefix(40))
                 all.append((j.date, RecentActivity(title: "Journal", detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: now), icon: "note.text", iconColor: .purple)))
-            }
-        }
-
-        // Emotional Journal
-        let emotionalDesc = FetchDescriptor<RREmotionalJournal>(
-            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
-            sortBy: [SortDescriptor(\.date, order: .reverse)]
-        )
-        if let results = try? context.fetch(emotionalDesc) {
-            for ej in results {
-                all.append((ej.date, RecentActivity(title: "Emotional Journal", detail: "\(ej.emotion), \(ej.intensity)/10", time: fmt.localizedString(for: ej.date, relativeTo: now), icon: "heart.circle.fill", iconColor: .pink)))
             }
         }
 
@@ -497,9 +475,6 @@ class TodayViewModel {
             )
         }
 
-        if activityType == ActivityType.recoveryCheckIn.rawValue {
-            return fetchDates(RRCheckIn.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
-        }
         if activityType == ActivityType.prayer.rawValue {
             return fetchDates(RRPrayerLog.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
@@ -508,9 +483,6 @@ class TodayViewModel {
         }
         if activityType == ActivityType.journal.rawValue {
             return fetchDates(RRJournalEntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
-        }
-        if activityType == ActivityType.emotionalJournal.rawValue {
-            return fetchDates(RREmotionalJournal.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
         if activityType == ActivityType.mood.rawValue {
             return fetchDates(RRMoodEntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
@@ -527,7 +499,7 @@ class TodayViewModel {
         if activityType == ActivityType.meetingsAttended.rawValue {
             return fetchDates(RRMeetingLog.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
-        if activityType == ActivityType.spouseCheckIn.rawValue {
+        if activityType == ActivityType.fanos.rawValue || activityType == ActivityType.fitnap.rawValue {
             return fetchDates(RRSpouseCheckIn.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
         if activityType == ActivityType.affirmationLog.rawValue {
@@ -584,14 +556,6 @@ class TodayViewModel {
             )
         }
 
-        if activityType == ActivityType.recoveryCheckIn.rawValue {
-            return hasRecord(
-                RRCheckIn.self,
-                predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
-                context: context
-            )
-        }
-
         if activityType == ActivityType.prayer.rawValue {
             return hasRecord(
                 RRPrayerLog.self,
@@ -611,14 +575,6 @@ class TodayViewModel {
         if activityType == ActivityType.journal.rawValue {
             return hasRecord(
                 RRJournalEntry.self,
-                predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
-                context: context
-            )
-        }
-
-        if activityType == ActivityType.emotionalJournal.rawValue {
-            return hasRecord(
-                RREmotionalJournal.self,
                 predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
                 context: context
             )
@@ -664,7 +620,7 @@ class TodayViewModel {
             )
         }
 
-        if activityType == ActivityType.spouseCheckIn.rawValue {
+        if activityType == ActivityType.fanos.rawValue || activityType == ActivityType.fitnap.rawValue {
             return hasRecord(
                 RRSpouseCheckIn.self,
                 predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },

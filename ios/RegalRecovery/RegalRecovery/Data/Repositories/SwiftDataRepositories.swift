@@ -691,16 +691,6 @@ actor SwiftDataSupportContactRepository: SupportContactRepository {
         }
     }
 
-    func updatePermissions(contactId: UUID, permissions: [String]) async throws {
-        let descriptor = FetchDescriptor<RRSupportContact>(
-            predicate: #Predicate { $0.id == contactId }
-        )
-        if let contact = try modelContext.fetch(descriptor).first {
-            contact.permissions = permissions
-            contact.modifiedAt = Date()
-            try modelContext.save()
-        }
-    }
 }
 
 // MARK: - Feature Flag Repository

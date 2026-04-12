@@ -65,17 +65,22 @@ final class AffirmationSessionViewModel {
     // MARK: - Dependencies
 
     private let apiClient: AffirmationsAPIClient
+    /// When true, sessions use bundled/cached content instead of API calls.
+    let isLocalOnly: Bool
 
     // MARK: - Init
 
-    init(apiClient: AffirmationsAPIClient) {
+    init(apiClient: AffirmationsAPIClient, isLocalOnly: Bool = false) {
         self.apiClient = apiClient
+        self.isLocalOnly = isLocalOnly
     }
 
     // MARK: - Hub Data Loading
 
     /// Fetches progress metrics and current level info for the hub screen.
+    /// In local-only mode, skips API calls and leaves progress/level as nil.
     func loadHubData() async {
+        guard !isLocalOnly else { return }
         isLoading = true
         defer { isLoading = false }
         do {
@@ -84,36 +89,95 @@ final class AffirmationSessionViewModel {
             let levelResp = try await apiClient.getLevelInfo()
             levelInfo = levelResp.data
         } catch {
-            self.error = error.localizedDescription
+            // Silently continue — hub shows without progress data
         }
     }
 
     // MARK: - Session Lifecycle
 
     /// Fetches a morning session from the API and begins the morning flow at card 0.
+    /// Falls back to local content if the API is unavailable or in local-only mode.
     func startMorningSession() async {
         isLoading = true
         defer { isLoading = false }
+
+        if isLocalOnly {
+            morningSessionData = Self.localMorningSession()
+            currentStep = .morningCard(index: 0)
+            return
+        }
+
         do {
             let response = try await apiClient.getMorningSession()
             morningSessionData = response.data
             currentStep = .morningCard(index: 0)
         } catch {
-            self.error = "Unable to load session. Please try again."
+            // Offline fallback: use local affirmations
+            morningSessionData = Self.localMorningSession()
+            currentStep = .morningCard(index: 0)
         }
     }
 
     /// Fetches an evening session from the API and begins the evening flow.
+    /// Falls back to local content if the API is unavailable or in local-only mode.
     func startEveningSession() async {
         isLoading = true
         defer { isLoading = false }
+
+        if isLocalOnly {
+            eveningSessionData = Self.localEveningSession()
+            currentStep = .eveningAffirmation
+            return
+        }
+
         do {
             let response = try await apiClient.getEveningSession()
             eveningSessionData = response.data
             currentStep = .eveningAffirmation
         } catch {
-            self.error = "Unable to load session. Please try again."
+            eveningSessionData = Self.localEveningSession()
+            currentStep = .eveningAffirmation
         }
+    }
+
+    // MARK: - Local Session Builders
+
+    private static func localMorningSession() -> MorningSessionData {
+        let affirmations = localAffirmationPool().prefix(3).map { $0 }
+        return MorningSessionData(
+            sessionId: "local-\(UUID().uuidString.prefix(8))",
+            sessionType: .morning,
+            affirmations: affirmations,
+            intentionPrompt: "What is one thing you want to protect in your recovery today?",
+            createdAt: Date()
+        )
+    }
+
+    private static func localEveningSession() -> EveningSessionData {
+        let affirmation = localAffirmationPool().randomElement() ?? localAffirmationPool()[0]
+        return EveningSessionData(
+            sessionId: "local-\(UUID().uuidString.prefix(8))",
+            sessionType: .evening,
+            affirmation: affirmation,
+            morningIntention: nil,
+            ratingPrompt: "How well did you live out your morning intention today?",
+            createdAt: Date()
+        )
+    }
+
+    private static func localAffirmationPool() -> [AffirmationItem] {
+        [
+            AffirmationItem(id: "local_001", text: "I am accepted in Christ. My identity is not defined by my past.", level: 1, coreBeliefs: [1], category: .selfWorth, track: .faithBased, recoveryStage: .early),
+            AffirmationItem(id: "local_002", text: "I am secure because God holds me. I do not need to control everything.", level: 1, coreBeliefs: [2], category: .selfWorth, track: .faithBased, recoveryStage: .early),
+            AffirmationItem(id: "local_003", text: "I am significant because God created me with purpose.", level: 1, coreBeliefs: [3], category: .purposeMeaning, track: .faithBased, recoveryStage: .early),
+            AffirmationItem(id: "local_004", text: "My recovery is evidence of God's faithfulness, not my perfection.", level: 1, coreBeliefs: [1, 3], category: .shameResilience, track: .faithBased, recoveryStage: .early),
+            AffirmationItem(id: "local_005", text: "I choose honesty today because secrets keep me sick.", level: 1, coreBeliefs: [2], category: .integrityHonesty, track: .standard, recoveryStage: .early),
+            AffirmationItem(id: "local_006", text: "I am not alone. God is with me and my community supports me.", level: 1, coreBeliefs: [1, 2], category: .connection, track: .faithBased, recoveryStage: .early),
+            AffirmationItem(id: "local_007", text: "Today I will guard my eyes, my heart, and my mind.", level: 1, coreBeliefs: [2], category: .dailyStrength, track: .standard, recoveryStage: .early),
+            AffirmationItem(id: "local_008", text: "A setback is not my story. God's grace is bigger than my worst day.", level: 1, coreBeliefs: [1, 3], category: .shameResilience, track: .faithBased, recoveryStage: .early),
+            AffirmationItem(id: "local_009", text: "I am worth fighting for. My family is worth fighting for.", level: 1, coreBeliefs: [3], category: .healthyRelationships, track: .standard, recoveryStage: .early),
+            AffirmationItem(id: "local_010", text: "Vulnerability is not weakness. It is the doorway to freedom.", level: 2, coreBeliefs: [1, 2], category: .emotionalRegulation, track: .standard, recoveryStage: .middle),
+        ]
     }
 
     // MARK: - Step Navigation
@@ -170,6 +234,10 @@ final class AffirmationSessionViewModel {
     /// Records morning session completion with the API. Falls back to local tracking on failure.
     private func completeMorningSession() async {
         guard let session = morningSessionData else { return }
+        if isLocalOnly {
+            hasMorningSessionToday = true
+            return
+        }
         do {
             let request = CompleteMorningRequest(
                 sessionId: session.sessionId,
@@ -180,14 +248,16 @@ final class AffirmationSessionViewModel {
             completionData = response.data
             hasMorningSessionToday = true
         } catch {
-            // Session still recorded locally even if API fails
             hasMorningSessionToday = true
         }
     }
 
-    /// Records evening session completion with the API. Falls back to local tracking on failure.
     private func completeEveningSession() async {
         guard let session = eveningSessionData else { return }
+        if isLocalOnly {
+            hasEveningSessionToday = true
+            return
+        }
         do {
             let request = CompleteEveningRequest(
                 sessionId: session.sessionId,
@@ -198,25 +268,25 @@ final class AffirmationSessionViewModel {
             completionData = response.data
             hasEveningSessionToday = true
         } catch {
-            // Session still recorded locally even if API fails
             hasEveningSessionToday = true
         }
     }
 
     // MARK: - Affirmation Actions
 
-    /// Adds an affirmation to the user's favorites. Errors are ignored gracefully.
     func favoriteAffirmation(id: String) async {
+        guard !isLocalOnly else { return }
         do {
             _ = try await apiClient.addFavorite(affirmationId: id)
         } catch {
-            // Ignore errors — favorite is a best-effort action
+            // Best-effort
         }
     }
 
     /// Hides an affirmation from future sessions. Returns a replacement affirmation if the API provides one.
     @discardableResult
     func hideAffirmation(id: String) async -> AffirmationItem? {
+        guard !isLocalOnly else { return nil }
         do {
             let response = try await apiClient.hideAffirmation(affirmationId: id)
             return response.data.replacement

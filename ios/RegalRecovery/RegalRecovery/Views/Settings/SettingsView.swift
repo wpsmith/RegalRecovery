@@ -76,9 +76,6 @@ struct SettingsView: View {
                                             Text(contact.name)
                                                 .font(RRFont.body)
                                                 .foregroundStyle(Color.rrText)
-                                            Text(contact.permissions.joined(separator: ", "))
-                                                .font(RRFont.caption)
-                                                .foregroundStyle(Color.rrTextSecondary)
                                         }
                                         Spacer()
                                         RRBadge(text: contact.role.capitalized, color: contactRoleColor(contact.role))

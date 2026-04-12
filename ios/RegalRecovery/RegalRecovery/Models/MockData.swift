@@ -74,10 +74,10 @@ enum MockData {
     // MARK: - Support Network
 
     static let supportNetwork: [SupportContact] = [
-        SupportContact(name: "James", role: .sponsor, permissionSummary: "Sees: All except journal & financial", linkedDaysAgo: 260, phone: "(512) 555-0142"),
-        SupportContact(name: "Dr. Sarah", role: .counselor, permissionSummary: "Sees: All", linkedDaysAgo: 265, phone: "(512) 555-0198"),
-        SupportContact(name: "Rachel", role: .spouse, permissionSummary: "Sees: All", linkedDaysAgo: 250, phone: "(512) 555-0111"),
-        SupportContact(name: "Mike", role: .accountabilityPartner, permissionSummary: "Sees: All except journal & financial", linkedDaysAgo: 200, phone: "(512) 555-0167"),
+        SupportContact(name: "James", role: .sponsor, linkedDaysAgo: 260, phone: "(512) 555-0142"),
+        SupportContact(name: "Dr. Sarah", role: .counselor, linkedDaysAgo: 265, phone: "(512) 555-0198"),
+        SupportContact(name: "Rachel", role: .spouse, linkedDaysAgo: 250, phone: "(512) 555-0111"),
+        SupportContact(name: "Mike", role: .accountabilityPartner, linkedDaysAgo: 200, phone: "(512) 555-0167"),
     ]
 
     // MARK: - Commitments
@@ -108,16 +108,11 @@ enum MockData {
     // MARK: - Recent Activity Feed
 
     static let recentActivity: [RecentActivity] = [
-        RecentActivity(title: "Recovery Check-in", detail: "Score: 82", time: "Today, 6:30 AM", icon: "heart.text.clipboard", iconColor: .rrPrimary),
         RecentActivity(title: "FASTER Scale", detail: "Green", time: "Today, 6:20 AM", icon: "gauge.with.needle", iconColor: .rrSuccess),
         RecentActivity(title: "Morning Commitment", detail: "Completed", time: "Today, 6:14 AM", icon: "sun.max.fill", iconColor: .rrSecondary),
         RecentActivity(title: "Prayer", detail: "12 min", time: "Today, 6:00 AM", icon: "hands.and.sparkles.fill", iconColor: .rrPrimary),
         RecentActivity(title: "Journal", detail: "Reflecting on gratitude...", time: "Yesterday, 9:15 PM", icon: "note.text", iconColor: .purple),
     ]
-
-    // MARK: - Check-in History (7 days for sparkline)
-
-    static let checkInScores: [Int] = [78, 75, 80, 85, 79, 84, 82]
 
     // MARK: - FASTER Scale History (30 days)
 

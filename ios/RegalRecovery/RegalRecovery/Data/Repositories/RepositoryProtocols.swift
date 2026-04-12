@@ -164,7 +164,6 @@ protocol SupportContactRepository: Sendable {
     func saveContact(_ contact: RRSupportContact) async throws
     func getContacts(for userId: UUID) async throws -> [RRSupportContact]
     func deleteContact(id: UUID) async throws
-    func updatePermissions(contactId: UUID, permissions: [String]) async throws
 }
 
 // MARK: - Feature Flag Repository

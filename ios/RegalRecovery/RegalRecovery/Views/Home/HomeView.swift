@@ -7,7 +7,6 @@ struct HomeView: View {
     @Query(sort: \RRMilestone.days) private var milestones: [RRMilestone]
     @Query(sort: \RRActivity.timestamp, order: .reverse) private var activities: [RRActivity]
     @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
-    @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
     @Query(sort: \RRMoodEntry.date, order: .reverse) private var moodEntries: [RRMoodEntry]
     @Query(sort: \RRPrayerLog.date, order: .reverse) private var prayerLogs: [RRPrayerLog]
     @Query(sort: \RRExerciseLog.date, order: .reverse) private var exerciseLogs: [RRExerciseLog]
@@ -65,9 +64,6 @@ struct HomeView: View {
             let label = c.type == "morning" ? "Morning Commitment" : "Evening Review"
             let icon = c.type == "morning" ? "sunrise.fill" : "moon.stars.fill"
             all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: c.type == "morning" ? .rrSecondary : .rrPrimary)))
-        }
-        for ci in checkIns.prefix(3) {
-            all.append((ci.date, RecentActivity(title: "Recovery Check-in", detail: "Score: \(ci.score)", time: fmt.localizedString(for: ci.date, relativeTo: Date()), icon: "heart.text.clipboard", iconColor: .rrPrimary)))
         }
         for m in moodEntries.prefix(3) {
             let emoji = m.score >= 7 ? "😊" : m.score >= 5 ? "😐" : "😟"

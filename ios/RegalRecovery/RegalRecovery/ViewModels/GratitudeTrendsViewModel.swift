@@ -198,27 +198,6 @@ class GratitudeTrendsViewModel {
 
     // MARK: - Correlations
 
-    func checkInCorrelation(entries: [RRGratitudeEntry], checkIns: [RRCheckIn]) -> String? {
-        let (gratitudeDays, nonGratitudeDays) = partitionDays(
-            entries: entries,
-            otherRecords: checkIns.map { ($0.date, $0.score) }
-        )
-
-        guard gratitudeDays.count >= 14, nonGratitudeDays.count >= 14 else { return nil }
-
-        let avgWithGratitude = Double(gratitudeDays.reduce(0, +)) / Double(gratitudeDays.count)
-        let avgWithout = Double(nonGratitudeDays.reduce(0, +)) / Double(nonGratitudeDays.count)
-        let diff = avgWithGratitude - avgWithout
-
-        guard abs(diff) >= 1.0 else { return nil }
-
-        if diff > 0 {
-            return "On days you complete a gratitude list, your check-in score averages \(Int(diff.rounded())) points higher."
-        } else {
-            return "Your check-in scores are consistent whether or not you journal gratitude -- keep it up!"
-        }
-    }
-
     func urgeCorrelation(entries: [RRGratitudeEntry], urgeLogs: [RRUrgeLog]) -> String? {
         let gratitudeDaySet = uniqueCalendarDayStrings(from: entries)
 

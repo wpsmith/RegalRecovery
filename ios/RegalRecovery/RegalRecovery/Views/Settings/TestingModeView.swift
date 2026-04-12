@@ -34,6 +34,50 @@ struct TestingModeView: View {
                 Text("Today's Data")
             }
 
+            // MARK: - Commitment Debug
+            Section {
+                Button {
+                    CommitmentStatementsManager.shared.resetMorningToDefaults()
+                    statusMessage = "Commitments reset to defaults"
+                } label: {
+                    HStack {
+                        Image(systemName: "arrow.counterclockwise")
+                            .foregroundStyle(Color.rrPrimary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Reset Commitments")
+                                .font(RRFont.body)
+                                .foregroundStyle(Color.rrText)
+                            Text("Reset morning commitment statements to recommended defaults.")
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        }
+                    }
+                }
+
+                Button(role: .destructive) {
+                    CommitmentStatementsManager.shared.resetMorningToDefaults()
+                    // Also clear the customized flag so the setup flow triggers again
+                    UserDefaults.standard.removeObject(forKey: "sobriety.commitment.morningStatements")
+                    UserDefaults.standard.set(false, forKey: "sobriety.commitment.hasCustomized")
+                    statusMessage = "Commitments erased \u{2014} setup will trigger on next open"
+                } label: {
+                    HStack {
+                        Image(systemName: "trash")
+                            .foregroundStyle(Color.rrDestructive)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Erase Commitments")
+                                .font(RRFont.body)
+                                .foregroundStyle(Color.rrDestructive)
+                            Text("Clear all commitments and force the setup flow to appear again.")
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        }
+                    }
+                }
+            } header: {
+                Text("Commitments")
+            }
+
             // MARK: - Erase All Data
             Section {
                 Button(role: .destructive) {
@@ -121,14 +165,12 @@ struct TestingModeView: View {
         let calendar = Calendar.current
         let todayStart = calendar.startOfDay(for: Date())
 
-        deleteCheckIns(from: todayStart)
         deleteMoodEntries(from: todayStart)
         deletePrayerLogs(from: todayStart)
         deleteExerciseLogs(from: todayStart)
         deleteFASTEREntries(from: todayStart)
         deleteGratitudeEntries(from: todayStart)
         deleteJournalEntries(from: todayStart)
-        deleteEmotionalJournals(from: todayStart)
         deleteTimeBlocks(from: todayStart)
         deleteUrgeLogs(from: todayStart)
         deletePhoneCallLogs(from: todayStart)
@@ -138,15 +180,6 @@ struct TestingModeView: View {
         deleteDailyScores(from: todayStart)
 
         statusMessage = "Today's data erased"
-    }
-
-    private func deleteCheckIns(from todayStart: Date) {
-        let descriptor = FetchDescriptor<RRCheckIn>(
-            predicate: #Predicate<RRCheckIn> { $0.date >= todayStart }
-        )
-        if let items = try? modelContext.fetch(descriptor) {
-            for item in items { modelContext.delete(item) }
-        }
     }
 
     private func deleteMoodEntries(from todayStart: Date) {
@@ -197,15 +230,6 @@ struct TestingModeView: View {
     private func deleteJournalEntries(from todayStart: Date) {
         let descriptor = FetchDescriptor<RRJournalEntry>(
             predicate: #Predicate<RRJournalEntry> { $0.date >= todayStart }
-        )
-        if let items = try? modelContext.fetch(descriptor) {
-            for item in items { modelContext.delete(item) }
-        }
-    }
-
-    private func deleteEmotionalJournals(from todayStart: Date) {
-        let descriptor = FetchDescriptor<RREmotionalJournal>(
-            predicate: #Predicate<RREmotionalJournal> { $0.date >= todayStart }
         )
         if let items = try? modelContext.fetch(descriptor) {
             for item in items { modelContext.delete(item) }
@@ -292,7 +316,6 @@ struct TestingModeView: View {
             try modelContext.delete(model: RRFASTEREntry.self)
             try modelContext.delete(model: RRGratitudeEntry.self)
             try modelContext.delete(model: RRJournalEntry.self)
-            try modelContext.delete(model: RREmotionalJournal.self)
             try modelContext.delete(model: RRTimeBlock.self)
             try modelContext.delete(model: RRUrgeLog.self)
             try modelContext.delete(model: RRPhoneCallLog.self)

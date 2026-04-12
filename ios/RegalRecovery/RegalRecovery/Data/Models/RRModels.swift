@@ -820,7 +820,6 @@ final class RRMeetingLog {
     var userId: UUID
     var date: Date
     var meetingName: String
-    var fellowship: String
     var durationMinutes: Int
     var notes: String
     var createdAt: Date
@@ -831,7 +830,6 @@ final class RRMeetingLog {
         userId: UUID,
         date: Date,
         meetingName: String,
-        fellowship: String,
         durationMinutes: Int,
         notes: String = "",
         createdAt: Date = Date(),
@@ -841,7 +839,6 @@ final class RRMeetingLog {
         self.userId = userId
         self.date = date
         self.meetingName = meetingName
-        self.fellowship = fellowship
         self.durationMinutes = durationMinutes
         self.notes = notes
         self.createdAt = createdAt
@@ -993,7 +990,6 @@ final class RRSupportContact {
     var name: String
     var role: String  // "sponsor", "counselor", "spouse", "accountabilityPartner"
     var phone: String
-    var permissions: [String]
     var linkedDate: Date
     var createdAt: Date
     var modifiedAt: Date
@@ -1006,7 +1002,6 @@ final class RRSupportContact {
         name: String,
         role: String,
         phone: String,
-        permissions: [String] = [],
         linkedDate: Date,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
@@ -1016,7 +1011,6 @@ final class RRSupportContact {
         self.name = name
         self.role = role
         self.phone = phone
-        self.permissions = permissions
         self.linkedDate = linkedDate
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
@@ -1341,8 +1335,6 @@ enum RRModelConfiguration {
         RRRecoveryPlan.self,
         RRDailyPlanItem.self,
         RRDailyScore.self,
-        RRCachedAffirmation.self,
-        RROfflineAffirmationSession.self,
     ]
 
     static var schema: Schema {

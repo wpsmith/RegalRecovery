@@ -55,12 +55,8 @@ struct ActivityDetailView: View {
         switch type {
         case .morningCommitment, .eveningReview:
             commitmentDetail(id: id)
-        case .recoveryCheckIn:
-            checkInDetail(id: id)
         case .journal:
             journalDetail(id: id)
-        case .emotionalJournal:
-            emotionalJournalDetail(id: id)
         case .fasterScale:
             fasterDetail(id: id)
         case .urgeLog:
@@ -77,7 +73,7 @@ struct ActivityDetailView: View {
             phoneCallDetail(id: id)
         case .meeting:
             meetingDetail(id: id)
-        case .spouseCheckIn:
+        case .fanos, .fitnap:
             spouseCheckInDetail(id: id)
         }
     }
@@ -95,24 +91,6 @@ struct ActivityDetailView: View {
                         if let completedAt = c.completedAt {
                             detailRow("Completed", value: completedAt.formatted(date: .omitted, time: .shortened))
                         }
-                    }
-                }
-            } else {
-                notFoundView
-            }
-        }
-    }
-
-    // MARK: - Check-In
-
-    private func checkInDetail(id: UUID) -> some View {
-        let item = fetchModel(RRCheckIn.self, id: id)
-        return Group {
-            if let ci = item {
-                RRCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        detailRow("Score", value: "\(ci.score)")
-                        detailRow("Date", value: ci.date.formatted(date: .long, time: .shortened))
                     }
                 }
             } else {
@@ -147,27 +125,6 @@ struct ActivityDetailView: View {
                                 .foregroundStyle(Color.rrText)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-            } else {
-                notFoundView
-            }
-        }
-    }
-
-    // MARK: - Emotional Journal
-
-    private func emotionalJournalDetail(id: UUID) -> some View {
-        let item = fetchModel(RREmotionalJournal.self, id: id)
-        return Group {
-            if let ej = item {
-                RRCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        detailRow("Emotion", value: ej.emotion)
-                        detailRow("Intensity", value: "\(ej.intensity)/10")
-                        detailRow("Activity", value: ej.activity)
-                        detailRow("Location", value: ej.location)
-                        detailRow("Date", value: ej.date.formatted(date: .long, time: .shortened))
                     }
                 }
             } else {
@@ -550,7 +507,6 @@ struct ActivityDetailView: View {
                     RRCard {
                         VStack(alignment: .leading, spacing: 12) {
                             detailRow("Meeting", value: ml.meetingName)
-                            detailRow("Fellowship", value: ml.fellowship)
                             detailRow("Duration", value: "\(ml.durationMinutes) min")
                             detailRow("Date", value: ml.date.formatted(date: .long, time: .shortened))
                         }
@@ -637,9 +593,7 @@ private protocol HasUUID {
 }
 
 extension RRCommitment: HasUUID {}
-extension RRCheckIn: HasUUID {}
 extension RRJournalEntry: HasUUID {}
-extension RREmotionalJournal: HasUUID {}
 extension RRFASTEREntry: HasUUID {}
 extension RRUrgeLog: HasUUID {}
 extension RRMoodEntry: HasUUID {}

@@ -293,6 +293,11 @@ struct ContentTabView: View {
             }
             .buttonStyle(.plain)
             Divider().padding(.leading, 52)
+            NavigationLink(destination: BookLibraryView()) {
+                resourceRow(icon: "books.vertical.fill", iconColor: .rrPrimary, title: "Library", subtitle: "\(BookCatalog.allBooks.count) books available")
+            }
+            .buttonStyle(.plain)
+            Divider().padding(.leading, 52)
             NavigationLink(destination: resourceComingSoonView(icon: "film", title: "Videos Coming Soon", description: "Video content is being prepared. Check back soon.")) {
                 resourceRow(icon: "play.rectangle.fill", iconColor: .blue, title: "Videos", subtitle: "12 recovery talks and testimonies")
             }

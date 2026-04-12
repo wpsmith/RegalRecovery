@@ -5,9 +5,6 @@ struct GratitudeTrendsView: View {
     @Query(sort: \RRGratitudeEntry.date, order: .reverse)
     private var entries: [RRGratitudeEntry]
 
-    @Query(sort: \RRCheckIn.date, order: .reverse)
-    private var checkIns: [RRCheckIn]
-
     @Query(sort: \RRUrgeLog.date, order: .reverse)
     private var urgeLogs: [RRUrgeLog]
 
@@ -235,17 +232,13 @@ struct GratitudeTrendsView: View {
 
     @ViewBuilder
     private var correlationInsightsCard: some View {
-        let checkInInsight = viewModel.checkInCorrelation(entries: entries, checkIns: checkIns)
         let urgeInsight = viewModel.urgeCorrelation(entries: entries, urgeLogs: urgeLogs)
 
-        if checkInInsight != nil || urgeInsight != nil {
+        if urgeInsight != nil {
             VStack(alignment: .leading, spacing: 12) {
                 RRSectionHeader(title: "Insights")
 
                 VStack(spacing: 12) {
-                    if let insight = checkInInsight {
-                        insightCard(text: insight)
-                    }
                     if let insight = urgeInsight {
                         insightCard(text: insight)
                     }

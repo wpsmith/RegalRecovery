@@ -150,9 +150,6 @@ struct TodayView: View {
                     quickActionCard(icon: "flame.fill", label: "Log Urge", color: .orange) {
                         UrgeLogView()
                     }
-                    quickActionCard(icon: "heart.text.clipboard", label: "Check In", color: .rrPrimary) {
-                        RecoveryCheckInView()
-                    }
                     quickActionCard(icon: "book.fill", label: "Journaling", color: .blue) {
                         JournalView()
                     }
@@ -407,15 +404,11 @@ struct TodayView: View {
         switch activityType {
         case ActivityType.sobrietyCommitment.rawValue:
             MorningCommitmentView()
-        case ActivityType.recoveryCheckIn.rawValue:
-            RecoveryCheckInView()
         case ActivityType.prayer.rawValue:
             PrayerLogView()
         case ActivityType.exercise.rawValue:
             ExerciseLogView()
         case ActivityType.journal.rawValue:
-            JournalView()
-        case ActivityType.emotionalJournal.rawValue:
             JournalView()
         case ActivityType.mood.rawValue:
             MoodRatingView()
@@ -431,8 +424,10 @@ struct TodayView: View {
             PhoneCallLogView()
         case ActivityType.meetingsAttended.rawValue:
             MeetingsAttendedView()
-        case ActivityType.spouseCheckIn.rawValue:
-            SpouseCheckInPrepView()
+        case ActivityType.fanos.rawValue:
+            FANOSCheckInView()
+        case ActivityType.fitnap.rawValue:
+            FITNAPCheckInView()
         case "pci":
             Text("PCI - Coming Soon")
                 .font(RRFont.title3)

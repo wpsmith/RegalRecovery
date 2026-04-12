@@ -71,7 +71,6 @@ class ProfileViewModel {
         let contact = SupportContact(
             name: name,
             role: contactRole,
-            permissionSummary: "No permissions set",
             linkedDaysAgo: 0,
             phone: phone
         )
@@ -82,18 +81,4 @@ class ProfileViewModel {
         supportNetwork.removeAll(where: { $0.id == contact.id })
     }
 
-    func updatePermissions(for contact: SupportContact, permissions: [String]) async throws {
-        guard let index = supportNetwork.firstIndex(where: { $0.id == contact.id }) else { return }
-
-        let existing = supportNetwork[index]
-        let summary = permissions.isEmpty ? "No permissions set" : "Sees: \(permissions.joined(separator: ", "))"
-
-        supportNetwork[index] = SupportContact(
-            name: existing.name,
-            role: existing.role,
-            permissionSummary: summary,
-            linkedDaysAgo: existing.linkedDaysAgo,
-            phone: existing.phone
-        )
-    }
 }

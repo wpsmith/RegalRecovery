@@ -1,6 +1,5 @@
 import SwiftUI
 import UserNotifications
-import Contacts
 import CoreLocation
 import LocalAuthentication
 
@@ -39,20 +38,6 @@ struct PermissionsView: View {
                 (icon: "exclamationmark.triangle.fill", text: "Urge surfing encouragement"),
             ],
             allowLabel: "Enable Notifications",
-            skipLabel: "Not Now"
-        ),
-        PermissionPage(
-            id: "contacts",
-            icon: "person.2.fill",
-            iconColor: .rrSuccess,
-            title: "Your Support Network",
-            headline: "Recovery is stronger together. Quickly add your sponsor, counselor, and accountability partners.",
-            bullets: [
-                (icon: "phone.fill", text: "One-tap call to your sponsor"),
-                (icon: "person.crop.circle.badge.checkmark", text: "Add accountability partners by name"),
-                (icon: "bell.badge.fill", text: "Emergency contact quick-access"),
-            ],
-            allowLabel: "Allow Contacts Access",
             skipLabel: "Not Now"
         ),
         PermissionPage(
@@ -193,8 +178,6 @@ struct PermissionsView: View {
         switch permissionId {
         case "notifications":
             requestNotifications()
-        case "contacts":
-            requestContacts()
         case "location":
             requestLocation()
         case "biometrics":
@@ -206,12 +189,6 @@ struct PermissionsView: View {
 
     private func requestNotifications() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { _, _ in
-            DispatchQueue.main.async { advance() }
-        }
-    }
-
-    private func requestContacts() {
-        CNContactStore().requestAccess(for: .contacts) { _, _ in
             DispatchQueue.main.async { advance() }
         }
     }

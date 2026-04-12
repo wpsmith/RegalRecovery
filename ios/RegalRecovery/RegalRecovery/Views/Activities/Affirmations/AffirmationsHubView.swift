@@ -36,10 +36,14 @@ struct AffirmationsHubView: View {
     }
 
     init() {
+        let container = ServiceContainer.shared
         let apiClient = AffirmationsAPIClient(
-            apiClient: ServiceContainer.shared.apiClient
+            apiClient: container.apiClient
         )
-        _viewModel = State(initialValue: AffirmationSessionViewModel(apiClient: apiClient))
+        _viewModel = State(initialValue: AffirmationSessionViewModel(
+            apiClient: apiClient,
+            isLocalOnly: container.isLocalOnly
+        ))
     }
 
     // MARK: - Body

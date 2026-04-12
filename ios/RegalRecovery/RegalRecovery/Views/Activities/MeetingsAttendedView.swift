@@ -7,12 +7,9 @@ struct MeetingsAttendedView: View {
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
     @State private var meetingName = ""
-    @State private var fellowship = "SA"
     @State private var meetingDate = Date()
     @State private var duration: Double = 60
     @State private var notes = ""
-
-    private let fellowships = ["SA", "CR", "AA", "Other"]
 
     private func relativeDay(_ date: Date) -> String {
         let cal = Calendar.current
@@ -42,24 +39,14 @@ struct MeetingsAttendedView: View {
 
                         Divider()
 
-                        // Fellowship
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Fellowship")
-                                .font(RRFont.subheadline)
-                                .foregroundStyle(Color.rrText)
-                            Picker("Fellowship", selection: $fellowship) {
-                                ForEach(fellowships, id: \.self) { f in
-                                    Text(f).tag(f)
-                                }
-                            }
-                            .pickerStyle(.segmented)
-                        }
-
-                        Divider()
-
-                        // Date picker
-                        DatePicker("Date", selection: $meetingDate, displayedComponents: .date)
-                            .font(RRFont.subheadline)
+                        // Date picker (max 48hrs ago, no future dates)
+                        DatePicker(
+                            "Date",
+                            selection: $meetingDate,
+                            in: Date().addingTimeInterval(-48 * 3600)...Date(),
+                            displayedComponents: .date
+                        )
+                        .font(RRFont.subheadline)
 
                         Divider()
 
@@ -110,7 +97,7 @@ struct MeetingsAttendedView: View {
                                             .font(RRFont.subheadline)
                                             .fontWeight(.medium)
                                             .foregroundStyle(Color.rrText)
-                                        Text("\(relativeDay(entry.date)) \u{2022} \(entry.fellowship)")
+                                        Text(relativeDay(entry.date))
                                             .font(RRFont.caption)
                                             .foregroundStyle(Color.rrTextSecondary)
                                     }
@@ -134,11 +121,12 @@ struct MeetingsAttendedView: View {
     private func submitMeeting() {
         let userId = users.first?.id ?? UUID()
         guard !meetingName.isEmpty else { return }
+        let minDate = Date().addingTimeInterval(-48 * 3600)
+        guard meetingDate >= minDate, meetingDate <= Date() else { return }
         let entry = RRMeetingLog(
             userId: userId,
             date: meetingDate,
             meetingName: meetingName,
-            fellowship: fellowship,
             durationMinutes: Int(duration),
             notes: notes
         )

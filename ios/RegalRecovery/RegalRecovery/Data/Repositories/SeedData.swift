@@ -67,7 +67,6 @@ enum SeedData {
         )
         seedMilestones(context: context, saId: saId, saAddiction: saAddiction)
         seedSupportNetwork(context: context, userId: userId, user: user)
-        seedCheckIns(context: context, userId: userId)
         seedMoodEntries(context: context, userId: userId)
         seedActivities(context: context, userId: userId)
         seedPrayerLogs(context: context, userId: userId)
@@ -79,7 +78,6 @@ enum SeedData {
         seedTimeBlocks(context: context, userId: userId)
         seedUrges(context: context, userId: userId, addictionId: saId)
         seedSpouseCheckIn(context: context, userId: userId)
-        seedEmotionalJournal(context: context, userId: userId)
         seedGratitude(context: context, userId: userId)
         seedStepWork(context: context, userId: userId)
         seedGoals(context: context, userId: userId)
@@ -201,47 +199,23 @@ enum SeedData {
     private static func seedSupportNetwork(
         context: ModelContext, userId: UUID, user: RRUser
     ) {
-        let contactData: [(String, String, String, [String], Int)] = [
-            ("James", "sponsor", "(512) 555-0142", ["streaks", "checkIns", "urges", "meetings", "faster", "mood", "exercise", "prayer", "phoneCalls", "milestones"], 260),
-            ("Dr. Sarah", "counselor", "(512) 555-0198", ["streaks", "checkIns", "urges", "meetings", "faster", "mood", "exercise", "prayer", "phoneCalls", "milestones", "journal", "financial"], 265),
-            ("Rachel", "spouse", "(512) 555-0111", ["streaks", "checkIns", "urges", "meetings", "faster", "mood", "exercise", "prayer", "phoneCalls", "milestones", "journal", "financial"], 250),
-            ("Mike", "accountabilityPartner", "(512) 555-0167", ["streaks", "checkIns", "urges", "meetings", "faster", "mood", "exercise", "prayer", "phoneCalls", "milestones"], 200),
+        let contactData: [(String, String, String, Int)] = [
+            ("James", "sponsor", "(512) 555-0142", 260),
+            ("Dr. Sarah", "counselor", "(512) 555-0198", 265),
+            ("Rachel", "spouse", "(512) 555-0111", 250),
+            ("Mike", "accountabilityPartner", "(512) 555-0167", 200),
         ]
-        for (name, role, phone, perms, ago) in contactData {
+        for (name, role, phone, ago) in contactData {
             let contact = RRSupportContact(
                 userId: userId,
                 name: name,
                 role: role,
                 phone: phone,
-                permissions: perms,
                 linkedDate: daysAgo(ago),
                 createdAt: daysAgo(ago)
             )
             contact.user = user
             context.insert(contact)
-        }
-    }
-
-    // MARK: - Check-Ins
-
-    private static func seedCheckIns(context: ModelContext, userId: UUID) {
-        let checkInScores = [78, 75, 80, 85, 79, 84, 82, 77, 83, 81, 86, 80, 79, 85, 88, 82, 76, 81, 84, 87, 80, 83, 78, 82, 85, 79, 81, 86, 84, 82]
-        for i in 0..<30 {
-            let score = checkInScores[i]
-            let checkIn = RRCheckIn(
-                userId: userId,
-                date: daysAgo(29 - i, hour: 21),
-                score: score,
-                answers: JSONPayload([
-                    "sobrietyStatus": .string("yes"),
-                    "urgeCount": .int(i % 3),
-                    "emotionalState": .int(score / 10),
-                    "overallRecoveryHealth": .int(score / 10),
-                ]),
-                synced: true,
-                createdAt: daysAgo(29 - i, hour: 21)
-            )
-            context.insert(checkIn)
         }
     }
 
@@ -264,7 +238,6 @@ enum SeedData {
 
     private static func seedActivities(context: ModelContext, userId: UUID) {
         let activityTypes: [(String, Int, Int)] = [
-            ("recoveryCheckIn", 6, 30),
             ("fasterScale", 6, 20),
             ("sobrietyCommitment", 6, 14),
             ("prayer", 6, 0),
@@ -351,17 +324,16 @@ enum SeedData {
     // MARK: - Meeting Logs
 
     private static func seedMeetingLogs(context: ModelContext, userId: UUID) {
-        let meetingData: [(Int, String, String, Int)] = [
-            (1, "SA Home Group", "SA", 60),
-            (3, "SA Virtual Noon", "SA", 60),
-            (5, "SA Step Study", "SA", 90),
+        let meetingData: [(Int, String, Int)] = [
+            (1, "SA Home Group", 60),
+            (3, "SA Virtual Noon", 60),
+            (5, "SA Step Study", 90),
         ]
-        for (ago, name, fellowship, duration) in meetingData {
+        for (ago, name, duration) in meetingData {
             let log = RRMeetingLog(
                 userId: userId,
                 date: daysAgo(ago, hour: 19),
                 meetingName: name,
-                fellowship: fellowship,
                 durationMinutes: duration,
                 createdAt: daysAgo(ago, hour: 19)
             )
@@ -481,33 +453,6 @@ enum SeedData {
             createdAt: daysAgo(3, hour: 20)
         )
         context.insert(spouseCheckIn)
-    }
-
-    // MARK: - Emotional Journal
-
-    private static func seedEmotionalJournal(context: ModelContext, userId: UUID) {
-        let emotionalData: [(Int, Int, String, String, Int, String, String)] = [
-            (0, 7, "Anxious", "purple", 6, "Work deadline", "Home, Austin TX"),
-            (1, 20, "Grateful", "yellow", 8, "Family dinner", "Home, Austin TX"),
-            (2, 8, "Peaceful", "blue", 7, "Morning prayer", "Home, Austin TX"),
-            (3, 15, "Frustrated", "red", 5, "Traffic", "I-35, Austin TX"),
-            (4, 10, "Hopeful", "yellow", 9, "Sponsor call", "Home, Austin TX"),
-            (6, 19, "Lonely", "blue", 4, "Working late", "Office, Austin TX"),
-            (7, 9, "Joyful", "yellow", 9, "SA meeting", "First Baptist, Austin TX"),
-        ]
-        for (ago, hour, emotion, color, intensity, activity, location) in emotionalData {
-            let entry = RREmotionalJournal(
-                userId: userId,
-                date: daysAgo(ago, hour: hour),
-                emotion: emotion,
-                emotionColor: color,
-                intensity: intensity,
-                activity: activity,
-                location: location,
-                createdAt: daysAgo(ago, hour: hour)
-            )
-            context.insert(entry)
-        }
     }
 
     // MARK: - Gratitude Entries
@@ -702,10 +647,9 @@ enum SeedData {
             ("activity.urge-logging", true, "Urge logging"),
             ("activity.journaling", true, "Journaling"),
             ("activity.faster-scale", true, "FASTER scale"),
-            ("activity.check-ins", true, "Recovery check-ins"),
-            ("activity.emotional-journaling", true, "Emotional journaling"),
             ("activity.time-journal", true, "Time journal"),
-            ("activity.spouse-checkin-prep", true, "Spouse check-in prep"),
+            ("activity.fanos", false, "FANOS check-in"),
+            ("activity.fitnap", false, "FITNAP check-in"),
             ("activity.person-check-ins", false, "Person check-ins"),
             ("activity.meetings", true, "Meetings attended"),
             ("activity.post-mortem", true, "Post-mortem analysis"),
@@ -809,11 +753,10 @@ enum SeedData {
             (ActivityType.phoneCalls.rawValue, 17, 0, 1),
             // Evening Block — 8:00-9:00 PM
             (ActivityType.meetingsAttended.rawValue, 20, 0, 0),
-            (ActivityType.spouseCheckIn.rawValue, 21, 0, 0),
+            (ActivityType.fanos.rawValue, 21, 0, 0),
             (ActivityType.gratitude.rawValue, 21, 0, 0),
             ("pci", 21, 0, 0),
             (ActivityType.fasterScale.rawValue, 21, 0, 0),
-            (ActivityType.recoveryCheckIn.rawValue, 21, 0, 0),
         ]
 
         for (sortOrder, (activityType, hour, minute, instanceIndex)) in items.enumerated() {

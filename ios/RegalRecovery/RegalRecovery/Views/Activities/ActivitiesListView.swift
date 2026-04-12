@@ -3,9 +3,7 @@ import SwiftData
 
 struct ActivitiesListView: View {
     @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
-    @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
     @Query(sort: \RRJournalEntry.date, order: .reverse) private var journals: [RRJournalEntry]
-    @Query(sort: \RREmotionalJournal.date, order: .reverse) private var emotionalJournals: [RREmotionalJournal]
     @Query(sort: \RRTimeBlock.date, order: .reverse) private var timeBlocks: [RRTimeBlock]
     @Query(sort: \RRFASTEREntry.date, order: .reverse) private var fasterEntries: [RRFASTEREntry]
     @Query(sort: \RRUrgeLog.date, order: .reverse) private var urgeLogs: [RRUrgeLog]
@@ -39,25 +37,9 @@ struct ActivitiesListView: View {
         return "Pending"
     }
 
-    private var checkInSubtitle: String {
-        if let latest = checkIns.first {
-            let dayLabel = Calendar.current.isDateInToday(latest.date) ? "Today" : relativeDay(latest.date)
-            return "\(dayLabel), \(latest.score)/100"
-        }
-        return "No entries"
-    }
-
     private var journalSubtitle: String {
         if let latest = journals.first {
             return relativeDay(latest.date)
-        }
-        return "No entries"
-    }
-
-    private var emotionalJournalSubtitle: String {
-        if let latest = emotionalJournals.first {
-            let dayLabel = Calendar.current.isDateInToday(latest.date) ? "Today" : relativeDay(latest.date)
-            return "\(dayLabel), \(latest.emotion), \(latest.intensity)/10"
         }
         return "No entries"
     }
@@ -143,9 +125,16 @@ struct ActivitiesListView: View {
         return "No entries"
     }
 
-    private var spouseSubtitle: String {
-        if let latest = spouseCheckIns.first {
-            return "\(relativeDay(latest.date)), \(latest.framework)"
+    private var fanosSubtitle: String {
+        if let latest = spouseCheckIns.first(where: { $0.framework == "FANOS" }) {
+            return relativeDay(latest.date)
+        }
+        return "No entries"
+    }
+
+    private var fitnapSubtitle: String {
+        if let latest = spouseCheckIns.first(where: { $0.framework == "FITNAP" }) {
+            return relativeDay(latest.date)
         }
         return "No entries"
     }
@@ -220,16 +209,6 @@ struct ActivitiesListView: View {
                         )
                     }
 
-                    NavigationLink {
-                        RecoveryCheckInView()
-                    } label: {
-                        RRActivityRow(
-                            icon: ActivityType.recoveryCheckIn.icon,
-                            iconColor: ActivityType.recoveryCheckIn.iconColor,
-                            title: "Recovery Check-in",
-                            subtitle: checkInSubtitle
-                        )
-                    }
                 } header: {
                     Text(ActivitySection.sobrietyCommitment.rawValue)
                 }
@@ -369,13 +348,24 @@ struct ActivitiesListView: View {
                     }
 
                     NavigationLink {
-                        SpouseCheckInPrepView()
+                        FANOSCheckInView()
                     } label: {
                         RRActivityRow(
-                            icon: ActivityType.spouseCheckIn.icon,
-                            iconColor: ActivityType.spouseCheckIn.iconColor,
-                            title: "Spouse Check-in Prep",
-                            subtitle: spouseSubtitle
+                            icon: ActivityType.fanos.icon,
+                            iconColor: ActivityType.fanos.iconColor,
+                            title: "FANOS Check-in",
+                            subtitle: fanosSubtitle
+                        )
+                    }
+
+                    NavigationLink {
+                        FITNAPCheckInView()
+                    } label: {
+                        RRActivityRow(
+                            icon: ActivityType.fitnap.icon,
+                            iconColor: ActivityType.fitnap.iconColor,
+                            title: "FITNAP Check-in",
+                            subtitle: fitnapSubtitle
                         )
                     }
                 } header: {

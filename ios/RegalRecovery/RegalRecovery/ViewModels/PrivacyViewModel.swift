@@ -4,24 +4,9 @@ import Observation
 @Observable
 class PrivacyViewModel {
     var contacts: [SupportContact] = []
-    var permissionMatrix: [[Bool]] = [] // rows=contacts, cols=categories
-    var categories: [String] = ["Sobriety", "Check-ins", "Activities", "Journal", "Financial"]
 
     func load() async {
         contacts = MockData.supportNetwork
-
-        // Build initial permission matrix from contact permission summaries
-        permissionMatrix = contacts.map { contact in
-            categories.map { category in
-                permissionFromSummary(contact.permissionSummary, category: category)
-            }
-        }
-    }
-
-    func updatePermission(contactIndex: Int, categoryIndex: Int, allowed: Bool) async throws {
-        guard contactIndex < permissionMatrix.count,
-              categoryIndex < categories.count else { return }
-        permissionMatrix[contactIndex][categoryIndex] = allowed
     }
 
     func exportData(format: String) async throws -> URL {
@@ -46,31 +31,15 @@ class PrivacyViewModel {
 
     // MARK: - Private
 
-    private func permissionFromSummary(_ summary: String, category: String) -> Bool {
-        let lower = summary.lowercased()
-        if lower.contains("all") {
-            // Check for exclusions like "All except journal & financial"
-            let categoryLower = category.lowercased()
-            if lower.contains("except") {
-                return !lower.contains(categoryLower)
-            }
-            return true
-        }
-        return lower.contains(category.lowercased())
-    }
-
     private func buildExportPayload() -> ExportPayload {
         let profile = MockData.profile
         let streak = MockData.streak
 
-        let contactExports = contacts.enumerated().map { index, contact in
+        let contactExports = contacts.map { contact in
             ContactExport(
                 name: contact.name,
                 role: contact.role.rawValue,
-                phone: contact.phone,
-                permissions: index < permissionMatrix.count
-                    ? Dictionary(uniqueKeysWithValues: zip(categories, permissionMatrix[index]))
-                    : [:]
+                phone: contact.phone
             )
         }
 
@@ -140,7 +109,6 @@ private struct ContactExport: Codable {
     let name: String
     let role: String
     let phone: String
-    let permissions: [String: Bool]
 }
 
 private struct ThreeCirclesExport: Codable {

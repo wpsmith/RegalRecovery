@@ -46,13 +46,20 @@ final class ServiceContainer {
     let modelContainer: ModelContainer
 
     private init() {
+        // Local-only mode: all data stays in SwiftData, no API calls.
+        // Set RR_LOCAL_ONLY=1 or omit RR_API_BASE_URL to enable.
+        let localOnly = ProcessInfo.processInfo.environment["RR_LOCAL_ONLY"] == "1"
+            || ProcessInfo.processInfo.environment["RR_API_BASE_URL"] == nil
+        self.isLocalOnly = localOnly
+
         let auth = AuthService()
         let tokenProvider = AuthServiceTokenProvider(authService: auth)
         let network = NetworkMonitor()
 
         #if DEBUG
         let apiConfig: APIClientConfiguration
-        if let devURL = ProcessInfo.processInfo.environment["RR_API_BASE_URL"],
+        if !localOnly,
+           let devURL = ProcessInfo.processInfo.environment["RR_API_BASE_URL"],
            let url = URL(string: devURL) {
             apiConfig = APIClientConfiguration(
                 baseURL: url,
@@ -95,7 +102,12 @@ final class ServiceContainer {
         self.featureFlagService = FeatureFlagService()
         self.modelContainer = modelContainer
 
-        network.start()
+        // In local-only mode, auto-authenticate and skip network
+        if localOnly {
+            auth.enableLocalMode()
+        } else {
+            network.start()
+        }
     }
 
     // MARK: - Feature Flags
@@ -104,10 +116,14 @@ final class ServiceContainer {
         featureFlagService.isEnabled(key)
     }
 
+    /// When true, the app runs entirely on local SwiftData — no API calls.
+    let isLocalOnly: Bool
+
     // MARK: - Lifecycle
 
     /// Call when the app enters the foreground to refresh state.
     func onForeground() async {
+        guard !isLocalOnly else { return }
         if authService.isAuthenticated {
             try? await authService.refreshTokenIfNeeded()
             syncEngine.onAppForeground()

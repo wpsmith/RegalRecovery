@@ -6,9 +6,7 @@ struct RecoveryWorkView: View {
 
     // MARK: - Queries for today's status
     @Query(sort: \RRCommitment.date, order: .reverse) private var commitments: [RRCommitment]
-    @Query(sort: \RRCheckIn.date, order: .reverse) private var checkIns: [RRCheckIn]
     @Query(sort: \RRJournalEntry.date, order: .reverse) private var journals: [RRJournalEntry]
-    @Query(sort: \RREmotionalJournal.date, order: .reverse) private var emotionalJournals: [RREmotionalJournal]
     @Query(sort: \RRTimeBlock.date, order: .reverse) private var timeBlocks: [RRTimeBlock]
     @Query(sort: \RRFASTEREntry.date, order: .reverse) private var fasterEntries: [RRFASTEREntry]
     @Query(sort: \RRUrgeLog.date, order: .reverse) private var urgeLogs: [RRUrgeLog]
@@ -114,9 +112,7 @@ struct RecoveryWorkView: View {
         RecoveryWorkViewModel.todayStatus(
             for: tile,
             commitments: commitments,
-            checkIns: checkIns,
             journals: journals,
-            emotionalJournals: emotionalJournals,
             timeBlocks: timeBlocks,
             fasterEntries: fasterEntries,
             urgeLogs: urgeLogs,
@@ -140,15 +136,11 @@ struct RecoveryWorkView: View {
         switch tile.activityTypeKey {
         case ActivityType.sobrietyCommitment.rawValue:
             MorningCommitmentView()
-        case ActivityType.recoveryCheckIn.rawValue:
-            RecoveryCheckInView()
         case ActivityType.prayer.rawValue:
             PrayerLogView()
         case ActivityType.exercise.rawValue:
             ExerciseLogView()
         case ActivityType.journal.rawValue:
-            JournalView()
-        case ActivityType.emotionalJournal.rawValue:
             JournalView()
         case ActivityType.mood.rawValue:
             MoodRatingView()
@@ -165,9 +157,9 @@ struct RecoveryWorkView: View {
         case ActivityType.meetingsAttended.rawValue:
             MeetingsAttendedView()
         case "fanos":
-            SpouseCheckInPrepView(initialFormat: 0)
+            FANOSCheckInView()
         case "fitnap":
-            SpouseCheckInPrepView(initialFormat: 1)
+            FITNAPCheckInView()
         case "personCheckInSpouse":
             SpouseCheckInPrepView()
         case ActivityType.weeklyGoals.rawValue:
