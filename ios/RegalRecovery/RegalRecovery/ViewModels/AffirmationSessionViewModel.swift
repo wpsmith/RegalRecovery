@@ -190,11 +190,9 @@ final class AffirmationSessionViewModel {
             if index < 2 {
                 currentStep = .morningCard(index: index + 1)
             } else {
-                currentStep = .morningIntention
+                currentStep = .morningComplete
+                Task { await completeMorningSession() }
             }
-        case .morningIntention:
-            currentStep = .morningComplete
-            Task { await completeMorningSession() }
         case .morningComplete:
             resetFlow()
         case .eveningAffirmation:
@@ -217,8 +215,6 @@ final class AffirmationSessionViewModel {
             if index > 0 {
                 currentStep = .morningCard(index: index - 1)
             }
-        case .morningIntention:
-            currentStep = .morningCard(index: 2)
         case .eveningRating:
             currentStep = .eveningAffirmation
         case .eveningReflection:

@@ -47,15 +47,6 @@ struct MorningSessionFlowView: View {
                 ))
             }
 
-        case .morningIntention:
-            IntentionPromptView(
-                prompt: viewModel.morningSessionData?.intentionPrompt ?? "Today I choose to...",
-                text: $viewModel.intentionText,
-                onComplete: { viewModel.advanceStep() },
-                onSkip: { viewModel.advanceStep() }
-            )
-            .transition(.move(edge: .trailing))
-
         case .morningComplete:
             SessionCompleteView(
                 sessionType: .morning,
