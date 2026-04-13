@@ -315,7 +315,7 @@ struct TodayView: View {
     private var activityListHeader: some View {
         HStack {
             Text("Activities")
-                .font(RRFont.headline)
+                .font(RRFont.title3)
                 .foregroundStyle(Color.rrText)
             Spacer()
             Button {
@@ -419,7 +419,7 @@ struct TodayView: View {
         case "devotional":
             DevotionalView()
         case ActivityType.affirmationLog.rawValue:
-            AffirmationsHubView()
+            AffirmationLogView()
         case ActivityType.phoneCalls.rawValue:
             PhoneCallLogView()
         case ActivityType.meetingsAttended.rawValue:

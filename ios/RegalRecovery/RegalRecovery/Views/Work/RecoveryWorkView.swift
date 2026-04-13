@@ -151,7 +151,7 @@ struct RecoveryWorkView: View {
         case "devotional":
             DevotionalView()
         case ActivityType.affirmationLog.rawValue:
-            AffirmationsHubView()
+            AffirmationLogView()
         case ActivityType.phoneCalls.rawValue:
             PhoneCallLogView()
         case ActivityType.meetingsAttended.rawValue:
@@ -178,8 +178,6 @@ struct RecoveryWorkView: View {
             RecoveryPlanSetupView()
         case "threeCircles":
             ThreeCirclesView()
-        case "meetingFinder":
-            MeetingFinderView()
         case "analytics":
             RecoveryProgressView()
         case "contentResources":
