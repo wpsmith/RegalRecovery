@@ -5,6 +5,7 @@ struct DevotionalView: View {
     @Query(sort: \RRDevotionalProgress.day) private var devotionalProgress: [RRDevotionalProgress]
     @Environment(\.modelContext) private var modelContext
     @State private var selectedDay: DevotionalDay?
+    @State private var journalDay: DevotionalDay?
 
     private var completedDays: Set<Int> {
         Set(devotionalProgress.compactMap { $0.completedAt != nil ? $0.day : nil })
@@ -106,8 +107,18 @@ struct DevotionalView: View {
         .background(Color.rrBackground)
         .navigationTitle("Devotional")
         .sheet(item: $selectedDay) { day in
-            DevotionalDetailSheet(day: day) { completedDay in
+            DevotionalDetailSheet(day: day, onMarkComplete: { completedDay in
                 markComplete(day: completedDay)
+            }, onReflectInJournal: { devotionalDay in
+                journalDay = devotionalDay
+            })
+        }
+        .sheet(item: $journalDay) { day in
+            NavigationStack {
+                JournalView(
+                    devotionalPrompt: day.reflection,
+                    devotionalTitle: "Devotional Day \(day.day): \(day.title)"
+                )
             }
         }
     }
@@ -178,7 +189,9 @@ struct DevotionalView: View {
 private struct DevotionalDetailSheet: View {
     let day: DevotionalDay
     let onMarkComplete: (Int) -> Void
+    let onReflectInJournal: (DevotionalDay) -> Void
     @Environment(\.dismiss) private var dismiss
+    @State private var justCompleted = false
 
     var body: some View {
         NavigationStack {
@@ -221,21 +234,34 @@ private struct DevotionalDetailSheet: View {
                             .lineSpacing(4)
                     }
 
-                    // Mark complete
-                    if !day.isComplete {
+                    // Mark complete / Completed state
+                    if !day.isComplete && !justCompleted {
                         RRButton("Mark Complete", icon: "checkmark.circle") {
                             onMarkComplete(day.day)
-                            dismiss()
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                justCompleted = true
+                            }
                         }
                     } else {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(Color.rrSuccess)
-                            Text("Completed")
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrSuccess)
+                        VStack(spacing: 12) {
+                            HStack {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(Color.rrSuccess)
+                                Text("Completed")
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrSuccess)
+                            }
+                            .frame(maxWidth: .infinity)
+
+                            Button {
+                                dismiss()
+                                onReflectInJournal(day)
+                            } label: {
+                                Label("Reflect in Journal", systemImage: "note.text")
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(.rrPrimary)
                         }
-                        .frame(maxWidth: .infinity)
                     }
                 }
                 .padding()

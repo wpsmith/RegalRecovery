@@ -284,6 +284,9 @@ enum JournalMode: String, CaseIterable {
 // MARK: - Journal View
 
 struct JournalView: View {
+    var devotionalPrompt: String? = nil
+    var devotionalTitle: String? = nil
+
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRJournalEntry.date, order: .reverse) private var entries: [RRJournalEntry]
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
@@ -303,7 +306,7 @@ struct JournalView: View {
     @State private var showSavedConfirmation = false
     @State private var entryToDelete: RRJournalEntry?
     @State private var showDeleteConfirmation = false
-    @State private var mode: JournalMode = .prompted
+    @State private var mode: JournalMode = .jotting
     @State private var jotText: String = ""
 
     var body: some View {
@@ -343,6 +346,17 @@ struct JournalView: View {
         }
         .sheet(isPresented: $showInfoSheet) {
             JournalingInfoView()
+        }
+        .onAppear {
+            if let devotionalPrompt {
+                mode = .prompted
+                currentPrompt = PromptItem(
+                    text: devotionalPrompt,
+                    category: "devotional",
+                    tags: ["Devotional"]
+                )
+                showPrompt = true
+            }
         }
         .overlay(alignment: .bottom) {
             if showSavedConfirmation {
@@ -558,80 +572,90 @@ struct JournalView: View {
 
     @ViewBuilder
     private var historySection: some View {
-        if !entries.isEmpty {
-            RRCard {
-                VStack(alignment: .leading, spacing: 16) {
-                    RRSectionHeader(title: "Past Entries")
+        VStack(spacing: 16) {
+            if !entries.isEmpty {
+                RRCard {
+                    VStack(alignment: .leading, spacing: 16) {
+                        RRSectionHeader(title: "Past Entries")
 
-                    ForEach(entries.prefix(5)) { entry in
-                        NavigationLink(destination: JournalEntryDetailView(entry: entry)) {
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack {
-                                    Text(relativeDay(entry.date))
-                                        .font(RRFont.caption)
-                                        .foregroundStyle(Color.rrTextSecondary)
-                                    Text(entry.mode.capitalized)
-                                        .font(RRFont.caption)
-                                        .foregroundStyle(Color.rrPrimary.opacity(0.7))
-                                        .padding(.horizontal, 6)
-                                        .padding(.vertical, 2)
-                                        .background(Color.rrPrimary.opacity(0.08))
-                                        .clipShape(Capsule())
-                                    Spacer()
-                                    if let prompt = entry.prompt {
-                                        Image(systemName: "lightbulb.fill")
+                        ForEach(entries.prefix(5)) { entry in
+                            NavigationLink(destination: JournalEntryDetailView(entry: entry)) {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(relativeDay(entry.date))
+                                            .font(RRFont.caption)
+                                            .foregroundStyle(Color.rrTextSecondary)
+                                        Text(entry.mode.capitalized)
+                                            .font(RRFont.caption)
+                                            .foregroundStyle(Color.rrPrimary.opacity(0.7))
+                                            .padding(.horizontal, 6)
+                                            .padding(.vertical, 2)
+                                            .background(Color.rrPrimary.opacity(0.08))
+                                            .clipShape(Capsule())
+                                        Spacer()
+                                        if let prompt = entry.prompt {
+                                            Image(systemName: "lightbulb.fill")
+                                                .font(.caption2)
+                                                .foregroundStyle(.yellow.opacity(0.7))
+                                                .help(prompt)
+                                        }
+                                        Image(systemName: "chevron.right")
                                             .font(.caption2)
-                                            .foregroundStyle(.yellow.opacity(0.7))
-                                            .help(prompt)
+                                            .foregroundStyle(Color.rrTextSecondary.opacity(0.5))
                                     }
-                                    Image(systemName: "chevron.right")
-                                        .font(.caption2)
-                                        .foregroundStyle(Color.rrTextSecondary.opacity(0.5))
+                                    Text(entry.content)
+                                        .font(RRFont.body)
+                                        .foregroundStyle(Color.rrText)
+                                        .lineLimit(3)
+                                        .multilineTextAlignment(.leading)
                                 }
-                                Text(entry.content)
-                                    .font(RRFont.body)
-                                    .foregroundStyle(Color.rrText)
-                                    .lineLimit(3)
-                                    .multilineTextAlignment(.leading)
                             }
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button(role: .destructive) {
-                                entryToDelete = entry
-                                showDeleteConfirmation = true
-                            } label: {
-                                Label("Delete", systemImage: "trash")
+                            .buttonStyle(.plain)
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    entryToDelete = entry
+                                    showDeleteConfirmation = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
                             }
-                        }
-                        if entry.id != entries.prefix(5).last?.id {
-                            Divider()
+                            if entry.id != entries.prefix(5).last?.id {
+                                Divider()
+                            }
                         }
                     }
+                }
+                .padding(.horizontal)
+                .confirmationDialog("Delete this entry?", isPresented: $showDeleteConfirmation, presenting: entryToDelete) { entry in
+                    Button("Delete", role: .destructive) {
+                        modelContext.delete(entry)
+                    }
+                }
+            }
 
-                    if entries.count > 5 {
-                        NavigationLink(destination: JournalHistoryView()) {
-                            HStack {
-                                Text("See all \(entries.count) entries")
-                                    .font(RRFont.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundStyle(Color.rrPrimary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption)
-                                    .foregroundStyle(Color.rrPrimary.opacity(0.5))
-                            }
-                            .padding(.top, 4)
+            NavigationLink(destination: JournalHistoryView()) {
+                RRCard {
+                    HStack(spacing: 12) {
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.title3)
+                            .foregroundStyle(Color.rrPrimary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Journal History")
+                                .font(RRFont.headline)
+                                .foregroundStyle(Color.rrText)
+                            Text(entries.isEmpty ? "Your entries will appear here" : "View all \(entries.count) entries")
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
                         }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
                     }
                 }
             }
+            .buttonStyle(.plain)
             .padding(.horizontal)
-            .confirmationDialog("Delete this entry?", isPresented: $showDeleteConfirmation, presenting: entryToDelete) { entry in
-                Button("Delete", role: .destructive) {
-                    modelContext.delete(entry)
-                }
-            }
         }
     }
 
@@ -676,12 +700,13 @@ struct JournalView: View {
         guard !plainText.isEmpty else { return }
 
         let userId = users.first?.id ?? UUID()
+        let promptText = devotionalTitle ?? currentPrompt?.text
         let entry = RRJournalEntry(
             userId: userId,
             date: Date(),
             mode: mode.rawValue,
             content: plainText,
-            prompt: currentPrompt?.text
+            prompt: promptText
         )
         entry.setRichContent(from: attributedText)
         modelContext.insert(entry)
