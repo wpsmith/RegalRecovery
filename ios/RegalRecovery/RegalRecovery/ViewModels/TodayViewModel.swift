@@ -706,8 +706,6 @@ class TodayViewModel {
         case "voiceJournal": return .purple
         case "bookReading": return .rrPrimary
         case "personCheckInSpouse": return .pink
-        case "personCheckInSponsor": return .rrPrimary
-        case "personCheckInCounselor": return .purple
         default: return .rrSecondary
         }
     }

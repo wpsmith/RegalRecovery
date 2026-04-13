@@ -864,32 +864,6 @@ struct DailyEligibleActivity {
             section: .connection
         ),
         DailyEligibleActivity(
-            activityType: "personCheckInSponsor",
-            displayName: "Spouse Check-in -- Sponsor",
-            icon: "person.fill.checkmark",
-            multiplePerDay: false,
-            maxPerDay: 1,
-            defaultEnabled: false,
-            typicalHour: 12,
-            typicalMinute: 0,
-            typicalBlock: "Midday",
-            featureFlagKey: "activity.spouse-check-ins",
-            section: .connection
-        ),
-        DailyEligibleActivity(
-            activityType: "personCheckInCounselor",
-            displayName: "Spouse Check-in -- Counselor/Coach",
-            icon: "stethoscope",
-            multiplePerDay: false,
-            maxPerDay: 1,
-            defaultEnabled: false,
-            typicalHour: 12,
-            typicalMinute: 0,
-            typicalBlock: "Midday",
-            featureFlagKey: "activity.spouse-check-ins",
-            section: .connection
-        ),
-        DailyEligibleActivity(
             activityType: ActivityType.fanos.rawValue,
             displayName: "FANOS Check-in",
             icon: "heart.fill",
