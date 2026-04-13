@@ -73,7 +73,7 @@ struct WorkScreenTileTests {
         #expect(tile?.category == .activities)
     }
 
-    @Test("AFF-AC-162: Tile activityTypeKey maps to AffirmationLogView")
+    @Test("AFF-AC-162: Tile activityTypeKey maps to AffirmationPackPickerView")
     func tileNavigatesToAffirmationExperience() {
         let tile = affirmationTile
         #expect(tile != nil, "Affirmations tile should exist")
@@ -153,7 +153,7 @@ struct TodayScreenTests {
         #expect(activity?.featureFlagKey == "activity.affirmations")
     }
 
-    @Test("AFF-AC-167: Activity type routes to AffirmationLogView")
+    @Test("AFF-AC-167: Activity type routes to AffirmationPackPickerView")
     func itemNavigatesToAffirmationExperience() {
         let activityType = ActivityType.affirmationLog.rawValue
         #expect(activityType == "Affirmation Log")

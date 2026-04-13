@@ -396,7 +396,7 @@ struct ActivitiesListView: View {
                     }
 
                     NavigationLink {
-                        AffirmationLogView()
+                        AffirmationPackPickerView()
                     } label: {
                         RRActivityRow(
                             icon: ActivityType.affirmationLog.icon,

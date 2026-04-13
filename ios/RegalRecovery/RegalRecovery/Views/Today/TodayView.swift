@@ -419,7 +419,12 @@ struct TodayView: View {
         case "devotional":
             DevotionalView()
         case ActivityType.affirmationLog.rawValue:
-            AffirmationLogView()
+            if let packName = AffirmationSettingsManager.shared.packForToday(),
+               let pack = ContentData.affirmationPacks.first(where: { $0.name == packName }) {
+                AffirmationDeckView(packName: pack.name, affirmations: pack.affirmations)
+            } else {
+                AffirmationPackPickerView()
+            }
         case ActivityType.phoneCalls.rawValue:
             PhoneCallLogView()
         case ActivityType.meetingsAttended.rawValue:

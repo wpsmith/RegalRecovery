@@ -37,7 +37,12 @@ struct AffirmationTodayCard: View {
 
     var body: some View {
         NavigationLink {
-            AffirmationLogView()
+            if let packName = AffirmationSettingsManager.shared.packForToday(),
+               let pack = ContentData.affirmationPacks.first(where: { $0.name == packName }) {
+                AffirmationDeckView(packName: pack.name, affirmations: pack.affirmations)
+            } else {
+                AffirmationPackPickerView()
+            }
         } label: {
             HStack(spacing: 12) {
                 // Left icon

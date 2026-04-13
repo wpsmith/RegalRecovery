@@ -22,6 +22,7 @@ struct RecoveryWorkView: View {
     @Query(filter: #Predicate<RRActivity> { $0.activityType == "Affirmation Log" },
            sort: \RRActivity.date, order: .reverse)
     private var affirmationSessions: [RRActivity]
+    @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
     @State private var showUrgeSurfingTimer = false
 
@@ -51,11 +52,84 @@ struct RecoveryWorkView: View {
         }
     }
 
+    // MARK: - Sorting
+
+    private var isAfterOnboardingPeriod: Bool {
+        guard let user = users.first else { return false }
+        let thirtyDaysAgo = Calendar.current.date(byAdding: .day, value: -30, to: Date()) ?? Date()
+        return user.createdAt <= thirtyDaysAgo
+    }
+
+    private func usageCount(for activityTypeKey: String?) -> Int {
+        guard let key = activityTypeKey else { return 0 }
+        switch key {
+        case ActivityType.sobrietyCommitment.rawValue:
+            return commitments.filter { $0.type == "morning" }.count
+        case ActivityType.affirmationLog.rawValue:
+            return affirmationSessions.count
+        case ActivityType.urgeLog.rawValue:
+            return urgeLogs.count
+        case ActivityType.journal.rawValue:
+            return journals.count
+        case ActivityType.fasterScale.rawValue:
+            return fasterEntries.count
+        case ActivityType.timeJournal.rawValue:
+            return timeBlocks.count
+        case "fanos":
+            return spouseCheckIns.filter { $0.framework == "FANOS" }.count
+        case "fitnap":
+            return spouseCheckIns.filter { $0.framework == "FITNAP" }.count
+        case "personCheckInSpouse":
+            return spouseCheckIns.count
+        case ActivityType.meetingsAttended.rawValue:
+            return meetingLogs.count
+        case ActivityType.stepWork.rawValue:
+            return stepWork.count
+        case ActivityType.weeklyGoals.rawValue:
+            return goals.count
+        case ActivityType.exercise.rawValue:
+            return exerciseLogs.count
+        case ActivityType.mood.rawValue:
+            return moodEntries.count
+        case ActivityType.gratitude.rawValue:
+            return gratitudeEntries.count
+        case ActivityType.phoneCalls.rawValue:
+            return phoneCallLogs.count
+        case ActivityType.prayer.rawValue:
+            return prayerLogs.count
+        case "integrityInventory":
+            return commitments.filter { $0.type == "evening" }.count
+        case "devotional":
+            return 0 // No dedicated query; alphabetical fallback
+        default:
+            return 0
+        }
+    }
+
+    private func sortedTiles(for category: WorkTileCategory) -> [WorkTileItem] {
+        let tiles = RecoveryWorkViewModel.allTiles.filter { $0.category == category }
+
+        if category == .activities && isAfterOnboardingPeriod {
+            // Sort by usage descending, then alphabetical for ties
+            return tiles.sorted { a, b in
+                let aCount = usageCount(for: a.activityTypeKey)
+                let bCount = usageCount(for: b.activityTypeKey)
+                if aCount != bCount {
+                    return aCount > bCount
+                }
+                return a.title.localizedCaseInsensitiveCompare(b.title) == .orderedAscending
+            }
+        }
+
+        // Default: alphabetical
+        return tiles.sorted { $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending }
+    }
+
     // MARK: - Section
 
     @ViewBuilder
     private func workSection(for category: WorkTileCategory) -> some View {
-        let tiles = RecoveryWorkViewModel.allTiles.filter { $0.category == category }
+        let tiles = sortedTiles(for: category)
         if !tiles.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
@@ -151,7 +225,7 @@ struct RecoveryWorkView: View {
         case "devotional":
             DevotionalView()
         case ActivityType.affirmationLog.rawValue:
-            AffirmationLogView()
+            AffirmationPackPickerView()
         case ActivityType.phoneCalls.rawValue:
             PhoneCallLogView()
         case ActivityType.meetingsAttended.rawValue:
