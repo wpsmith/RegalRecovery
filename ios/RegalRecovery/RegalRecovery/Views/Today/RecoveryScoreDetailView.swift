@@ -31,48 +31,46 @@ struct RecoveryScoreDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            if FeatureFlagStore.shared.isEnabled("feature.analytics-dashboard") {
-                Divider()
+            Divider()
 
-                // Breakdown toggle
-                Button {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        isExpanded.toggle()
-                    }
-                } label: {
-                    HStack {
-                        Text("View Score Breakdown")
-                            .font(RRFont.subheadline)
-                            .foregroundStyle(Color.rrPrimary)
-                        Spacer()
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .font(.caption)
-                            .foregroundStyle(Color.rrPrimary)
-                    }
+            // Breakdown toggle
+            Button {
+                withAnimation(.easeInOut(duration: 0.25)) {
+                    isExpanded.toggle()
                 }
+            } label: {
+                HStack {
+                    Text("View Score Breakdown")
+                        .font(RRFont.subheadline)
+                        .foregroundStyle(Color.rrPrimary)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption)
+                        .foregroundStyle(Color.rrPrimary)
+                }
+            }
 
-                if isExpanded {
-                    VStack(spacing: 10) {
-                        ForEach(planItems) { item in
-                            HStack(spacing: 10) {
-                                Image(systemName: item.state == .completed ? "checkmark.circle.fill" : "circle")
-                                    .font(.body)
-                                    .foregroundStyle(item.state == .completed ? Color.rrSuccess : Color.rrTextSecondary)
+            if isExpanded {
+                VStack(spacing: 10) {
+                    ForEach(planItems) { item in
+                        HStack(spacing: 10) {
+                            Image(systemName: item.state == .completed ? "checkmark.circle.fill" : "circle")
+                                .font(.body)
+                                .foregroundStyle(item.state == .completed ? Color.rrSuccess : Color.rrTextSecondary)
 
-                                Text(item.displayName)
-                                    .font(RRFont.subheadline)
-                                    .foregroundStyle(item.state == .completed ? Color.rrText : Color.rrTextSecondary)
+                            Text(item.displayName)
+                                .font(RRFont.subheadline)
+                                .foregroundStyle(item.state == .completed ? Color.rrText : Color.rrTextSecondary)
 
-                                Spacer()
+                            Spacer()
 
-                                Text(String(format: "%.0f%%", item.weight))
-                                    .font(RRFont.caption)
-                                    .foregroundStyle(Color.rrTextSecondary)
-                            }
+                            Text(String(format: "%.0f%%", item.weight))
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
                         }
                     }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
                 }
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding()

@@ -612,14 +612,9 @@ enum SeedData {
             // P0 Features
             ("feature.onboarding", true, "Onboarding flow"),
             ("feature.profile-management", true, "Profile management"),
-            ("feature.content-resources", true, "Content and resources"),
-            ("feature.commitments", true, "Commitments"),
             ("feature.themes", true, "Themes"),
             ("feature.offline-first", true, "Offline-first architecture"),
-            ("feature.dsr", true, "Data subject rights"),
             // P1 Features
-            ("feature.analytics-dashboard", true, "Analytics dashboard"),
-            ("feature.meeting-finder", true, "Meeting finder"),
             ("feature.quick-actions", true, "Quick actions"),
             ("feature.backup", false, "Data backup"),
             ("feature.messaging-integrations", false, "Messaging integrations"),
@@ -650,7 +645,7 @@ enum SeedData {
             ("activity.time-journal", true, "Time journal"),
             ("activity.fanos", false, "FANOS check-in"),
             ("activity.fitnap", false, "FITNAP check-in"),
-            ("activity.person-check-ins", false, "Person check-ins"),
+            ("activity.spouse-check-ins", false, "Spouse check-ins"),
             ("activity.meetings", true, "Meetings attended"),
             ("activity.post-mortem", true, "Post-mortem analysis"),
             ("activity.step-work", true, "12-step work"),

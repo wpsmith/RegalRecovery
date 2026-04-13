@@ -276,13 +276,6 @@ struct ContentTabView: View {
 
     private var resourcesContent: some View {
         VStack(spacing: 0) {
-            if isFlagEnabled("feature.meeting-finder") {
-                NavigationLink(destination: MeetingFinderView()) {
-                    resourceRow(icon: "map.fill", iconColor: .rrPrimary, title: "Meeting Finder", subtitle: "5 meetings nearby")
-                }
-                .buttonStyle(.plain)
-                Divider().padding(.leading, 52)
-            }
             NavigationLink(destination: CrisisHotlinesView()) {
                 resourceRow(icon: "phone.fill", iconColor: .rrDestructive, title: "Crisis Hotlines", subtitle: "SA Helpline, 988 Lifeline, RAINN")
             }

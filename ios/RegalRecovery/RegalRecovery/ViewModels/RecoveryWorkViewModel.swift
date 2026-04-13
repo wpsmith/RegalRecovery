@@ -216,12 +216,12 @@ class RecoveryWorkViewModel {
                 activityTypeKey: "fitnap"
             ),
             WorkTileItem(
-                id: "activity.person-check-ins",
-                title: "Person Check-ins",
+                id: "activity.spouse-check-ins",
+                title: "Spouse Check-ins",
                 icon: "person.fill.checkmark",
                 iconColor: .rrPrimary,
                 category: .activities,
-                featureFlagKey: "activity.person-check-ins",
+                featureFlagKey: "activity.spouse-check-ins",
                 implemented: true,
                 activityTypeKey: "personCheckInSpouse"
             ),
@@ -415,9 +415,9 @@ class RecoveryWorkViewModel {
                 icon: "map.fill",
                 iconColor: .rrPrimary,
                 category: .tools,
-                featureFlagKey: "feature.meeting-finder",
-                implemented: true,
-                activityTypeKey: "meetingFinder"
+                featureFlagKey: nil,
+                implemented: false,
+                activityTypeKey: nil
             ),
         ])
 

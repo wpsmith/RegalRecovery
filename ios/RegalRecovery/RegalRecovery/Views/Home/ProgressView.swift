@@ -99,6 +99,30 @@ struct RecoveryProgressView: View {
                     weeklySummarySection
                     monthlyStatsSection
                     stepProgressSection
+
+                    // MARK: - History
+                    NavigationLink(destination: ActivityHistoryView()) {
+                        RRCard {
+                            HStack(spacing: 12) {
+                                Image(systemName: "clock.arrow.circlepath")
+                                    .font(.title3)
+                                    .foregroundStyle(Color.rrPrimary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Activity History")
+                                        .font(RRFont.headline)
+                                        .foregroundStyle(Color.rrText)
+                                    Text("View all past recovery activities")
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
                 }
                 .padding()
             }

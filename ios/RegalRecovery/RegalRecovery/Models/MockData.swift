@@ -171,16 +171,6 @@ enum MockData {
         green: ["Prayer", "Exercise", "Calling sponsor", "Attending meetings", "Journaling", "Scripture reading", "Date night with Rachel", "Fellowship", "Acts of service", "Meditation", "Gratitude practice", "Consistent sleep routine"]
     )
 
-    // MARK: - Meetings
-
-    static let meetings: [Meeting] = [
-        Meeting(name: "SA Home Group", fellowship: "SA", day: "Saturday", time: "9:00 AM", distance: "1.2 mi", location: "First Baptist Church, Austin TX", isVirtual: false, isSaved: true, latitude: 30.2672, longitude: -97.7431),
-        Meeting(name: "SA Men's Meeting", fellowship: "SA", day: "Tuesday", time: "7:00 PM", distance: "2.8 mi", location: "Community Center, Austin TX", isVirtual: false, isSaved: false, latitude: 30.2850, longitude: -97.7340),
-        Meeting(name: "SA Virtual Noon", fellowship: "SA", day: "Daily", time: "12:00 PM", distance: nil, location: "Zoom", isVirtual: true, isSaved: true, latitude: 30.2672, longitude: -97.7431),
-        Meeting(name: "Celebrate Recovery", fellowship: "CR", day: "Friday", time: "6:30 PM", distance: "3.1 mi", location: "Grace Church, Austin TX", isVirtual: false, isSaved: false, latitude: 30.2500, longitude: -97.7500),
-        Meeting(name: "SA Step Study", fellowship: "SA", day: "Thursday", time: "8:00 PM", distance: nil, location: "Zoom", isVirtual: true, isSaved: true, latitude: 30.2672, longitude: -97.7431),
-    ]
-
     // MARK: - Affirmation Packs
 
     static let affirmationPacks: [AffirmationPack] = [
@@ -374,7 +364,7 @@ enum MockData {
         PrayerItem(title: "Morning Prayer", icon: "sunrise.fill", text: "Lord, I give You this new day. I commit my sobriety to You. Guard my eyes, my mind, and my heart. Give me the strength to walk in integrity today. Help me to be honest, humble, and present with those I love. I cannot do this alone — I need You every moment. In Jesus' name, Amen."),
         PrayerItem(title: "Evening Prayer", icon: "moon.stars.fill", text: "Father, thank You for getting me through this day. Forgive me where I fell short. I surrender my worries, my temptations, and my failures to You. As I rest tonight, guard my mind. Restore my soul. Let me wake tomorrow ready to walk in Your freedom again. In Jesus' name, Amen."),
         PrayerItem(title: "Serenity Prayer", icon: "leaf.fill", text: "God, grant me the serenity to accept the things I cannot change, courage to change the things I can, and wisdom to know the difference. Living one day at a time, enjoying one moment at a time, accepting hardships as the pathway to peace. Taking, as He did, this sinful world as it is, not as I would have it. Trusting that He will make all things right if I surrender to His will. That I may be reasonably happy in this life and supremely happy with Him forever in the next. Amen."),
-        PrayerItem(title: "SA Third Step Prayer", icon: "hands.and.sparkles.fill", text: "God, I offer myself to Thee — to build with me and to do with me as Thou wilt. Relieve me of the bondage of self, that I may better do Thy will. Take away my difficulties, that victory over them may bear witness to those I would help of Thy power, Thy love, and Thy way of life. May I do Thy will always. Amen."),
+        PrayerItem(title: "Third Step Prayer", icon: "hands.and.sparkles.fill", text: "God, I offer myself to Thee — to build with me and to do with me as Thou wilt. Relieve me of the bondage of self, that I may better do Thy will. Take away my difficulties, that victory over them may bear witness to those I would help of Thy power, Thy love, and Thy way of life. May I do Thy will always. Amen."),
         PrayerItem(title: "Prayer for My Spouse", icon: "heart.fill", text: "Lord, I lift up my spouse to You. Heal the wounds that my addiction has caused. Give them strength, peace, and hope. Help me to be patient, honest, and present. Rebuild the trust I have broken, one day at a time. Teach me to love the way You love — sacrificially, faithfully, and completely. In Jesus' name, Amen."),
         PrayerItem(title: "Prayer in Temptation", icon: "shield.fill", text: "Father, I am struggling right now. The pull is strong but You are stronger. I claim Your promise that no temptation has overtaken me except what is common to mankind. You are faithful — You will not let me be tempted beyond what I can bear. Show me the way out that You have provided. I choose You over my addiction. Right now, in this moment, I choose You. In Jesus' name, Amen."),
     ]

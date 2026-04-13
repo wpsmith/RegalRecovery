@@ -68,15 +68,10 @@ final class FeatureFlagService {
         // Features - P0
         flags["feature.onboarding"] = true
         flags["feature.profile-management"] = true
-        flags["feature.content-resources"] = true
-        flags["feature.commitments"] = true
         flags["feature.themes"] = true
         flags["feature.offline-first"] = true
-        flags["feature.dsr"] = false
 
         // Features - P1
-        flags["feature.analytics-dashboard"] = true
-        flags["feature.meeting-finder"] = true
         flags["feature.quick-actions"] = true
         flags["feature.backup"] = false
         flags["feature.messaging-integrations"] = false
@@ -112,7 +107,7 @@ final class FeatureFlagService {
         flags["activity.time-journal"] = true
         flags["activity.fanos"] = false
         flags["activity.fitnap"] = false
-        flags["activity.person-check-ins"] = false
+        flags["activity.spouse-check-ins"] = false
         flags["activity.meetings"] = true
         flags["activity.post-mortem"] = true
         flags["activity.step-work"] = true

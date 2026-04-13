@@ -49,15 +49,10 @@ final class FeatureFlagStore {
         // Features - P0
         "feature.onboarding": true,
         "feature.profile-management": true,
-        "feature.content-resources": true,
-        "feature.commitments": true,
         "feature.themes": true,
         "feature.offline-first": true,
-        "feature.dsr": false,
 
         // Features - P1
-        "feature.analytics-dashboard": true,
-        "feature.meeting-finder": true,
         "feature.quick-actions": true,
         "feature.backup": false,
         "feature.messaging-integrations": false,
@@ -93,7 +88,7 @@ final class FeatureFlagStore {
         "activity.time-journal": true,
         "activity.fanos": false,
         "activity.fitnap": false,
-        "activity.person-check-ins": false,
+        "activity.spouse-check-ins": false,
         "activity.meetings": true,
         "activity.post-mortem": true,
         "activity.step-work": true,

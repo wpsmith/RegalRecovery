@@ -78,7 +78,6 @@
 		10000051 /* TimeJournalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000051 /* TimeJournalViewModel.swift */; };
 		10000052 /* UrgeLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000052 /* UrgeLogViewModel.swift */; };
 		10000053 /* ActivitiesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000053 /* ActivitiesListView.swift */; };
-		10000054 /* AffirmationLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000054 /* AffirmationLogView.swift */; };
 		10000055 /* EmotionalJournalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000055 /* EmotionalJournalView.swift */; };
 		10000056 /* EveningReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000056 /* EveningReviewView.swift */; };
 		10000057 /* ExerciseLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000057 /* ExerciseLogView.swift */; };
@@ -210,21 +209,7 @@
 		10001028 /* ReviewReflectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001028 /* ReviewReflectionView.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
 		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
-		10002002 /* 00-foreword.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002002 /* 00-foreword.txt */; };
-		10002003 /* 01-the-doctors-opinion.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002003 /* 01-the-doctors-opinion.txt */; };
-		10002004 /* 02-bills-story.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002004 /* 02-bills-story.txt */; };
-		10002005 /* 03-there-is-a-solution.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002005 /* 03-there-is-a-solution.txt */; };
-		10002006 /* 04-more-about-alcoholism.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002006 /* 04-more-about-alcoholism.txt */; };
-		10002007 /* 05-we-agnostics.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002007 /* 05-we-agnostics.txt */; };
-		10002008 /* 06-how-it-works.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002008 /* 06-how-it-works.txt */; };
-		10002009 /* 07-into-action.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002009 /* 07-into-action.txt */; };
-		10002010 /* 08-working-with-others.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002010 /* 08-working-with-others.txt */; };
-		10002011 /* 09-to-wives.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002011 /* 09-to-wives.txt */; };
-		10002012 /* 10-the-family-afterward.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002012 /* 10-the-family-afterward.txt */; };
-		10002013 /* 11-to-employers.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002013 /* 11-to-employers.txt */; };
-		10002014 /* 12-a-vision-for-you.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002014 /* 12-a-vision-for-you.txt */; };
-		10002015 /* 13-doctor-bobs-nightmare.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002015 /* 13-doctor-bobs-nightmare.txt */; };
-		10002016 /* 14-spiritual-experience.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002016 /* 14-spiritual-experience.txt */; };
+		10002001 /* BigBook in Resources */ = {isa = PBXBuildFile; fileRef = 20002001 /* BigBook */; };
 			10003000 /* BookData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003000 /* BookData.swift */; };
 			10003001 /* BookCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003001 /* BookCatalog.swift */; };
 			10003002 /* BookLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003002 /* BookLibraryView.swift */; };
@@ -240,6 +225,9 @@
 		10003350 /* AbsoluteSurrender in Resources */ = {isa = PBXBuildFile; fileRef = 20003350 /* AbsoluteSurrender */; };
 		10003450 /* SchoolOfPrayer in Resources */ = {isa = PBXBuildFile; fileRef = 20003450 /* SchoolOfPrayer */; };
 		10003550 /* WaitingOnGod in Resources */ = {isa = PBXBuildFile; fileRef = 20003550 /* WaitingOnGod */; };
+		10001200 /* AffirmationSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001200 /* AffirmationSettingsManager.swift */; };
+		10001201 /* AffirmationPackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001201 /* AffirmationPackPickerView.swift */; };
+		10001202 /* AffirmationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001202 /* AffirmationSettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -381,7 +369,6 @@
 		20000052 /* UrgeLogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModel.swift; sourceTree = "<group>"; };
 		20000203 /* UrgeSurfingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeSurfingViewModel.swift; sourceTree = "<group>"; };
 		20000053 /* ActivitiesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivitiesListView.swift; sourceTree = "<group>"; };
-		20000054 /* AffirmationLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationLogView.swift; sourceTree = "<group>"; };
 		20000055 /* EmotionalJournalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmotionalJournalView.swift; sourceTree = "<group>"; };
 		20000056 /* EveningReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReviewView.swift; sourceTree = "<group>"; };
 		20000057 /* ExerciseLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseLogView.swift; sourceTree = "<group>"; };
@@ -454,21 +441,7 @@
 		20000210 /* RecoveryWorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkViewModel.swift; sourceTree = "<group>"; };
 		20000211 /* RecoveryFoundationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFoundationView.swift; sourceTree = "<group>"; };
 		20000212 /* TestingModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingModeView.swift; sourceTree = "<group>"; };
-		20002002 /* 00-foreword.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "00-foreword.txt"; sourceTree = "<group>"; };
-		20002003 /* 01-the-doctors-opinion.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "01-the-doctors-opinion.txt"; sourceTree = "<group>"; };
-		20002004 /* 02-bills-story.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "02-bills-story.txt"; sourceTree = "<group>"; };
-		20002005 /* 03-there-is-a-solution.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "03-there-is-a-solution.txt"; sourceTree = "<group>"; };
-		20002006 /* 04-more-about-alcoholism.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "04-more-about-alcoholism.txt"; sourceTree = "<group>"; };
-		20002007 /* 05-we-agnostics.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "05-we-agnostics.txt"; sourceTree = "<group>"; };
-		20002008 /* 06-how-it-works.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "06-how-it-works.txt"; sourceTree = "<group>"; };
-		20002009 /* 07-into-action.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "07-into-action.txt"; sourceTree = "<group>"; };
-		20002010 /* 08-working-with-others.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "08-working-with-others.txt"; sourceTree = "<group>"; };
-		20002011 /* 09-to-wives.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "09-to-wives.txt"; sourceTree = "<group>"; };
-		20002012 /* 10-the-family-afterward.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "10-the-family-afterward.txt"; sourceTree = "<group>"; };
-		20002013 /* 11-to-employers.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "11-to-employers.txt"; sourceTree = "<group>"; };
-		20002014 /* 12-a-vision-for-you.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "12-a-vision-for-you.txt"; sourceTree = "<group>"; };
-		20002015 /* 13-doctor-bobs-nightmare.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "13-doctor-bobs-nightmare.txt"; sourceTree = "<group>"; };
-		20002016 /* 14-spiritual-experience.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "14-spiritual-experience.txt"; sourceTree = "<group>"; };
+		20002001 /* BigBook */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BigBook; sourceTree = "<group>"; };
 			20003000 /* BookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookData.swift; sourceTree = "<group>"; };
 			20003001 /* BookCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCatalog.swift; sourceTree = "<group>"; };
 			20003002 /* BookLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLibraryView.swift; sourceTree = "<group>"; };
@@ -484,6 +457,9 @@
 		20003350 /* AbsoluteSurrender */ = {isa = PBXFileReference; lastKnownFileType = folder; path = AbsoluteSurrender; sourceTree = "<group>"; };
 		20003450 /* SchoolOfPrayer */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SchoolOfPrayer; sourceTree = "<group>"; };
 		20003550 /* WaitingOnGod */ = {isa = PBXFileReference; lastKnownFileType = folder; path = WaitingOnGod; sourceTree = "<group>"; };
+		20001200 /* AffirmationSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSettingsManager.swift; sourceTree = "<group>"; };
+		20001201 /* AffirmationPackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationPackPickerView.swift; sourceTree = "<group>"; };
+		20001202 /* AffirmationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -492,7 +468,10 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
+							10001200 /* AffirmationSettingsManager.swift in Sources */,
+				10001201 /* AffirmationPackPickerView.swift in Sources */,
+				10001202 /* AffirmationSettingsView.swift in Sources */,
+				runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -606,6 +585,7 @@
 				20000213 /* FeatureFlagStore.swift */,
 				20000800 /* GratitudePromptService.swift */,
 				20000909 /* GratitudeSharingService.swift */,
+					20001200 /* AffirmationSettingsManager.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
 				20001001 /* ThreeCirclesAPIClient.swift */,
 			);
@@ -755,7 +735,6 @@
 			children = (
 				50001100 /* Affirmations */,
 				20000053 /* ActivitiesListView.swift */,
-				20000054 /* AffirmationLogView.swift */,
 				20000055 /* EmotionalJournalView.swift */,
 				20000056 /* EveningReviewView.swift */,
 				20000057 /* ExerciseLogView.swift */,
@@ -993,7 +972,7 @@
 			isa = PBXGroup;
 			children = (
 				20001111 /* aa-bigbook-2nd-edition.pdf */,
-				50002000 /* BigBook */,
+				20002001 /* BigBook */,
 				20000801 /* gratitude-prompts.json */,
 				20003150 /* Confessions */,
 				20003250 /* Humility */,
@@ -1002,28 +981,6 @@
 				20003550 /* WaitingOnGod */,
 			);
 			path = Resources;
-			sourceTree = "<group>";
-		};
-		50002000 /* BigBook */ = {
-			isa = PBXGroup;
-			children = (
-				20002002 /* 00-foreword.txt */,
-				20002003 /* 01-the-doctors-opinion.txt */,
-				20002004 /* 02-bills-story.txt */,
-				20002005 /* 03-there-is-a-solution.txt */,
-				20002006 /* 04-more-about-alcoholism.txt */,
-				20002007 /* 05-we-agnostics.txt */,
-				20002008 /* 06-how-it-works.txt */,
-				20002009 /* 07-into-action.txt */,
-				20002010 /* 08-working-with-others.txt */,
-				20002011 /* 09-to-wives.txt */,
-				20002012 /* 10-the-family-afterward.txt */,
-				20002013 /* 11-to-employers.txt */,
-				20002014 /* 12-a-vision-for-you.txt */,
-				20002015 /* 13-doctor-bobs-nightmare.txt */,
-				20002016 /* 14-spiritual-experience.txt */,
-			);
-			path = BigBook;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1077,21 +1034,7 @@
 				10000200 /* Assets.xcassets in Resources */,
 				10000801 /* gratitude-prompts.json in Resources */,
 				10001111 /* aa-bigbook-2nd-edition.pdf in Resources */,
-				10002002 /* 00-foreword.txt in Resources */,
-				10002003 /* 01-the-doctors-opinion.txt in Resources */,
-				10002004 /* 02-bills-story.txt in Resources */,
-				10002005 /* 03-there-is-a-solution.txt in Resources */,
-				10002006 /* 04-more-about-alcoholism.txt in Resources */,
-				10002007 /* 05-we-agnostics.txt in Resources */,
-				10002008 /* 06-how-it-works.txt in Resources */,
-				10002009 /* 07-into-action.txt in Resources */,
-				10002010 /* 08-working-with-others.txt in Resources */,
-				10002011 /* 09-to-wives.txt in Resources */,
-				10002012 /* 10-the-family-afterward.txt in Resources */,
-				10002013 /* 11-to-employers.txt in Resources */,
-				10002014 /* 12-a-vision-for-you.txt in Resources */,
-				10002015 /* 13-doctor-bobs-nightmare.txt in Resources */,
-				10002016 /* 14-spiritual-experience.txt in Resources */,
+				10002001 /* BigBook in Resources */,
 				10003150 /* Confessions in Resources */,
 				10003250 /* Humility in Resources */,
 				10003350 /* AbsoluteSurrender in Resources */,
@@ -1192,7 +1135,6 @@
 				10000051 /* TimeJournalViewModel.swift in Sources */,
 				10000052 /* UrgeLogViewModel.swift in Sources */,
 				10000053 /* ActivitiesListView.swift in Sources */,
-				10000054 /* AffirmationLogView.swift in Sources */,
 				10000055 /* EmotionalJournalView.swift in Sources */,
 				10000056 /* EveningReviewView.swift in Sources */,
 				10000057 /* ExerciseLogView.swift in Sources */,

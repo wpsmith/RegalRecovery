@@ -25,13 +25,6 @@ struct ToolsView: View {
                         subtitle: "Boundary Tool"
                     )
                     toolCard(
-                        destination: MeetingFinderView(),
-                        icon: "map.fill",
-                        iconColor: .rrPrimary,
-                        title: "Meeting Finder",
-                        subtitle: "5 meetings nearby"
-                    )
-                    toolCard(
                         destination: PanicButtonView(),
                         icon: "exclamationmark.shield.fill",
                         iconColor: .rrDestructive,

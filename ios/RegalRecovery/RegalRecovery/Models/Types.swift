@@ -420,22 +420,6 @@ struct TimeBlock: Identifiable {
     let color: Color
 }
 
-// MARK: - Meetings
-
-struct Meeting: Identifiable {
-    let id = UUID()
-    let name: String
-    let fellowship: String
-    let day: String
-    let time: String
-    let distance: String?
-    let location: String
-    let isVirtual: Bool
-    let isSaved: Bool
-    let latitude: Double
-    let longitude: Double
-}
-
 // MARK: - Three Circles
 
 struct ThreeCirclesData {
@@ -570,6 +554,18 @@ struct CrisisResource: Identifiable {
     let name: String
     let phone: String
     let description: String
+    let textOption: String?
+    let category: String
+    let is24x7: Bool
+
+    init(name: String, phone: String, description: String, textOption: String? = nil, category: String = "Crisis", is24x7: Bool = true) {
+        self.name = name
+        self.phone = phone
+        self.description = description
+        self.textOption = textOption
+        self.category = category
+        self.is24x7 = is24x7
+    }
 }
 
 // MARK: - Notification Setting
@@ -856,7 +852,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "personCheckInSpouse",
-            displayName: "Person Check-in -- Spouse",
+            displayName: "Spouse Check-in",
             icon: "heart.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -864,12 +860,12 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.person-check-ins",
+            featureFlagKey: "activity.spouse-check-ins",
             section: .connection
         ),
         DailyEligibleActivity(
             activityType: "personCheckInSponsor",
-            displayName: "Person Check-in -- Sponsor",
+            displayName: "Spouse Check-in -- Sponsor",
             icon: "person.fill.checkmark",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -877,12 +873,12 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.person-check-ins",
+            featureFlagKey: "activity.spouse-check-ins",
             section: .connection
         ),
         DailyEligibleActivity(
             activityType: "personCheckInCounselor",
-            displayName: "Person Check-in -- Counselor/Coach",
+            displayName: "Spouse Check-in -- Counselor/Coach",
             icon: "stethoscope",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -890,7 +886,7 @@ struct DailyEligibleActivity {
             typicalHour: 12,
             typicalMinute: 0,
             typicalBlock: "Midday",
-            featureFlagKey: "activity.person-check-ins",
+            featureFlagKey: "activity.spouse-check-ins",
             section: .connection
         ),
         DailyEligibleActivity(

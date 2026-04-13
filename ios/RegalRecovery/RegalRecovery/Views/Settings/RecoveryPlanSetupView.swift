@@ -88,22 +88,20 @@ struct RecoveryPlanSetupView: View {
             }
 
             // MARK: - Debug
-            if FeatureFlagStore.shared.isEnabled("feature.analytics-dashboard") {
-                Section {
-                    Button {
-                        showAlgorithmDebug = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "ladybug.fill")
-                                .foregroundStyle(.orange)
-                            Text("Score Algorithm Debug")
-                                .font(RRFont.caption)
-                                .foregroundStyle(Color.rrText)
-                        }
+            Section {
+                Button {
+                    showAlgorithmDebug = true
+                } label: {
+                    HStack {
+                        Image(systemName: "ladybug.fill")
+                            .foregroundStyle(.orange)
+                        Text("Score Algorithm Debug")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrText)
                     }
-                } header: {
-                    Text("Debug")
                 }
+            } header: {
+                Text("Debug")
             }
         }
         .listStyle(.insetGrouped)

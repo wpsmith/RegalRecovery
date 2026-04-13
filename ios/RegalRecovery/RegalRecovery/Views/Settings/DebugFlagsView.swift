@@ -10,12 +10,7 @@ struct FeatureFlag: Identifiable {
 struct DebugFlagsView: View {
     @State private var activeFeatures: [FeatureFlag] = [
         FeatureFlag(key: "feature.onboarding", label: "Onboarding", enabled: true),
-        FeatureFlag(key: "feature.content-resources", label: "Content / Resources", enabled: true),
-        FeatureFlag(key: "feature.commitments", label: "Commitments", enabled: true),
         FeatureFlag(key: "feature.themes", label: "Themes", enabled: true),
-        FeatureFlag(key: "feature.dsr", label: "Data Subject Rights", enabled: true),
-        FeatureFlag(key: "feature.analytics-dashboard", label: "Analytics Dashboard", enabled: true),
-        FeatureFlag(key: "feature.meeting-finder", label: "Meeting Finder", enabled: true),
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
         FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
         FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
@@ -32,7 +27,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.time-journal", label: "Time Journal", enabled: true),
         FeatureFlag(key: "activity.fanos", label: "FANOS Check-in", enabled: false),
         FeatureFlag(key: "activity.fitnap", label: "FITNAP Check-in", enabled: false),
-        FeatureFlag(key: "activity.person-check-ins", label: "Person Check-ins", enabled: false),
+        FeatureFlag(key: "activity.spouse-check-ins", label: "Spouse Check-ins", enabled: false),
         FeatureFlag(key: "activity.meetings", label: "Meetings Attended", enabled: true),
         FeatureFlag(key: "activity.post-mortem", label: "Post-Mortem Analysis", enabled: true),
         FeatureFlag(key: "activity.step-work", label: "12-Step Work", enabled: true),
@@ -247,12 +242,7 @@ struct DebugFlagsView: View {
 
     private static let defaultActiveFeatures: [FeatureFlag] = [
         FeatureFlag(key: "feature.onboarding", label: "Onboarding", enabled: true),
-        FeatureFlag(key: "feature.content-resources", label: "Content / Resources", enabled: true),
-        FeatureFlag(key: "feature.commitments", label: "Commitments", enabled: true),
         FeatureFlag(key: "feature.themes", label: "Themes", enabled: true),
-        FeatureFlag(key: "feature.dsr", label: "Data Subject Rights", enabled: true),
-        FeatureFlag(key: "feature.analytics-dashboard", label: "Analytics Dashboard", enabled: true),
-        FeatureFlag(key: "feature.meeting-finder", label: "Meeting Finder", enabled: true),
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
         FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
         FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
@@ -267,7 +257,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.time-journal", label: "Time Journal", enabled: true),
         FeatureFlag(key: "activity.fanos", label: "FANOS Check-in", enabled: false),
         FeatureFlag(key: "activity.fitnap", label: "FITNAP Check-in", enabled: false),
-        FeatureFlag(key: "activity.person-check-ins", label: "Person Check-ins", enabled: false),
+        FeatureFlag(key: "activity.spouse-check-ins", label: "Spouse Check-ins", enabled: false),
         FeatureFlag(key: "activity.meetings", label: "Meetings Attended", enabled: true),
         FeatureFlag(key: "activity.post-mortem", label: "Post-Mortem Analysis", enabled: true),
         FeatureFlag(key: "activity.step-work", label: "12-Step Work", enabled: true),
