@@ -228,6 +228,7 @@
 		10001200 /* AffirmationSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001200 /* AffirmationSettingsManager.swift */; };
 		10001201 /* AffirmationPackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001201 /* AffirmationPackPickerView.swift */; };
 		10001202 /* AffirmationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001202 /* AffirmationSettingsView.swift */; };
+		10001203 /* BookLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001203 /* BookLanguageManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -460,6 +461,7 @@
 		20001200 /* AffirmationSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSettingsManager.swift; sourceTree = "<group>"; };
 		20001201 /* AffirmationPackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationPackPickerView.swift; sourceTree = "<group>"; };
 		20001202 /* AffirmationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSettingsView.swift; sourceTree = "<group>"; };
+		20001203 /* BookLanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLanguageManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -468,10 +470,7 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-							10001200 /* AffirmationSettingsManager.swift in Sources */,
-				10001201 /* AffirmationPackPickerView.swift in Sources */,
-				10001202 /* AffirmationSettingsView.swift in Sources */,
-				runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -586,6 +585,7 @@
 				20000800 /* GratitudePromptService.swift */,
 				20000909 /* GratitudeSharingService.swift */,
 					20001200 /* AffirmationSettingsManager.swift */,
+				20001203 /* BookLanguageManager.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
 				20001001 /* ThreeCirclesAPIClient.swift */,
 			);
@@ -766,6 +766,8 @@
 				20000071 /* TimeJournalView.swift */,
 				20000072 /* UrgeLogView.swift */,
 				20000073 /* WeeklyGoalsView.swift */,
+				20001201 /* AffirmationPackPickerView.swift */,
+				20001202 /* AffirmationSettingsView.swift */,
 			);
 			path = Activities;
 			sourceTree = "<group>";
@@ -1254,6 +1256,10 @@
 				10003002 /* BookLibraryView.swift in Sources */,
 				10003003 /* BookTableOfContentsView.swift in Sources */,
 				10003004 /* BookChapterReaderView.swift in Sources */,
+				10001200 /* AffirmationSettingsManager.swift in Sources */,
+				10001201 /* AffirmationPackPickerView.swift in Sources */,
+				10001202 /* AffirmationSettingsView.swift in Sources */,
+				10001203 /* BookLanguageManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
