@@ -2,6 +2,10 @@ import SwiftUI
 
 struct BookLibraryView: View {
     @State private var hasMigrated = false
+    @State private var showLanguagePicker = false
+
+    private var langManager: BookLanguageManager { .shared }
+    private var isNonEnglish: Bool { langManager.currentLanguage != "en" }
 
     var body: some View {
         ScrollView {
@@ -19,11 +23,38 @@ struct BookLibraryView: View {
         .background(Color.rrBackground)
         .navigationTitle("Library")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                languageButton
+            }
+        }
+        .sheet(isPresented: $showLanguagePicker) {
+            BookLanguagePickerView()
+        }
         .onAppear {
             if !hasMigrated {
                 migrateProgressIfNeeded()
                 hasMigrated = true
             }
+        }
+    }
+
+    // MARK: - Language Button
+
+    private var languageButton: some View {
+        Button {
+            showLanguagePicker = true
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "globe")
+                    .font(.body)
+
+                if isNonEnglish {
+                    Text(langManager.currentLanguage.uppercased())
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                }
+            }
+            .foregroundStyle(Color.rrPrimary)
         }
     }
 
@@ -36,16 +67,32 @@ struct BookLibraryView: View {
         return RRCard {
             HStack(spacing: 16) {
                 // Book icon
-                Image(systemName: book.icon)
-                    .font(.title2)
-                    .foregroundStyle(book.iconColor)
-                    .frame(width: 48, height: 48)
-                    .background(book.iconColor.opacity(0.12))
-                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: book.icon)
+                        .font(.title2)
+                        .foregroundStyle(book.iconColor)
+                        .frame(width: 48, height: 48)
+                        .background(book.iconColor.opacity(0.12))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                    // Language badge overlay
+                    if isNonEnglish {
+                        Text(langManager.currentLanguage.uppercased())
+                            .font(.system(size: 8, weight: .bold, design: .rounded))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 3)
+                            .padding(.vertical, 1)
+                            .background(
+                                Capsule()
+                                    .fill(book.isUsingFallback ? Color.rrTextSecondary : Color.rrPrimary)
+                            )
+                            .offset(x: 4, y: -4)
+                    }
+                }
 
                 // Book details
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(book.title)
+                    Text(book.localizedTitle)
                         .font(.system(size: 17, weight: .semibold, design: .serif))
                         .foregroundStyle(Color.rrText)
                         .lineLimit(2)
@@ -60,6 +107,14 @@ struct BookLibraryView: View {
                             .font(RRFont.caption2)
                             .foregroundStyle(Color.rrTextSecondary.opacity(0.8))
                             .tracking(0.5)
+                    }
+
+                    // English fallback indicator
+                    if isNonEnglish && book.isUsingFallback {
+                        Text("English \u{2014} translation not yet available")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundStyle(Color.rrTextSecondary.opacity(0.7))
+                            .italic()
                     }
 
                     // Progress bar row
@@ -126,6 +181,86 @@ struct BookLibraryView: View {
            defaults.object(forKey: newFontKey) == nil {
             defaults.set(defaults.double(forKey: oldFontKey), forKey: newFontKey)
         }
+    }
+}
+
+// MARK: - Language Picker
+
+struct BookLanguagePickerView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    private var langManager: BookLanguageManager { .shared }
+
+    var body: some View {
+        NavigationStack {
+            List {
+                // Follow Device option
+                Section {
+                    Button {
+                        langManager.selectedLanguage = nil
+                        dismiss()
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Follow Device")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(Color.rrText)
+
+                                let resolved = BookLanguageManager.displayName(
+                                    for: BookLanguageManager.resolvedDeviceLanguage
+                                )
+                                Text("Currently: \(resolved)")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+
+                            Spacer()
+
+                            if langManager.selectedLanguage == nil {
+                                Image(systemName: "checkmark")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(Color.rrPrimary)
+                            }
+                        }
+                    }
+                }
+
+                // Explicit language choices
+                Section {
+                    ForEach(BookLanguageManager.supportedLanguages, id: \.code) { lang in
+                        Button {
+                            langManager.selectedLanguage = lang.code
+                            dismiss()
+                        } label: {
+                            HStack {
+                                Text(lang.name)
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundStyle(Color.rrText)
+
+                                Spacer()
+
+                                if langManager.selectedLanguage == lang.code {
+                                    Image(systemName: "checkmark")
+                                        .font(.body.weight(.semibold))
+                                        .foregroundStyle(Color.rrPrimary)
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Language")
+                }
+            }
+            .navigationTitle("Book Language")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                        .foregroundStyle(Color.rrPrimary)
+                }
+            }
+        }
+        .presentationDetents([.medium])
     }
 }
 

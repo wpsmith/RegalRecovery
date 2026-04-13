@@ -5,6 +5,9 @@ struct BookTableOfContentsView: View {
 
     @State private var progressMap: [String: Double] = [:]
 
+    private var langManager: BookLanguageManager { .shared }
+    private var isNonEnglish: Bool { langManager.currentLanguage != "en" }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -16,7 +19,7 @@ struct BookTableOfContentsView: View {
             .padding(.vertical, 24)
         }
         .background(Color.rrBackground)
-        .navigationTitle(book.title)
+        .navigationTitle(book.localizedTitle)
         .navigationBarTitleDisplayMode(.inline)
         .onAppear { loadProgress() }
     }
@@ -30,17 +33,19 @@ struct BookTableOfContentsView: View {
                 .foregroundStyle(book.iconColor)
                 .padding(.bottom, 4)
 
-            Text(book.title)
+            Text(book.localizedTitle)
                 .font(.system(size: 24, weight: .bold, design: .serif))
                 .foregroundStyle(Color.rrText)
                 .multilineTextAlignment(.center)
 
-            Text(book.subtitle)
-                .font(.system(size: 14, weight: .regular, design: .serif))
-                .foregroundStyle(Color.rrTextSecondary)
-                .multilineTextAlignment(.center)
-                .italic()
-                .padding(.horizontal, 32)
+            if !book.localizedSubtitle.isEmpty {
+                Text(book.localizedSubtitle)
+                    .font(.system(size: 14, weight: .regular, design: .serif))
+                    .foregroundStyle(Color.rrTextSecondary)
+                    .multilineTextAlignment(.center)
+                    .italic()
+                    .padding(.horizontal, 32)
+            }
 
             Text(book.author)
                 .font(.system(size: 13, weight: .medium, design: .serif))
@@ -55,11 +60,45 @@ struct BookTableOfContentsView: View {
                     .padding(.top, 4)
             }
 
+            // Language badge
+            if isNonEnglish {
+                languageBadge
+                    .padding(.top, 4)
+            }
+
             Divider()
                 .padding(.horizontal, 48)
                 .padding(.top, 8)
         }
         .padding(.horizontal, 24)
+    }
+
+    // MARK: - Language Badge
+
+    private var languageBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "globe")
+                .font(.system(size: 11))
+
+            if book.isUsingFallback {
+                Text("English \u{2014} translation not yet available")
+                    .font(.system(size: 11, weight: .medium))
+            } else {
+                Text(BookLanguageManager.displayName(for: langManager.currentLanguage))
+                    .font(.system(size: 11, weight: .medium))
+            }
+        }
+        .foregroundStyle(book.isUsingFallback ? Color.rrTextSecondary : Color.rrPrimary)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background(
+            Capsule()
+                .fill(
+                    book.isUsingFallback
+                        ? Color.rrTextSecondary.opacity(0.1)
+                        : Color.rrPrimary.opacity(0.1)
+                )
+        )
     }
 
     // MARK: - Chapter List
