@@ -112,14 +112,18 @@ struct Book: Identifiable {
 
     // MARK: - Localized Metadata
 
-    /// Returns the book title in the current language, falling back to English.
+    /// Returns the book title in the current language.
+    /// If no translated content exists for this book, returns the English title.
     var localizedTitle: String {
+        guard !isUsingFallback else { return title }
         let lang = BookLanguageManager.shared.currentLanguage
         return Self.titleTranslations[id]?[lang] ?? title
     }
 
-    /// Returns the book subtitle in the current language, falling back to English.
+    /// Returns the book subtitle in the current language.
+    /// If no translated content exists for this book, returns the English subtitle.
     var localizedSubtitle: String {
+        guard !isUsingFallback else { return subtitle }
         let lang = BookLanguageManager.shared.currentLanguage
         return Self.subtitleTranslations[id]?[lang] ?? subtitle
     }

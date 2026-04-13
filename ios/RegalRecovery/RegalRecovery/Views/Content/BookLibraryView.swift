@@ -77,7 +77,7 @@ struct BookLibraryView: View {
 
                     // Language badge overlay
                     if isNonEnglish {
-                        Text(langManager.currentLanguage.uppercased())
+                        Text(book.isUsingFallback ? "EN" : langManager.currentLanguage.uppercased())
                             .font(.system(size: 8, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
                             .padding(.horizontal, 3)
