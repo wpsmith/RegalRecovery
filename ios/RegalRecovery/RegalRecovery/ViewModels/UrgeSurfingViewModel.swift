@@ -23,6 +23,7 @@ class UrgeSurfingViewModel {
     var showDismissOption = false
     var showCompanionBreathing = false
     var showCompanionPrayer = false
+    var showCompanionAffirmations = false
 
     // Wave animation
     var wavePhaseOffset: Double = 0

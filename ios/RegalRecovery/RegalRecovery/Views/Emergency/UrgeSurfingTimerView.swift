@@ -99,6 +99,9 @@ struct UrgeSurfingTimerView: View {
         .sheet(isPresented: $viewModel.showCompanionPrayer) {
             prayerSheet
         }
+        .sheet(isPresented: $viewModel.showCompanionAffirmations) {
+            AffirmationSurfingSheet()
+        }
         .onDisappear {
             timerCancellable?.cancel()
         }
@@ -213,6 +216,10 @@ struct UrgeSurfingTimerView: View {
 
             companionButton(icon: "hands.and.sparkles.fill", label: "Pray") {
                 viewModel.showCompanionPrayer = true
+            }
+
+            companionButton(icon: "text.quote", label: "Affirm") {
+                viewModel.showCompanionAffirmations = true
             }
         }
         .padding(.horizontal, 32)
@@ -455,6 +462,144 @@ private struct MilestoneTrackView: View {
                 .font(.system(size: 10, weight: .medium, design: .rounded))
                 .foregroundStyle(.white.opacity(0.5))
         }
+    }
+}
+
+// MARK: - Affirmation Surfing Sheet
+
+private struct AffirmationSurfingSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var currentIndex = 0
+    @State private var currentPackIndex = 0
+
+    private let packs = ContentData.affirmationPacks.filter {
+        $0.name == "I Am Accepted" || $0.name == "I Am Secure" || $0.name == "I Am Significant"
+    }
+
+    private var currentPack: AffirmationPack { packs[currentPackIndex] }
+    private var currentAffirmation: Affirmation { currentPack.affirmations[currentIndex] }
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // Top bar
+                HStack {
+                    Text(currentPack.name)
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(Color.rrPrimary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color.rrPrimary.opacity(0.15))
+                        .clipShape(Capsule())
+
+                    Spacer()
+
+                    Button { dismiss() } label: {
+                        Image(systemName: "xmark")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Color.white.opacity(0.15))
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal)
+                .padding(.top, 16)
+
+                Spacer()
+
+                // Affirmation text
+                VStack(spacing: 24) {
+                    Text(currentAffirmation.text)
+                        .font(.system(size: 28, weight: .semibold, design: .serif))
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                        .id(currentAffirmation.id)
+
+                    if !currentAffirmation.scripture.isEmpty {
+                        Text("— \(currentAffirmation.scripture)")
+                            .font(RRFont.subheadline)
+                            .foregroundStyle(Color.rrPrimary.opacity(0.8))
+                    }
+                }
+
+                Spacer()
+
+                // Pack dots
+                HStack(spacing: 8) {
+                    ForEach(Array(packs.enumerated()), id: \.offset) { idx, pack in
+                        Circle()
+                            .fill(idx == currentPackIndex ? Color.rrPrimary : Color.white.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                    }
+                }
+                .padding(.bottom, 12)
+
+                // Counter
+                Text("\(currentIndex + 1) of \(currentPack.affirmations.count)")
+                    .font(.system(size: 13, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .padding(.bottom, 16)
+
+                // Navigation
+                HStack(spacing: 16) {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            if currentIndex > 0 {
+                                currentIndex -= 1
+                            } else if currentPackIndex > 0 {
+                                currentPackIndex -= 1
+                                currentIndex = packs[currentPackIndex].affirmations.count - 1
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 56, height: 56)
+                            .background(Color.white.opacity(0.1))
+                            .clipShape(Circle())
+                    }
+                    .opacity(currentIndex == 0 && currentPackIndex == 0 ? 0.3 : 1)
+
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            if currentIndex < currentPack.affirmations.count - 1 {
+                                currentIndex += 1
+                            } else if currentPackIndex < packs.count - 1 {
+                                currentPackIndex += 1
+                                currentIndex = 0
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Text(isLastAffirmation ? "Done" : "Next")
+                                .fontWeight(.semibold)
+                            if !isLastAffirmation {
+                                Image(systemName: "chevron.right")
+                            }
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.rrPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 16)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: currentIndex)
+        .animation(.easeInOut(duration: 0.3), value: currentPackIndex)
+    }
+
+    private var isLastAffirmation: Bool {
+        currentPackIndex == packs.count - 1 &&
+        currentIndex == currentPack.affirmations.count - 1
     }
 }
 
