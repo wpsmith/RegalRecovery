@@ -441,34 +441,38 @@ def process_grace_abounding():
     for line in lines:
         line_to_pos.append(line_to_pos[-1] + len(line) + 1)
 
-    # Find the CONTENTS block to skip
-    contents_start = None
-    contents_end = None
+    # Find the CONTENTS block to know what to skip.
+    # The TOC is a short block (about 15 lines) near the beginning.
+    contents_line_start = None
+    contents_line_end = None
     for i, line in enumerate(lines):
         if line.strip() == "CONTENTS":
-            contents_start = i
-        if contents_start and i > contents_start + 2 and line.strip() == "" and i > contents_start:
-            # Look for end of contents (blank line after last entry)
-            next_nonempty = None
-            for j in range(i+1, min(i+5, len(lines))):
-                if lines[j].strip():
-                    next_nonempty = j
+            contents_line_start = i
+        elif contents_line_start and contents_line_end is None:
+            # TOC ends at the first blank line that is followed by
+            # a non-TOC line (no trailing page number)
+            if line.strip() == "":
+                # Check if the previous non-empty line was a TOC entry
+                # and the next non-empty line is NOT a TOC entry
+                if i > contents_line_start + 2:
+                    contents_line_end = i
                     break
-            if next_nonempty and not any(lines[next_nonempty].strip().endswith(str(d)) for d in range(10)):
-                contents_end = i
+            # Safety: TOC should not extend more than 30 lines
+            if i > contents_line_start + 30:
+                contents_line_end = i
                 break
 
     last_pos = 0
     for pattern, name in section_defs:
         for m in re.finditer(pattern, text, re.MULTILINE | re.IGNORECASE):
             pos = m.start()
-            # Skip if in the CONTENTS or title block
-            # Check line number
             approx_line = text[:pos].count("\n")
-            if contents_start and contents_end and contents_start <= approx_line <= contents_end + 5:
-                continue
-            # Skip if before the actual content (title page area, ~first 45 lines)
-            if approx_line < 45 and name != "Prefatory Note":
+            # Skip if in the CONTENTS section (small block near the top)
+            if contents_line_start is not None and contents_line_end is not None:
+                if contents_line_start <= approx_line <= contents_line_end:
+                    continue
+            # Skip if in the title page (first 42 lines) unless it's Prefatory Note
+            if approx_line < 42 and name != "Prefatory Note":
                 continue
             # Must be after last found section
             if pos > last_pos:
