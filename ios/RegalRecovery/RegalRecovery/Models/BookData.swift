@@ -58,40 +58,35 @@ struct Book: Identifiable {
 
     /// Loads chapter text with locale-aware resolution.
     /// 1. Try localized path: `{subdirectory}/{lang}/{filename}.txt`
-    /// 2. Fall back to English: `{subdirectory}/{filename}.txt` then bundle root
+    /// 2. Fall back to English: `{subdirectory}/en/{filename}.txt`
     func loadText(for chapter: BookChapter) -> String {
         let lang = BookLanguageManager.shared.currentLanguage
 
-        // Try localized path first (non-English)
-        if lang != "en" {
-            if let url = Bundle.main.url(
-                forResource: chapter.filename,
-                withExtension: "txt",
-                subdirectory: "\(subdirectory)/\(lang)"
-            ), let text = try? String(contentsOf: url, encoding: .utf8) {
-                return processText(text)
-            }
-        }
-
-        // Fallback to English (current default location)
-        let url = Bundle.main.url(
+        // Try selected language
+        if let url = Bundle.main.url(
             forResource: chapter.filename,
             withExtension: "txt",
-            subdirectory: subdirectory
-        ) ?? Bundle.main.url(
-            forResource: chapter.filename,
-            withExtension: "txt"
-        )
-        guard let url, let raw = try? String(contentsOf: url, encoding: .utf8) else {
-            return ""
+            subdirectory: "\(subdirectory)/\(lang)"
+        ), let text = try? String(contentsOf: url, encoding: .utf8) {
+            return processText(text)
         }
-        return processText(raw)
+
+        // Fallback to English
+        if lang != "en",
+           let url = Bundle.main.url(
+               forResource: chapter.filename,
+               withExtension: "txt",
+               subdirectory: "\(subdirectory)/en"
+           ), let text = try? String(contentsOf: url, encoding: .utf8) {
+            return processText(text)
+        }
+
+        return ""
     }
 
     /// Whether a localized file exists for the given chapter in the current language.
     func hasLocalizedContent(for chapter: BookChapter) -> Bool {
         let lang = BookLanguageManager.shared.currentLanguage
-        if lang == "en" { return true }
         return Bundle.main.url(
             forResource: chapter.filename,
             withExtension: "txt",
