@@ -312,16 +312,23 @@ struct JournalView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+                // Devotional context card (when opened from a devotional)
+                if let devotionalPrompt, let devotionalTitle {
+                    devotionalContextCard(title: devotionalTitle, reflection: devotionalPrompt)
+                }
+
                 // Mode selector
-                modeSelector
+                if devotionalPrompt == nil {
+                    modeSelector
+                }
 
                 // Prompt offering (prompted mode only)
-                if mode == .prompted {
+                if mode == .prompted && devotionalPrompt == nil {
                     promptSection
                 }
 
                 // Editor or Jot section
-                if mode == .jotting {
+                if mode == .jotting && devotionalPrompt == nil {
                     jotSection
                 } else {
                     editorSection
@@ -348,14 +355,8 @@ struct JournalView: View {
             JournalingInfoView()
         }
         .onAppear {
-            if let devotionalPrompt {
-                mode = .prompted
-                currentPrompt = PromptItem(
-                    text: devotionalPrompt,
-                    category: "devotional",
-                    tags: ["Devotional"]
-                )
-                showPrompt = true
+            if devotionalPrompt != nil {
+                mode = .freeform
             }
         }
         .overlay(alignment: .bottom) {
@@ -543,6 +544,29 @@ struct JournalView: View {
                 RRButton("Save Entry", icon: "square.and.arrow.down") {
                     saveEntry()
                 }
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    // MARK: - Devotional Context Card
+
+    private func devotionalContextCard(title: String, reflection: String) -> some View {
+        RRCard {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "book.fill")
+                        .foregroundStyle(Color.rrPrimary)
+                    Text(title)
+                        .font(RRFont.headline)
+                        .foregroundStyle(Color.rrText)
+                }
+
+                Text(reflection)
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrTextSecondary)
+                    .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal)
