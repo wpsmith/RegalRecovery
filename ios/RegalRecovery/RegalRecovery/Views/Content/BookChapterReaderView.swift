@@ -1,5 +1,4 @@
 import SwiftUI
-import SwiftData
 
 struct BookChapterReaderView: View {
     let book: Book
@@ -11,41 +10,7 @@ struct BookChapterReaderView: View {
     @State private var viewportHeight: CGFloat = 1
     @State private var text: String = ""
 
-    @Environment(\.modelContext) private var modelContext
-    @Query private var allHighlights: [RRBookHighlight]
-    @Query private var allBookmarks: [RRBookBookmark]
-    @State private var annotationTarget: AnnotationTarget?
-    @State private var showingFallbackBanner: Bool = false
-
     private static let readingBackground = Color(red: 0.98, green: 0.96, blue: 0.93)
-
-    // MARK: - Annotation Helpers
-
-    private var chapterHighlights: [RRBookHighlight] {
-        allHighlights.filter { $0.bookId == book.id && $0.chapterFilename == chapter.filename }
-    }
-
-    private var chapterBookmarks: [RRBookBookmark] {
-        allBookmarks.filter { $0.bookId == book.id && $0.chapterFilename == chapter.filename }
-    }
-
-    private func highlightFor(paragraph: Int, sentence: Int) -> RRBookHighlight? {
-        chapterHighlights.first { $0.paragraphIndex == paragraph && $0.sentenceIndex == sentence }
-    }
-
-    private func isBookmarked(paragraph: Int) -> Bool {
-        chapterBookmarks.contains { $0.paragraphIndex == paragraph }
-    }
-
-    private func highlightColor(_ name: String) -> Color {
-        switch name {
-        case "yellow": return .yellow
-        case "blue": return Color(red: 0.6, green: 0.8, blue: 1.0)
-        case "green": return Color(red: 0.7, green: 0.95, blue: 0.7)
-        case "pink": return Color(red: 1.0, green: 0.75, blue: 0.8)
-        default: return .yellow
-        }
-    }
 
     private var paragraphs: [String] {
         text.components(separatedBy: "\n\n")
@@ -70,11 +35,6 @@ struct BookChapterReaderView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                if showingFallbackBanner {
-                    fallbackBanner
-                        .padding(.bottom, 16)
-                }
-
                 chapterHeader
                     .padding(.bottom, 28)
 
@@ -126,33 +86,10 @@ struct BookChapterReaderView: View {
         }
         .onAppear {
             text = book.loadText(for: chapter)
-            let lang = BookLanguageManager.shared.currentLanguage
-            showingFallbackBanner = lang != "en" && !book.hasLocalizedContent(for: chapter)
         }
         .onDisappear {
             saveProgress()
         }
-    }
-
-    // MARK: - Fallback Banner
-
-    private var fallbackBanner: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "globe")
-                .font(.system(size: 12))
-
-            Text("English \u{2014} translation not yet available")
-                .font(.system(size: 12, weight: .medium))
-
-            Spacer()
-        }
-        .foregroundStyle(Color.rrTextSecondary)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.rrTextSecondary.opacity(0.08))
-        )
     }
 
     // MARK: - Chapter Header
