@@ -64,8 +64,6 @@
 		10000035 /* GratitudeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000035 /* GratitudeViewModel.swift */; };
 		10000036 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000036 /* HomeViewModel.swift */; };
 		10000037 /* JournalViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000037 /* JournalViewModel.swift */; };
-		10000038 /* MeetingFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000038 /* MeetingFinderViewModel.swift */; };
-		10000039 /* MeetingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000039 /* MeetingViewModel.swift */; };
 		10000040 /* MoodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000040 /* MoodViewModel.swift */; };
 		10000041 /* NotificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000041 /* NotificationViewModel.swift */; };
 		10000042 /* PhoneCallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000042 /* PhoneCallViewModel.swift */; };
@@ -142,11 +140,9 @@
 		10000103 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000103 /* SettingsView.swift */; };
 		10000104 /* SupportNetworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000104 /* SupportNetworkView.swift */; };
 		10000105 /* FASTERScaleToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000105 /* FASTERScaleToolView.swift */; };
-		10000106 /* MeetingFinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000106 /* MeetingFinderView.swift */; };
 		10000107 /* PanicButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000107 /* PanicButtonView.swift */; };
 		10000108 /* ThreeCirclesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000108 /* ThreeCirclesView.swift */; };
 		10000109 /* ToolsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000109 /* ToolsView.swift */; };
-		10000110 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000116 /* ContentData.swift */; };
 		10000200 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000200 /* Assets.xcassets */; };
 		10000208 /* RecoveryWorkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000208 /* RecoveryWorkView.swift */; };
 		10000209 /* RecoveryWorkItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000209 /* RecoveryWorkItemRow.swift */; };
@@ -212,16 +208,6 @@
 		10001026 /* SummaryShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001026 /* SummaryShareView.swift */; };
 		10001027 /* QuarterlyReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001027 /* QuarterlyReviewView.swift */; };
 		10001028 /* ReviewReflectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001028 /* ReviewReflectionView.swift */; };
-		10001100 /* AffirmationSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001100 /* AffirmationSessionViewModel.swift */; };
-		10001101 /* AffirmationsHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001101 /* AffirmationsHubView.swift */; };
-		10001102 /* MorningSessionFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001102 /* MorningSessionFlowView.swift */; };
-		10001103 /* EveningReflectionFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001103 /* EveningReflectionFlowView.swift */; };
-		10001104 /* AffirmationCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001104 /* AffirmationCardView.swift */; };
-		10001105 /* IntentionPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001105 /* IntentionPromptView.swift */; };
-		10001106 /* DayRatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001106 /* DayRatingView.swift */; };
-		10001107 /* IntentionRecallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001107 /* IntentionRecallView.swift */; };
-		10001108 /* EveningReflectionTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001108 /* EveningReflectionTextView.swift */; };
-		10001109 /* SessionCompleteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001109 /* SessionCompleteView.swift */; };
 		10000702 /* JournalEntryDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000702 /* JournalEntryDetailView.swift */; };
 		10000703 /* JournalHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000703 /* JournalHistoryView.swift */; };
 		10002002 /* 00-foreword.txt in Resources */ = {isa = PBXBuildFile; fileRef = 20002002 /* 00-foreword.txt */; };
@@ -365,16 +351,6 @@
 		20001026 /* SummaryShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryShareView.swift; sourceTree = "<group>"; };
 		20001027 /* QuarterlyReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuarterlyReviewView.swift; sourceTree = "<group>"; };
 		20001028 /* ReviewReflectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewReflectionView.swift; sourceTree = "<group>"; };
-		20001100 /* AffirmationSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSessionViewModel.swift; sourceTree = "<group>"; };
-		20001101 /* AffirmationsHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsHubView.swift; sourceTree = "<group>"; };
-		20001102 /* MorningSessionFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorningSessionFlowView.swift; sourceTree = "<group>"; };
-		20001103 /* EveningReflectionFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReflectionFlowView.swift; sourceTree = "<group>"; };
-		20001104 /* AffirmationCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationCardView.swift; sourceTree = "<group>"; };
-		20001105 /* IntentionPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentionPromptView.swift; sourceTree = "<group>"; };
-		20001106 /* DayRatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRatingView.swift; sourceTree = "<group>"; };
-		20001107 /* IntentionRecallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentionRecallView.swift; sourceTree = "<group>"; };
-		20001108 /* EveningReflectionTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReflectionTextView.swift; sourceTree = "<group>"; };
-		20001109 /* SessionCompleteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionCompleteView.swift; sourceTree = "<group>"; };
 		20000702 /* JournalEntryDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalEntryDetailView.swift; sourceTree = "<group>"; };
 		20000703 /* JournalHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalHistoryView.swift; sourceTree = "<group>"; };
 		20000024 /* ActivityError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityError.swift; sourceTree = "<group>"; };
@@ -390,8 +366,6 @@
 		20000035 /* GratitudeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GratitudeViewModel.swift; sourceTree = "<group>"; };
 		20000036 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		20000037 /* JournalViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalViewModel.swift; sourceTree = "<group>"; };
-		20000038 /* MeetingFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingFinderViewModel.swift; sourceTree = "<group>"; };
-		20000039 /* MeetingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingViewModel.swift; sourceTree = "<group>"; };
 		20000040 /* MoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodViewModel.swift; sourceTree = "<group>"; };
 		20000041 /* NotificationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewModel.swift; sourceTree = "<group>"; };
 		20000042 /* PhoneCallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCallViewModel.swift; sourceTree = "<group>"; };
@@ -465,7 +439,6 @@
 		20000103 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		20000104 /* SupportNetworkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportNetworkView.swift; sourceTree = "<group>"; };
 		20000105 /* FASTERScaleToolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERScaleToolView.swift; sourceTree = "<group>"; };
-		20000106 /* MeetingFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingFinderView.swift; sourceTree = "<group>"; };
 		20000107 /* PanicButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanicButtonView.swift; sourceTree = "<group>"; };
 		20000108 /* ThreeCirclesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesView.swift; sourceTree = "<group>"; };
 		20000109 /* ToolsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolsView.swift; sourceTree = "<group>"; };
@@ -474,7 +447,6 @@
 		20000113 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
 		20000114 /* StreakViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModelTests.swift; sourceTree = "<group>"; };
 		20000115 /* UrgeLogViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModelTests.swift; sourceTree = "<group>"; };
-		20000116 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
 		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20000208 /* RecoveryWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkView.swift; sourceTree = "<group>"; };
@@ -581,7 +553,6 @@
 		50000011 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				20000116 /* ContentData.swift */,
 				20000117 /* ContentData.swift */,
 				20000950 /* AffirmationTypes.swift */,
 				20000900 /* GratitudeTypes.swift */,
@@ -675,7 +646,6 @@
 		50000030 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				20001100 /* AffirmationSessionViewModel.swift */,
 				20000024 /* ActivityError.swift */,
 				20000025 /* ActivityViewModel.swift */,
 				20000026 /* AffirmationsViewModel.swift */,
@@ -689,8 +659,6 @@
 				20000035 /* GratitudeViewModel.swift */,
 				20000036 /* HomeViewModel.swift */,
 				20000037 /* JournalViewModel.swift */,
-				20000038 /* MeetingFinderViewModel.swift */,
-				20000039 /* MeetingViewModel.swift */,
 				20000040 /* MoodViewModel.swift */,
 				20000041 /* NotificationViewModel.swift */,
 				20000042 /* PhoneCallViewModel.swift */,
@@ -778,15 +746,6 @@
 		50001100 /* Affirmations */ = {
 			isa = PBXGroup;
 			children = (
-				20001101 /* AffirmationsHubView.swift */,
-				20001104 /* AffirmationCardView.swift */,
-				20001106 /* DayRatingView.swift */,
-				20001103 /* EveningReflectionFlowView.swift */,
-				20001108 /* EveningReflectionTextView.swift */,
-				20001105 /* IntentionPromptView.swift */,
-				20001107 /* IntentionRecallView.swift */,
-				20001102 /* MorningSessionFlowView.swift */,
-				20001109 /* SessionCompleteView.swift */,
 			);
 			path = Affirmations;
 			sourceTree = "<group>";
@@ -939,7 +898,6 @@
 			isa = PBXGroup;
 			children = (
 				20000105 /* FASTERScaleToolView.swift */,
-				20000106 /* MeetingFinderView.swift */,
 				20000107 /* PanicButtonView.swift */,
 				50001001 /* ThreeCircles */,
 				20000108 /* ThreeCirclesView.swift */,
@@ -1220,8 +1178,6 @@
 				10000035 /* GratitudeViewModel.swift in Sources */,
 				10000036 /* HomeViewModel.swift in Sources */,
 				10000037 /* JournalViewModel.swift in Sources */,
-				10000038 /* MeetingFinderViewModel.swift in Sources */,
-				10000039 /* MeetingViewModel.swift in Sources */,
 				10000040 /* MoodViewModel.swift in Sources */,
 				10000041 /* NotificationViewModel.swift in Sources */,
 				10000042 /* PhoneCallViewModel.swift in Sources */,
@@ -1298,11 +1254,9 @@
 				10000103 /* SettingsView.swift in Sources */,
 				10000104 /* SupportNetworkView.swift in Sources */,
 				10000105 /* FASTERScaleToolView.swift in Sources */,
-				10000106 /* MeetingFinderView.swift in Sources */,
 				10000107 /* PanicButtonView.swift in Sources */,
 				10000108 /* ThreeCirclesView.swift in Sources */,
 				10000109 /* ToolsView.swift in Sources */,
-				10000110 /* ContentData.swift in Sources */,
 				10000600 /* TimeJournalEntryViewModel.swift in Sources */,
 				10000601 /* LocationField.swift in Sources */,
 				10000602 /* ActivityField.swift in Sources */,
@@ -1353,16 +1307,6 @@
 				10001027 /* QuarterlyReviewView.swift in Sources */,
 				10001028 /* ReviewReflectionView.swift in Sources */,
 				10000960 /* AffirmationTodayCard.swift in Sources */,
-				10001100 /* AffirmationSessionViewModel.swift in Sources */,
-				10001101 /* AffirmationsHubView.swift in Sources */,
-				10001102 /* MorningSessionFlowView.swift in Sources */,
-				10001103 /* EveningReflectionFlowView.swift in Sources */,
-				10001104 /* AffirmationCardView.swift in Sources */,
-				10001105 /* IntentionPromptView.swift in Sources */,
-				10001106 /* DayRatingView.swift in Sources */,
-				10001107 /* IntentionRecallView.swift in Sources */,
-				10001108 /* EveningReflectionTextView.swift in Sources */,
-				10001109 /* SessionCompleteView.swift in Sources */,
 				10003000 /* BookData.swift in Sources */,
 				10003001 /* BookCatalog.swift in Sources */,
 				10003002 /* BookLibraryView.swift in Sources */,
