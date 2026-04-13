@@ -469,8 +469,11 @@ private struct MilestoneTrackView: View {
 
 private struct AffirmationSurfingSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var currentIndex = 0
     @State private var currentPackIndex = 0
+    /// Tracks the highest affirmation index viewed per pack (for progress logging).
+    @State private var maxViewedPerPack: [Int: Int] = [:]
 
     private let packs = ContentData.affirmationPacks.filter {
         $0.name == "I Am Accepted" || $0.name == "I Am Secure" || $0.name == "I Am Significant"
@@ -595,11 +598,51 @@ private struct AffirmationSurfingSheet: View {
         }
         .animation(.easeInOut(duration: 0.3), value: currentIndex)
         .animation(.easeInOut(duration: 0.3), value: currentPackIndex)
+        .onAppear { recordView() }
+        .onChange(of: currentIndex) { recordView() }
+        .onChange(of: currentPackIndex) { recordView() }
+        .onDisappear { logProgress() }
     }
 
     private var isLastAffirmation: Bool {
         currentPackIndex == packs.count - 1 &&
         currentIndex == currentPack.affirmations.count - 1
+    }
+
+    /// Track the highest index viewed in the current pack.
+    private func recordView() {
+        let prev = maxViewedPerPack[currentPackIndex] ?? -1
+        if currentIndex > prev {
+            maxViewedPerPack[currentPackIndex] = currentIndex
+        }
+    }
+
+    /// Build a progress summary string and log as an RRActivity.
+    private func logProgress() {
+        guard !maxViewedPerPack.isEmpty else { return }
+
+        // Build summary like "3/11 I Am Accepted, 11/11 I Am Secure"
+        var parts: [String] = []
+        for (packIdx, maxIdx) in maxViewedPerPack.sorted(by: { $0.key < $1.key }) {
+            guard packIdx < packs.count else { continue }
+            let pack = packs[packIdx]
+            let viewed = maxIdx + 1
+            parts.append("\(viewed)/\(pack.affirmations.count) \(pack.name)")
+        }
+
+        let summary = parts.joined(separator: ", ")
+
+        let activity = RRActivity(
+            userId: UUID(),
+            activityType: "Affirmation Log",
+            date: Date(),
+            data: JSONPayload([
+                "source": .string("urgeSurfing"),
+                "summary": .string(summary),
+            ])
+        )
+        modelContext.insert(activity)
+        try? modelContext.save()
     }
 }
 
