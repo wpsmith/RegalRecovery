@@ -85,6 +85,35 @@ struct MorningCommitmentView: View {
                         }
                     }
                 }
+                // Vision snippet (P1)
+                if FeatureFlagStore.shared.isEnabled("feature.vision"),
+                   let vision = currentVisions.first {
+                    NavigationLink {
+                        VisionHubView()
+                    } label: {
+                        RRCard {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Image(systemName: "eye.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.rrPrimary)
+                                    Text("Your Vision")
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                }
+                                Text("I am becoming \(vision.identityStatement)")
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                                    .lineLimit(2)
+                                Text("Tap to read full vision")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrPrimary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
                 .padding(.horizontal)
             }
             .padding(.vertical)
