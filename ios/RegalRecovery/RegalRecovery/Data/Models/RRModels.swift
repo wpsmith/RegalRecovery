@@ -1300,6 +1300,70 @@ final class RRDailyScore {
     }
 }
 
+// MARK: - Vision Statement
+
+@Model
+final class RRVisionStatement {
+
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var identityStatement: String
+    var visionBody: String
+    var coreValues: [String]
+    var scriptureReference: String?
+    var scriptureText: String?
+    var promptResponsesJSON: String?
+    var version: Int
+    var isCurrent: Bool
+    var createdAt: Date
+    var modifiedAt: Date
+
+    var promptResponses: [String: String] {
+        get {
+            guard let json = promptResponsesJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([String: String].self, from: data) else {
+                return [:]
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                promptResponsesJSON = json
+            }
+        }
+    }
+
+    init(
+        id: UUID = UUID(),
+        userId: UUID,
+        identityStatement: String,
+        visionBody: String = "",
+        coreValues: [String] = [],
+        scriptureReference: String? = nil,
+        scriptureText: String? = nil,
+        promptResponsesJSON: String? = nil,
+        version: Int = 1,
+        isCurrent: Bool = true,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.userId = userId
+        self.identityStatement = identityStatement
+        self.visionBody = visionBody
+        self.coreValues = coreValues
+        self.scriptureReference = scriptureReference
+        self.scriptureText = scriptureText
+        self.promptResponsesJSON = promptResponsesJSON
+        self.version = version
+        self.isCurrent = isCurrent
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1335,6 +1399,7 @@ enum RRModelConfiguration {
         RRRecoveryPlan.self,
         RRDailyPlanItem.self,
         RRDailyScore.self,
+        RRVisionStatement.self,
     ]
 
     static var schema: Schema {
