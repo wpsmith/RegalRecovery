@@ -113,8 +113,8 @@ struct MorningCommitmentView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
             .padding(.vertical)
         }
