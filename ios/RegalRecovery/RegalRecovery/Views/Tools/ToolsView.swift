@@ -31,6 +31,15 @@ struct ToolsView: View {
                         title: "Panic Button",
                         subtitle: "Emergency Tools"
                     )
+                    if FeatureFlagStore.shared.isEnabled("feature.vision") {
+                        toolCard(
+                            destination: VisionHubView(),
+                            icon: "eye.fill",
+                            iconColor: .rrPrimary,
+                            title: "Vision",
+                            subtitle: "Your Recovery Why"
+                        )
+                    }
                 }
                 .padding()
             }

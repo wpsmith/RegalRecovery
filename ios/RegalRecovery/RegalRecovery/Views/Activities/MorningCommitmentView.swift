@@ -9,6 +9,8 @@ struct MorningCommitmentView: View {
     @Query(sort: \RRAddiction.sortOrder) private var addictions: [RRAddiction]
     @Query(filter: #Predicate<RRDailyPlanItem> { $0.isEnabled == true })
     private var planItems: [RRDailyPlanItem]
+    @Query(filter: #Predicate<RRVisionStatement> { $0.isCurrent == true })
+    private var currentVisions: [RRVisionStatement]
 
     @State private var statements: [String] = []
     @State private var toggles: [Bool] = []
