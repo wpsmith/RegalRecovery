@@ -4,10 +4,11 @@ struct GlossaryView: View {
     @State private var searchText = ""
 
     private var filteredGlossary: [GlossaryTerm] {
+        let sorted = ContentData.glossary.sorted { $0.term.localizedCaseInsensitiveCompare($1.term) == .orderedAscending }
         if searchText.isEmpty {
-            return ContentData.glossary
+            return sorted
         }
-        return ContentData.glossary.filter { item in
+        return sorted.filter { item in
             item.term.localizedCaseInsensitiveContains(searchText) ||
             item.definition.localizedCaseInsensitiveContains(searchText)
         }

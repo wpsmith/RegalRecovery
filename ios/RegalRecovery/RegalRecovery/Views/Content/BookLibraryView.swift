@@ -21,8 +21,8 @@ struct BookLibraryView: View {
             .padding(.vertical, 20)
         }
         .background(Color.rrBackground)
-        .navigationTitle("Library")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 languageButton
