@@ -16,6 +16,8 @@ struct HomeView: View {
     @Query(sort: \RRUrgeLog.date, order: .reverse) private var urgeLogs: [RRUrgeLog]
     @Query(sort: \RRPhoneCallLog.date, order: .reverse) private var phoneCalls: [RRPhoneCallLog]
     @Query(sort: \RRMeetingLog.date, order: .reverse) private var meetingLogs: [RRMeetingLog]
+    @Query(filter: #Predicate<RRVisionStatement> { $0.isCurrent == true })
+    private var currentVisions: [RRVisionStatement]
 
     private var user: RRUser? { users.first }
 
@@ -112,6 +114,14 @@ struct HomeView: View {
                     }
 
                     CommitmentsCard(status: commitmentStatus)
+
+                    if FeatureFlagStore.shared.isEnabled("feature.vision"),
+                       let vision = currentVisions.first {
+                        VisionCard(
+                            identityStatement: vision.identityStatement,
+                            scriptureReference: vision.scriptureReference
+                        )
+                    }
 
                     QuickActionsRow()
 
