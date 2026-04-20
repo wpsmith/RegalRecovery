@@ -331,7 +331,18 @@ struct UrgeSurfingTimerView: View {
             Color.black.ignoresSafeArea()
 
             VStack(spacing: 32) {
-                Spacer()
+                HStack {
+                    Spacer()
+                    Button { viewModel.showCompanionPrayer = false } label: {
+                        Image(systemName: "xmark")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(Color.white.opacity(0.15))
+                            .clipShape(Circle())
+                    }
+                }
+                .padding(.horizontal)
 
                 Image(systemName: "hands.and.sparkles.fill")
                     .font(.system(size: 48))

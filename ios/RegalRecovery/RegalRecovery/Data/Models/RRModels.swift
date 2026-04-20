@@ -1031,6 +1031,7 @@ final class RRSupportContact {
     var name: String
     var role: String  // "sponsor", "counselor", "spouse", "accountabilityPartner"
     var phone: String
+    var addiction: String?
     var linkedDate: Date
     var createdAt: Date
     var modifiedAt: Date
@@ -1043,6 +1044,7 @@ final class RRSupportContact {
         name: String,
         role: String,
         phone: String,
+        addiction: String? = nil,
         linkedDate: Date,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
@@ -1052,6 +1054,7 @@ final class RRSupportContact {
         self.name = name
         self.role = role
         self.phone = phone
+        self.addiction = addiction
         self.linkedDate = linkedDate
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt

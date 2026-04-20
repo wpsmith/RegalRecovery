@@ -11,6 +11,7 @@ struct EmotionalJournalView: View {
     @State private var selectedSecondary: String?
     @State private var intensity: Double = 5
     @State private var activity = ""
+    @State private var locationService = LocationService()
 
     var body: some View {
         ScrollView {
@@ -135,10 +136,26 @@ struct EmotionalJournalView: View {
                     HStack {
                         Image(systemName: "location.fill")
                             .foregroundStyle(Color.rrTextSecondary)
-                        Text("Home, Austin TX")
+                        if locationService.isLoading {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else if let place = locationService.placeName {
+                            Text(place)
+                                .font(RRFont.subheadline)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        } else if locationService.isAuthorized {
+                            Button("Detect location") {
+                                locationService.requestLocation()
+                            }
                             .font(RRFont.subheadline)
-                            .foregroundStyle(Color.rrTextSecondary)
+                            .foregroundStyle(Color.rrPrimary)
+                        } else {
+                            Text("Location unavailable")
+                                .font(RRFont.subheadline)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        }
                     }
+                    .onAppear { locationService.requestLocation() }
 
                     RRButton("Log Emotion", icon: "heart.circle.fill") {
                         submitEmotion()
@@ -229,7 +246,7 @@ struct EmotionalJournalView: View {
             emotionColor: colorString,
             intensity: Int(intensity),
             activity: activity,
-            location: "Home, Austin TX"
+            location: locationService.placeName ?? ""
         )
         modelContext.insert(entry)
         activity = ""

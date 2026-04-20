@@ -46,10 +46,6 @@ struct SupportNetworkView: View {
     @Environment(\.modelContext) private var modelContext
 
     @State private var showAddSheet = false
-    @State private var showContactSourcePicker = false
-    @State private var showContactPicker = false
-    @State private var prefillName = ""
-    @State private var prefillPhone = ""
     @State private var editingContact: RRSupportContact?
 
     var body: some View {
@@ -86,6 +82,12 @@ struct SupportNetworkView: View {
                                     RRBadge(text: displayRole(contact.role), color: roleColor(contact.role))
                                 }
 
+                                if let addiction = contact.addiction, !addiction.isEmpty {
+                                    Text(addiction)
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                }
+
                                 HStack(spacing: 6) {
                                     Image(systemName: "phone.fill")
                                         .font(.caption)
@@ -108,9 +110,7 @@ struct SupportNetworkView: View {
 
             Section {
                 Button {
-                    prefillName = ""
-                    prefillPhone = ""
-                    showContactSourcePicker = true
+                    showAddSheet = true
                 } label: {
                     HStack {
                         Image(systemName: "plus.circle.fill")
@@ -123,41 +123,22 @@ struct SupportNetworkView: View {
         }
         .listStyle(.insetGrouped)
         .navigationTitle("Support Network")
-        .confirmationDialog("Add Contact", isPresented: $showContactSourcePicker) {
-            Button("From Contacts") { showContactPicker = true }
-            Button("Enter Manually") { showAddSheet = true }
-            Button("Cancel", role: .cancel) { }
-        }
-        .sheet(isPresented: $showContactPicker) {
-            ContactPicker(
-                onSelect: { name, phone in
-                    prefillName = name
-                    prefillPhone = phone
-                    showContactPicker = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        showAddSheet = true
-                    }
-                },
-                onCancel: {
-                    showContactPicker = false
-                }
-            )
-        }
         .sheet(isPresented: $showAddSheet) {
-            AddContactSheet(prefillName: prefillName, prefillPhone: prefillPhone, onSave: addContact)
+            AddContactSheet(onSave: addContact)
         }
         .sheet(item: $editingContact) { contact in
             EditContactSheet(contact: contact, onSave: { updateContact(contact) })
         }
     }
 
-    private func addContact(name: String, role: String, phone: String) {
+    private func addContact(name: String, role: String, phone: String, addiction: String?) {
         let userId = users.first?.id ?? UUID()
         let contact = RRSupportContact(
             userId: userId,
             name: name,
             role: role,
             phone: phone,
+            addiction: addiction,
             linkedDate: Date()
         )
         modelContext.insert(contact)
@@ -176,7 +157,7 @@ struct SupportNetworkView: View {
     private func displayRole(_ role: String) -> String {
         switch role {
         case "sponsor": return "Sponsor"
-        case "counselor": return "Counselor (CSAT)"
+        case "counselor": return "Counselor"
         case "spouse": return "Spouse"
         case "accountabilityPartner": return "Accountability Partner"
         default: return role.capitalized
@@ -198,24 +179,25 @@ struct SupportNetworkView: View {
 
 struct AddContactSheet: View {
     @Environment(\.dismiss) private var dismiss
-    let onSave: (String, String, String) -> Void
+    @Query(sort: \RRAddiction.sortOrder) private var addictions: [RRAddiction]
+    let onSave: (String, String, String, String?) -> Void
 
-    @State private var name: String
+    @State private var name = ""
     @State private var role = "sponsor"
-    @State private var phone: String
-
-    init(prefillName: String = "", prefillPhone: String = "", onSave: @escaping (String, String, String) -> Void) {
-        _name = State(initialValue: prefillName)
-        _phone = State(initialValue: prefillPhone)
-        self.onSave = onSave
-    }
+    @State private var phone = ""
+    @State private var selectedAddiction: String?
+    @State private var showContactPicker = false
 
     private let roles = [
         ("sponsor", "Sponsor"),
-        ("counselor", "Counselor (CSAT)"),
+        ("counselor", "Counselor"),
         ("spouse", "Spouse"),
         ("accountabilityPartner", "Accountability Partner"),
     ]
+
+    private var showAddictionPicker: Bool {
+        role == "sponsor" || role == "counselor"
+    }
 
     var body: some View {
         NavigationStack {
@@ -224,6 +206,17 @@ struct AddContactSheet: View {
                     TextField("Name", text: $name)
                     TextField("Phone", text: $phone)
                         .keyboardType(.phonePad)
+
+                    Button {
+                        showContactPicker = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "person.crop.circle.badge.plus")
+                                .foregroundStyle(Color.rrPrimary)
+                            Text("Import from Contacts")
+                                .foregroundStyle(Color.rrPrimary)
+                        }
+                    }
                 }
 
                 Section {
@@ -232,8 +225,19 @@ struct AddContactSheet: View {
                             Text(label).tag(value)
                         }
                     }
+
+                    if showAddictionPicker && !addictions.isEmpty {
+                        Picker("Addiction (optional)", selection: $selectedAddiction) {
+                            Text("None").tag(String?.none)
+                            ForEach(addictions) { addiction in
+                                Text(addiction.name).tag(Optional(addiction.name))
+                            }
+                        }
+                    }
                 }
             }
+            .navigationTitle("Add Contact")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -241,11 +245,24 @@ struct AddContactSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Add") {
                         guard !name.isEmpty else { return }
-                        onSave(name, role, phone)
+                        let addiction = showAddictionPicker ? selectedAddiction : nil
+                        onSave(name, role, phone, addiction)
                         dismiss()
                     }
                     .disabled(name.isEmpty)
                 }
+            }
+            .sheet(isPresented: $showContactPicker) {
+                ContactPicker(
+                    onSelect: { contactName, contactPhone in
+                        name = contactName
+                        phone = contactPhone
+                        showContactPicker = false
+                    },
+                    onCancel: {
+                        showContactPicker = false
+                    }
+                )
             }
         }
     }
@@ -255,19 +272,25 @@ struct AddContactSheet: View {
 
 struct EditContactSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \RRAddiction.sortOrder) private var addictions: [RRAddiction]
     let contact: RRSupportContact
     let onSave: () -> Void
 
     @State private var name: String = ""
     @State private var phone: String = ""
     @State private var role: String = ""
+    @State private var selectedAddiction: String?
 
     private let roles = [
         ("sponsor", "Sponsor"),
-        ("counselor", "Counselor (CSAT)"),
+        ("counselor", "Counselor"),
         ("spouse", "Spouse"),
         ("accountabilityPartner", "Accountability Partner"),
     ]
+
+    private var showAddictionPicker: Bool {
+        role == "sponsor" || role == "counselor"
+    }
 
     var body: some View {
         NavigationStack {
@@ -284,12 +307,22 @@ struct EditContactSheet: View {
                             Text(label).tag(value)
                         }
                     }
+
+                    if showAddictionPicker && !addictions.isEmpty {
+                        Picker("Addiction (optional)", selection: $selectedAddiction) {
+                            Text("None").tag(String?.none)
+                            ForEach(addictions) { addiction in
+                                Text(addiction.name).tag(Optional(addiction.name))
+                            }
+                        }
+                    }
                 }
             }
             .onAppear {
                 name = contact.name
                 phone = contact.phone
                 role = contact.role
+                selectedAddiction = contact.addiction
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -300,6 +333,7 @@ struct EditContactSheet: View {
                         contact.name = name
                         contact.phone = phone
                         contact.role = role
+                        contact.addiction = showAddictionPicker ? selectedAddiction : nil
                         contact.modifiedAt = Date()
                         onSave()
                         dismiss()

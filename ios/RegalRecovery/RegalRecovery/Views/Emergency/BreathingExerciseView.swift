@@ -24,6 +24,7 @@ struct BreathingExerciseView: View {
         }
     }
 
+    @Environment(\.dismiss) private var dismiss
     @State private var isRunning = false
     @State private var currentPhase: Phase = .inhale
     @State private var currentSecond = 0
@@ -36,7 +37,18 @@ struct BreathingExerciseView: View {
 
     var body: some View {
         VStack(spacing: 32) {
-            Spacer()
+            HStack {
+                Spacer()
+                Button { dismiss() } label: {
+                    Image(systemName: "xmark")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 36, height: 36)
+                        .background(Color.white.opacity(0.15))
+                        .clipShape(Circle())
+                }
+            }
+            .padding(.horizontal)
 
             ZStack {
                 Circle()
