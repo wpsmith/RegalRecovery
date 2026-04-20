@@ -4,18 +4,47 @@ struct PlanActivityRowView: View {
     @Binding var item: PlanItemState
     var siblingCount: Int = 1
 
+    @State private var isEditingName = false
+    @FocusState private var nameFieldFocused: Bool
+
     private let dayLabels = ["S", "M", "T", "W", "T", "F", "S"]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            // Row 1: Icon + type label + custom title + time picker (all one line)
+        VStack(alignment: .leading, spacing: 4) {
+            // Row 1: Custom name (only if set or editing)
+            if isEditingName {
+                HStack(spacing: 6) {
+                    TextField("Custom name", text: $item.customTitle)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(Color.rrPrimary)
+                        .textFieldStyle(.plain)
+                        .focused($nameFieldFocused)
+                        .onSubmit { finishEditing() }
+
+                    Button {
+                        finishEditing()
+                    } label: {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(Color.rrPrimary)
+                    }
+                    .buttonStyle(.borderless)
+                }
+            } else if !item.customTitle.isEmpty {
+                Text(item.customTitle)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.rrPrimary)
+                    .lineLimit(1)
+                    .onTapGesture { startEditing() }
+            }
+
+            // Row 2: Icon + activity name + rename button
             HStack(spacing: 8) {
                 Image(systemName: item.activity.icon)
                     .font(.caption)
                     .foregroundStyle(iconColor)
                     .frame(width: 22, height: 22)
 
-                // Type label (e.g., "Prayer #2")
                 let typeLabel = siblingCount > 1
                     ? "\(item.activity.displayName) #\(item.instanceIndex + 1)"
                     : item.activity.displayName
@@ -24,16 +53,22 @@ struct PlanActivityRowView: View {
                     .foregroundStyle(Color.rrText)
                     .lineLimit(1)
 
-                // Custom title inline
-                TextField("Custom name", text: $item.customTitle)
-                    .font(.subheadline)
-                    .foregroundStyle(Color.rrPrimary)
-                    .textFieldStyle(.plain)
-                    .lineLimit(1)
+                Spacer()
 
-                Spacer(minLength: 4)
+                if !isEditingName {
+                    Button {
+                        startEditing()
+                    } label: {
+                        Image(systemName: "pencil")
+                            .font(.caption2)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                    .buttonStyle(.borderless)
+                }
+            }
 
-                // Time picker (compact)
+            // Row 3: Time picker + day-of-week chips
+            HStack(spacing: 8) {
                 DatePicker(
                     "",
                     selection: Binding(
@@ -43,55 +78,63 @@ struct PlanActivityRowView: View {
                     displayedComponents: .hourAndMinute
                 )
                 .labelsHidden()
-                .frame(width: 90)
-            }
+                .frame(width: 82)
 
-            // Row 2: Day-of-week chips (compact)
-            let isEveryDay = item.daysOfWeek.isEmpty
-            HStack(spacing: 4) {
-                ForEach(1...7, id: \.self) { day in
-                    let selected = isEveryDay || item.daysOfWeek.contains(day)
-                    Button {
-                        toggleDay(day, isEveryDay: isEveryDay)
-                    } label: {
-                        Text(dayLabels[day - 1])
-                            .font(.system(size: 11, weight: .semibold))
-                            .frame(width: 28, height: 28)
-                            .foregroundStyle(selected ? .white : Color.rrTextSecondary)
-                            .background(selected ? Color.rrPrimary : Color.rrSurface)
-                            .clipShape(Circle())
+                let isEveryDay = item.daysOfWeek.isEmpty
+                HStack(spacing: 3) {
+                    ForEach(1...7, id: \.self) { day in
+                        let selected = isEveryDay || item.daysOfWeek.contains(day)
+                        Button {
+                            toggleDay(day, isEveryDay: isEveryDay)
+                        } label: {
+                            Text(dayLabels[day - 1])
+                                .font(.system(size: 10, weight: .semibold))
+                                .frame(width: 26, height: 26)
+                                .foregroundStyle(selected ? .white : Color.rrTextSecondary)
+                                .background(selected ? Color.rrPrimary : Color.rrSurface)
+                                .clipShape(Circle())
+                        }
+                        .buttonStyle(.borderless)
                     }
-                    .buttonStyle(.borderless)
-                }
 
-                Spacer()
-
-                if !isEveryDay {
-                    Button {
-                        item.daysOfWeek.removeAll()
-                    } label: {
-                        Text("All")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(Color.rrPrimary)
+                    if !isEveryDay {
+                        Button {
+                            item.daysOfWeek.removeAll()
+                        } label: {
+                            Text("All")
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundStyle(Color.rrPrimary)
+                        }
+                        .buttonStyle(.borderless)
                     }
-                    .buttonStyle(.borderless)
                 }
             }
         }
         .padding(.vertical, 2)
     }
 
+    // MARK: - Editing
+
+    private func startEditing() {
+        isEditingName = true
+        nameFieldFocused = true
+    }
+
+    private func finishEditing() {
+        isEditingName = false
+        nameFieldFocused = false
+    }
+
+    // MARK: - Day Toggle
+
     private func toggleDay(_ day: Int, isEveryDay: Bool) {
         if isEveryDay {
-            // "Every day" → select all except this one
             item.daysOfWeek = Set(1...7)
             item.daysOfWeek.remove(day)
         } else if item.daysOfWeek.contains(day) {
             item.daysOfWeek.remove(day)
-            // If none left, revert to "every day"
         } else {
             item.daysOfWeek.insert(day)
-            // If all 7 selected, collapse to "every day"
             if item.daysOfWeek.count == 7 { item.daysOfWeek.removeAll() }
         }
     }
@@ -126,7 +169,7 @@ struct PlanActivityRowView: View {
                 scheduledHour: 7,
                 scheduledMinute: 0,
                 instanceIndex: 0,
-                daysOfWeek: [],
+                daysOfWeek: [1, 3, 5],
                 customTitle: "Morning devotion time"
             )),
             siblingCount: 2

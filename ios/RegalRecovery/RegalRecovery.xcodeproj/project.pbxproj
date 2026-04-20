@@ -133,6 +133,7 @@
 		10000097 /* AddictionManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000097 /* AddictionManagementView.swift */; };
 		10000098 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000098 /* AppearanceSettingsView.swift */; };
 		10000099 /* DebugFlagsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000099 /* DebugFlagsView.swift */; };
+		10000990 /* DebugEmotionEmojiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000990 /* DebugEmotionEmojiView.swift */; };
 		10000100 /* NotificationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000100 /* NotificationSettingsView.swift */; };
 		10000101 /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000101 /* PrivacySettingsView.swift */; };
 		10000102 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000102 /* ProfileEditView.swift */; };
@@ -220,6 +221,7 @@
 		10003002 /* BookLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003002 /* BookLibraryView.swift */; };
 		10003003 /* BookTableOfContentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003003 /* BookTableOfContentsView.swift */; };
 		10003004 /* BookChapterReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003004 /* BookChapterReaderView.swift */; };
+		10003100 /* SensaEmoji.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003100 /* SensaEmoji.swift */; };
 		10003150 /* Confessions in Resources */ = {isa = PBXBuildFile; fileRef = 20003150 /* Confessions */; };
 		10003250 /* Humility in Resources */ = {isa = PBXBuildFile; fileRef = 20003250 /* Humility */; };
 		10003350 /* AbsoluteSurrender in Resources */ = {isa = PBXBuildFile; fileRef = 20003350 /* AbsoluteSurrender */; };
@@ -229,6 +231,7 @@
 		10001201 /* AffirmationPackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001201 /* AffirmationPackPickerView.swift */; };
 		10001202 /* AffirmationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001202 /* AffirmationSettingsView.swift */; };
 		10001203 /* BookLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001203 /* BookLanguageManager.swift */; };
+		10001204 /* TextToSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001204 /* TextToSpeechService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -421,6 +424,7 @@
 		20000097 /* AddictionManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddictionManagementView.swift; sourceTree = "<group>"; };
 		20000098 /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
 		20000099 /* DebugFlagsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugFlagsView.swift; sourceTree = "<group>"; };
+		20000990 /* DebugEmotionEmojiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugEmotionEmojiView.swift; sourceTree = "<group>"; };
 		20000100 /* NotificationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationSettingsView.swift; sourceTree = "<group>"; };
 		20000101 /* PrivacySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacySettingsView.swift; sourceTree = "<group>"; };
 		20000102 /* ProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileEditView.swift; sourceTree = "<group>"; };
@@ -450,6 +454,7 @@
 			20003004 /* BookChapterReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookChapterReaderView.swift; sourceTree = "<group>"; };
 		20003000 /* BookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookData.swift; sourceTree = "<group>"; };
 		20003001 /* BookCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCatalog.swift; sourceTree = "<group>"; };
+		20003100 /* SensaEmoji.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensaEmoji.swift; sourceTree = "<group>"; };
 		20003002 /* BookLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLibraryView.swift; sourceTree = "<group>"; };
 		20003003 /* BookTableOfContentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookTableOfContentsView.swift; sourceTree = "<group>"; };
 		20003004 /* BookChapterReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookChapterReaderView.swift; sourceTree = "<group>"; };
@@ -462,6 +467,7 @@
 		20001201 /* AffirmationPackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationPackPickerView.swift; sourceTree = "<group>"; };
 		20001202 /* AffirmationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSettingsView.swift; sourceTree = "<group>"; };
 		20001203 /* BookLanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLanguageManager.swift; sourceTree = "<group>"; };
+		20001204 /* TextToSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextToSpeechService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -540,6 +546,7 @@
 				20000007 /* Types.swift */,
 				20003000 /* BookData.swift */,
 				20003001 /* BookCatalog.swift */,
+				20003100 /* SensaEmoji.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -586,6 +593,7 @@
 				20000909 /* GratitudeSharingService.swift */,
 					20001200 /* AffirmationSettingsManager.swift */,
 				20001203 /* BookLanguageManager.swift */,
+				20001204 /* TextToSpeechService.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
 				20001001 /* ThreeCirclesAPIClient.swift */,
 			);
@@ -834,6 +842,7 @@
 				20000097 /* AddictionManagementView.swift */,
 				20000098 /* AppearanceSettingsView.swift */,
 				20000099 /* DebugFlagsView.swift */,
+				20000990 /* DebugEmotionEmojiView.swift */,
 				20000100 /* NotificationSettingsView.swift */,
 				20000101 /* PrivacySettingsView.swift */,
 				20000102 /* ProfileEditView.swift */,
@@ -1192,6 +1201,7 @@
 				10000097 /* AddictionManagementView.swift in Sources */,
 				10000098 /* AppearanceSettingsView.swift in Sources */,
 				10000099 /* DebugFlagsView.swift in Sources */,
+				10000990 /* DebugEmotionEmojiView.swift in Sources */,
 				10000100 /* NotificationSettingsView.swift in Sources */,
 				10000101 /* PrivacySettingsView.swift in Sources */,
 				10000102 /* ProfileEditView.swift in Sources */,
@@ -1253,6 +1263,7 @@
 				10000960 /* AffirmationTodayCard.swift in Sources */,
 				10003000 /* BookData.swift in Sources */,
 				10003001 /* BookCatalog.swift in Sources */,
+				10003100 /* SensaEmoji.swift in Sources */,
 				10003002 /* BookLibraryView.swift in Sources */,
 				10003003 /* BookTableOfContentsView.swift in Sources */,
 				10003004 /* BookChapterReaderView.swift in Sources */,
@@ -1260,6 +1271,7 @@
 				10001201 /* AffirmationPackPickerView.swift in Sources */,
 				10001202 /* AffirmationSettingsView.swift in Sources */,
 				10001203 /* BookLanguageManager.swift in Sources */,
+				10001204 /* TextToSpeechService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

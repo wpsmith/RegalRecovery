@@ -2,13 +2,14 @@ import SwiftData
 import SwiftUI
 
 enum ContentSection: String, CaseIterable {
+    case resources = "Resources"
+    case library = "Library"
     case affirmations = "Affirmations"
     case devotions = "Devotions"
-    case resources = "Resources"
 }
 
 struct ContentTabView: View {
-    @State private var selectedSection: ContentSection = .affirmations
+    @State private var selectedSection: ContentSection = .resources
     @Query private var favorites: [RRAffirmationFavorite]
 
     private func isFlagEnabled(_ key: String) -> Bool {
@@ -18,9 +19,10 @@ struct ContentTabView: View {
     private var enabledSections: [ContentSection] {
         ContentSection.allCases.filter { section in
             switch section {
+            case .resources: return true
+            case .library: return true
             case .affirmations: return isFlagEnabled("activity.affirmations")
             case .devotions: return isFlagEnabled("activity.devotionals")
-            case .resources: return isFlagEnabled("feature.content-resources")
             }
         }
     }
@@ -72,12 +74,14 @@ struct ContentTabView: View {
                     ScrollView {
                         VStack(spacing: 24) {
                             switch selectedSection {
+                            case .resources:
+                                resourcesContent
+                            case .library:
+                                libraryContent
                             case .affirmations:
                                 affirmationsContent
                             case .devotions:
                                 devotionalContent
-                            case .resources:
-                                resourcesContent
                             }
                         }
                         .padding()
@@ -286,11 +290,6 @@ struct ContentTabView: View {
             }
             .buttonStyle(.plain)
             Divider().padding(.leading, 52)
-            NavigationLink(destination: BookLibraryView()) {
-                resourceRow(icon: "books.vertical.fill", iconColor: .rrPrimary, title: "Library", subtitle: "\(BookCatalog.allBooks.count) books available")
-            }
-            .buttonStyle(.plain)
-            Divider().padding(.leading, 52)
             NavigationLink(destination: resourceComingSoonView(icon: "film", title: "Videos Coming Soon", description: "Video content is being prepared. Check back soon.")) {
                 resourceRow(icon: "play.rectangle.fill", iconColor: .blue, title: "Videos", subtitle: "12 recovery talks and testimonies")
             }
@@ -316,6 +315,12 @@ struct ContentTabView: View {
         .background(Color.rrSurface)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 2)
+    }
+
+    // MARK: - Library
+
+    private var libraryContent: some View {
+        BookLibraryView()
     }
 
     private func resourceComingSoonView(icon: String, title: String, description: String) -> some View {

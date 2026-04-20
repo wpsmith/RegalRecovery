@@ -408,6 +408,127 @@ enum PrimaryEmotion: String, CaseIterable {
     }
 }
 
+// MARK: - Mood Check-In
+
+enum MoodPrimary: String, CaseIterable, Identifiable {
+    case love = "Love"
+    case joy = "Joy"
+    case surprise = "Surprise"
+    case anger = "Anger"
+    case sadness = "Sadness"
+    case fear = "Fear"
+
+    var id: String { rawValue }
+
+    var score: Int {
+        switch self {
+        case .love: return 9
+        case .joy: return 10
+        case .surprise: return 6
+        case .anger: return 3
+        case .sadness: return 2
+        case .fear: return 2
+        }
+    }
+
+    var emoji: String {
+        switch self {
+        case .love: return "❤️"
+        case .joy: return "😊"
+        case .surprise: return "😮"
+        case .anger: return "😠"
+        case .sadness: return "😢"
+        case .fear: return "😨"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .love: return Color(red: 0.831, green: 0.220, blue: 0.353)
+        case .joy: return Color(red: 0.976, green: 0.733, blue: 0.176)
+        case .surprise: return Color(red: 0.482, green: 0.620, blue: 0.239)
+        case .anger: return Color(red: 0.831, green: 0.243, blue: 0.196)
+        case .sadness: return Color(red: 0.247, green: 0.459, blue: 0.702)
+        case .fear: return Color(red: 0.506, green: 0.286, blue: 0.635)
+        }
+    }
+
+    var secondaryEmotions: [SecondaryEmotion] {
+        switch self {
+        case .love:
+            return [
+                SecondaryEmotion(name: "Affection", emoji: "🥰", description: "Warmth and caring toward someone", tertiaryEmotions: ["Adoration", "Fondness", "Liking", "Attractiveness", "Caring", "Tenderness", "Compassion", "Sentimentality"]),
+                SecondaryEmotion(name: "Lust", emoji: "🔥", description: "Intense physical or emotional desire", tertiaryEmotions: ["Desire", "Passion", "Infatuation"]),
+                SecondaryEmotion(name: "Longing", emoji: "💭", description: "Deep yearning for connection or closeness", tertiaryEmotions: ["Longing"]),
+            ]
+        case .joy:
+            return [
+                SecondaryEmotion(name: "Cheerfulness", emoji: "😄", description: "Light-hearted happiness and good spirits", tertiaryEmotions: ["Amusement", "Bliss", "Gaiety", "Glee", "Jolliness", "Joviality", "Delight", "Enjoyment", "Gladness", "Happiness", "Jubilation", "Elation", "Satisfaction", "Ecstasy", "Euphoria"]),
+                SecondaryEmotion(name: "Zest", emoji: "⚡", description: "Energetic enthusiasm and excitement", tertiaryEmotions: ["Enthusiasm", "Zeal", "Excitement", "Thrill", "Exhilaration"]),
+                SecondaryEmotion(name: "Contentment", emoji: "😌", description: "Quiet satisfaction with how things are", tertiaryEmotions: ["Pleasure", "Contentment"]),
+                SecondaryEmotion(name: "Pride", emoji: "🦁", description: "Satisfaction from achievement or self-worth", tertiaryEmotions: ["Triumph", "Pride"]),
+                SecondaryEmotion(name: "Optimism", emoji: "🌅", description: "Hopefulness about what's ahead", tertiaryEmotions: ["Eagerness", "Hope", "Optimism"]),
+                SecondaryEmotion(name: "Enthrallment", emoji: "✨", description: "Captivated and deeply absorbed", tertiaryEmotions: ["Enthrallment", "Rapture"]),
+                SecondaryEmotion(name: "Relief", emoji: "😮‍💨", description: "Tension releasing after worry or stress", tertiaryEmotions: ["Relief"]),
+            ]
+        case .surprise:
+            return [
+                SecondaryEmotion(name: "Surprise", emoji: "😲", description: "Unexpected event catching you off guard", tertiaryEmotions: ["Amazement", "Astonishment"]),
+            ]
+        case .anger:
+            return [
+                SecondaryEmotion(name: "Irritation", emoji: "😤", description: "Low-level annoyance building under the surface", tertiaryEmotions: ["Aggravation", "Agitation", "Annoyance", "Grouchiness", "Grumpiness"]),
+                SecondaryEmotion(name: "Exasperation", emoji: "🤦", description: "Frustrated beyond patience", tertiaryEmotions: ["Exasperation", "Frustration"]),
+                SecondaryEmotion(name: "Rage", emoji: "🤬", description: "Intense, overwhelming anger", tertiaryEmotions: ["Anger", "Hostility", "Ferocity", "Bitterness", "Outrage", "Fury", "Wrath", "Loathing", "Scorn", "Spite", "Vengefulness", "Dislike", "Resentment"]),
+                SecondaryEmotion(name: "Disgust", emoji: "🤢", description: "Strong aversion or moral repulsion", tertiaryEmotions: ["Disgust", "Revulsion", "Contempt"]),
+                SecondaryEmotion(name: "Envy", emoji: "💚", description: "Wanting what someone else has", tertiaryEmotions: ["Envy", "Jealousy"]),
+                SecondaryEmotion(name: "Torment", emoji: "😖", description: "Agonizing internal conflict or suffering", tertiaryEmotions: ["Torment"]),
+            ]
+        case .sadness:
+            return [
+                SecondaryEmotion(name: "Suffering", emoji: "💔", description: "Deep emotional or physical pain", tertiaryEmotions: ["Agony", "Anguish", "Hurt"]),
+                SecondaryEmotion(name: "Sadness", emoji: "😞", description: "General heaviness and low mood", tertiaryEmotions: ["Depression", "Despair", "Gloom", "Glumness", "Unhappiness", "Grief", "Sorrow", "Woe", "Misery", "Melancholy"]),
+                SecondaryEmotion(name: "Disappointment", emoji: "😔", description: "Unmet expectations or letdown", tertiaryEmotions: ["Dismay", "Displeasure", "Disappointment"]),
+                SecondaryEmotion(name: "Shame", emoji: "😳", description: "Feeling exposed, flawed, or unworthy", tertiaryEmotions: ["Guilt", "Shame", "Regret", "Remorse"]),
+                SecondaryEmotion(name: "Neglect", emoji: "🫥", description: "Feeling unseen, dismissed, or abandoned", tertiaryEmotions: ["Alienation", "Defeatism", "Dejection", "Embarrassment", "Homesickness", "Humiliation", "Insecurity", "Isolation", "Insult", "Loneliness", "Rejection"]),
+                SecondaryEmotion(name: "Sympathy", emoji: "🫂", description: "Feeling sorrow for another's pain", tertiaryEmotions: ["Pity", "Sympathy"]),
+            ]
+        case .fear:
+            return [
+                SecondaryEmotion(name: "Horror", emoji: "😱", description: "Intense shock or dread from perceived danger", tertiaryEmotions: ["Alarm", "Shock", "Fright", "Horror", "Terror", "Panic", "Hysteria", "Mortification"]),
+                SecondaryEmotion(name: "Nervousness", emoji: "😰", description: "Uneasy anticipation of something bad", tertiaryEmotions: ["Anxiety", "Apprehension", "Distress", "Dread", "Nervousness", "Tenseness", "Uneasiness", "Worry"]),
+            ]
+        }
+    }
+}
+
+struct SecondaryEmotion: Identifiable {
+    let name: String
+    let emoji: String
+    let description: String
+    let tertiaryEmotions: [String]
+
+    var id: String { name }
+}
+
+enum MoodCheckInStep: Int, CaseIterable {
+    case primaryMood = 0
+    case secondaryEmotion
+    case tertiaryEmotion
+    case intensityAndContext
+    case journalPrompt
+
+    var title: String {
+        switch self {
+        case .primaryMood: return "How are you feeling?"
+        case .secondaryEmotion: return "More specifically..."
+        case .tertiaryEmotion: return "Even more precisely..."
+        case .intensityAndContext: return "Tell me more"
+        case .journalPrompt: return "Reflect"
+        }
+    }
+}
+
 // MARK: - Time Journal
 
 struct TimeBlock: Identifiable {

@@ -12,18 +12,6 @@ struct EmotionalJournalView: View {
     @State private var intensity: Double = 5
     @State private var activity = ""
 
-    private func colorFromString(_ colorName: String) -> Color {
-        switch colorName.lowercased() {
-        case "purple": return .purple
-        case "yellow": return .yellow
-        case "blue": return .blue
-        case "red": return .red
-        case "green": return .green
-        case "orange": return .orange
-        default: return .gray
-        }
-    }
-
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -61,15 +49,13 @@ struct EmotionalJournalView: View {
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 16), count: 3), spacing: 16) {
                         ForEach(PrimaryEmotion.allCases, id: \.rawValue) { emotion in
                             VStack(spacing: 6) {
-                                Circle()
-                                    .fill(emotion.color.opacity(expandedEmotion == emotion ? 1.0 : 0.6))
-                                    .frame(width: 56, height: 56)
-                                    .overlay {
-                                        Text(emotion.rawValue.prefix(3).uppercased())
-                                            .font(RRFont.caption2)
-                                            .fontWeight(.bold)
-                                            .foregroundStyle(.white)
-                                    }
+                                SensaEmoji.forPrimaryEmotion(emotion).image(size: 56)
+                                    .opacity(expandedEmotion == emotion ? 1.0 : 0.6)
+                                    .background(
+                                        Circle()
+                                            .fill(emotion.color.opacity(expandedEmotion == emotion ? 0.2 : 0.1))
+                                            .frame(width: 64, height: 64)
+                                    )
                                     .onTapGesture {
                                         withAnimation {
                                             expandedEmotion = expandedEmotion == emotion ? nil : emotion
@@ -91,19 +77,24 @@ struct EmotionalJournalView: View {
                                 .font(RRFont.subheadline)
                                 .foregroundStyle(Color.rrTextSecondary)
 
-                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80), spacing: 8)], spacing: 8) {
+                            FlowLayout(spacing: 8) {
                                 ForEach(expanded.secondaryEmotions, id: \.self) { secondary in
                                     Button {
                                         selectedSecondary = secondary
                                     } label: {
-                                        Text(secondary)
-                                            .font(RRFont.caption)
-                                            .fontWeight(.medium)
-                                            .foregroundStyle(selectedSecondary == secondary ? .white : expanded.color)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 6)
-                                            .background(selectedSecondary == secondary ? expanded.color : expanded.color.opacity(0.15))
-                                            .clipShape(Capsule())
+                                        HStack(spacing: 4) {
+                                            SensaEmoji.forSecondaryEmotion(secondary).image(size: 20)
+                                            Text(secondary)
+                                                .font(RRFont.caption)
+                                                .fontWeight(.medium)
+                                                .lineLimit(1)
+                                                .fixedSize(horizontal: true, vertical: false)
+                                        }
+                                        .foregroundStyle(selectedSecondary == secondary ? .white : expanded.color)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(selectedSecondary == secondary ? expanded.color : expanded.color.opacity(0.15))
+                                        .clipShape(Capsule())
                                     }
                                 }
                             }
@@ -165,7 +156,7 @@ struct EmotionalJournalView: View {
             ForEach(entries) { entry in
                 RRCard {
                     HStack(spacing: 12) {
-                        RRColorDot(colorFromString(entry.emotionColor), size: 14)
+                        SensaEmoji.forSecondaryEmotion(entry.emotion).image(size: 28)
 
                         VStack(alignment: .leading, spacing: 2) {
                             Text(entry.emotion)
@@ -198,48 +189,28 @@ struct EmotionalJournalView: View {
 
     private var insightsTab: some View {
         VStack(spacing: 16) {
-            RRCard {
-                HStack(spacing: 12) {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.title2)
-                        .foregroundStyle(Color.rrPrimary)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Pattern Detected")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                        Text("You feel Anxious most on Mondays")
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrText)
-                    }
-                    Spacer()
-                }
-            }
-            .padding(.horizontal)
-
-            RRCard {
-                HStack(spacing: 12) {
-                    Image(systemName: "clock.fill")
-                        .font(.title2)
-                        .foregroundStyle(.orange)
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Timing Insight")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                        Text("High intensity peaks between 8-10 PM")
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrText)
-                    }
-                    Spacer()
-                }
-            }
-            .padding(.horizontal)
+            Spacer()
+                .frame(height: 40)
+            Image(systemName: "chart.bar.fill")
+                .font(.system(size: 40))
+                .foregroundStyle(Color.rrTextSecondary.opacity(0.4))
+            Text("Insights Coming Soon")
+                .font(RRFont.title3)
+                .foregroundStyle(Color.rrTextSecondary)
+            Text("Log a few entries and we'll surface patterns in your emotional data.")
+                .font(RRFont.caption)
+                .foregroundStyle(Color.rrTextSecondary.opacity(0.7))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+            Spacer()
+                .frame(height: 40)
         }
+        .frame(maxWidth: .infinity)
     }
 
     private func submitEmotion() {
         let userId = users.first?.id ?? UUID()
         let emotionName = selectedSecondary ?? expandedEmotion?.rawValue ?? "Unknown"
-        let emotionColor = expandedEmotion?.color ?? .gray
         let colorString: String = {
             switch expandedEmotion {
             case .happy: return "yellow"

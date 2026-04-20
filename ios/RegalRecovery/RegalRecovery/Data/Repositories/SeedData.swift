@@ -224,9 +224,19 @@ enum SeedData {
     private static func seedMoodEntries(context: ModelContext, userId: UUID) {
         let moodScores = [7, 6, 7, 8, 7, 8, 7, 6, 7, 8, 8, 7, 6, 8, 9, 7, 6, 7, 8, 8, 7, 8, 7, 7, 8, 6, 7, 8, 8, 7]
         for i in 0..<30 {
+            let primaryMood: String = {
+                switch moodScores[i] {
+                case 9...10: return MoodPrimary.joy.rawValue
+                case 7...8: return MoodPrimary.joy.rawValue
+                case 5...6: return MoodPrimary.surprise.rawValue
+                case 3...4: return MoodPrimary.sadness.rawValue
+                default: return MoodPrimary.fear.rawValue
+                }
+            }()
             let mood = RRMoodEntry(
                 userId: userId,
                 date: daysAgo(29 - i, hour: 14),
+                primaryMood: primaryMood,
                 score: moodScores[i],
                 createdAt: daysAgo(29 - i, hour: 14)
             )

@@ -92,16 +92,6 @@ class RecoveryWorkViewModel {
                 activityTypeKey: nil
             ),
             WorkTileItem(
-                id: "foundation.backbone",
-                title: "Backbone",
-                icon: "shield.checkered",
-                iconColor: .rrPrimary,
-                category: .foundationTools,
-                featureFlagKey: nil,
-                implemented: false,
-                activityTypeKey: nil
-            ),
-            WorkTileItem(
                 id: "foundation.vision",
                 title: "Vision Statement",
                 icon: "eye.fill",
@@ -135,6 +125,16 @@ class RecoveryWorkViewModel {
 
         // ── Activities ──
         tiles.append(contentsOf: [
+            WorkTileItem(
+                id: "activity.backbone",
+                title: "Backbone",
+                icon: "shield.checkered",
+                iconColor: .rrPrimary,
+                category: .activities,
+                featureFlagKey: nil,
+                implemented: false,
+                activityTypeKey: nil
+            ),
             WorkTileItem(
                 id: "activity.sobriety-commitment",
                 title: "Sobriety Commitment",
@@ -176,6 +176,16 @@ class RecoveryWorkViewModel {
                 activityTypeKey: ActivityType.journal.rawValue
             ),
             WorkTileItem(
+                id: "activity.emotional-journal",
+                title: "Emotional Journal",
+                icon: "heart.text.square.fill",
+                iconColor: .pink,
+                category: .activities,
+                featureFlagKey: "activity.emotional-journal",
+                implemented: true,
+                activityTypeKey: "emotionalJournal"
+            ),
+            WorkTileItem(
                 id: "activity.faster-scale",
                 title: "FASTER Scale",
                 icon: "gauge.with.needle",
@@ -214,16 +224,6 @@ class RecoveryWorkViewModel {
                 featureFlagKey: "activity.fitnap",
                 implemented: true,
                 activityTypeKey: "fitnap"
-            ),
-            WorkTileItem(
-                id: "activity.spouse-check-ins",
-                title: "Spouse Check-ins",
-                icon: "person.fill.checkmark",
-                iconColor: .rrPrimary,
-                category: .activities,
-                featureFlagKey: "activity.spouse-check-ins",
-                implemented: true,
-                activityTypeKey: "personCheckInSpouse"
             ),
             WorkTileItem(
                 id: "activity.meetings",
@@ -553,12 +553,6 @@ class RecoveryWorkViewModel {
             }
             return .none
 
-        case "personCheckInSpouse":
-            if spouseCheckIns.first(where: { cal.isDateInToday($0.date) }) != nil {
-                return .hasEntries("1")
-            }
-            return .none
-
         case ActivityType.meetingsAttended.rawValue:
             let todayCount = meetingLogs.filter { cal.isDateInToday($0.date) }.count
             if todayCount > 0 { return .hasEntries("\(todayCount)") }
@@ -601,6 +595,9 @@ class RecoveryWorkViewModel {
         case ActivityType.prayer.rawValue:
             let todayPrayers = prayerLogs.filter { cal.isDateInToday($0.date) }.count
             if todayPrayers > 0 { return .hasEntries("\(todayPrayers)") }
+            return .none
+
+        case "emotionalJournal":
             return .none
 
         case ActivityType.postMortem.rawValue:

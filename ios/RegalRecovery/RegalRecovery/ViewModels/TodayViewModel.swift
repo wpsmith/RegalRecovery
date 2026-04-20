@@ -55,6 +55,8 @@ class TodayViewModel {
     var morningCommitmentDone: Bool = false
     var recoveryWorkCards: [RecoveryWorkCard] = []
     var hasPlan: Bool = false
+    /// Activity types present in today's plan (for gating standalone cards).
+    var planActivityTypes: Set<String> = []
     var userName: String = ""
 
     // Sobriety
@@ -145,10 +147,12 @@ class TodayViewModel {
               let items = plan.items else {
             hasPlan = false
             planItems = []
+            planActivityTypes = []
             return
         }
 
         hasPlan = true
+        planActivityTypes = Set(items.filter(\.isEnabled).map(\.activityType))
         let calendar = Calendar.current
         let todayWeekday = calendar.component(.weekday, from: Date())
         let now = Date()
@@ -338,8 +342,12 @@ class TodayViewModel {
         )
         if let results = try? context.fetch(moodDesc) {
             for m in results {
-                let emoji = m.score >= 7 ? "\u{1F60A}" : m.score >= 5 ? "\u{1F610}" : "\u{1F61F}"
-                all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: now), icon: "face.smiling", iconColor: .yellow)))
+                let detail: String = {
+                    var parts = [m.primaryMood]
+                    if let secondary = m.secondaryEmotion { parts.append(secondary) }
+                    return parts.joined(separator: " · ")
+                }()
+                all.append((m.date, RecentActivity(title: "Mood Check-In", detail: detail, time: fmt.localizedString(for: m.date, relativeTo: now), icon: "face.smiling", iconColor: .yellow)))
             }
         }
 

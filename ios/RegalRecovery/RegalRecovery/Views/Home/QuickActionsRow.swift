@@ -3,14 +3,6 @@ import SwiftUI
 struct QuickActionsRow: View {
     @State private var showFASTER = false
 
-    private let actions: [(title: String, icon: String)] = [
-        ("Log Urge", "exclamationmark.triangle.fill"),
-        ("Journal", "note.text"),
-        ("Prayer", "hands.clap.fill"),
-        ("Mood", "face.smiling"),
-        ("Gratitude", "leaf.fill"),
-    ]
-
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             RRSectionHeader(title: "Quick Actions")
@@ -39,8 +31,28 @@ struct QuickActionsRow: View {
                         .clipShape(Capsule())
                     }
 
-                    ForEach(actions, id: \.title) { action in
-                        RRQuickAction(title: action.title, icon: action.icon) {}
+                    NavigationLink { UrgeLogView() } label: {
+                        quickActionLabel("Log Urge", icon: "exclamationmark.triangle.fill")
+                    }
+
+                    NavigationLink { JournalView() } label: {
+                        quickActionLabel("Journal", icon: "note.text")
+                    }
+
+                    NavigationLink { EmotionalJournalView() } label: {
+                        quickActionLabel("EmoJournal", icon: "heart.text.square.fill")
+                    }
+
+                    NavigationLink { PrayerLogView() } label: {
+                        quickActionLabel("Prayer", icon: "hands.clap.fill")
+                    }
+
+                    NavigationLink { MoodRatingView() } label: {
+                        quickActionLabel("Mood", icon: "face.smiling")
+                    }
+
+                    NavigationLink { GratitudeTabView() } label: {
+                        quickActionLabel("Gratitude", icon: "leaf.fill")
                     }
                 }
             }
@@ -49,10 +61,27 @@ struct QuickActionsRow: View {
             FASTERCheckInFlowView()
         }
     }
+
+    private func quickActionLabel(_ title: String, icon: String) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.caption)
+            Text(title)
+                .font(RRFont.caption)
+                .fontWeight(.medium)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .foregroundStyle(Color.rrPrimary)
+        .background(Color.rrPrimary.opacity(0.1))
+        .clipShape(Capsule())
+    }
 }
 
 #Preview {
-    QuickActionsRow()
-        .padding()
-        .background(Color.rrBackground)
+    NavigationStack {
+        QuickActionsRow()
+            .padding()
+            .background(Color.rrBackground)
+    }
 }

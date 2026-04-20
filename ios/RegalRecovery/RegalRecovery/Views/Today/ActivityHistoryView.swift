@@ -29,8 +29,12 @@ struct ActivityHistoryView: View {
             all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: color)))
         }
         for m in moodEntries {
-            let emoji = m.score >= 7 ? "\u{1F60A}" : m.score >= 5 ? "\u{1F610}" : "\u{1F61F}"
-            all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: ActivityType.mood.icon, iconColor: ActivityType.mood.iconColor)))
+            let detail: String = {
+                var parts = [m.primaryMood]
+                if let secondary = m.secondaryEmotion { parts.append(secondary) }
+                return parts.joined(separator: " · ")
+            }()
+            all.append((m.date, RecentActivity(title: "Mood Check-In", detail: detail, time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: ActivityType.mood.icon, iconColor: ActivityType.mood.iconColor)))
         }
         for p in prayerLogs {
             all.append((p.date, RecentActivity(title: "Prayer", detail: p.prayerType, time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: ActivityType.prayer.icon, iconColor: ActivityType.prayer.iconColor)))

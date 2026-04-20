@@ -66,8 +66,12 @@ struct HomeView: View {
             all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: c.type == "morning" ? .rrSecondary : .rrPrimary)))
         }
         for m in moodEntries.prefix(3) {
-            let emoji = m.score >= 7 ? "😊" : m.score >= 5 ? "😐" : "😟"
-            all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: "face.smiling", iconColor: .yellow)))
+            let detail: String = {
+                var parts = [m.primaryMood]
+                if let secondary = m.secondaryEmotion { parts.append(secondary) }
+                return parts.joined(separator: " · ")
+            }()
+            all.append((m.date, RecentActivity(title: "Mood Check-In", detail: detail, time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: "face.smiling", iconColor: .yellow)))
         }
         for p in prayerLogs.prefix(3) {
             all.append((p.date, RecentActivity(title: "Prayer", detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: "hands.and.sparkles.fill", iconColor: .rrPrimary)))

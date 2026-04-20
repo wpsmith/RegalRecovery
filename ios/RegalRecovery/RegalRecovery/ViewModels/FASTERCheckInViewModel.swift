@@ -85,6 +85,21 @@ class FASTERCheckInViewModel {
         currentStep = .indicators
     }
 
+    var isFirstStep: Bool {
+        currentStep == .mood
+    }
+
+    func goBack() {
+        switch currentStep {
+        case .mood:
+            break
+        case .indicators:
+            currentStep = .mood
+        case .results:
+            currentStep = .indicators
+        }
+    }
+
     // MARK: - Persistence (S-09)
 
     func save(context: ModelContext, userId: UUID) {

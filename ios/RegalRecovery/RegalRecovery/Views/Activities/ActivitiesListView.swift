@@ -75,16 +75,9 @@ struct ActivitiesListView: View {
     private var moodSubtitle: String {
         if let latest = moodEntries.first {
             let dayLabel = Calendar.current.isDateInToday(latest.date) ? "Today" : relativeDay(latest.date)
-            let emoji: String = {
-                switch latest.score {
-                case 1...2: return "\u{1F622}"
-                case 3...4: return "\u{1F61F}"
-                case 5...6: return "\u{1F610}"
-                case 7...8: return "\u{1F60A}"
-                default: return "\u{1F604}"
-                }
-            }()
-            return "\(dayLabel), \(latest.score)/10 \(emoji)"
+            var parts = [latest.primaryMood]
+            if let secondary = latest.secondaryEmotion { parts.append(secondary) }
+            return "\(dayLabel), \(parts.joined(separator: " · "))"
         }
         return "No entries"
     }

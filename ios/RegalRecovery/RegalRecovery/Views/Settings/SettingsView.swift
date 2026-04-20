@@ -192,6 +192,17 @@ struct SettingsView: View {
                                     .foregroundStyle(Color.rrText)
                             }
                         }
+
+                        NavigationLink {
+                            DebugEmotionEmojiView()
+                        } label: {
+                            HStack {
+                                Image(systemName: "heart.text.square.fill")
+                                    .foregroundStyle(.orange)
+                                Text("Emotions & Emojis")
+                                    .foregroundStyle(Color.rrText)
+                            }
+                        }
                     }
                 } header: {
                     sectionHeader("Debug")

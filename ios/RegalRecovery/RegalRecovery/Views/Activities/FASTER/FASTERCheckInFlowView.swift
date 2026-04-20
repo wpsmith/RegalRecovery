@@ -8,17 +8,37 @@ struct FASTERCheckInFlowView: View {
     @State private var viewModel = FASTERCheckInViewModel()
 
     var body: some View {
-        Group {
-            switch viewModel.currentStep {
-            case .mood:
-                FASTERMoodPromptView { score in
-                    viewModel.selectMood(score)
+        NavigationStack {
+            Group {
+                switch viewModel.currentStep {
+                case .mood:
+                    FASTERMoodPromptView { score in
+                        viewModel.selectMood(score)
+                    }
+                case .indicators:
+                    FASTERIndicatorSelectionView(viewModel: viewModel)
+                case .results:
+                    FASTERResultsView(viewModel: viewModel) {
+                        saveAndDismiss()
+                    }
                 }
-            case .indicators:
-                FASTERIndicatorSelectionView(viewModel: viewModel)
-            case .results:
-                FASTERResultsView(viewModel: viewModel) {
-                    saveAndDismiss()
+            }
+            .navigationBarBackButtonHidden(true)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        if viewModel.isFirstStep {
+                            dismiss()
+                        } else {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.goBack()
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 17, weight: .semibold))
+                            .foregroundStyle(Color.rrText)
+                    }
                 }
             }
         }

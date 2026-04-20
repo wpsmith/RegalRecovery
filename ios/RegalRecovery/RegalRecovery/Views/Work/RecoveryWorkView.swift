@@ -25,6 +25,7 @@ struct RecoveryWorkView: View {
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
 
     @State private var showUrgeSurfingTimer = false
+    @State private var searchText = ""
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -44,6 +45,7 @@ struct RecoveryWorkView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 100)
             }
+            .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search activities")
             .background(Color.rrBackground)
             .navigationTitle("Recovery Work")
         }
@@ -79,8 +81,6 @@ struct RecoveryWorkView: View {
             return spouseCheckIns.filter { $0.framework == "FANOS" }.count
         case "fitnap":
             return spouseCheckIns.filter { $0.framework == "FITNAP" }.count
-        case "personCheckInSpouse":
-            return spouseCheckIns.count
         case ActivityType.meetingsAttended.rawValue:
             return meetingLogs.count
         case ActivityType.stepWork.rawValue:
@@ -107,7 +107,12 @@ struct RecoveryWorkView: View {
     }
 
     private func sortedTiles(for category: WorkTileCategory) -> [WorkTileItem] {
-        let tiles = RecoveryWorkViewModel.allTiles.filter { $0.category == category }
+        var tiles = RecoveryWorkViewModel.allTiles.filter { $0.category == category }
+
+        // Apply search filter if searchText is non-empty
+        if !searchText.isEmpty {
+            tiles = tiles.filter { $0.title.localizedCaseInsensitiveContains(searchText) }
+        }
 
         if category == .activities && isAfterOnboardingPeriod {
             // Sort by usage descending, then alphabetical for ties
@@ -234,8 +239,8 @@ struct RecoveryWorkView: View {
             FANOSCheckInView()
         case "fitnap":
             FITNAPCheckInView()
-        case "personCheckInSpouse":
-            SpouseCheckInPrepView()
+        case "emotionalJournal":
+            EmotionalJournalView()
         case ActivityType.weeklyGoals.rawValue:
             WeeklyGoalsView()
         case ActivityType.stepWork.rawValue:

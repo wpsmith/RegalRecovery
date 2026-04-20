@@ -347,22 +347,41 @@ struct ActivityDetailView: View {
         let item = fetchModel(RRMoodEntry.self, id: id)
         return Group {
             if let m = item {
-                let emoji: String = {
-                    switch m.score {
-                    case 1...2: return "\u{1F622}"
-                    case 3...4: return "\u{1F61F}"
-                    case 5...6: return "\u{1F610}"
-                    case 7...8: return "\u{1F60A}"
-                    default: return "\u{1F604}"
-                    }
-                }()
+                let mood = MoodPrimary(rawValue: m.primaryMood) ?? .surprise
                 RRCard {
                     VStack(spacing: 16) {
-                        Text(emoji)
-                            .font(.system(size: 64))
-                        Text("\(m.score)/10")
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                            .foregroundStyle(Color.rrText)
+                        SensaEmoji.forMoodPrimary(mood).image(size: 64)
+                        Text(mood.rawValue)
+                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .foregroundStyle(mood.color)
+                        if let secondary = m.secondaryEmotion {
+                            Text(secondary)
+                                .font(RRFont.body)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        }
+                        if let intensity = m.intensity {
+                            detailRow("Intensity", value: "\(intensity)/10")
+                        }
+                        if let urge = m.urgeToActOut, urge > 0 {
+                            detailRow("Urge to Act Out", value: "\(urge)/10")
+                        }
+                        if !m.contextTags.isEmpty {
+                            detailRow("Context", value: m.contextTags.joined(separator: ", "))
+                        }
+                        if let response = m.journalResponse, !response.isEmpty {
+                            VStack(alignment: .leading, spacing: 4) {
+                                if let prompt = m.journalPrompt {
+                                    Text(prompt)
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                        .italic()
+                                }
+                                Text(response)
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
                         detailRow("Date", value: m.date.formatted(date: .long, time: .shortened))
                     }
                 }

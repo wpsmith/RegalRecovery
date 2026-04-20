@@ -639,7 +639,25 @@ final class RRMoodEntry {
     @Attribute(.unique) var id: UUID
     var userId: UUID
     var date: Date
-    var score: Int  // 1-10
+
+    // Layer 1: Primary mood (required) — maps to MoodPrimary enum rawValue
+    var primaryMood: String
+
+    // Layer 2: Secondary emotion (optional)
+    var secondaryEmotion: String?
+
+    // Layer 3: Intensity, urge, context tags (optional)
+    var intensity: Int?
+    var urgeToActOut: Int?
+    var contextTagsJSON: String?
+
+    // Layer 4: Journal prompt response (optional)
+    var journalPrompt: String?
+    var journalResponse: String?
+
+    // Kept for backward compat with score-based consumers
+    var score: Int
+
     var createdAt: Date
     var modifiedAt: Date
 
@@ -647,16 +665,39 @@ final class RRMoodEntry {
         id: UUID = UUID(),
         userId: UUID,
         date: Date,
-        score: Int,
+        primaryMood: String,
+        secondaryEmotion: String? = nil,
+        intensity: Int? = nil,
+        urgeToActOut: Int? = nil,
+        contextTagsJSON: String? = nil,
+        journalPrompt: String? = nil,
+        journalResponse: String? = nil,
+        score: Int = 5,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
         self.id = id
         self.userId = userId
         self.date = date
+        self.primaryMood = primaryMood
+        self.secondaryEmotion = secondaryEmotion
+        self.intensity = intensity
+        self.urgeToActOut = urgeToActOut
+        self.contextTagsJSON = contextTagsJSON
+        self.journalPrompt = journalPrompt
+        self.journalResponse = journalResponse
         self.score = score
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
+    }
+
+    var contextTags: [String] {
+        guard let json = contextTagsJSON,
+              let data = json.data(using: .utf8),
+              let tags = try? JSONDecoder().decode([String].self, from: data) else {
+            return []
+        }
+        return tags
     }
 }
 

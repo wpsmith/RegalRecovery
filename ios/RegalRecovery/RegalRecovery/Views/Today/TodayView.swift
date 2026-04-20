@@ -123,19 +123,9 @@ struct TodayView: View {
                 HStack(spacing: 12) {
                     Button { showFASTERMood = true } label: {
                         VStack(spacing: 6) {
-                            ZStack(alignment: .topTrailing) {
-                                Image(systemName: "gauge.with.dots.needle.33percent")
-                                    .font(.title3)
-                                    .foregroundStyle(.orange)
-                                Text("NEW")
-                                    .font(.system(size: 7, weight: .bold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 3)
-                                    .padding(.vertical, 1)
-                                    .background(Color.rrSecondary)
-                                    .clipShape(Capsule())
-                                    .offset(x: 8, y: -6)
-                            }
+                            Image(systemName: "gauge.with.needle")
+                                .font(.title3)
+                                .foregroundStyle(Color.rrSuccess)
                             Text("FASTER")
                                 .font(RRFont.caption2)
                                 .foregroundStyle(Color.rrText)
@@ -147,17 +137,26 @@ struct TodayView: View {
                     }
                     .buttonStyle(.plain)
 
-                    quickActionCard(icon: "flame.fill", label: "Log Urge", color: .orange) {
-                        UrgeLogView()
-                    }
-                    quickActionCard(icon: "book.fill", label: "Journaling", color: .blue) {
+                    quickActionCard(icon: "note.text", label: "Journaling", color: .purple) {
                         JournalView()
                     }
-                    quickActionCard(icon: "hands.and.sparkles.fill", label: "Pray", color: .purple) {
+                    quickActionCard(icon: "heart.text.square.fill", label: "EmoJournal", color: .pink) {
+                        EmotionalJournalView()
+                    }
+                    quickActionCard(icon: "hands.and.sparkles.fill", label: "Pray", color: .rrSecondary) {
                         PrayerLogView()
                     }
-                    quickActionCard(icon: "phone.fill", label: "Call Someone", color: .green) {
-                        PhoneCallLogView()
+                    quickActionCard(icon: "text.quote", label: "Affirmations", color: .rrPrimary) {
+                        AffirmationDeckView(
+                            packName: ContentData.affirmationPacks[0].name,
+                            affirmations: ContentData.affirmationPacks[0].affirmations
+                        )
+                    }
+                    quickActionCard(icon: "face.smiling", label: "Mood", color: .yellow) {
+                        MoodRatingView()
+                    }
+                    quickActionCard(icon: "leaf.fill", label: "Gratitude", color: .rrSuccess) {
+                        GratitudeTabView()
                     }
                 }
             }
@@ -193,7 +192,8 @@ struct TodayView: View {
 
     @ViewBuilder
     private var timeJournalCard: some View {
-        if FeatureFlagStore.shared.isEnabled("activity.time-journal") {
+        if FeatureFlagStore.shared.isEnabled("activity.time-journal"),
+           viewModel.planActivityTypes.contains(ActivityType.timeJournal.rawValue) {
             NavigationLink {
                 TimeJournalDailyView()
             } label: {
@@ -213,7 +213,8 @@ struct TodayView: View {
 
     @ViewBuilder
     private var gratitudeWidgetCard: some View {
-        if FeatureFlagStore.shared.isEnabled("activity.gratitude") {
+        if FeatureFlagStore.shared.isEnabled("activity.gratitude"),
+           viewModel.planActivityTypes.contains(ActivityType.gratitude.rawValue) {
             GratitudeWidgetCard()
         }
     }
@@ -222,7 +223,8 @@ struct TodayView: View {
 
     @ViewBuilder
     private var affirmationCard: some View {
-        if FeatureFlagStore.shared.isEnabled("activity.affirmations") {
+        if FeatureFlagStore.shared.isEnabled("activity.affirmations"),
+           viewModel.planActivityTypes.contains(ActivityType.affirmationLog.rawValue) {
             AffirmationTodayCard()
         }
     }
