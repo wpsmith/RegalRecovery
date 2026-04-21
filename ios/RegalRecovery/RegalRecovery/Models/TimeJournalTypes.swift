@@ -26,8 +26,8 @@ enum TimeJournalMode: String, Codable, CaseIterable {
     /// Human-readable name for display.
     var displayName: String {
         switch self {
-        case .t30: return "T30 (30-min)"
-        case .t60: return "T60 (60-min)"
+        case .t30: return String(localized: "T30 (30-min)")
+        case .t60: return String(localized: "T60 (60-min)")
         }
     }
 
@@ -101,11 +101,11 @@ enum TimeJournalSlotStatus: String, Codable {
     /// Accessibility label for VoiceOver.
     var accessibilityLabel: String {
         switch self {
-        case .empty: return "Empty slot"
-        case .filled: return "Filled slot"
-        case .retroactive: return "Retroactively filled slot"
-        case .autoFilled: return "Auto-filled slot"
-        case .flagged: return "Flagged slot"
+        case .empty: return String(localized: "Empty slot")
+        case .filled: return String(localized: "Filled slot")
+        case .retroactive: return String(localized: "Retroactively filled slot")
+        case .autoFilled: return String(localized: "Auto-filled slot")
+        case .flagged: return String(localized: "Flagged slot")
         }
     }
 }
@@ -121,9 +121,9 @@ enum TimeJournalDayStatus: String {
     /// Human-readable label.
     var label: String {
         switch self {
-        case .inProgress: return "In Progress"
-        case .overdue: return "Overdue"
-        case .completed: return "Completed"
+        case .inProgress: return String(localized: "In Progress")
+        case .overdue: return String(localized: "Overdue")
+        case .completed: return String(localized: "Completed")
         }
     }
 
@@ -255,32 +255,32 @@ struct EmotionCatalog {
     }
 
     static let categories: [Category] = [
-        Category(name: "Happy", color: .yellow, emotions: [
-            "Joyful", "Grateful", "Content", "Peaceful", "Hopeful", "Proud", "Relieved", "Playful",
+        Category(name: String(localized: "Happy"), color: .yellow, emotions: [
+            String(localized: "Joyful"), String(localized: "Grateful"), String(localized: "Content"), String(localized: "Peaceful"), String(localized: "Hopeful"), String(localized: "Proud"), String(localized: "Relieved"), String(localized: "Playful"),
         ]),
-        Category(name: "Sad", color: .blue, emotions: [
-            "Lonely", "Grieving", "Disappointed", "Hopeless", "Ashamed", "Empty", "Melancholic", "Homesick",
+        Category(name: String(localized: "Sad"), color: .blue, emotions: [
+            String(localized: "Lonely"), String(localized: "Grieving"), String(localized: "Disappointed"), String(localized: "Hopeless"), String(localized: "Ashamed"), String(localized: "Empty"), String(localized: "Melancholic"), String(localized: "Homesick"),
         ]),
-        Category(name: "Angry", color: .red, emotions: [
-            "Frustrated", "Resentful", "Irritated", "Bitter", "Jealous", "Betrayed", "Enraged", "Disgusted",
+        Category(name: String(localized: "Angry"), color: .red, emotions: [
+            String(localized: "Frustrated"), String(localized: "Resentful"), String(localized: "Irritated"), String(localized: "Bitter"), String(localized: "Jealous"), String(localized: "Betrayed"), String(localized: "Enraged"), String(localized: "Disgusted"),
         ]),
-        Category(name: "Fearful", color: .purple, emotions: [
-            "Anxious", "Insecure", "Overwhelmed", "Vulnerable", "Panicked", "Worried", "Terrified", "Dread",
+        Category(name: String(localized: "Fearful"), color: .purple, emotions: [
+            String(localized: "Anxious"), String(localized: "Insecure"), String(localized: "Overwhelmed"), String(localized: "Vulnerable"), String(localized: "Panicked"), String(localized: "Worried"), String(localized: "Terrified"), String(localized: "Dread"),
         ]),
-        Category(name: "Shame", color: Color(red: 0.55, green: 0.27, blue: 0.07), emotions: [
-            "Guilty", "Humiliated", "Embarrassed", "Unworthy", "Exposed", "Self-loathing",
+        Category(name: String(localized: "Shame"), color: Color(red: 0.55, green: 0.27, blue: 0.07), emotions: [
+            String(localized: "Guilty"), String(localized: "Humiliated"), String(localized: "Embarrassed"), String(localized: "Unworthy"), String(localized: "Exposed"), String(localized: "Self-loathing"),
         ]),
-        Category(name: "The Three I's", color: .rrDestructive, emotions: [
-            "Insignificant", "Incompetent", "Impotent",
+        Category(name: String(localized: "The Three I's"), color: .rrDestructive, emotions: [
+            String(localized: "Insignificant"), String(localized: "Incompetent"), String(localized: "Impotent"),
         ]),
-        Category(name: "Numb", color: .gray, emotions: [
-            "Disconnected", "Flat", "Apathetic", "Foggy", "Exhausted", "Dissociated",
+        Category(name: String(localized: "Numb"), color: .gray, emotions: [
+            String(localized: "Disconnected"), String(localized: "Flat"), String(localized: "Apathetic"), String(localized: "Foggy"), String(localized: "Exhausted"), String(localized: "Dissociated"),
         ]),
-        Category(name: "Surprise", color: .orange, emotions: [
-            "Shocked", "Confused", "Amazed", "Startled", "Curious",
+        Category(name: String(localized: "Surprise"), color: .orange, emotions: [
+            String(localized: "Shocked"), String(localized: "Confused"), String(localized: "Amazed"), String(localized: "Startled"), String(localized: "Curious"),
         ]),
-        Category(name: "Connected", color: .rrSuccess, emotions: [
-            "Loved", "Accepted", "Seen", "Understood", "Safe", "Belonging",
+        Category(name: String(localized: "Connected"), color: .rrSuccess, emotions: [
+            String(localized: "Loved"), String(localized: "Accepted"), String(localized: "Seen"), String(localized: "Understood"), String(localized: "Safe"), String(localized: "Belonging"),
         ]),
     ]
 

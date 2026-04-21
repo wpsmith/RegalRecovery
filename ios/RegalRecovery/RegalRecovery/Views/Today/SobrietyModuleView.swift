@@ -84,7 +84,8 @@ struct SobrietyModuleView: View {
     }
 
     private var soberSinceText: String {
-        "Sober since \(Self.soberSinceDateFormatter.string(from: activeSobrietyDate))"
+        let dateString = Self.soberSinceDateFormatter.string(from: activeSobrietyDate)
+        return String(localized: "Sober since \(dateString)")
     }
 
     // MARK: - Body
@@ -244,7 +245,7 @@ struct SobrietyModuleView: View {
                     onResetSobriety(target.id, resetSelectedDate)
                     showResetSheet = false
                     encouragementMessage = ContentData.sobrietyResetMessages.randomElement()
-                        ?? "You got back up. That takes courage."
+                        ?? String(localized: "You got back up. That takes courage.")
                     // Show encouragement after a brief delay so the sheet dismiss animation completes
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                         showEncouragement = true
@@ -312,7 +313,7 @@ struct SobrietyModuleView: View {
     private var addictionPillBar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                pillButton(label: "All", color: nil, isSelected: selectedAddictionID == nil) {
+                pillButton(label: String(localized: "All"), color: nil, isSelected: selectedAddictionID == nil) {
                     selectedAddictionID = nil
                     calendarDisplayedMonth = Date()
                 }
@@ -397,13 +398,16 @@ struct SobrietyModuleView: View {
         let b = breakdownComponents
         var parts: [String] = []
         if b.years > 0 {
-            parts.append("\(b.years) year\(b.years == 1 ? "" : "s")")
+            let yearLabel = b.years == 1 ? String(localized: "year") : String(localized: "years")
+            parts.append("\(b.years) \(yearLabel)")
         }
         if b.months > 0 {
-            parts.append("\(b.months) month\(b.months == 1 ? "" : "s")")
+            let monthLabel = b.months == 1 ? String(localized: "month") : String(localized: "months")
+            parts.append("\(b.months) \(monthLabel)")
         }
         // Always show days in breakdown
-        parts.append("\(b.days) day\(b.days == 1 ? "" : "s")")
+        let dayLabel = b.days == 1 ? String(localized: "day") : String(localized: "days")
+        parts.append("\(b.days) \(dayLabel)")
         return parts.joined(separator: ", ")
     }
 
@@ -490,7 +494,7 @@ struct SobrietyModuleView: View {
             }
 
             // Weekday labels
-            let weekdays = ["S", "M", "T", "W", "T", "F", "S"]
+            let weekdays = [String(localized: "S"), String(localized: "M"), String(localized: "T"), String(localized: "W"), String(localized: "T"), String(localized: "F"), String(localized: "S")]
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 4) {
                 ForEach(weekdays, id: \.self) { day in
                     Text(day)

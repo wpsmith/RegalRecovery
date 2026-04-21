@@ -693,9 +693,9 @@ class TodayViewModel {
         let hour = Calendar.current.component(.hour, from: Date())
         let period: String
         switch hour {
-        case 0..<12: period = "Good morning"
-        case 12..<17: period = "Good afternoon"
-        default: period = "Good evening"
+        case 0..<12: period = String(localized: "Good morning")
+        case 12..<17: period = String(localized: "Good afternoon")
+        default: period = String(localized: "Good evening")
         }
         return "\(period), \(name)"
     }

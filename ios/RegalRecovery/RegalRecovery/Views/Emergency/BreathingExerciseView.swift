@@ -62,7 +62,7 @@ struct BreathingExerciseView: View {
 
                 if isRunning && !isComplete {
                     VStack(spacing: 4) {
-                        Text(currentPhase.rawValue)
+                        Text(LocalizedStringKey(currentPhase.rawValue))
                             .font(RRFont.title)
                             .foregroundStyle(.white)
                         Text("\(currentPhase.duration - currentSecond)")
@@ -85,7 +85,7 @@ struct BreathingExerciseView: View {
                 }
             } else if isRunning {
                 VStack(spacing: 8) {
-                    Text(currentPhase.rawValue)
+                    Text(LocalizedStringKey(currentPhase.rawValue))
                         .font(RRFont.largeTitle)
                         .foregroundStyle(Color.rrText)
 

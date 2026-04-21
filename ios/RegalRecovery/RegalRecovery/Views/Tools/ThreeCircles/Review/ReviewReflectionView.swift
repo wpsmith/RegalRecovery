@@ -87,22 +87,22 @@ struct ReviewReflectionView: View {
     private var promptForCircle: String {
         switch circleType {
         case .inner:
-            return "Are your bottom lines still accurate? Has anything changed in what you need to completely avoid?"
+            return String(localized: "Are your bottom lines still accurate? Has anything changed in what you need to completely avoid?")
         case .middle:
-            return "Do your warning signs still ring true? Have you noticed new patterns that should be here?"
+            return String(localized: "Do your warning signs still ring true? Have you noticed new patterns that should be here?")
         case .outer:
-            return "Are your healthy behaviors still serving you? Is there anything new that has been helping?"
+            return String(localized: "Are your healthy behaviors still serving you? Is there anything new that has been helping?")
         }
     }
 
     private var subPromptForCircle: String {
         switch circleType {
         case .inner:
-            return "Recovery evolves. What felt like a clear line months ago might need adjusting, and that is okay."
+            return String(localized: "Recovery evolves. What felt like a clear line months ago might need adjusting, and that is okay.")
         case .middle:
-            return "Middle circle items are your early warning system. Keeping them accurate helps you stay aware."
+            return String(localized: "Middle circle items are your early warning system. Keeping them accurate helps you stay aware.")
         case .outer:
-            return "Your outer circle is your foundation. It should reflect what actually supports your recovery today."
+            return String(localized: "Your outer circle is your foundation. It should reflect what actually supports your recovery today.")
         }
     }
 

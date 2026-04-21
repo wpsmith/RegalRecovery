@@ -28,12 +28,12 @@ class PlanNotificationScheduler {
             let activityNames = batchItems.map { displayName(for: $0.activityType) }
 
             if batchItems.count == 1 {
-                content.title = "Time for \(activityNames[0])"
-                content.body = "Your \(timeBlock.lowercased()) recovery activity is ready."
+                content.title = String(localized: "Time for \(activityNames[0])")
+                content.body = String(localized: "Your \(timeBlock.lowercased()) recovery activity is ready.")
             } else {
-                content.title = "\(timeBlock) recovery time"
+                content.title = String(localized: "\(timeBlock) recovery time")
                 let list = activityNames.joined(separator: ", ")
-                content.body = "Good \(timeBlock.lowercased()), \(userName). Your \(list) are ready."
+                content.body = String(localized: "Good \(timeBlock.lowercased()), \(userName). Your \(list) are ready.")
             }
 
             // Schedule at the configured time, repeating daily
@@ -56,14 +56,14 @@ class PlanNotificationScheduler {
 
         switch score {
         case 90...100:
-            content.title = "100% today!"
-            content.body = "Every single one, \(userName). That's what recovery looks like."
+            content.title = String(localized: "100% today!")
+            content.body = String(localized: "Every single one, \(userName). That's what recovery looks like.")
         case 70...89:
-            content.title = "Strong day, \(userName)"
-            content.body = "You showed up for your recovery today. Keep going."
+            content.title = String(localized: "Strong day, \(userName)")
+            content.body = String(localized: "You showed up for your recovery today. Keep going.")
         case 50...69:
-            content.title = "Good effort today"
-            content.body = "Every activity you completed matters. Tomorrow is another opportunity."
+            content.title = String(localized: "Good effort today")
+            content.body = String(localized: "Every activity you completed matters. Tomorrow is another opportunity.")
         default:
             // No notification for low scores — avoid shame
             return
@@ -77,8 +77,8 @@ class PlanNotificationScheduler {
     /// Schedule the morning commitment reminder (always present if notifications enabled)
     func scheduleMorningCommitmentReminder(userName: String) async {
         let content = UNMutableNotificationContent()
-        content.title = "Good morning, \(userName)"
-        content.body = "Start your day with a sobriety commitment."
+        content.title = String(localized: "Good morning, \(userName)")
+        content.body = String(localized: "Start your day with a sobriety commitment.")
         content.sound = .default
 
         var dateComponents = DateComponents()
@@ -105,14 +105,14 @@ class PlanNotificationScheduler {
 
         if items.count == 1 {
             return (
-                "Time for \(activityNames[0])",
-                "Your \(timeBlock.lowercased()) recovery activity is ready."
+                String(localized: "Time for \(activityNames[0])"),
+                String(localized: "Your \(timeBlock.lowercased()) recovery activity is ready.")
             )
         } else {
             let list = activityNames.joined(separator: ", ")
             return (
-                "\(timeBlock) recovery time",
-                "Good \(timeBlock.lowercased()), \(userName). Your \(list) are ready."
+                String(localized: "\(timeBlock) recovery time"),
+                String(localized: "Good \(timeBlock.lowercased()), \(userName). Your \(list) are ready.")
             )
         }
     }
@@ -121,11 +121,11 @@ class PlanNotificationScheduler {
 
     func timeBlockName(hour: Int) -> String {
         switch hour {
-        case 5...11: return "Morning"
-        case 12...13: return "Midday"
-        case 14...17: return "Afternoon"
-        case 18...23: return "Evening"
-        default: return "Recovery"
+        case 5...11: return String(localized: "Morning")
+        case 12...13: return String(localized: "Midday")
+        case 14...17: return String(localized: "Afternoon")
+        case 18...23: return String(localized: "Evening")
+        default: return String(localized: "Recovery")
         }
     }
 

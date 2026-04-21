@@ -24,52 +24,52 @@ struct ActivitiesListView: View {
     private var morningSubtitle: String {
         if let latest = commitments.first(where: { $0.type == "morning" && Calendar.current.isDateInToday($0.date) }) {
             let time = latest.date.formatted(date: .omitted, time: .shortened)
-            return "Today, \(time) \u{2713}"
+            return String(localized: "Today, \(time) \u{2713}")
         }
-        return "Pending"
+        return String(localized: "Pending")
     }
 
     private var eveningSubtitle: String {
         if let latest = commitments.first(where: { $0.type == "evening" && Calendar.current.isDateInToday($0.date) }) {
             let time = latest.date.formatted(date: .omitted, time: .shortened)
-            return "Today, \(time) \u{2713}"
+            return String(localized: "Today, \(time) \u{2713}")
         }
-        return "Pending"
+        return String(localized: "Pending")
     }
 
     private var journalSubtitle: String {
         if let latest = journals.first {
             return relativeDay(latest.date)
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var timeJournalSubtitle: String {
         let todayBlocks = timeBlocks.filter { Calendar.current.isDateInToday($0.date) }
         if !todayBlocks.isEmpty {
-            return "Today, \(todayBlocks.count) entries"
+            return String(localized: "Today, \(todayBlocks.count) entries")
         }
         if let latest = timeBlocks.first {
             let dayBlocks = timeBlocks.filter { Calendar.current.isDate($0.date, inSameDayAs: latest.date) }
-            return "\(relativeDay(latest.date)), \(dayBlocks.count) entries"
+            return String(localized: "\(relativeDay(latest.date)), \(dayBlocks.count) entries")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var fasterSubtitle: String {
         if let latest = fasterEntries.first {
-            let dayLabel = Calendar.current.isDateInToday(latest.date) ? "Today" : relativeDay(latest.date)
+            let dayLabel = Calendar.current.isDateInToday(latest.date) ? String(localized: "Today") : relativeDay(latest.date)
             let stage = FASTERStage(rawValue: latest.stage) ?? .restoration
-            return "\(dayLabel), \(stage.name)"
+            return String(localized: "\(dayLabel), \(stage.name)")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var urgeSubtitle: String {
         if let latest = urgeLogs.first {
-            return "\(relativeDay(latest.date)), \(latest.intensity)/10"
+            return String(localized: "\(relativeDay(latest.date)), \(latest.intensity)/10")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var moodSubtitle: String {
@@ -79,95 +79,95 @@ struct ActivitiesListView: View {
             if let secondary = latest.secondaryEmotion { parts.append(secondary) }
             return "\(dayLabel), \(parts.joined(separator: " · "))"
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var gratitudeSubtitle: String {
         if let latest = gratitudeEntries.first {
-            return "\(relativeDay(latest.date)), \(latest.items.count) items"
+            return String(localized: "\(relativeDay(latest.date)), \(latest.items.count) items")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var prayerSubtitle: String {
         if let latest = prayerLogs.first {
-            let dayLabel = Calendar.current.isDateInToday(latest.date) ? "Today" : relativeDay(latest.date)
-            return "\(dayLabel), \(latest.durationMinutes) min"
+            let dayLabel = Calendar.current.isDateInToday(latest.date) ? String(localized: "Today") : relativeDay(latest.date)
+            return String(localized: "\(dayLabel), \(latest.durationMinutes) min")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var exerciseSubtitle: String {
         if let latest = exerciseLogs.first {
-            return "\(relativeDay(latest.date)), \(latest.durationMinutes) min \(latest.exerciseType)"
+            return String(localized: "\(relativeDay(latest.date)), \(latest.durationMinutes) min \(latest.exerciseType)")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var phoneCallSubtitle: String {
         if let latest = phoneCallLogs.first {
-            return "\(relativeDay(latest.date)), \(latest.contactName), \(latest.durationMinutes) min"
+            return String(localized: "\(relativeDay(latest.date)), \(latest.contactName), \(latest.durationMinutes) min")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var meetingSubtitle: String {
         if let latest = meetingLogs.first {
-            return "\(relativeDay(latest.date)), \(latest.meetingName)"
+            return String(localized: "\(relativeDay(latest.date)), \(latest.meetingName)")
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var fanosSubtitle: String {
         if let latest = spouseCheckIns.first(where: { $0.framework == "FANOS" }) {
             return relativeDay(latest.date)
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var fitnapSubtitle: String {
         if let latest = spouseCheckIns.first(where: { $0.framework == "FITNAP" }) {
             return relativeDay(latest.date)
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var stepWorkSubtitle: String {
         if let inProgress = stepWork.first(where: { $0.status == "inProgress" }) {
-            return "Step \(inProgress.stepNumber) \u{2014} In Progress"
+            return String(localized: "Step \(inProgress.stepNumber) \u{2014} In Progress")
         }
         if let lastComplete = stepWork.last(where: { $0.status == "complete" }) {
-            return "Step \(lastComplete.stepNumber) \u{2014} Complete"
+            return String(localized: "Step \(lastComplete.stepNumber) \u{2014} Complete")
         }
-        return "Not started"
+        return String(localized: "Not started")
     }
 
     private var goalsSubtitle: String {
         let completed = goals.filter { $0.isComplete }.count
-        return "\(completed) of \(goals.count) complete"
+        return String(localized: "\(completed) of \(goals.count) complete")
     }
 
     private var affirmationSubtitle: String {
         if let latest = affirmationFavorites.first {
-            let dayLabel = Calendar.current.isDateInToday(latest.createdAt) ? "Today" : relativeDay(latest.createdAt)
+            let dayLabel = Calendar.current.isDateInToday(latest.createdAt) ? String(localized: "Today") : relativeDay(latest.createdAt)
             return dayLabel
         }
-        return "No entries"
+        return String(localized: "No entries")
     }
 
     private var motivationsSubtitle: String {
         if let user = users.first {
             return user.motivations.joined(separator: ", ")
         }
-        return "Faith, Family, Freedom"
+        return String(localized: "Faith, Family, Freedom")
     }
 
     private func relativeDay(_ date: Date) -> String {
         let cal = Calendar.current
-        if cal.isDateInToday(date) { return "Today" }
-        if cal.isDateInYesterday(date) { return "Yesterday" }
+        if cal.isDateInToday(date) { return String(localized: "Today") }
+        if cal.isDateInYesterday(date) { return String(localized: "Yesterday") }
         let days = cal.dateComponents([.day], from: date, to: Date()).day ?? 0
-        return "\(days) days ago"
+        return String(localized: "\(days) days ago")
     }
 
     // MARK: - Feature Flag Helpers
@@ -186,7 +186,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: "sunrise.fill",
                             iconColor: .rrSecondary,
-                            title: "Morning Commitment",
+                            title: String(localized: "Morning Commitment"),
                             subtitle: morningSubtitle
                         )
                     }
@@ -197,7 +197,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: "moon.stars.fill",
                             iconColor: .rrPrimary,
-                            title: "Evening Review",
+                            title: String(localized: "Evening Review"),
                             subtitle: eveningSubtitle
                         )
                     }
@@ -213,7 +213,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: "book.fill",
                             iconColor: ActivityType.journal.iconColor,
-                            title: "Journaling",
+                            title: String(localized: "Journaling"),
                             subtitle: journalSubtitle
                         )
                     }
@@ -224,7 +224,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.fasterScale.icon,
                             iconColor: ActivityType.fasterScale.iconColor,
-                            title: "FASTER Scale",
+                            title: String(localized: "FASTER Scale"),
                             subtitle: fasterSubtitle
                         )
                     }
@@ -236,7 +236,7 @@ struct ActivitiesListView: View {
                             RRActivityRow(
                                 icon: "clock.fill",
                                 iconColor: .purple,
-                                title: "Time Journal",
+                                title: String(localized: "Time Journal"),
                                 subtitle: timeJournalSubtitle
                             )
                         }
@@ -249,8 +249,8 @@ struct ActivitiesListView: View {
                             RRActivityRow(
                                 icon: ActivityType.postMortem.icon,
                                 iconColor: ActivityType.postMortem.iconColor,
-                                title: "Post-Mortem",
-                                subtitle: "142 days ago"
+                                title: String(localized: "Post-Mortem"),
+                                subtitle: String(localized: "142 days ago")
                             )
                         }
                     }
@@ -265,7 +265,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.urgeLog.icon,
                             iconColor: ActivityType.urgeLog.iconColor,
-                            title: "Urge Log",
+                            title: String(localized: "Urge Log"),
                             subtitle: urgeSubtitle
                         )
                     }
@@ -276,7 +276,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.mood.icon,
                             iconColor: ActivityType.mood.iconColor,
-                            title: "Mood",
+                            title: String(localized: "Mood"),
                             subtitle: moodSubtitle
                         )
                     }
@@ -287,7 +287,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.gratitude.icon,
                             iconColor: ActivityType.gratitude.iconColor,
-                            title: "Gratitude",
+                            title: String(localized: "Gratitude"),
                             subtitle: gratitudeSubtitle
                         )
                     }
@@ -298,7 +298,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.prayer.icon,
                             iconColor: ActivityType.prayer.iconColor,
-                            title: "Prayer",
+                            title: String(localized: "Prayer"),
                             subtitle: prayerSubtitle
                         )
                     }
@@ -309,7 +309,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.exercise.icon,
                             iconColor: ActivityType.exercise.iconColor,
-                            title: "Exercise",
+                            title: String(localized: "Exercise"),
                             subtitle: exerciseSubtitle
                         )
                     }
@@ -324,7 +324,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.phoneCalls.icon,
                             iconColor: ActivityType.phoneCalls.iconColor,
-                            title: "Phone Calls",
+                            title: String(localized: "Phone Calls"),
                             subtitle: phoneCallSubtitle
                         )
                     }
@@ -335,7 +335,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.meetingsAttended.icon,
                             iconColor: ActivityType.meetingsAttended.iconColor,
-                            title: "Meetings Attended",
+                            title: String(localized: "Meetings Attended"),
                             subtitle: meetingSubtitle
                         )
                     }
@@ -346,7 +346,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.fanos.icon,
                             iconColor: ActivityType.fanos.iconColor,
-                            title: "FANOS Check-in",
+                            title: String(localized: "FANOS Check-in"),
                             subtitle: fanosSubtitle
                         )
                     }
@@ -357,7 +357,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.fitnap.icon,
                             iconColor: ActivityType.fitnap.iconColor,
-                            title: "FITNAP Check-in",
+                            title: String(localized: "FITNAP Check-in"),
                             subtitle: fitnapSubtitle
                         )
                     }
@@ -372,7 +372,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.stepWork.icon,
                             iconColor: ActivityType.stepWork.iconColor,
-                            title: "12-Step Work",
+                            title: String(localized: "12-Step Work"),
                             subtitle: stepWorkSubtitle
                         )
                     }
@@ -383,7 +383,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.weeklyGoals.icon,
                             iconColor: ActivityType.weeklyGoals.iconColor,
-                            title: "Weekly Goals",
+                            title: String(localized: "Weekly Goals"),
                             subtitle: goalsSubtitle
                         )
                     }
@@ -394,7 +394,7 @@ struct ActivitiesListView: View {
                         RRActivityRow(
                             icon: ActivityType.affirmationLog.icon,
                             iconColor: ActivityType.affirmationLog.iconColor,
-                            title: "Affirmation Log",
+                            title: String(localized: "Affirmation Log"),
                             subtitle: affirmationSubtitle
                         )
                     }
@@ -406,8 +406,8 @@ struct ActivitiesListView: View {
                             RRActivityRow(
                                 icon: "circles.hexagongrid",
                                 iconColor: .rrPrimary,
-                                title: "3 Circles",
-                                subtitle: "Boundary Tool"
+                                title: String(localized: "3 Circles"),
+                                subtitle: String(localized: "Boundary Tool")
                             )
                         }
                     }
@@ -415,7 +415,7 @@ struct ActivitiesListView: View {
                     RRActivityRow(
                         icon: "sparkles",
                         iconColor: .rrSecondary,
-                        title: "Motivations",
+                        title: String(localized: "Motivations"),
                         subtitle: motivationsSubtitle
                     )
                 } header: {

@@ -10,11 +10,11 @@ struct TimeJournalHeaderView: View {
 
     private var dateLabel: String {
         if Calendar.current.isDateInToday(date) {
-            return "Today"
+            return String(localized: "Today")
         } else if Calendar.current.isDateInYesterday(date) {
-            return "Yesterday"
+            return String(localized: "Yesterday")
         } else if Calendar.current.isDateInTomorrow(date) {
-            return "Tomorrow"
+            return String(localized: "Tomorrow")
         } else {
             let formatter = DateFormatter()
             formatter.dateFormat = "MMMM d"

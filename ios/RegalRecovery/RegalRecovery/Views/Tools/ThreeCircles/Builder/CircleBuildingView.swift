@@ -26,33 +26,33 @@ struct CircleBuildingView: View {
     private var circleDefinition: String {
         switch circleType {
         case .inner:
-            return "Your inner circle contains your bottom lines: behaviors you have committed to completely avoiding. These are the actions that, if you engage in them, represent a break in your sobriety."
+            return String(localized: "Your inner circle contains your bottom lines: behaviors you have committed to completely avoiding. These are the actions that, if you engage in them, represent a break in your sobriety.")
         case .middle:
-            return "Your middle circle contains warning signs and slippery behaviors. These are not failures, but signals that you may be moving toward your inner circle. Recognizing them early is a sign of growing awareness."
+            return String(localized: "Your middle circle contains warning signs and slippery behaviors. These are not failures, but signals that you may be moving toward your inner circle. Recognizing them early is a sign of growing awareness.")
         case .outer:
-            return "Your outer circle contains healthy behaviors, self-care practices, and recovery activities. These are the things that strengthen your recovery and the life you are building."
+            return String(localized: "Your outer circle contains healthy behaviors, self-care practices, and recovery activities. These are the things that strengthen your recovery and the life you are building.")
         }
     }
 
     private var circlePrompt: String {
         switch circleType {
         case .inner:
-            return "What behaviors are you committed to avoiding completely?"
+            return String(localized: "What behaviors are you committed to avoiding completely?")
         case .middle:
-            return "What warning signs tell you that you might be heading toward your inner circle?"
+            return String(localized: "What warning signs tell you that you might be heading toward your inner circle?")
         case .outer:
-            return "What healthy practices support your recovery and well-being?"
+            return String(localized: "What healthy practices support your recovery and well-being?")
         }
     }
 
     private var reflectionPrompt: String {
         switch circleType {
         case .inner:
-            return "As you review your inner circle, consider: Are these specific enough that you would know clearly if you crossed a line? Could you explain each one to your sponsor or accountability partner?"
+            return String(localized: "As you review your inner circle, consider: Are these specific enough that you would know clearly if you crossed a line? Could you explain each one to your sponsor or accountability partner?")
         case .middle:
-            return "Think about the last time you acted out. What happened in the hours or days before? Those patterns often belong in your middle circle."
+            return String(localized: "Think about the last time you acted out. What happened in the hours or days before? Those patterns often belong in your middle circle.")
         case .outer:
-            return "Recovery is not just about avoiding harm. What does a good day look like for you? What activities bring you genuine peace or joy?"
+            return String(localized: "Recovery is not just about avoiding harm. What does a good day look like for you? What activities bring you genuine peace or joy?")
         }
     }
 

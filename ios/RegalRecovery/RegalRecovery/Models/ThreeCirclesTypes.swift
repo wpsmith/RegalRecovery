@@ -14,9 +14,9 @@ enum CircleType: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .inner: return "Inner Circle"
-        case .middle: return "Middle Circle"
-        case .outer: return "Outer Circle"
+        case .inner: return String(localized: "Inner Circle")
+        case .middle: return String(localized: "Middle Circle")
+        case .outer: return String(localized: "Outer Circle")
         }
     }
 }
@@ -35,9 +35,9 @@ enum CircleSetStatus: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .draft: return "Draft"
-        case .active: return "Active"
-        case .archived: return "Archived"
+        case .draft: return String(localized: "Draft")
+        case .active: return String(localized: "Active")
+        case .archived: return String(localized: "Archived")
         }
     }
 }
@@ -59,16 +59,16 @@ enum RecoveryArea: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .sexPornography: return "Sex / Pornography"
-        case .alcohol: return "Alcohol"
-        case .drugs: return "Drugs"
-        case .gambling: return "Gambling"
-        case .foodEating: return "Food / Eating"
-        case .internetTechnology: return "Internet / Technology"
-        case .work: return "Work"
-        case .shoppingDebt: return "Shopping / Debt"
-        case .loveRelationships: return "Love / Relationships"
-        case .other: return "Other"
+        case .sexPornography: return String(localized: "Sex / Pornography")
+        case .alcohol: return String(localized: "Alcohol")
+        case .drugs: return String(localized: "Drugs")
+        case .gambling: return String(localized: "Gambling")
+        case .foodEating: return String(localized: "Food / Eating")
+        case .internetTechnology: return String(localized: "Internet / Technology")
+        case .work: return String(localized: "Work")
+        case .shoppingDebt: return String(localized: "Shopping / Debt")
+        case .loveRelationships: return String(localized: "Love / Relationships")
+        case .other: return String(localized: "Other")
         }
     }
 }
@@ -93,19 +93,19 @@ enum FrameworkPreference: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .SAA: return "SAA"
-        case .SLAA: return "SLAA"
-        case .AA: return "AA"
-        case .NA: return "NA"
-        case .SMART: return "SMART Recovery"
-        case .OA: return "OA"
-        case .GA: return "GA"
-        case .DA: return "DA"
-        case .CoDA: return "CoDA"
-        case .ITAA: return "ITAA"
-        case .WA: return "WA"
-        case .other: return "Other"
-        case .none: return "None"
+        case .SAA: return String(localized: "SAA")
+        case .SLAA: return String(localized: "SLAA")
+        case .AA: return String(localized: "AA")
+        case .NA: return String(localized: "NA")
+        case .SMART: return String(localized: "SMART Recovery")
+        case .OA: return String(localized: "OA")
+        case .GA: return String(localized: "GA")
+        case .DA: return String(localized: "DA")
+        case .CoDA: return String(localized: "CoDA")
+        case .ITAA: return String(localized: "ITAA")
+        case .WA: return String(localized: "WA")
+        case .other: return String(localized: "Other")
+        case .none: return String(localized: "None")
         }
     }
 }
@@ -129,9 +129,9 @@ enum StarterPackVariant: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .secular: return "Secular"
-        case .faithBased: return "Faith-Based"
-        case .lgbtqAffirming: return "LGBTQ+-Affirming"
+        case .secular: return String(localized: "Secular")
+        case .faithBased: return String(localized: "Faith-Based")
+        case .lgbtqAffirming: return String(localized: "LGBTQ+-Affirming")
         }
     }
 }
@@ -146,9 +146,9 @@ enum OnboardingMode: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .guided: return "Guided"
-        case .starterPack: return "Starter Pack"
-        case .express: return "Express"
+        case .guided: return String(localized: "Guided")
+        case .starterPack: return String(localized: "Starter Pack")
+        case .express: return String(localized: "Express")
         }
     }
 }

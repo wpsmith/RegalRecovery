@@ -123,7 +123,7 @@ struct GratitudeWidgetCard: View {
 
                     // Streak
                     if currentStreak > 0 {
-                        Text("Streak: \(currentStreak) day\(currentStreak == 1 ? "" : "s")")
+                        Text(String(localized: "Streak: \(currentStreak) day\(currentStreak == 1 ? "" : "s")"))
                             .font(RRFont.caption)
                             .foregroundStyle(Color.rrTextSecondary)
                     }
@@ -137,7 +137,7 @@ struct GratitudeWidgetCard: View {
                                 .lineLimit(1)
                                 .italic()
 
-                            Text(" -- \(pastItem.daysAgo) day\(pastItem.daysAgo == 1 ? "" : "s") ago")
+                            Text(String(localized: " -- \(pastItem.daysAgo) day\(pastItem.daysAgo == 1 ? "" : "s") ago"))
                                 .font(RRFont.caption)
                                 .foregroundStyle(Color.rrTextSecondary)
                                 .layoutPriority(1)

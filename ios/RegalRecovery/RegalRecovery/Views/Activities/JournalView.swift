@@ -266,9 +266,9 @@ enum JournalMode: String, CaseIterable {
 
     var label: String {
         switch self {
-        case .jotting: return "Quick Jot"
-        case .prompted: return "Prompted"
-        case .freeform: return "Freeform"
+        case .jotting: return String(localized: "Quick Jot")
+        case .prompted: return String(localized: "Prompted")
+        case .freeform: return String(localized: "Freeform")
         }
     }
 

@@ -5,7 +5,7 @@ struct QuickActionsRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            RRSectionHeader(title: "Quick Actions")
+            RRSectionHeader(title: String(localized: "Quick Actions"))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {

@@ -27,6 +27,7 @@ struct RegalRecoveryApp: App {
                 }
             }
             .preferredColorScheme(colorScheme)
+            .environment(\.locale, LanguageManager.shared.effectiveLocale)
             .environment(services.authService as AuthService)
             .environment(services.biometricService as BiometricService)
             .environment(services.featureFlagService as FeatureFlagService)
@@ -35,7 +36,7 @@ struct RegalRecoveryApp: App {
             .modelContainer(services.modelContainer)
             .task {
                 let context = ModelContext(services.modelContainer)
-                try? SeedData.seedDatabase(context: context)
+                try? SeedData.seedFeatureFlagsIfNeeded(context: context)
                 await reschedulePlanNotifications(context: context)
             }
             .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in

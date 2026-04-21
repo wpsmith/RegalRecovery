@@ -120,7 +120,7 @@ class UrgeSurfingViewModel {
         if secondsRemaining <= 0 {
             phase = .completed
             isRunning = false
-            milestoneMessage = "You made it. The wave has passed."
+            milestoneMessage = String(localized: "You made it. The wave has passed.")
         }
     }
 
@@ -144,17 +144,17 @@ class UrgeSurfingViewModel {
         switch secondsElapsed {
         case 300: // 5 minutes
             currentMilestone = 5
-            milestoneMessage = "5 minutes — you're riding the wave"
+            milestoneMessage = String(localized: "5 minutes — you're riding the wave")
             phase = .milestone
             clearMilestoneAfterDelay()
         case 600: // 10 minutes
             currentMilestone = 10
-            milestoneMessage = "10 minutes — halfway there, the urge is fading"
+            milestoneMessage = String(localized: "10 minutes — halfway there, the urge is fading")
             phase = .milestone
             clearMilestoneAfterDelay()
         case 900: // 15 minutes
             currentMilestone = 15
-            milestoneMessage = "15 minutes — almost through it"
+            milestoneMessage = String(localized: "15 minutes — almost through it")
             phase = .milestone
             clearMilestoneAfterDelay()
         default:

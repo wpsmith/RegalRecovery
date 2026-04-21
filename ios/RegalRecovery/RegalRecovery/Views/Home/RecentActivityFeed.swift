@@ -5,7 +5,7 @@ struct RecentActivityFeed: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            RRSectionHeader(title: "Recent Activity")
+            RRSectionHeader(title: String(localized: "Recent Activity"))
 
             VStack(spacing: 0) {
                 ForEach(activities) { activity in

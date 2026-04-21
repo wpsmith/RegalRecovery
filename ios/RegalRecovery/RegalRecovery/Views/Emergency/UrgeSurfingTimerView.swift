@@ -19,13 +19,13 @@ struct UrgeSurfingTimerView: View {
     private var sponsor: RRSupportContact? { sponsors.first }
 
     private let motivations = [
-        "The urge is a wave. You can ride it out.",
-        "This feeling is temporary. You are not.",
-        "God's grace is sufficient for you. — 2 Cor 12:9",
-        "Be strong and courageous. — Joshua 1:9",
-        "You have already overcome so much.",
-        "Every second you wait, the urge weakens.",
-        "Remember why you started this journey."
+        String(localized: "The urge is a wave. You can ride it out."),
+        String(localized: "This feeling is temporary. You are not."),
+        String(localized: "God's grace is sufficient for you. — 2 Cor 12:9"),
+        String(localized: "Be strong and courageous. — Joshua 1:9"),
+        String(localized: "You have already overcome so much."),
+        String(localized: "Every second you wait, the urge weakens."),
+        String(localized: "Remember why you started this journey."),
     ]
 
     var body: some View {

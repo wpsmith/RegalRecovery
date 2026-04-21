@@ -7,11 +7,32 @@ struct TestingModeView: View {
 
     @State private var showEraseTodayConfirm = false
     @State private var showEraseAllConfirm = false
-    @State private var showReseedConfirm = false
     @State private var statusMessage: String?
 
     var body: some View {
         List {
+            // MARK: - Seed App
+            Section {
+                NavigationLink {
+                    SeedPersonaPickerView()
+                } label: {
+                    HStack {
+                        Image(systemName: "person.crop.rectangle.stack.fill")
+                            .foregroundStyle(Color.rrPrimary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Seed App")
+                                .font(RRFont.body)
+                                .foregroundStyle(Color.rrText)
+                            Text("Choose a test persona to populate the app with realistic data.")
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        }
+                    }
+                }
+            } header: {
+                Text("Test Personas")
+            }
+
             // MARK: - Erase Today's Data
             Section {
                 Button {
@@ -97,22 +118,6 @@ struct TestingModeView: View {
                     }
                 }
 
-                Button {
-                    showReseedConfirm = true
-                } label: {
-                    HStack {
-                        Image(systemName: "arrow.counterclockwise.circle.fill")
-                            .foregroundStyle(Color.rrPrimary)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Reseed Alex's Data")
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                            Text("Erase everything and repopulate with Alex's 270-day demo data.")
-                                .font(RRFont.caption)
-                                .foregroundStyle(Color.rrTextSecondary)
-                        }
-                    }
-                }
             } header: {
                 Text("Full Reset")
             } footer: {
@@ -148,14 +153,6 @@ struct TestingModeView: View {
             Button("Cancel", role: .cancel) { }
         } message: {
             Text("This permanently deletes all user data, streaks, activities, and settings. The app will return to first-launch state.")
-        }
-        .confirmationDialog("Reseed Demo Data?", isPresented: $showReseedConfirm, titleVisibility: .visible) {
-            Button("Erase & Reseed", role: .destructive) {
-                reseedData()
-            }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("This erases all data and repopulates with Alex's 270-day demo dataset.")
         }
     }
 
@@ -340,20 +337,6 @@ struct TestingModeView: View {
         }
     }
 
-    // MARK: - Reseed
-
-    private func reseedData() {
-        eraseAllData()
-        statusMessage = nil
-
-        do {
-            try SeedData.seedDatabase(context: modelContext)
-            SeedData.markSeeded()
-            statusMessage = "Data reseeded with Alex's 270-day demo data"
-        } catch {
-            statusMessage = "Reseed error: \(error.localizedDescription)"
-        }
-    }
 }
 
 #Preview {

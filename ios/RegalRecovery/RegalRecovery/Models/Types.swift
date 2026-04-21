@@ -49,6 +49,15 @@ enum ContactRole: String {
     case spouse = "Spouse"
     case accountabilityPartner = "Accountability Partner"
 
+    var displayName: String {
+        switch self {
+        case .sponsor: return String(localized: "Sponsor")
+        case .counselor: return String(localized: "Counselor (CSAT)")
+        case .spouse: return String(localized: "Spouse")
+        case .accountabilityPartner: return String(localized: "Accountability Partner")
+        }
+    }
+
     var color: Color {
         switch self {
         case .sponsor: return .rrPrimary
@@ -156,6 +165,16 @@ enum ActivitySection: String, CaseIterable {
     case selfCare = "Self-Care & Wellness"
     case connection = "Connection"
     case growth = "Growth"
+
+    var displayName: String {
+        switch self {
+        case .sobrietyCommitment: return String(localized: "Sobriety & Commitment")
+        case .journalingReflection: return String(localized: "Journaling & Reflection")
+        case .selfCare: return String(localized: "Self-Care & Wellness")
+        case .connection: return String(localized: "Connection")
+        case .growth: return String(localized: "Growth")
+        }
+    }
 }
 
 // MARK: - FASTER Scale
@@ -173,13 +192,13 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
 
     var name: String {
         switch self {
-        case .restoration: return "Restoration"
-        case .forgettingPriorities: return "Forgetting Priorities"
-        case .anxiety: return "Anxiety"
-        case .speedingUp: return "Speeding Up"
-        case .tickedOff: return "Ticked Off"
-        case .exhausted: return "Exhausted"
-        case .relapse: return "Relapse"
+        case .restoration: return String(localized: "Restoration")
+        case .forgettingPriorities: return String(localized: "Forgetting Priorities")
+        case .anxiety: return String(localized: "Anxiety")
+        case .speedingUp: return String(localized: "Speeding Up")
+        case .tickedOff: return String(localized: "Ticked Off")
+        case .exhausted: return String(localized: "Exhausted")
+        case .relapse: return String(localized: "Relapse")
         }
     }
 
@@ -197,32 +216,32 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
 
     var subtitle: String {
         switch self {
-        case .restoration: return "The starting line"
-        case .forgettingPriorities: return "The quiet drift"
-        case .anxiety: return "The background noise gets louder"
-        case .speedingUp: return "Running from the pain you won't name"
-        case .tickedOff: return "Anger takes the wheel"
-        case .exhausted: return "The crash"
-        case .relapse: return "The cycle restarts"
+        case .restoration: return String(localized: "The starting line")
+        case .forgettingPriorities: return String(localized: "The quiet drift")
+        case .anxiety: return String(localized: "The background noise gets louder")
+        case .speedingUp: return String(localized: "Running from the pain you won't name")
+        case .tickedOff: return String(localized: "Anger takes the wheel")
+        case .exhausted: return String(localized: "The crash")
+        case .relapse: return String(localized: "The cycle restarts")
         }
     }
 
     var description: String {
         switch self {
         case .restoration:
-            return "You're being honest, staying connected, keeping your commitments, and dealing with problems as they come up. No current secrets. This is where recovery lives — not perfection, but presence."
+            return String(localized: "You're being honest, staying connected, keeping your commitments, and dealing with problems as they come up. No current secrets. This is where recovery lives — not perfection, but presence.")
         case .forgettingPriorities:
-            return "The most subtle stage. You start drifting from the things that keep you healthy — skipping a meeting, losing touch with your partner, spending more time scrolling than connecting. Overconfidence is the hallmark."
+            return String(localized: "The most subtle stage. You start drifting from the things that keep you healthy — skipping a meeting, losing touch with your partner, spending more time scrolling than connecting. Overconfidence is the hallmark.")
         case .anxiety:
-            return "A growing sense of unease moves in. Old negative thoughts replay. Your brain picks up on the drift and tags it as danger. Sleep gets worse, you become more judgmental, and current stresses start feeling catastrophic."
+            return String(localized: "A growing sense of unease moves in. Old negative thoughts replay. Your brain picks up on the drift and tags it as danger. Sleep gets worse, you become more judgmental, and current stresses start feeling catastrophic.")
         case .speedingUp:
-            return "You can't outrun anxiety, but you're going to try. Relentless busyness — staying so occupied you never sit with your feelings. Deceptive because culture rewards it. Underneath is someone terrified to slow down."
+            return String(localized: "You can't outrun anxiety, but you're going to try. Relentless busyness — staying so occupied you never sit with your feelings. Deceptive because culture rewards it. Underneath is someone terrified to slow down.")
         case .tickedOff:
-            return "Anger has become your primary coping mechanism. It works temporarily — provides adrenaline, makes you feel powerful, gives you someone to blame. Black-and-white thinking, keeping score, defensiveness, self-pity."
+            return String(localized: "Anger has become your primary coping mechanism. It works temporarily — provides adrenaline, makes you feel powerful, gives you someone to blame. Black-and-white thinking, keeping score, defensiveness, self-pity.")
         case .exhausted:
-            return "The adrenaline from anger has run out. Heavy fog — depression, hopelessness, emotional numbness. Cravings become overwhelming because your brain is desperately searching for anything that feels normal. This is the danger zone."
+            return String(localized: "The adrenaline from anger has run out. Heavy fog — depression, hopelessness, emotional numbness. Cravings become overwhelming because your brain is desperately searching for anything that feels normal. This is the danger zone.")
         case .relapse:
-            return "The behavior returns. And immediately, the shame arrives. The cruelest part: shame drives isolation, which restarts the entire FASTER descent. Relapse is not the end of recovery — it is information."
+            return String(localized: "The behavior returns. And immediately, the shame arrives. The cruelest part: shame drives isolation, which restarts the entire FASTER descent. Relapse is not the end of recovery — it is information.")
         }
     }
 
@@ -242,72 +261,72 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
         switch self {
         case .restoration:
             return [
-                "No active secrets",
-                "Keeping commitments",
-                "Honest relationships",
-                "Attending meetings",
-                "Processing pain openly",
-                "Growing in connection",
+                String(localized: "No active secrets"),
+                String(localized: "Keeping commitments"),
+                String(localized: "Honest relationships"),
+                String(localized: "Attending meetings"),
+                String(localized: "Processing pain openly"),
+                String(localized: "Growing in connection"),
             ]
         case .forgettingPriorities:
             return [
-                "Skipping meetings",
-                "Isolating",
-                "Keeping small secrets",
-                "Sarcasm and cynicism",
-                "Overconfidence",
-                "Procrastinating",
-                "Losing interest in growth",
-                "Entertainment as escape",
+                String(localized: "Skipping meetings"),
+                String(localized: "Isolating"),
+                String(localized: "Keeping small secrets"),
+                String(localized: "Sarcasm and cynicism"),
+                String(localized: "Overconfidence"),
+                String(localized: "Procrastinating"),
+                String(localized: "Losing interest in growth"),
+                String(localized: "Entertainment as escape"),
             ]
         case .anxiety:
             return [
-                "Vague worry or dread",
-                "Negative self-talk replaying",
-                "Sleep problems",
-                "Perfectionism",
-                "Judging others harshly",
-                "People-pleasing",
-                "Flirting for reassurance",
-                "Unrealistic to-do lists",
+                String(localized: "Vague worry or dread"),
+                String(localized: "Negative self-talk replaying"),
+                String(localized: "Sleep problems"),
+                String(localized: "Perfectionism"),
+                String(localized: "Judging others harshly"),
+                String(localized: "People-pleasing"),
+                String(localized: "Flirting for reassurance"),
+                String(localized: "Unrealistic to-do lists"),
             ]
         case .speedingUp:
             return [
-                "Workaholic behavior",
-                "Can't relax or sit still",
-                "Skipping meals",
-                "Excessive caffeine",
-                "Over-exercising",
-                "Racing thoughts at night",
-                "Overspending",
-                "Constant device use",
+                String(localized: "Workaholic behavior"),
+                String(localized: "Can't relax or sit still"),
+                String(localized: "Skipping meals"),
+                String(localized: "Excessive caffeine"),
+                String(localized: "Over-exercising"),
+                String(localized: "Racing thoughts at night"),
+                String(localized: "Overspending"),
+                String(localized: "Constant device use"),
             ]
         case .tickedOff:
             return [
-                "Resentment and bitterness",
-                "Black-and-white thinking",
-                "Blaming everyone else",
-                "Defensiveness",
-                "Road rage",
-                "Self-pity",
-                "Silent treatment",
-                "Intimidation",
+                String(localized: "Resentment and bitterness"),
+                String(localized: "Black-and-white thinking"),
+                String(localized: "Blaming everyone else"),
+                String(localized: "Defensiveness"),
+                String(localized: "Road rage"),
+                String(localized: "Self-pity"),
+                String(localized: "Silent treatment"),
+                String(localized: "Intimidation"),
             ]
         case .exhausted:
             return [
-                "Emotional numbness",
-                "Hopelessness",
-                "Spontaneous crying",
-                "Intense cravings",
-                "Survival mode",
-                "Missing work or obligations",
-                "Confusion and poor decisions",
-                "Thoughts of self-harm",
+                String(localized: "Emotional numbness"),
+                String(localized: "Hopelessness"),
+                String(localized: "Spontaneous crying"),
+                String(localized: "Intense cravings"),
+                String(localized: "Survival mode"),
+                String(localized: "Missing work or obligations"),
+                String(localized: "Confusion and poor decisions"),
+                String(localized: "Thoughts of self-harm"),
             ]
         case .relapse:
             return [
-                "Acting out on addictive behavior",
-                "Breaking sobriety commitment",
+                String(localized: "Acting out on addictive behavior"),
+                String(localized: "Breaking sobriety commitment"),
             ]
         }
     }
@@ -316,19 +335,19 @@ enum FASTERStage: Int, CaseIterable, Identifiable {
     var adaptiveContent: (title: String, body: String) {
         switch self {
         case .restoration:
-            return ("You're in Restoration", "Keep doing what you're doing. Stay connected, keep your commitments, and continue processing life honestly with the people around you. Recovery lives in the daily practice.")
+            return (String(localized: "You're in Restoration"), String(localized: "Keep doing what you're doing. Stay connected, keep your commitments, and continue processing life honestly with the people around you. Recovery lives in the daily practice."))
         case .forgettingPriorities:
-            return ("Priority Check", "Take a moment to review your commitments. Are you attending your meetings? Have you called your accountability partner this week? Are there small secrets forming? Reconnect with one priority today.")
+            return (String(localized: "Priority Check"), String(localized: "Take a moment to review your commitments. Are you attending your meetings? Have you called your accountability partner this week? Are there small secrets forming? Reconnect with one priority today."))
         case .anxiety:
-            return ("Ground Yourself", "Try the 5-4-3-2-1 grounding exercise: Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste. Take three slow breaths. The anxiety is a signal — not a verdict.")
+            return (String(localized: "Ground Yourself"), String(localized: "Try the 5-4-3-2-1 grounding exercise: Name 5 things you see, 4 you can touch, 3 you hear, 2 you smell, and 1 you taste. Take three slow breaths. The anxiety is a signal — not a verdict."))
         case .speedingUp:
-            return ("Slow Down", "Your busyness is a shield against feeling. Challenge: take 10 minutes right now to do absolutely nothing. No phone, no tasks. Just sit. Notice what feelings come up when you stop running.")
+            return (String(localized: "Slow Down"), String(localized: "Your busyness is a shield against feeling. Challenge: take 10 minutes right now to do absolutely nothing. No phone, no tasks. Just sit. Notice what feelings come up when you stop running."))
         case .tickedOff:
-            return ("Name What's Underneath", "Anger feels powerful, but it's masking something. What are you really feeling beneath the irritation? Try naming the emotion without judging it. Consider reaching out to your counselor or accountability partner today.")
+            return (String(localized: "Name What's Underneath"), String(localized: "Anger feels powerful, but it's masking something. What are you really feeling beneath the irritation? Try naming the emotion without judging it. Consider reaching out to your counselor or accountability partner today."))
         case .exhausted:
-            return ("You Need Support Now", "You're running on empty and your coping capacity is depleted. This is not the time to push through alone. Please reach out to your accountability partner, sponsor, or counselor today. You don't have to explain everything — just say you're struggling.")
+            return (String(localized: "You Need Support Now"), String(localized: "You're running on empty and your coping capacity is depleted. This is not the time to push through alone. Please reach out to your accountability partner, sponsor, or counselor today. You don't have to explain everything — just say you're struggling."))
         case .relapse:
-            return ("This Is Not the End", "Relapse is painful, but it is not your identity. The shame you're feeling right now is the exact force that restarts the cycle — don't let it drive you into isolation. Call your accountability partner or sponsor. If you're in crisis, contact the 988 Suicide & Crisis Lifeline (call or text 988).")
+            return (String(localized: "This Is Not the End"), String(localized: "Relapse is painful, but it is not your identity. The shame you're feeling right now is the exact force that restarts the cycle — don't let it drive you into isolation. Call your accountability partner or sponsor. If you're in crisis, contact the 988 Suicide & Crisis Lifeline (call or text 988)."))
         }
     }
 }
@@ -385,6 +404,17 @@ enum PrimaryEmotion: String, CaseIterable {
     case disgusted = "Disgusted"
     case surprised = "Surprised"
 
+    var displayName: String {
+        switch self {
+        case .happy: return String(localized: "Happy")
+        case .sad: return String(localized: "Sad")
+        case .angry: return String(localized: "Angry")
+        case .fearful: return String(localized: "Fearful")
+        case .disgusted: return String(localized: "Disgusted")
+        case .surprised: return String(localized: "Surprised")
+        }
+    }
+
     var color: Color {
         switch self {
         case .happy: return .yellow
@@ -398,12 +428,12 @@ enum PrimaryEmotion: String, CaseIterable {
 
     var secondaryEmotions: [String] {
         switch self {
-        case .happy: return ["Joyful", "Grateful", "Content", "Peaceful", "Hopeful", "Proud"]
-        case .sad: return ["Lonely", "Grieving", "Disappointed", "Hopeless", "Ashamed", "Empty"]
-        case .angry: return ["Frustrated", "Resentful", "Irritated", "Bitter", "Jealous", "Betrayed"]
-        case .fearful: return ["Anxious", "Insecure", "Overwhelmed", "Vulnerable", "Panicked", "Worried"]
-        case .disgusted: return ["Contemptuous", "Repulsed", "Self-loathing", "Judgmental"]
-        case .surprised: return ["Shocked", "Confused", "Amazed", "Startled"]
+        case .happy: return [String(localized: "Joyful"), String(localized: "Grateful"), String(localized: "Content"), String(localized: "Peaceful"), String(localized: "Hopeful"), String(localized: "Proud")]
+        case .sad: return [String(localized: "Lonely"), String(localized: "Grieving"), String(localized: "Disappointed"), String(localized: "Hopeless"), String(localized: "Ashamed"), String(localized: "Empty")]
+        case .angry: return [String(localized: "Frustrated"), String(localized: "Resentful"), String(localized: "Irritated"), String(localized: "Bitter"), String(localized: "Jealous"), String(localized: "Betrayed")]
+        case .fearful: return [String(localized: "Anxious"), String(localized: "Insecure"), String(localized: "Overwhelmed"), String(localized: "Vulnerable"), String(localized: "Panicked"), String(localized: "Worried")]
+        case .disgusted: return [String(localized: "Contemptuous"), String(localized: "Repulsed"), String(localized: "Self-loathing"), String(localized: "Judgmental")]
+        case .surprised: return [String(localized: "Shocked"), String(localized: "Confused"), String(localized: "Amazed"), String(localized: "Startled")]
         }
     }
 }
@@ -704,6 +734,14 @@ enum AppearanceMode: String, CaseIterable {
     case system = "System"
     case light = "Light"
     case dark = "Dark"
+
+    var displayName: String {
+        switch self {
+        case .system: return String(localized: "System")
+        case .light: return String(localized: "Light")
+        case .dark: return String(localized: "Dark")
+        }
+    }
 }
 
 // MARK: - Journal Prompt
@@ -732,6 +770,16 @@ enum DailyPlanActivityState: String {
     case upcoming
     case overdue
     case skipped
+
+    var displayName: String {
+        switch self {
+        case .completed: return String(localized: "Completed")
+        case .pending: return String(localized: "Pending")
+        case .upcoming: return String(localized: "Upcoming")
+        case .overdue: return String(localized: "Overdue")
+        case .skipped: return String(localized: "Skipped")
+        }
+    }
 
     var icon: String {
         switch self {
@@ -785,11 +833,11 @@ enum DailyScoreLevel: String {
 
     var label: String {
         switch self {
-        case .excellent: return "Excellent"
-        case .strong: return "Strong"
-        case .moderate: return "Moderate"
-        case .low: return "Low"
-        case .minimal: return "Minimal"
+        case .excellent: return String(localized: "Excellent")
+        case .strong: return String(localized: "Strong")
+        case .moderate: return String(localized: "Moderate")
+        case .low: return String(localized: "Low")
+        case .minimal: return String(localized: "Minimal")
         }
     }
 
@@ -809,7 +857,7 @@ enum DailyScoreLevel: String {
 
 struct DailyEligibleActivity {
     let activityType: String
-    let displayName: String
+    let displayNameKey: String
     let icon: String
     let multiplePerDay: Bool
     let maxPerDay: Int
@@ -819,6 +867,10 @@ struct DailyEligibleActivity {
     let typicalBlock: String
     let featureFlagKey: String
     let section: ActivitySection
+
+    var displayName: String {
+        String(localized: String.LocalizationValue(displayNameKey))
+    }
 
     /// Activities filtered by feature flags (reactive via FeatureFlagStore)
     static var enabled: [DailyEligibleActivity] {
@@ -830,7 +882,7 @@ struct DailyEligibleActivity {
     static let all: [DailyEligibleActivity] = [
         DailyEligibleActivity(
             activityType: ActivityType.sobrietyCommitment.rawValue,
-            displayName: "Morning Commitment",
+            displayNameKey: "Morning Commitment",
             icon: "sun.max.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -843,7 +895,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.affirmationLog.rawValue,
-            displayName: "Christian Affirmations",
+            displayNameKey: "Christian Affirmations",
             icon: "text.quote",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -856,7 +908,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.journal.rawValue,
-            displayName: "Journaling / Jotting",
+            displayNameKey: "Journaling / Jotting",
             icon: "note.text",
             multiplePerDay: true,
             maxPerDay: 10,
@@ -869,7 +921,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "devotional",
-            displayName: "Devotional",
+            displayNameKey: "Devotional",
             icon: "book.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -882,7 +934,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.prayer.rawValue,
-            displayName: "Prayer",
+            displayNameKey: "Prayer",
             icon: "hands.and.sparkles.fill",
             multiplePerDay: true,
             maxPerDay: 5,
@@ -895,7 +947,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "memoryVerseReview",
-            displayName: "Memory Verse Review",
+            displayNameKey: "Memory Verse Review",
             icon: "text.book.closed.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -908,7 +960,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.mood.rawValue,
-            displayName: "Mood Rating",
+            displayNameKey: "Mood Rating",
             icon: "face.smiling",
             multiplePerDay: true,
             maxPerDay: 5,
@@ -921,7 +973,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.gratitude.rawValue,
-            displayName: "Gratitude List",
+            displayNameKey: "Gratitude List",
             icon: "leaf.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -934,7 +986,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.phoneCalls.rawValue,
-            displayName: "Phone Calls",
+            displayNameKey: "Phone Calls",
             icon: "phone.fill",
             multiplePerDay: true,
             maxPerDay: 10,
@@ -947,7 +999,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.exercise.rawValue,
-            displayName: "Exercise / Physical Activity",
+            displayNameKey: "Exercise / Physical Activity",
             icon: "figure.run",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -960,7 +1012,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.meetingsAttended.rawValue,
-            displayName: "Meetings Attended",
+            displayNameKey: "Meetings Attended",
             icon: "person.3.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -973,7 +1025,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "personCheckInSpouse",
-            displayName: "Spouse Check-in",
+            displayNameKey: "Spouse Check-in",
             icon: "heart.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -986,7 +1038,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.fanos.rawValue,
-            displayName: "FANOS Check-in",
+            displayNameKey: "FANOS Check-in",
             icon: "heart.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -999,7 +1051,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.fitnap.rawValue,
-            displayName: "FITNAP Check-in",
+            displayNameKey: "FITNAP Check-in",
             icon: "heart.text.clipboard",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1012,7 +1064,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.fasterScale.rawValue,
-            displayName: "FASTER Scale",
+            displayNameKey: "FASTER Scale",
             icon: "gauge.with.needle",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1025,7 +1077,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "pci",
-            displayName: "PCI",
+            displayNameKey: "PCI",
             icon: "checklist",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1038,7 +1090,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.weeklyGoals.rawValue,
-            displayName: "Weekly/Daily Goals Review",
+            displayNameKey: "Weekly/Daily Goals Review",
             icon: "target",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1051,7 +1103,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "nutrition",
-            displayName: "Nutrition (Meal Logging)",
+            displayNameKey: "Nutrition (Meal Logging)",
             icon: "fork.knife",
             multiplePerDay: true,
             maxPerDay: 5,
@@ -1064,7 +1116,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.timeJournal.rawValue,
-            displayName: "T30/60 Journaling",
+            displayNameKey: "T30/60 Journaling",
             icon: "clock.fill",
             multiplePerDay: true,
             maxPerDay: 24,
@@ -1077,7 +1129,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "actingInBehaviors",
-            displayName: "Acting In Behaviors Check-in",
+            displayNameKey: "Acting In Behaviors Check-in",
             icon: "shield.lefthalf.filled",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1090,7 +1142,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "voiceJournal",
-            displayName: "Voice Journal",
+            displayNameKey: "Voice Journal",
             icon: "mic.fill",
             multiplePerDay: true,
             maxPerDay: 10,
@@ -1103,7 +1155,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "bookReading",
-            displayName: "Book Reading",
+            displayNameKey: "Book Reading",
             icon: "book.fill",
             multiplePerDay: false,
             maxPerDay: 1,

@@ -137,26 +137,17 @@ struct TodayView: View {
                     }
                     .buttonStyle(.plain)
 
-                    quickActionCard(icon: "note.text", label: "Journaling", color: .purple) {
+                    quickActionCard(icon: "flame.fill", label: String(localized: "Log Urge"), color: .orange) {
+                        UrgeLogView()
+                    }
+                    quickActionCard(icon: "book.fill", label: String(localized: "Journaling"), color: .blue) {
                         JournalView()
                     }
-                    quickActionCard(icon: "heart.text.square.fill", label: "EmoJournal", color: .pink) {
-                        EmotionalJournalView()
-                    }
-                    quickActionCard(icon: "hands.and.sparkles.fill", label: "Pray", color: .rrSecondary) {
+                    quickActionCard(icon: "hands.and.sparkles.fill", label: String(localized: "Pray"), color: .purple) {
                         PrayerLogView()
                     }
-                    quickActionCard(icon: "text.quote", label: "Affirmations", color: .rrPrimary) {
-                        AffirmationDeckView(
-                            packName: ContentData.affirmationPacks[0].name,
-                            affirmations: ContentData.affirmationPacks[0].affirmations
-                        )
-                    }
-                    quickActionCard(icon: "face.smiling", label: "Mood", color: .yellow) {
-                        MoodRatingView()
-                    }
-                    quickActionCard(icon: "leaf.fill", label: "Gratitude", color: .rrSuccess) {
-                        GratitudeTabView()
+                    quickActionCard(icon: "phone.fill", label: String(localized: "Call Someone"), color: .green) {
+                        PhoneCallLogView()
                     }
                 }
             }
@@ -249,7 +240,7 @@ struct TodayView: View {
     private var todayActivityLogSection: some View {
         if FeatureFlagStore.shared.isEnabled("feature.activities") {
             VStack(alignment: .leading, spacing: 12) {
-                RRSectionHeader(title: "Today's Activity Log")
+                RRSectionHeader(title: String(localized: "Today's Activity Log"))
 
                 if viewModel.todayActivityLog.isEmpty {
                     Text("No activities logged yet today")

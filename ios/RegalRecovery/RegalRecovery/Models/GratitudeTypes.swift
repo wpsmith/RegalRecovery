@@ -76,12 +76,12 @@ enum MoodIcon {
 
     static func label(for score: Int) -> String {
         switch score {
-        case 1: return "Very Low"
-        case 2: return "Low"
-        case 3: return "Neutral"
-        case 4: return "Good"
-        case 5: return "Great"
-        default: return "Neutral"
+        case 1: return String(localized: "Very Low")
+        case 2: return String(localized: "Low")
+        case 3: return String(localized: "Neutral")
+        case 4: return String(localized: "Good")
+        case 5: return String(localized: "Great")
+        default: return String(localized: "Neutral")
         }
     }
 }

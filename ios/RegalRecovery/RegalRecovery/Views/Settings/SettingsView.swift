@@ -36,7 +36,7 @@ struct SettingsView: View {
                                         .foregroundStyle(.white)
                                 )
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(user?.name ?? "Set up profile")
+                                Text(user?.name ?? String(localized: "Set up profile"))
                                     .font(RRFont.headline)
                                     .foregroundStyle(Color.rrText)
                                 RRBadge(text: "\(currentDays) days", color: .rrSuccess)
@@ -136,6 +136,18 @@ struct SettingsView: View {
                         if FeatureFlagStore.shared.isEnabled("feature.themes") {
                             NavigationLink("Appearance") {
                                 AppearanceSettingsView()
+                            }
+                        }
+                        NavigationLink {
+                            LanguageSettingsView()
+                        } label: {
+                            HStack {
+                                Text("Language")
+                                    .foregroundStyle(Color.rrText)
+                                Spacer()
+                                Text(LanguageManager.shared.displayName)
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
                             }
                         }
                     }
@@ -242,7 +254,7 @@ struct SettingsView: View {
                     .font(.caption2)
                     .foregroundStyle(Color.rrTextSecondary)
                     .frame(width: 12)
-                Text(title)
+                Text(LocalizedStringKey(title))
                 Spacer()
             }
         }

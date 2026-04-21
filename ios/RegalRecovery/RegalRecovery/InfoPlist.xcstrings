@@ -1,0 +1,116 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery uses the camera to let you capture photos for your recovery journal."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery usa la cámara para permitirte capturar fotos para tu diario de recuperación."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery utilise l'appareil photo pour vous permettre de prendre des photos pour votre journal de rétablissement."
+          }
+        }
+      }
+    },
+    "NSContactsUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery accesses your contacts to help you quickly add your sponsor, counselor, and accountability partners to your support network."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery accede a tus contactos para ayudarte a agregar rápidamente a tu padrino, consejero y compañeros de rendición de cuentas a tu red de apoyo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery accède à vos contacts pour vous aider à ajouter rapidement votre parrain, conseiller et partenaires de redevabilité à votre réseau de soutien."
+          }
+        }
+      }
+    },
+    "NSFaceIDUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery uses Face ID to protect your recovery data and keep your journal private."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery usa Face ID para proteger tus datos de recuperación y mantener tu diario privado."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery utilise Face ID pour protéger vos données de rétablissement et garder votre journal privé."
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery uses your location to find SA and Celebrate Recovery meetings near you."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery usa tu ubicación para encontrar reuniones de SA y Celebra la Recuperación cerca de ti."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regal Recovery utilise votre position pour trouver des réunions SA et Celebrate Recovery près de chez vous."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

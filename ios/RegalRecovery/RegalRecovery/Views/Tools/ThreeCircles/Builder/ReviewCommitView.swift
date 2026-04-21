@@ -418,21 +418,21 @@ struct ReviewCommitView: View {
 
     private var commitTitle: String {
         switch selectedCommitOption {
-        case .commitNow: return "Commit Your Circles"
-        case .draft: return "Save & Share"
-        case .draftNoShare: return "Save as Draft"
-        case .none: return "Save"
+        case .commitNow: return String(localized: "Commit Your Circles")
+        case .draft: return String(localized: "Save & Share")
+        case .draftNoShare: return String(localized: "Save as Draft")
+        case .none: return String(localized: "Save")
         }
     }
 
     private var commitMessage: String {
         switch selectedCommitOption {
         case .commitNow:
-            return "Your circles will become active and used for daily check-ins. You can always edit them later."
+            return String(localized: "Your circles will become active and used for daily check-ins. You can always edit them later.")
         case .draft:
-            return "Your circles will be saved as a draft. A share link will be generated for your sponsor to review and comment."
+            return String(localized: "Your circles will be saved as a draft. A share link will be generated for your sponsor to review and comment.")
         case .draftNoShare:
-            return "Your circles will be saved as a draft. You can commit or share them when you are ready."
+            return String(localized: "Your circles will be saved as a draft. You can commit or share them when you are ready.")
         case .none:
             return ""
         }
