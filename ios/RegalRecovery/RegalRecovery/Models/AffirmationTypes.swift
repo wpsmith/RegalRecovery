@@ -16,10 +16,10 @@ enum AffirmationLevel: Int, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .permission: return "Permission"
-        case .process: return "Process"
-        case .temperedIdentity: return "Tempered Identity"
-        case .fullIdentity: return "Full Identity"
+        case .permission: return String(localized: "Permission")
+        case .process: return String(localized: "Process")
+        case .temperedIdentity: return String(localized: "Tempered Identity")
+        case .fullIdentity: return String(localized: "Full Identity")
         }
     }
 
@@ -51,16 +51,16 @@ enum AffirmationCategory: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .selfWorth: return "Self-Worth"
-        case .shameResilience: return "Shame Resilience"
-        case .healthyRelationships: return "Healthy Relationships"
-        case .connection: return "Connection"
-        case .emotionalRegulation: return "Emotional Regulation"
-        case .purposeMeaning: return "Purpose & Meaning"
-        case .integrityHonesty: return "Integrity & Honesty"
-        case .dailyStrength: return "Daily Strength"
-        case .healthySexuality: return "Healthy Sexuality"
-        case .sosCrisis: return "SOS / Crisis"
+        case .selfWorth: return String(localized: "Self-Worth")
+        case .shameResilience: return String(localized: "Shame Resilience")
+        case .healthyRelationships: return String(localized: "Healthy Relationships")
+        case .connection: return String(localized: "Connection")
+        case .emotionalRegulation: return String(localized: "Emotional Regulation")
+        case .purposeMeaning: return String(localized: "Purpose & Meaning")
+        case .integrityHonesty: return String(localized: "Integrity & Honesty")
+        case .dailyStrength: return String(localized: "Daily Strength")
+        case .healthySexuality: return String(localized: "Healthy Sexuality")
+        case .sosCrisis: return String(localized: "SOS / Crisis")
         }
     }
 }
@@ -74,8 +74,8 @@ enum AffirmationTrack: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .standard: return "Standard"
-        case .faithBased: return "Faith-Based"
+        case .standard: return String(localized: "Standard")
+        case .faithBased: return String(localized: "Faith-Based")
         }
     }
 }
@@ -101,11 +101,11 @@ enum AffirmationBackgroundMusic: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .nature: return "Nature"
-        case .ocean: return "Ocean"
-        case .rain: return "Rain"
-        case .softTones: return "Soft Tones"
-        case .silence: return "Silence"
+        case .nature: return String(localized: "Nature")
+        case .ocean: return String(localized: "Ocean")
+        case .rain: return String(localized: "Rain")
+        case .softTones: return String(localized: "Soft Tones")
+        case .silence: return String(localized: "Silence")
         }
     }
 }

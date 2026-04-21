@@ -147,16 +147,16 @@ struct TodayView: View {
                     }
                     .buttonStyle(.plain)
 
-                    quickActionCard(icon: "flame.fill", label: "Log Urge", color: .orange) {
+                    quickActionCard(icon: "flame.fill", label: String(localized: "Log Urge"), color: .orange) {
                         UrgeLogView()
                     }
-                    quickActionCard(icon: "book.fill", label: "Journaling", color: .blue) {
+                    quickActionCard(icon: "book.fill", label: String(localized: "Journaling"), color: .blue) {
                         JournalView()
                     }
-                    quickActionCard(icon: "hands.and.sparkles.fill", label: "Pray", color: .purple) {
+                    quickActionCard(icon: "hands.and.sparkles.fill", label: String(localized: "Pray"), color: .purple) {
                         PrayerLogView()
                     }
-                    quickActionCard(icon: "phone.fill", label: "Call Someone", color: .green) {
+                    quickActionCard(icon: "phone.fill", label: String(localized: "Call Someone"), color: .green) {
                         PhoneCallLogView()
                     }
                 }
@@ -247,7 +247,7 @@ struct TodayView: View {
     private var todayActivityLogSection: some View {
         if FeatureFlagStore.shared.isEnabled("feature.activities") {
             VStack(alignment: .leading, spacing: 12) {
-                RRSectionHeader(title: "Today's Activity Log")
+                RRSectionHeader(title: String(localized: "Today's Activity Log"))
 
                 if viewModel.todayActivityLog.isEmpty {
                     Text("No activities logged yet today")

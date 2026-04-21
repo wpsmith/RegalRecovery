@@ -71,8 +71,8 @@ struct ActivityHistoryView: View {
         let calendar = Calendar.current
 
         let grouped = Dictionary(grouping: limited) { entry -> String in
-            if calendar.isDateInToday(entry.date) { return "Today" }
-            if calendar.isDateInYesterday(entry.date) { return "Yesterday" }
+            if calendar.isDateInToday(entry.date) { return String(localized: "Today") }
+            if calendar.isDateInYesterday(entry.date) { return String(localized: "Yesterday") }
             return entry.date.formatted(.dateTime.month(.wide).day().year())
         }
 
@@ -88,8 +88,8 @@ struct ActivityHistoryView: View {
 
     private func sectionLabel(for date: Date) -> String {
         let calendar = Calendar.current
-        if calendar.isDateInToday(date) { return "Today" }
-        if calendar.isDateInYesterday(date) { return "Yesterday" }
+        if calendar.isDateInToday(date) { return String(localized: "Today") }
+        if calendar.isDateInYesterday(date) { return String(localized: "Yesterday") }
         return date.formatted(.dateTime.month(.wide).day().year())
     }
 

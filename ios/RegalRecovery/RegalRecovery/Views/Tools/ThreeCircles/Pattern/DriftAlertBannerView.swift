@@ -18,7 +18,7 @@ struct DriftAlertBannerView: View {
 
     /// Default message when the alert doesn't provide one.
     private var displayMessage: String {
-        alert.message ?? "You've been in your middle circle a few times this week. That's useful information -- your awareness is a strength."
+        alert.message ?? String(localized: "You've been in your middle circle a few times this week. That's useful information -- your awareness is a strength.")
     }
 
     var body: some View {

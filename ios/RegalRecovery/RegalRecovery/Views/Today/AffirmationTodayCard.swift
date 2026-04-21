@@ -92,7 +92,7 @@ struct AffirmationTodayCard: View {
 
                     // Cumulative session count (never streaks)
                     if totalSessions > 0 {
-                        Text("\(totalSessions) session\(totalSessions == 1 ? "" : "s") total")
+                        Text(String(localized: "\(totalSessions) session\(totalSessions == 1 ? "" : "s") total"))
                             .font(RRFont.caption)
                             .foregroundStyle(Color.rrTextSecondary)
                     }

@@ -11,17 +11,17 @@ struct CommitmentsCard: View {
                     .foregroundStyle(Color.rrText)
 
                 commitmentRow(
-                    title: "Morning Commitment",
+                    title: String(localized: "Morning Commitment"),
                     isComplete: status.morningComplete,
-                    detail: status.morningTime.map { "Completed \($0)" } ?? "Pending"
+                    detail: status.morningTime.map { String(localized: "Completed \($0)") } ?? String(localized: "Pending")
                 )
 
                 Divider()
 
                 commitmentRow(
-                    title: "Evening Review",
+                    title: String(localized: "Evening Review"),
                     isComplete: status.eveningComplete,
-                    detail: status.eveningTime.map { "Completed \($0)" } ?? "Pending"
+                    detail: status.eveningTime.map { String(localized: "Completed \($0)") } ?? String(localized: "Pending")
                 )
             }
         }

@@ -33,6 +33,9 @@
 		10000611 /* TimeJournalHeatmapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000611 /* TimeJournalHeatmapView.swift */; };
 		10000009 /* RepositoryProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000009 /* RepositoryProtocols.swift */; };
 		10000010 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000010 /* SeedData.swift */; };
+		10000990 /* SeedPersonas.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000990 /* SeedPersonas.swift */; };
+		10000991 /* SeedPersonaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000991 /* SeedPersonaData.swift */; };
+		10000992 /* SeedPersonaPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000992 /* SeedPersonaPickerView.swift */; };
 		10000011 /* SwiftDataRepositories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000011 /* SwiftDataRepositories.swift */; };
 		10000012 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000012 /* APIClient.swift */; };
 		10000013 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000013 /* APIError.swift */; };
@@ -48,6 +51,8 @@
 		10000023 /* FeatureFlagService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000023 /* FeatureFlagService.swift */; };
 		10000213 /* FeatureFlagStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000213 /* FeatureFlagStore.swift */; };
 		10000204 /* PlanNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000204 /* PlanNotificationScheduler.swift */; };
+		10000993 /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000993 /* LanguageManager.swift */; };
+		10000994 /* LanguageSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000994 /* LanguageSettingsView.swift */; };
 		10000205 /* RecoveryPlanSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000205 /* RecoveryPlanSetupView.swift */; };
 		10000206 /* PlanActivityRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000206 /* PlanActivityRowView.swift */; };
 		10000207 /* RecoveryPlanViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000207 /* RecoveryPlanViewModel.swift */; };
@@ -229,6 +234,8 @@
 		10001201 /* AffirmationPackPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001201 /* AffirmationPackPickerView.swift */; };
 		10001202 /* AffirmationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001202 /* AffirmationSettingsView.swift */; };
 		10001203 /* BookLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001203 /* BookLanguageManager.swift */; };
+		B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F001 /* Localizable.xcstrings */; };
+		B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -259,6 +266,8 @@
 		20000611 /* TimeJournalHeatmapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeatmapView.swift; sourceTree = "<group>"; };
 		20000009 /* RepositoryProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryProtocols.swift; sourceTree = "<group>"; };
 		20000010 /* SeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedData.swift; sourceTree = "<group>"; };
+		20000990 /* SeedPersonas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPersonas.swift; sourceTree = "<group>"; };
+		20000991 /* SeedPersonaData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPersonaData.swift; sourceTree = "<group>"; };
 		20000011 /* SwiftDataRepositories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataRepositories.swift; sourceTree = "<group>"; };
 		20000012 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		20000013 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
@@ -274,6 +283,7 @@
 		20000023 /* FeatureFlagService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagService.swift; sourceTree = "<group>"; };
 		20000213 /* FeatureFlagStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlagStore.swift; sourceTree = "<group>"; };
 		20000204 /* PlanNotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanNotificationScheduler.swift; sourceTree = "<group>"; };
+		20000993 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		20000205 /* RecoveryPlanSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanSetupView.swift; sourceTree = "<group>"; };
 		20000206 /* PlanActivityRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanActivityRowView.swift; sourceTree = "<group>"; };
 		20000207 /* RecoveryPlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryPlanViewModel.swift; sourceTree = "<group>"; };
@@ -442,6 +452,9 @@
 		20000210 /* RecoveryWorkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkViewModel.swift; sourceTree = "<group>"; };
 		20000211 /* RecoveryFoundationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryFoundationView.swift; sourceTree = "<group>"; };
 		20000212 /* TestingModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingModeView.swift; sourceTree = "<group>"; };
+		20000992 /* SeedPersonaPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPersonaPickerView.swift; sourceTree = "<group>"; };
+		20000993 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
+		20000994 /* LanguageSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSettingsView.swift; sourceTree = "<group>"; };
 		20002001 /* BigBook */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BigBook; sourceTree = "<group>"; };
 			20003000 /* BookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookData.swift; sourceTree = "<group>"; };
 			20003001 /* BookCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCatalog.swift; sourceTree = "<group>"; };
@@ -462,6 +475,8 @@
 		20001201 /* AffirmationPackPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationPackPickerView.swift; sourceTree = "<group>"; };
 		20001202 /* AffirmationSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationSettingsView.swift; sourceTree = "<group>"; };
 		20001203 /* BookLanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLanguageManager.swift; sourceTree = "<group>"; };
+		B0A1B2C3D4E5F001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -505,6 +520,8 @@
 				20000001 /* RegalRecoveryApp.swift */,
 				20000200 /* Assets.xcassets */,
 				20000201 /* Info.plist */,
+				B0A1B2C3D4E5F001 /* Localizable.xcstrings */,
+				B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */,
 				50000010 /* Theme */,
 				50000011 /* Models */,
 				50000012 /* Data */,
@@ -567,6 +584,8 @@
 			children = (
 				20000009 /* RepositoryProtocols.swift */,
 				20000010 /* SeedData.swift */,
+				20000990 /* SeedPersonas.swift */,
+				20000991 /* SeedPersonaData.swift */,
 				20000011 /* SwiftDataRepositories.swift */,
 			);
 			path = Repositories;
@@ -579,6 +598,7 @@
 				50000022 /* Auth */,
 				50000023 /* Sync */,
 				20000204 /* PlanNotificationScheduler.swift */,
+				20000993 /* LanguageManager.swift */,
 				20000022 /* ServiceContainer.swift */,
 				20000023 /* FeatureFlagService.swift */,
 				20000213 /* FeatureFlagStore.swift */,
@@ -843,6 +863,8 @@
 				20000206 /* PlanActivityRowView.swift */,
 				20000211 /* RecoveryFoundationView.swift */,
 				20000212 /* TestingModeView.swift */,
+				20000992 /* SeedPersonaPickerView.swift */,
+				20000994 /* LanguageSettingsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1017,6 +1039,8 @@
 			knownRegions = (
 				en,
 				Base,
+				es,
+				fr,
 			);
 			mainGroup = 50000001;
 			productRefGroup = 50000003 /* Products */;
@@ -1033,6 +1057,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */,
+				B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */,
 				10000200 /* Assets.xcassets in Resources */,
 				10000801 /* gratitude-prompts.json in Resources */,
 				10001111 /* aa-bigbook-2nd-edition.pdf in Resources */,
@@ -1078,6 +1104,9 @@
 				10000611 /* TimeJournalHeatmapView.swift in Sources */,
 				10000009 /* RepositoryProtocols.swift in Sources */,
 				10000010 /* SeedData.swift in Sources */,
+				10000990 /* SeedPersonas.swift in Sources */,
+				10000991 /* SeedPersonaData.swift in Sources */,
+				10000992 /* SeedPersonaPickerView.swift in Sources */,
 				10000011 /* SwiftDataRepositories.swift in Sources */,
 				10000012 /* APIClient.swift in Sources */,
 				10000013 /* APIError.swift in Sources */,
@@ -1090,6 +1119,8 @@
 				10000020 /* NetworkMonitor.swift in Sources */,
 				10000021 /* SyncEngine.swift in Sources */,
 				10000204 /* PlanNotificationScheduler.swift in Sources */,
+				10000993 /* LanguageManager.swift in Sources */,
+				10000994 /* LanguageSettingsView.swift in Sources */,
 				10000205 /* RecoveryPlanSetupView.swift in Sources */,
 				10000206 /* PlanActivityRowView.swift in Sources */,
 				10000207 /* RecoveryPlanViewModel.swift in Sources */,

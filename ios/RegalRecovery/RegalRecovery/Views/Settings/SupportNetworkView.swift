@@ -175,10 +175,10 @@ struct SupportNetworkView: View {
 
     private func displayRole(_ role: String) -> String {
         switch role {
-        case "sponsor": return "Sponsor"
-        case "counselor": return "Counselor (CSAT)"
-        case "spouse": return "Spouse"
-        case "accountabilityPartner": return "Accountability Partner"
+        case "sponsor": return String(localized: "Sponsor")
+        case "counselor": return String(localized: "Counselor (CSAT)")
+        case "spouse": return String(localized: "Spouse")
+        case "accountabilityPartner": return String(localized: "Accountability Partner")
         default: return role.capitalized
         }
     }

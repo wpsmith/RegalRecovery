@@ -37,6 +37,7 @@ enum SeedData {
     // MARK: - Seed Check
 
     static let seedKey = "com.regalrecovery.seeded"
+    private static let flagsSeedKey = "com.regalrecovery.flagsSeeded"
 
     static func needsSeed() -> Bool {
         !UserDefaults.standard.bool(forKey: seedKey)
@@ -44,6 +45,14 @@ enum SeedData {
 
     static func markSeeded() {
         UserDefaults.standard.set(true, forKey: seedKey)
+    }
+
+    @MainActor
+    static func seedFeatureFlagsIfNeeded(context: ModelContext) throws {
+        guard !UserDefaults.standard.bool(forKey: flagsSeedKey) else { return }
+        try seedFeatureFlags(context: context)
+        try context.save()
+        UserDefaults.standard.set(true, forKey: flagsSeedKey)
     }
 
     // MARK: - Main Seed Function
@@ -607,7 +616,7 @@ enum SeedData {
 
     // MARK: - Feature Flags
 
-    private static func seedFeatureFlags(context: ModelContext) throws {
+    static func seedFeatureFlags(context: ModelContext) throws {
         let flags: [(String, Bool, String)] = [
             // P0 Features
             ("feature.onboarding", true, "Onboarding flow"),

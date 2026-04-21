@@ -26,7 +26,7 @@ struct TimeJournalTodayCard: View {
             formatter.dateFormat = "h:mm a"
             return "Last updated \(formatter.string(from: lastUpdated))"
         }
-        return "No entries yet today"
+        return String(localized: "No entries yet today")
     }
 
     var body: some View {

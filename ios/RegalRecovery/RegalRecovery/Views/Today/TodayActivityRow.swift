@@ -40,7 +40,7 @@ struct TodayActivityRow: View {
                     .foregroundStyle(Color.rrSuccess)
             } else {
                 // State label
-                Text(item.state.rawValue)
+                Text(item.state.displayName)
                     .font(RRFont.caption)
                     .foregroundStyle(item.state.color)
             }
@@ -57,7 +57,7 @@ struct TodayActivityRow: View {
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             if item.state != .completed && item.state != .skipped {
                 Button {
-                    onSkip?("Not today")
+                    onSkip?(String(localized: "Not today"))
                 } label: {
                     Label("Skip", systemImage: "xmark.circle")
                 }

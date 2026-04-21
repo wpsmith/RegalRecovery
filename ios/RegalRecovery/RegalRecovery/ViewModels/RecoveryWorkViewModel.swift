@@ -370,7 +370,7 @@ class RecoveryWorkViewModel {
                 title: "Acting In Behaviors",
                 icon: "shield.lefthalf.filled",
                 iconColor: .orange,
-                category: .activities,
+                category: .foundationTools,
                 featureFlagKey: nil,
                 implemented: false,
                 activityTypeKey: nil
@@ -839,10 +839,10 @@ enum WorkStatus: String {
 
     var label: String {
         switch self {
-        case .notStarted: return "Not Started"
-        case .inProgress: return "In Progress"
-        case .completed: return "Completed"
-        case .overdue: return "Overdue"
+        case .notStarted: return String(localized: "Not Started")
+        case .inProgress: return String(localized: "In Progress")
+        case .completed: return String(localized: "Completed")
+        case .overdue: return String(localized: "Overdue")
         }
     }
 

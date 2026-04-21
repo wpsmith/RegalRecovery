@@ -170,10 +170,10 @@ struct TimeJournalSlotRow: View {
                 // Status chips
                 HStack(spacing: 4) {
                     if entry.isRetroactive {
-                        chipView(text: "Late", color: .rrSecondary)
+                        chipView(text: String(localized: "Late"), color: .rrSecondary)
                     }
                     if entry.isAutoFilled {
-                        chipView(text: "Auto", color: .blue)
+                        chipView(text: String(localized: "Auto"), color: .blue)
                     }
                     if entry.isFlagged {
                         Image(systemName: "flag.fill")
@@ -192,7 +192,7 @@ struct TimeJournalSlotRow: View {
             Image(systemName: "plus.circle")
                 .font(.system(size: 13))
                 .foregroundStyle(.rrTextSecondary)
-            Text("Tap to log")
+            Text(String(localized: "Tap to log"))
                 .font(RRFont.caption)
                 .foregroundStyle(.rrTextSecondary)
         }
@@ -200,7 +200,7 @@ struct TimeJournalSlotRow: View {
     }
 
     private var emptyFutureContent: some View {
-        Text("Upcoming")
+        Text(String(localized: "Upcoming"))
             .font(RRFont.caption)
             .foregroundStyle(.rrTextSecondary.opacity(0.5))
             .padding(.vertical, 6)

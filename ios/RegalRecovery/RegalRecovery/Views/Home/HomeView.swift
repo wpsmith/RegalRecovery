@@ -61,39 +61,39 @@ struct HomeView: View {
         var all: [(date: Date, item: RecentActivity)] = []
 
         for c in commitments.prefix(3) {
-            let label = c.type == "morning" ? "Morning Commitment" : "Evening Review"
+            let label = c.type == "morning" ? String(localized: "Morning Commitment") : String(localized: "Evening Review")
             let icon = c.type == "morning" ? "sunrise.fill" : "moon.stars.fill"
-            all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: c.type == "morning" ? .rrSecondary : .rrPrimary)))
+            all.append((c.date, RecentActivity(title: label, detail: String(localized: "Completed"), time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: c.type == "morning" ? .rrSecondary : .rrPrimary)))
         }
         for m in moodEntries.prefix(3) {
             let emoji = m.score >= 7 ? "😊" : m.score >= 5 ? "😐" : "😟"
-            all.append((m.date, RecentActivity(title: "Mood", detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: "face.smiling", iconColor: .yellow)))
+            all.append((m.date, RecentActivity(title: String(localized: "Mood"), detail: "\(m.score)/10 \(emoji)", time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: "face.smiling", iconColor: .yellow)))
         }
         for p in prayerLogs.prefix(3) {
-            all.append((p.date, RecentActivity(title: "Prayer", detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: "hands.and.sparkles.fill", iconColor: .rrPrimary)))
+            all.append((p.date, RecentActivity(title: String(localized: "Prayer"), detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: "hands.and.sparkles.fill", iconColor: .rrPrimary)))
         }
         for e in exerciseLogs.prefix(3) {
-            all.append((e.date, RecentActivity(title: "Exercise", detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: "figure.run", iconColor: .blue)))
+            all.append((e.date, RecentActivity(title: String(localized: "Exercise"), detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: "figure.run", iconColor: .blue)))
         }
         for f in fasterEntries.prefix(3) {
             let stage = FASTERStage(rawValue: f.stage) ?? .restoration
-            all.append((f.date, RecentActivity(title: "FASTER Scale", detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: "gauge.with.needle", iconColor: stage.color)))
+            all.append((f.date, RecentActivity(title: String(localized: "FASTER Scale"), detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: "gauge.with.needle", iconColor: stage.color)))
         }
         for j in journals.prefix(3) {
             let snippet = String(j.content.prefix(40))
-            all.append((j.date, RecentActivity(title: "Journal", detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: "note.text", iconColor: .purple)))
+            all.append((j.date, RecentActivity(title: String(localized: "Journal"), detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: "note.text", iconColor: .purple)))
         }
         for g in gratitudeEntries.prefix(2) {
-            all.append((g.date, RecentActivity(title: "Gratitude", detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: "leaf.fill", iconColor: .rrSuccess)))
+            all.append((g.date, RecentActivity(title: String(localized: "Gratitude"), detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: "leaf.fill", iconColor: .rrSuccess)))
         }
         for u in urgeLogs.prefix(2) {
-            all.append((u.date, RecentActivity(title: "Urge Log", detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: Date()), icon: "exclamationmark.triangle.fill", iconColor: .orange)))
+            all.append((u.date, RecentActivity(title: String(localized: "Urge Log"), detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: Date()), icon: "exclamationmark.triangle.fill", iconColor: .orange)))
         }
         for pc in phoneCalls.prefix(2) {
-            all.append((pc.date, RecentActivity(title: "Phone Call", detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: Date()), icon: "phone.fill", iconColor: .green)))
+            all.append((pc.date, RecentActivity(title: String(localized: "Phone Call"), detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: Date()), icon: "phone.fill", iconColor: .green)))
         }
         for ml in meetingLogs.prefix(2) {
-            all.append((ml.date, RecentActivity(title: "Meeting", detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: "person.3.fill", iconColor: .rrPrimary)))
+            all.append((ml.date, RecentActivity(title: String(localized: "Meeting"), detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: "person.3.fill", iconColor: .rrPrimary)))
         }
 
         return all.sorted { $0.date > $1.date }.prefix(10).map(\.item)
@@ -115,7 +115,7 @@ struct HomeView: View {
 
                     // MARK: - My Motivations
                     if let motivations = user?.motivations, !motivations.isEmpty {
-                        RRSectionHeader(title: "My Motivations")
+                        RRSectionHeader(title: String(localized: "My Motivations"))
 
                         ForEach(motivations, id: \.self) { motivation in
                             RRCard {
@@ -169,9 +169,9 @@ struct HomeView: View {
 
     private func motivationQuote(for motivation: String) -> String {
         switch motivation {
-        case "Faith":   return "Trust in the Lord with all your heart. — Proverbs 3:5"
-        case "Family":  return "The ones who matter most are counting on you."
-        case "Freedom": return "It is for freedom that Christ has set us free. — Galatians 5:1"
+        case "Faith":   return String(localized: "Trust in the Lord with all your heart. — Proverbs 3:5")
+        case "Family":  return String(localized: "The ones who matter most are counting on you.")
+        case "Freedom": return String(localized: "It is for freedom that Christ has set us free. — Galatians 5:1")
         default:        return ""
         }
     }

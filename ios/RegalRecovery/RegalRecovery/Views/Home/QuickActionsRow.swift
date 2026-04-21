@@ -4,16 +4,16 @@ struct QuickActionsRow: View {
     @State private var showFASTER = false
 
     private let actions: [(title: String, icon: String)] = [
-        ("Log Urge", "exclamationmark.triangle.fill"),
-        ("Journal", "note.text"),
-        ("Prayer", "hands.clap.fill"),
-        ("Mood", "face.smiling"),
-        ("Gratitude", "leaf.fill"),
+        (String(localized: "Log Urge"), "exclamationmark.triangle.fill"),
+        (String(localized: "Journal"), "note.text"),
+        (String(localized: "Prayer"), "hands.clap.fill"),
+        (String(localized: "Mood"), "face.smiling"),
+        (String(localized: "Gratitude"), "leaf.fill"),
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            RRSectionHeader(title: "Quick Actions")
+            RRSectionHeader(title: String(localized: "Quick Actions"))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
