@@ -538,12 +538,38 @@ final class RRUrgeLog {
     var userId: UUID
     var date: Date
     var intensity: Int
-    var addictionId: UUID?
+    var addictionId: UUID?  // Kept for backward compat (single addiction)
+    var addictionIdsJSON: String?  // JSON-encoded [String] of UUID strings
     var triggers: [String]
     var notes: String
     var resolution: String
     var createdAt: Date
     var modifiedAt: Date
+
+    /// Decoded addiction IDs from JSON storage. Falls back to single `addictionId` if JSON is absent.
+    var addictionIds: [UUID] {
+        get {
+            if let json = addictionIdsJSON,
+               let data = json.data(using: .utf8),
+               let decoded = try? JSONDecoder().decode([String].self, from: data) {
+                return decoded.compactMap { UUID(uuidString: $0) }
+            }
+            // Backward compat: fall back to single addictionId
+            if let single = addictionId {
+                return [single]
+            }
+            return []
+        }
+        set {
+            let strings = newValue.map { $0.uuidString }
+            if let data = try? JSONEncoder().encode(strings),
+               let json = String(data: data, encoding: .utf8) {
+                addictionIdsJSON = json
+            }
+            // Also keep addictionId in sync for backward compat
+            addictionId = newValue.first
+        }
+    }
 
     init(
         id: UUID = UUID(),
@@ -551,6 +577,7 @@ final class RRUrgeLog {
         date: Date,
         intensity: Int,
         addictionId: UUID? = nil,
+        addictionIds: [UUID] = [],
         triggers: [String] = [],
         notes: String = "",
         resolution: String = "",
@@ -561,12 +588,30 @@ final class RRUrgeLog {
         self.userId = userId
         self.date = date
         self.intensity = intensity
-        self.addictionId = addictionId
         self.triggers = triggers
         self.notes = notes
         self.resolution = resolution
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
+
+        // If addictionIds provided, use them; otherwise fall back to single addictionId
+        if !addictionIds.isEmpty {
+            self.addictionId = addictionIds.first
+            let strings = addictionIds.map { $0.uuidString }
+            if let data = try? JSONEncoder().encode(strings),
+               let json = String(data: data, encoding: .utf8) {
+                self.addictionIdsJSON = json
+            }
+        } else {
+            self.addictionId = addictionId
+            if let single = addictionId {
+                let strings = [single.uuidString]
+                if let data = try? JSONEncoder().encode(strings),
+                   let json = String(data: data, encoding: .utf8) {
+                    self.addictionIdsJSON = json
+                }
+            }
+        }
     }
 }
 

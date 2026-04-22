@@ -10,7 +10,7 @@ struct UrgeLogViewModelTests {
     func testSubmit_ClearsFormAfterSuccess() async throws {
         let vm = UrgeLogViewModel()
         vm.intensity = 8
-        vm.selectedAddiction = "Sex Addiction (SA)"
+        vm.selectedAddictions = ["Sex Addiction (SA)"]
         vm.selectedTriggers = ["Stress", "Loneliness"]
         vm.notes = "Felt vulnerable after argument"
 
@@ -24,7 +24,7 @@ struct UrgeLogViewModelTests {
     @Test("submit with triggers saves triggers list")
     func testSubmit_WithTriggers_SavesTriggersList() async throws {
         let vm = UrgeLogViewModel()
-        vm.selectedAddiction = "Sex Addiction (SA)"
+        vm.selectedAddictions = ["Sex Addiction (SA)"]
         vm.selectedTriggers = ["Stress", "Loneliness", "Boredom"]
         vm.intensity = 6
 
@@ -42,7 +42,7 @@ struct UrgeLogViewModelTests {
     func testReset_ClearsAllFields() {
         let vm = UrgeLogViewModel()
         vm.intensity = 9
-        vm.selectedAddiction = "Pornography"
+        vm.selectedAddictions = ["Pornography"]
         vm.selectedTriggers = ["Anger", "Late Night"]
         vm.notes = "Some notes"
 
@@ -56,7 +56,7 @@ struct UrgeLogViewModelTests {
     @Test("submit without addiction throws validation error")
     func testSubmit_NoAddiction_Throws() async {
         let vm = UrgeLogViewModel()
-        vm.selectedAddiction = ""
+        vm.selectedAddictions = []
         vm.intensity = 5
 
         do {
@@ -70,7 +70,7 @@ struct UrgeLogViewModelTests {
     @Test("submit adds entry to recent urges")
     func testSubmit_AddsToRecentUrges() async throws {
         let vm = UrgeLogViewModel()
-        vm.selectedAddiction = "Sex Addiction (SA)"
+        vm.selectedAddictions = ["Sex Addiction (SA)"]
         vm.intensity = 7
         vm.notes = "Test note"
 
@@ -78,14 +78,14 @@ struct UrgeLogViewModelTests {
 
         #expect(vm.recentUrges.count == 1)
         #expect(vm.recentUrges.first?.intensity == 7)
-        #expect(vm.recentUrges.first?.addiction == "Sex Addiction (SA)")
+        #expect(vm.recentUrges.first?.addictions.contains("Sex Addiction (SA)") == true)
         #expect(vm.recentUrges.first?.notes == "Test note")
     }
 
     @Test("submit sets isSubmitting during execution")
     func testSubmit_SetsIsSubmitting() async throws {
         let vm = UrgeLogViewModel()
-        vm.selectedAddiction = "Sex Addiction (SA)"
+        vm.selectedAddictions = ["Sex Addiction (SA)"]
         vm.intensity = 5
 
         // After completion, isSubmitting should be false
@@ -97,17 +97,32 @@ struct UrgeLogViewModelTests {
     func testMultipleSubmissions_AccumulateInOrder() async throws {
         let vm = UrgeLogViewModel()
 
-        vm.selectedAddiction = "Sex Addiction (SA)"
+        vm.selectedAddictions = ["Sex Addiction (SA)"]
         vm.intensity = 3
         try await vm.submit()
 
-        vm.selectedAddiction = "Pornography"
+        vm.selectedAddictions = ["Pornography"]
         vm.intensity = 7
         try await vm.submit()
 
         #expect(vm.recentUrges.count == 2)
         // Most recent first
-        #expect(vm.recentUrges[0].addiction == "Pornography")
-        #expect(vm.recentUrges[1].addiction == "Sex Addiction (SA)")
+        #expect(vm.recentUrges[0].addictions.contains("Pornography"))
+        #expect(vm.recentUrges[1].addictions.contains("Sex Addiction (SA)"))
+    }
+
+    @Test("submit with multiple addictions saves all addictions")
+    func testSubmit_MultipleAddictions_SavesAll() async throws {
+        let vm = UrgeLogViewModel()
+        vm.selectedAddictions = ["Sex Addiction (SA)", "Pornography"]
+        vm.intensity = 6
+
+        try await vm.submit()
+
+        #expect(vm.recentUrges.count == 1)
+        let entry = vm.recentUrges.first!
+        #expect(entry.addictions.count == 2)
+        #expect(entry.addictions.contains("Sex Addiction (SA)"))
+        #expect(entry.addictions.contains("Pornography"))
     }
 }

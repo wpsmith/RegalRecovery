@@ -26,7 +26,43 @@ struct EmergencyOverlayView: View {
     @State private var selectedTriggers: Set<String> = []
     @State private var urgeNotes = ""
 
-    private let triggers = ["Stress", "Loneliness", "Boredom", "Anger", "Tiredness", "Social Media", "Late Night", "Conflict"]
+    // Custom trigger support (shared with UrgeLogView)
+    @State private var customTriggerText = ""
+    @State private var showCustomTriggerField = false
+    @AppStorage("customUrgeLogTriggers") private var customTriggersData: Data = Data()
+
+    private let defaultTriggers = ["Stress", "Loneliness", "Boredom", "Anger", "Tiredness", "Social Media", "Late Night", "Conflict"]
+
+    private var customTriggers: [String] {
+        guard !customTriggersData.isEmpty,
+              let decoded = try? JSONDecoder().decode([String].self, from: customTriggersData) else {
+            return []
+        }
+        return decoded
+    }
+
+    private var allTriggers: [String] {
+        defaultTriggers + customTriggers
+    }
+
+    private func saveCustomTrigger(_ trigger: String) {
+        var current = customTriggers
+        let trimmed = trigger.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, !defaultTriggers.contains(trimmed), !current.contains(trimmed) else { return }
+        current.append(trimmed)
+        if let data = try? JSONEncoder().encode(current) {
+            customTriggersData = data
+        }
+    }
+
+    private func confirmCustomTrigger() {
+        let trimmed = customTriggerText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        saveCustomTrigger(trimmed)
+        selectedTriggers.insert(trimmed)
+        customTriggerText = ""
+        showCustomTriggerField = false
+    }
 
     private var sponsor: RRSupportContact? { sponsors.first }
     private var currentStreakDays: Int { streaks.first?.currentDays ?? 0 }
@@ -393,7 +429,7 @@ struct EmergencyOverlayView: View {
                 .foregroundStyle(Color.rrText)
 
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100), spacing: 10)], spacing: 10) {
-                ForEach(triggers, id: \.self) { trigger in
+                ForEach(allTriggers, id: \.self) { trigger in
                     Button {
                         if selectedTriggers.contains(trigger) {
                             selectedTriggers.remove(trigger)
@@ -410,6 +446,58 @@ struct EmergencyOverlayView: View {
                             .frame(maxWidth: .infinity)
                             .background(selectedTriggers.contains(trigger) ? Color.orange : Color.rrSurface)
                             .clipShape(Capsule())
+                    }
+                }
+
+                // Add custom trigger button
+                if showCustomTriggerField {
+                    HStack(spacing: 6) {
+                        TextField("Custom trigger", text: $customTriggerText)
+                            .font(RRFont.caption)
+                            .textFieldStyle(.plain)
+                            .frame(minWidth: 80)
+                            .onSubmit {
+                                confirmCustomTrigger()
+                            }
+
+                        Button {
+                            confirmCustomTrigger()
+                        } label: {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(Color.orange)
+                        }
+
+                        Button {
+                            showCustomTriggerField = false
+                            customTriggerText = ""
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(Color.rrTextSecondary)
+                        }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.rrSurface)
+                    .clipShape(Capsule())
+                    .overlay(
+                        Capsule().strokeBorder(Color.orange.opacity(0.5), lineWidth: 1)
+                    )
+                } else {
+                    Button {
+                        showCustomTriggerField = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                            Text("Add")
+                        }
+                        .font(RRFont.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.orange)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.orange.opacity(0.1))
+                        .clipShape(Capsule())
                     }
                 }
             }

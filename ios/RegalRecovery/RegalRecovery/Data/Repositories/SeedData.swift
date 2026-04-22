@@ -446,6 +446,7 @@ enum SeedData {
                 date: daysAgo(ago, hour: 16, minute: 45),
                 intensity: intensity,
                 addictionId: addictionId,
+                addictionIds: [addictionId],
                 triggers: triggers,
                 notes: notes,
                 resolution: "Maintained sobriety",

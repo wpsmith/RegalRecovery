@@ -5,15 +5,15 @@ struct UrgeEntry: Identifiable {
     let id: UUID
     let date: Date
     let intensity: Int
-    let addiction: String
+    let addictions: [String]
     let triggers: [String]
     let notes: String
 
-    init(id: UUID = UUID(), date: Date = Date(), intensity: Int, addiction: String, triggers: [String], notes: String) {
+    init(id: UUID = UUID(), date: Date = Date(), intensity: Int, addictions: [String], triggers: [String], notes: String) {
         self.id = id
         self.date = date
         self.intensity = intensity
-        self.addiction = addiction
+        self.addictions = addictions
         self.triggers = triggers
         self.notes = notes
     }
@@ -31,7 +31,7 @@ class UrgeLogViewModel {
 
     // Entry state
     var intensity: Int = 5
-    var selectedAddiction: String = ""
+    var selectedAddictions: Set<String> = []
     var selectedTriggers: Set<String> = []
     var notes: String = ""
 
@@ -54,16 +54,18 @@ class UrgeLogViewModel {
             self.error = error.localizedDescription
         }
 
-        if selectedAddiction.isEmpty {
-            selectedAddiction = MockData.profile.addictions.first ?? ""
+        if selectedAddictions.isEmpty {
+            if let first = MockData.profile.addictions.first {
+                selectedAddictions = [first]
+            }
         }
     }
 
     // MARK: - Submit
 
     func submit() async throws {
-        guard !selectedAddiction.isEmpty else {
-            throw ActivityError.validationFailed("Please select an addiction type.")
+        guard !selectedAddictions.isEmpty else {
+            throw ActivityError.validationFailed("Please select at least one addiction type.")
         }
         guard intensity >= 1, intensity <= 10 else {
             throw ActivityError.validationFailed("Intensity must be between 1 and 10.")
@@ -74,7 +76,7 @@ class UrgeLogViewModel {
 
         let entry = UrgeEntry(
             intensity: intensity,
-            addiction: selectedAddiction,
+            addictions: Array(selectedAddictions),
             triggers: Array(selectedTriggers),
             notes: notes
         )
@@ -88,7 +90,11 @@ class UrgeLogViewModel {
 
     func reset() {
         intensity = 5
-        selectedAddiction = MockData.profile.addictions.first ?? ""
+        if let first = MockData.profile.addictions.first {
+            selectedAddictions = [first]
+        } else {
+            selectedAddictions = []
+        }
         selectedTriggers = []
         notes = ""
     }
