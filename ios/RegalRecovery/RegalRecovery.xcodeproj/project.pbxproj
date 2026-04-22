@@ -238,6 +238,7 @@
 		10001204 /* TextToSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001204 /* TextToSpeechService.swift */; };
 		10001205 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001205 /* LocationService.swift */; };
 		10005001 /* VisionTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005001 /* VisionTypes.swift */; };
+		10006000 /* BowtieTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006000 /* BowtieTypes.swift */; };
 		10005002 /* VisionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005002 /* VisionWizardViewModel.swift */; };
 		10005003 /* VisionWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005003 /* VisionWizardView.swift */; };
 		10005004 /* VisionPromptsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005004 /* VisionPromptsStepView.swift */; };
@@ -488,6 +489,7 @@
 		20001204 /* TextToSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextToSpeechService.swift; sourceTree = "<group>"; };
 		20001205 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		20005001 /* VisionTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionTypes.swift; sourceTree = "<group>"; };
+		20006000 /* BowtieTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieTypes.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
 		20005003 /* VisionWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardView.swift; sourceTree = "<group>"; };
 		20005004 /* VisionPromptsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPromptsStepView.swift; sourceTree = "<group>"; };
@@ -582,6 +584,7 @@
 				20003001 /* BookCatalog.swift */,
 				20003100 /* SensaEmoji.swift */,
 				20005001 /* VisionTypes.swift */,
+				20006000 /* BowtieTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1346,6 +1349,7 @@
 				10001204 /* TextToSpeechService.swift in Sources */,
 				10001205 /* LocationService.swift in Sources */,
 				10005001 /* VisionTypes.swift in Sources */,
+				10006000 /* BowtieTypes.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,
 				10005004 /* VisionPromptsStepView.swift in Sources */,
