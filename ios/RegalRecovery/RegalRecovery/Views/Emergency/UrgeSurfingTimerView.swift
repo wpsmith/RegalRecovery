@@ -13,10 +13,20 @@ struct UrgeSurfingTimerView: View {
 
     @State private var viewModel = UrgeSurfingViewModel()
     @State private var timerCancellable: AnyCancellable?
+    @State private var showCompanionActivityId: String?
 
     private var currentStreakDays: Int { streaks.first?.currentDays ?? 0 }
     private var userId: UUID { users.first?.id ?? UUID() }
     private var sponsor: RRSupportContact? { sponsors.first }
+
+    /// Selectable companion activity IDs read from UserDefaults.
+    private var configuredSelectableActivities: [String] {
+        if let data = UserDefaults.standard.data(forKey: "urgeSurfing.selectableActivities"),
+           let ids = try? JSONDecoder().decode([String].self, from: data) {
+            return ids
+        }
+        return [ActivityType.prayer.rawValue, ActivityType.affirmationLog.rawValue]
+    }
 
     private let motivations = [
         String(localized: "The urge is a wave. You can ride it out."),
@@ -102,6 +112,21 @@ struct UrgeSurfingTimerView: View {
         .sheet(isPresented: $viewModel.showCompanionAffirmations) {
             AffirmationSurfingSheet()
         }
+        .sheet(isPresented: Binding(
+            get: { showCompanionActivityId != nil },
+            set: { if !$0 { showCompanionActivityId = nil } }
+        )) {
+            if let activityId = showCompanionActivityId {
+                NavigationStack {
+                    companionActivityDestination(for: activityId)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Done") { showCompanionActivityId = nil }
+                            }
+                        }
+                }
+            }
+        }
         .onDisappear {
             timerCancellable?.cancel()
         }
@@ -157,7 +182,7 @@ struct UrgeSurfingTimerView: View {
                         .font(RRFont.largeTitle)
                         .foregroundStyle(.white)
 
-                    Text("The urge is a wave — ride it out for 20 minutes")
+                    Text("The urge is a wave — ride it out for \(viewModel.configuredDurationSeconds / 60) minutes")
                         .font(RRFont.body)
                         .foregroundStyle(.white.opacity(0.7))
                         .multilineTextAlignment(.center)
@@ -196,18 +221,23 @@ struct UrgeSurfingTimerView: View {
     // MARK: - Milestone Track
 
     private var milestoneTrack: some View {
-        MilestoneTrackView(secondsElapsed: viewModel.secondsElapsed)
+        MilestoneTrackView(
+            secondsElapsed: viewModel.secondsElapsed,
+            totalMinutes: viewModel.configuredDurationSeconds / 60
+        )
     }
 
     // MARK: - Companion Tools
 
     private var companionTools: some View {
         HStack(spacing: 16) {
+            // Permanent: Breathing Exercise (always shown)
             companionButton(icon: "wind", label: "Breathe") {
                 viewModel.activitiesUsed.insert("Breathing")
                 viewModel.showCompanionBreathing = true
             }
 
+            // Permanent: Call Sponsor (only if sponsor exists)
             if let phone = sponsor?.phone {
                 companionButton(icon: "phone.fill", label: "Call Sponsor") {
                     viewModel.activitiesUsed.insert("Call Sponsor")
@@ -217,17 +247,55 @@ struct UrgeSurfingTimerView: View {
                 }
             }
 
+            // Selectable activities from config
+            ForEach(configuredSelectableActivities, id: \.self) { activityId in
+                companionButtonForActivity(activityId)
+            }
+        }
+        .padding(.horizontal, 32)
+    }
+
+    @ViewBuilder
+    private func companionButtonForActivity(_ activityId: String) -> some View {
+        switch activityId {
+        case ActivityType.prayer.rawValue:
             companionButton(icon: "hands.and.sparkles.fill", label: "Pray") {
                 viewModel.activitiesUsed.insert("Prayer")
                 viewModel.showCompanionPrayer = true
             }
-
+        case ActivityType.affirmationLog.rawValue:
             companionButton(icon: "text.quote", label: "Affirm") {
                 viewModel.activitiesUsed.insert("Affirmations")
                 viewModel.showCompanionAffirmations = true
             }
+        case ActivityType.journal.rawValue:
+            companionButton(icon: "note.text", label: "Journal") {
+                viewModel.activitiesUsed.insert("Journaling")
+                showCompanionActivityId = "journal"
+            }
+        case ActivityType.mood.rawValue:
+            companionButton(icon: "face.smiling", label: "Mood") {
+                viewModel.activitiesUsed.insert("Mood Rating")
+                showCompanionActivityId = "mood"
+            }
+        case ActivityType.gratitude.rawValue:
+            companionButton(icon: "leaf.fill", label: "Gratitude") {
+                viewModel.activitiesUsed.insert("Gratitude")
+                showCompanionActivityId = "gratitude"
+            }
+        case ActivityType.exercise.rawValue:
+            companionButton(icon: "figure.run", label: "Exercise") {
+                viewModel.activitiesUsed.insert("Exercise")
+                showCompanionActivityId = "exercise"
+            }
+        case "devotional":
+            companionButton(icon: "book.fill", label: "Devotional") {
+                viewModel.activitiesUsed.insert("Devotional")
+                showCompanionActivityId = "devotional"
+            }
+        default:
+            EmptyView()
         }
-        .padding(.horizontal, 32)
     }
 
     private func companionButton(icon: String, label: String, action: @escaping () -> Void) -> some View {
@@ -385,6 +453,28 @@ struct UrgeSurfingTimerView: View {
         }
     }
 
+    // MARK: - Companion Activity Destinations
+
+    @ViewBuilder
+    private func companionActivityDestination(for activityId: String) -> some View {
+        switch activityId {
+        case "journal":
+            JournalView()
+        case "mood":
+            MoodRatingView()
+        case "gratitude":
+            GratitudeTabView()
+        case "exercise":
+            ExerciseLogView()
+        case "devotional":
+            DevotionalView()
+        default:
+            Text("Coming Soon")
+                .font(RRFont.title3)
+                .foregroundStyle(Color.rrTextSecondary)
+        }
+    }
+
     // MARK: - Timer
 
     private func startTimer() {
@@ -444,8 +534,14 @@ private struct WaveCanvasView: View {
 
 private struct MilestoneTrackView: View {
     let secondsElapsed: Int
+    var totalMinutes: Int = 20
 
-    private let minutes = [0, 5, 10, 15, 20]
+    private var minutes: [Int] {
+        let q1 = totalMinutes / 4
+        let q2 = totalMinutes / 2
+        let q3 = (totalMinutes * 3) / 4
+        return [0, q1, q2, q3, totalMinutes]
+    }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -468,7 +564,7 @@ private struct MilestoneTrackView: View {
 
     private func milestoneDot(for minute: Int) -> some View {
         let filled = secondsElapsed >= minute * 60
-        let isEndpoint = minute == 0 || minute == 20
+        let isEndpoint = minute == 0 || minute == totalMinutes
         let dotSize: CGFloat = isEndpoint ? 14 : 10
 
         return VStack(spacing: 4) {

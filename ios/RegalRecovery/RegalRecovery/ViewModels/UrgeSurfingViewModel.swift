@@ -30,9 +30,16 @@ class UrgeSurfingViewModel {
     // Wave animation
     var wavePhaseOffset: Double = 0
 
+    /// Configured timer duration in seconds, read from UserDefaults.
+    var configuredDurationSeconds: Int {
+        let minutes = UserDefaults.standard.integer(forKey: "urgeSurfing.timerMinutes")
+        let resolved = minutes > 0 ? minutes : 20
+        return resolved * 60
+    }
+
     /// Normalized progress 0...1
     var progress: Double {
-        Double(secondsElapsed) / 1200.0
+        Double(secondsElapsed) / Double(configuredDurationSeconds)
     }
 
     /// Wave height decreases as timer progresses (urge subsides)
@@ -46,11 +53,17 @@ class UrgeSurfingViewModel {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
+    /// Milestone minutes at 25%, 50%, 75% of configured duration.
+    var milestoneMinutes: [Int] {
+        let total = configuredDurationSeconds / 60
+        return [total / 4, total / 2, (total * 3) / 4]
+    }
+
     var milestonesPassed: Set<Int> {
         var passed: Set<Int> = []
-        if secondsElapsed >= 300 { passed.insert(5) }
-        if secondsElapsed >= 600 { passed.insert(10) }
-        if secondsElapsed >= 900 { passed.insert(15) }
+        for m in milestoneMinutes {
+            if secondsElapsed >= m * 60 { passed.insert(m) }
+        }
         return passed
     }
 
@@ -59,7 +72,7 @@ class UrgeSurfingViewModel {
     func start(modelContext: ModelContext, userId: UUID) {
         phase = .running
         isRunning = true
-        secondsRemaining = 1200
+        secondsRemaining = configuredDurationSeconds
         secondsElapsed = 0
         currentMilestone = nil
         milestoneMessage = nil
@@ -91,7 +104,7 @@ class UrgeSurfingViewModel {
     func stop() {
         isRunning = false
         phase = .ready
-        secondsRemaining = 1200
+        secondsRemaining = configuredDurationSeconds
         secondsElapsed = 0
         currentMilestone = nil
         milestoneMessage = nil
@@ -167,24 +180,23 @@ class UrgeSurfingViewModel {
     // MARK: - Private
 
     private func checkMilestone() {
-        switch secondsElapsed {
-        case 300: // 5 minutes
-            currentMilestone = 5
-            milestoneMessage = String(localized: "5 minutes — you're riding the wave")
-            phase = .milestone
-            clearMilestoneAfterDelay()
-        case 600: // 10 minutes
-            currentMilestone = 10
-            milestoneMessage = String(localized: "10 minutes — halfway there, the urge is fading")
-            phase = .milestone
-            clearMilestoneAfterDelay()
-        case 900: // 15 minutes
-            currentMilestone = 15
-            milestoneMessage = String(localized: "15 minutes — almost through it")
-            phase = .milestone
-            clearMilestoneAfterDelay()
-        default:
-            break
+        let milestones = milestoneMinutes
+        guard milestones.count == 3 else { return }
+
+        let messages: [(Int, String)] = [
+            (milestones[0], String(localized: "\(milestones[0]) minutes — you're riding the wave")),
+            (milestones[1], String(localized: "\(milestones[1]) minutes — halfway there, the urge is fading")),
+            (milestones[2], String(localized: "\(milestones[2]) minutes — almost through it")),
+        ]
+
+        for (minute, message) in messages {
+            if secondsElapsed == minute * 60 {
+                currentMilestone = minute
+                milestoneMessage = message
+                phase = .milestone
+                clearMilestoneAfterDelay()
+                return
+            }
         }
     }
 

@@ -117,6 +117,7 @@
 		10000082 /* EmergencyFABButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000082 /* EmergencyFABButton.swift */; };
 		10000083 /* EmergencyOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000083 /* EmergencyOverlayView.swift */; };
 		10000202 /* UrgeSurfingTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000202 /* UrgeSurfingTimerView.swift */; };
+		10001301 /* UrgeSurfingConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001301 /* UrgeSurfingConfigView.swift */; };
 		10000203 /* UrgeSurfingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000203 /* UrgeSurfingViewModel.swift */; };
 		10000084 /* CommitmentsCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000084 /* CommitmentsCard.swift */; };
 		10000085 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000085 /* HomeView.swift */; };
@@ -434,6 +435,7 @@
 		20000082 /* EmergencyFABButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyFABButton.swift; sourceTree = "<group>"; };
 		20000083 /* EmergencyOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyOverlayView.swift; sourceTree = "<group>"; };
 		20000202 /* UrgeSurfingTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeSurfingTimerView.swift; sourceTree = "<group>"; };
+		20001301 /* UrgeSurfingConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeSurfingConfigView.swift; sourceTree = "<group>"; };
 		20000084 /* CommitmentsCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommitmentsCard.swift; sourceTree = "<group>"; };
 		20000085 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		20000086 /* MilestoneBadgesRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MilestoneBadgesRow.swift; sourceTree = "<group>"; };
@@ -859,6 +861,7 @@
 				20000082 /* EmergencyFABButton.swift */,
 				20000083 /* EmergencyOverlayView.swift */,
 				20000202 /* UrgeSurfingTimerView.swift */,
+				20001301 /* UrgeSurfingConfigView.swift */,
 			);
 			path = Emergency;
 			sourceTree = "<group>";
@@ -1276,6 +1279,7 @@
 				10000082 /* EmergencyFABButton.swift in Sources */,
 				10000083 /* EmergencyOverlayView.swift in Sources */,
 				10000202 /* UrgeSurfingTimerView.swift in Sources */,
+				10001301 /* UrgeSurfingConfigView.swift in Sources */,
 				10000203 /* UrgeSurfingViewModel.swift in Sources */,
 				10000084 /* CommitmentsCard.swift in Sources */,
 				10000085 /* HomeView.swift in Sources */,

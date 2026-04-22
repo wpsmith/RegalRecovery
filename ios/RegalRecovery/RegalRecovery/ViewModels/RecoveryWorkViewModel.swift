@@ -130,6 +130,16 @@ class RecoveryWorkViewModel {
                 implemented: true,
                 activityTypeKey: "recoveryPlan"
             ),
+            WorkTileItem(
+                id: "foundation.urge-surfing-config",
+                title: String(localized: "Urge Surfing"),
+                icon: "water.waves",
+                iconColor: .orange,
+                category: .foundationTools,
+                featureFlagKey: "feature.urge-surfing-timer",
+                implemented: true,
+                activityTypeKey: "urgeSurfingConfig"
+            ),
         ])
 
         // ── Activities ──

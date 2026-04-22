@@ -257,6 +257,8 @@ struct RecoveryWorkView: View {
             RecoveryPlanSetupView()
         case "visionStatement":
             VisionHubView()
+        case "urgeSurfingConfig":
+            UrgeSurfingConfigView()
         case "threeCircles":
             ThreeCirclesView()
         case "analytics":
