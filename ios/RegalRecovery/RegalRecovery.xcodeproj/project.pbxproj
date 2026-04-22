@@ -775,6 +775,7 @@
 				20006011 /* BowtieMarkerViewModel.swift */,
 				20006020 /* PPPEntryViewModel.swift */,
 				20006030 /* BowtieOnboardingViewModel.swift */,
+				20006040 /* BackboneProcessingViewModel.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -791,6 +792,7 @@
 				20006019 /* BowtieDiagramView.swift */,
 				20006021 /* PPPFormView.swift */,
 				20006031 /* BowtieOnboardingView.swift */,
+				20006041 /* BackboneFlowView.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -803,6 +805,7 @@
 				20006018 /* BowtieMarkerViewModelTests.swift */,
 				20006022 /* PPPEntryViewModelTests.swift */,
 				20006032 /* BowtieOnboardingViewModelTests.swift */,
+				20006042 /* BackboneProcessingViewModelTests.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -1445,6 +1448,8 @@
 				10006021 /* PPPFormView.swift in Sources */,
 				10006030 /* BowtieOnboardingViewModel.swift in Sources */,
 				10006031 /* BowtieOnboardingView.swift in Sources */,
+				10006040 /* BackboneProcessingViewModel.swift in Sources */,
+				10006041 /* BackboneFlowView.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,
 				10005004 /* VisionPromptsStepView.swift in Sources */,
