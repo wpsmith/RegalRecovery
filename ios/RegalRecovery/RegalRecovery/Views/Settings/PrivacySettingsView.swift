@@ -3,7 +3,6 @@ import SwiftUI
 struct PrivacySettingsView: View {
     @State private var showExportJSONAlert = false
     @State private var showExportPDFAlert = false
-    @State private var showDeleteAlert = false
 
     var body: some View {
         List {
@@ -24,17 +23,6 @@ struct PrivacySettingsView: View {
                 Text("Export")
             }
 
-            // MARK: - Delete Section
-            Section {
-                Button(role: .destructive) {
-                    showDeleteAlert = true
-                } label: {
-                    Label("Delete My Account", systemImage: "trash")
-                        .foregroundStyle(Color.rrDestructive)
-                }
-            } footer: {
-                Text("Account deletion is permanent and takes effect after 30 days.")
-            }
         }
         .listStyle(.insetGrouped)
         .alert("Export Successful", isPresented: $showExportJSONAlert) {
@@ -46,12 +34,6 @@ struct PrivacySettingsView: View {
             Button("OK") { }
         } message: {
             Text("Your data has been exported as PDF.")
-        }
-        .alert("Delete Account?", isPresented: $showDeleteAlert) {
-            Button("Delete", role: .destructive) { }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("This will permanently delete your account after 30 days.")
         }
     }
 }
