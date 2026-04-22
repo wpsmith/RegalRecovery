@@ -99,6 +99,7 @@ enum ActivityType: String, CaseIterable {
     case stepWork = "12-Step Work"
     case weeklyGoals = "Weekly Goals"
     case affirmationLog = "Affirmation Log"
+    case motivations = "Motivations"
 
     var displayName: String {
         switch self {
@@ -119,6 +120,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return String(localized: "12-Step Work")
         case .weeklyGoals: return String(localized: "Weekly Goals")
         case .affirmationLog: return String(localized: "Affirmation Log")
+        case .motivations: return String(localized: "Motivations")
         }
     }
 
@@ -141,6 +143,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return "stairs"
         case .weeklyGoals: return "target"
         case .affirmationLog: return "text.quote"
+        case .motivations: return "flame.fill"
         }
     }
 
@@ -162,6 +165,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return .rrSecondary
         case .weeklyGoals: return .rrPrimary
         case .affirmationLog: return .rrSecondary
+        case .motivations: return .orange
         }
     }
 
@@ -175,7 +179,7 @@ enum ActivityType: String, CaseIterable {
             return .selfCare
         case .phoneCalls, .meetingsAttended, .fanos, .fitnap:
             return .connection
-        case .stepWork, .weeklyGoals, .affirmationLog:
+        case .stepWork, .weeklyGoals, .affirmationLog, .motivations:
             return .growth
         }
     }
@@ -1215,6 +1219,20 @@ struct DailyEligibleActivity {
             typicalMinute: 0,
             typicalBlock: "Evening",
             featureFlagKey: "activity.book-reading",
+            section: .growth
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.motivations.rawValue,
+            displayNameKey: "Motivations",
+            shortNameKey: "Motivations",
+            icon: "flame.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 7,
+            typicalMinute: 0,
+            typicalBlock: "Morning",
+            featureFlagKey: "activity.motivations",
             section: .growth
         ),
     ]
