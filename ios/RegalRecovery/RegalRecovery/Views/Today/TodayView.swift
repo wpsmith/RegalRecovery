@@ -71,6 +71,9 @@ struct TodayView: View {
             .fullScreenCover(isPresented: $showFASTERMood) {
                 FASTERCheckInFlowView()
             }
+            .onReceive(NotificationCenter.default.publisher(for: .emergencyDismissed)) { _ in
+                viewModel.load(context: modelContext)
+            }
         }
     }
 

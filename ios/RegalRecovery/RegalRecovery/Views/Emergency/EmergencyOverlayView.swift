@@ -156,6 +156,7 @@ struct EmergencyOverlayView: View {
 
             // Dismiss button
             Button {
+                NotificationCenter.default.post(name: .emergencyDismissed, object: nil, userInfo: ["reason": "closedByUser"])
                 isPresented = false
             } label: {
                 Image(systemName: "xmark")

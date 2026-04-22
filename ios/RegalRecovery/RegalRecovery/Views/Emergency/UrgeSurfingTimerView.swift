@@ -124,6 +124,7 @@ struct UrgeSurfingTimerView: View {
             Button {
                 timerCancellable?.cancel()
                 viewModel.stop()
+                NotificationCenter.default.post(name: .emergencyDismissed, object: nil, userInfo: ["reason": "closedByUser"])
                 isPresented = false
             } label: {
                 Image(systemName: "xmark")
@@ -267,6 +268,7 @@ struct UrgeSurfingTimerView: View {
                     timerCancellable?.cancel()
                     viewModel.markSurfed(modelContext: modelContext)
                     viewModel.stop()
+                    NotificationCenter.default.post(name: .emergencyDismissed, object: nil, userInfo: ["reason": "closedByUser"])
                     isPresented = false
                 } label: {
                     HStack(spacing: 8) {
@@ -285,6 +287,7 @@ struct UrgeSurfingTimerView: View {
                     timerCancellable?.cancel()
                     viewModel.markSurfed(modelContext: modelContext)
                     viewModel.stop()
+                    NotificationCenter.default.post(name: .emergencyDismissed, object: nil, userInfo: ["reason": "okayNow"])
                     isPresented = false
                 } label: {
                     Text("I'm okay now")

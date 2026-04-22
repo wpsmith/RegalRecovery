@@ -36,92 +36,99 @@ struct BreathingExerciseView: View {
     private let totalCycles = 3
 
     var body: some View {
-        VStack(spacing: 32) {
-            HStack {
+        ZStack(alignment: .topTrailing) {
+            VStack(spacing: 24) {
                 Spacer()
-                Button { dismiss() } label: {
-                    Image(systemName: "xmark")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 36, height: 36)
-                        .background(Color.white.opacity(0.15))
-                        .clipShape(Circle())
-                }
-            }
-            .padding(.horizontal)
 
-            ZStack {
-                Circle()
-                    .fill(Color.rrPrimary.opacity(0.15))
-                    .frame(width: 240, height: 240)
+                // Circle animation
+                ZStack {
+                    Circle()
+                        .fill(Color.rrPrimary.opacity(0.15))
+                        .frame(width: 240, height: 240)
 
-                Circle()
-                    .fill(Color.rrPrimary.opacity(phaseOpacity))
-                    .frame(width: 180, height: 180)
-                    .scaleEffect(circleScale)
+                    Circle()
+                        .fill(Color.rrPrimary.opacity(phaseOpacity))
+                        .frame(width: 180, height: 180)
+                        .scaleEffect(circleScale)
 
-                if isRunning && !isComplete {
-                    VStack(spacing: 4) {
-                        Text(LocalizedStringKey(currentPhase.rawValue))
-                            .font(RRFont.title)
-                            .foregroundStyle(.white)
-                        Text("\(currentPhase.duration - currentSecond)")
-                            .font(.system(size: 36, weight: .bold, design: .rounded))
-                            .foregroundStyle(.white)
+                    if isRunning && !isComplete {
+                        VStack(spacing: 4) {
+                            Text(LocalizedStringKey(currentPhase.rawValue))
+                                .font(RRFont.title)
+                                .foregroundStyle(.white)
+                            Text("\(currentPhase.duration - currentSecond)")
+                                .font(.system(size: 36, weight: .bold, design: .rounded))
+                                .foregroundStyle(.white)
+                        }
                     }
                 }
+                .frame(width: 330, height: 330)
+
+                // Phase / completion / intro text
+                if isComplete {
+                    VStack(spacing: 12) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 48))
+                            .foregroundStyle(Color.rrSuccess)
+
+                        Text("Great job — you completed 3 cycles")
+                            .font(RRFont.title3)
+                            .foregroundStyle(Color.rrText)
+                            .multilineTextAlignment(.center)
+                    }
+                } else if isRunning {
+                    VStack(spacing: 8) {
+                        Text(LocalizedStringKey(currentPhase.rawValue))
+                            .font(RRFont.largeTitle)
+                            .foregroundStyle(Color.rrText)
+
+                        Text("Cycle \(cycleCount + 1) of \(totalCycles)")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                } else {
+                    VStack(spacing: 8) {
+                        Text("4-7-8 Breathing")
+                            .font(RRFont.title)
+                            .foregroundStyle(Color.rrText)
+
+                        Text("Inhale 4s  ·  Hold 7s  ·  Exhale 8s")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                }
+
+                Spacer()
+
+                // Action button
+                if !isRunning && !isComplete {
+                    RRButton("Tap to Start", icon: "play.fill") {
+                        startBreathing()
+                    }
+                    .padding(.horizontal, 32)
+                } else if isComplete {
+                    RRButton("Done", icon: "checkmark") {
+                        dismiss()
+                    }
+                    .padding(.horizontal, 32)
+                }
+
+                Spacer()
             }
+            .padding()
 
-            if isComplete {
-                VStack(spacing: 12) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 48))
-                        .foregroundStyle(Color.rrSuccess)
-
-                    Text("Great job — you completed 3 cycles")
-                        .font(RRFont.title3)
-                        .foregroundStyle(Color.rrText)
-                        .multilineTextAlignment(.center)
-                }
-            } else if isRunning {
-                VStack(spacing: 8) {
-                    Text(LocalizedStringKey(currentPhase.rawValue))
-                        .font(RRFont.largeTitle)
-                        .foregroundStyle(Color.rrText)
-
-                    Text("Cycle \(cycleCount + 1) of \(totalCycles)")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                }
-            } else {
-                VStack(spacing: 8) {
-                    Text("4-7-8 Breathing")
-                        .font(RRFont.title)
-                        .foregroundStyle(Color.rrText)
-
-                    Text("Inhale 4s  ·  Hold 7s  ·  Exhale 8s")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                }
+            // Close button (overlay, outside VStack flow)
+            Button { dismiss() } label: {
+                Image(systemName: "xmark")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 36, height: 36)
+                    .background(Color.white.opacity(0.15))
+                    .clipShape(Circle())
             }
-
-            Spacer()
-
-            if !isRunning && !isComplete {
-                RRButton("Tap to Start", icon: "play.fill") {
-                    startBreathing()
-                }
-                .padding(.horizontal, 32)
-            } else if isComplete {
-                RRButton("Done", icon: "checkmark") {
-                    resetExercise()
-                }
-                .padding(.horizontal, 32)
-            }
-
-            Spacer()
+            .padding(.top, 16)
+            .padding(.trailing, 16)
         }
-        .padding()
         .background(Color.rrBackground.ignoresSafeArea())
         .onDisappear {
             timerCancellable?.cancel()
@@ -194,6 +201,9 @@ struct BreathingExerciseView: View {
                     timerCancellable?.cancel()
                     isComplete = true
                     isRunning = false
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        dismiss()
+                    }
                     return
                 }
             }

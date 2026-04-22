@@ -1,6 +1,10 @@
 import SwiftUI
 import SwiftData
 
+extension Notification.Name {
+    static let emergencyDismissed = Notification.Name("emergencyDismissed")
+}
+
 @main
 struct RegalRecoveryApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
@@ -8,6 +12,7 @@ struct RegalRecoveryApp: App {
     @AppStorage("biometricLockEnabled") private var biometricLockEnabled = false
     @State private var showEmergencyOverlay = false
     @State private var showUrgeSurfingTimer = false
+    @State private var showUrgeLogAfterDismiss = false
     @State private var selectedTab = 0
     @State private var isUnlocked = true
 
@@ -82,6 +87,20 @@ struct RegalRecoveryApp: App {
         }
         .fullScreenCover(isPresented: $showUrgeSurfingTimer) {
             UrgeSurfingTimerView(isPresented: $showUrgeSurfingTimer)
+        }
+        .sheet(isPresented: $showUrgeLogAfterDismiss) {
+            NavigationStack {
+                UrgeLogView()
+                    .navigationTitle("Log Urge")
+                    .navigationBarTitleDisplayMode(.inline)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .emergencyDismissed)) { notification in
+            if let reason = notification.userInfo?["reason"] as? String, reason == "okayNow" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showUrgeLogAfterDismiss = true
+                }
+            }
         }
     }
 
