@@ -132,7 +132,8 @@
 		10000091 /* AccountSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000091 /* AccountSetupView.swift */; };
 		10000092 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000092 /* OnboardingFlow.swift */; };
 		10000093 /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000093 /* PermissionsView.swift */; };
-		10000094 /* RecoverySetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000094 /* RecoverySetupView.swift */; };
+		10000998 /* AddictionSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000998 /* AddictionSetupView.swift */; };
+		10000999 /* MotivationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000999 /* MotivationSetupView.swift */; };
 		10000095 /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000095 /* WelcomeView.swift */; };
 		10000096 /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000096 /* AboutView.swift */; };
 		10000097 /* AddictionManagementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000097 /* AddictionManagementView.swift */; };
@@ -143,6 +144,7 @@
 		10000101 /* PrivacySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000101 /* PrivacySettingsView.swift */; };
 		10000102 /* ProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000102 /* ProfileEditView.swift */; };
 		10000103 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000103 /* SettingsView.swift */; };
+		10000995 /* AppPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000995 /* AppPermissionsView.swift */; };
 		10000104 /* SupportNetworkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000104 /* SupportNetworkView.swift */; };
 		10000105 /* FASTERScaleToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000105 /* FASTERScaleToolView.swift */; };
 		10000107 /* PanicButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000107 /* PanicButtonView.swift */; };
@@ -248,6 +250,10 @@
 		10005009 /* VisionHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005009 /* VisionHubView.swift */; };
 		10005010 /* VisionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005010 /* VisionHistoryView.swift */; };
 		10005011 /* VisionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005011 /* VisionCard.swift */; };
+		10006001 /* QuickActionDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006001 /* QuickActionDefinition.swift */; };
+		10006002 /* ActivityDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006002 /* ActivityDestinationView.swift */; };
+		10006003 /* QuickActionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006003 /* QuickActionsViewModel.swift */; };
+		10006004 /* QuickActionsCustomizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006004 /* QuickActionsCustomizeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -439,7 +445,8 @@
 		20000091 /* AccountSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSetupView.swift; sourceTree = "<group>"; };
 		20000092 /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		20000093 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
-		20000094 /* RecoverySetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoverySetupView.swift; sourceTree = "<group>"; };
+		20000998 /* AddictionSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddictionSetupView.swift; sourceTree = "<group>"; };
+		20000999 /* MotivationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSetupView.swift; sourceTree = "<group>"; };
 		20000095 /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		20000096 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		20000097 /* AddictionManagementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddictionManagementView.swift; sourceTree = "<group>"; };
@@ -469,6 +476,7 @@
 		20000212 /* TestingModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestingModeView.swift; sourceTree = "<group>"; };
 		20000992 /* SeedPersonaPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPersonaPickerView.swift; sourceTree = "<group>"; };
 		20000994 /* LanguageSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageSettingsView.swift; sourceTree = "<group>"; };
+		20000995 /* AppPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppPermissionsView.swift; sourceTree = "<group>"; };
 		20002001 /* BigBook */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BigBook; sourceTree = "<group>"; };
 		20003000 /* BookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookData.swift; sourceTree = "<group>"; };
 		20003001 /* BookCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCatalog.swift; sourceTree = "<group>"; };
@@ -500,6 +508,10 @@
 		20005011 /* VisionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionCard.swift; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		20006001 /* QuickActionDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDefinition.swift; sourceTree = "<group>"; };
+		20006002 /* ActivityDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDestinationView.swift; sourceTree = "<group>"; };
+		20006003 /* QuickActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsViewModel.swift; sourceTree = "<group>"; };
+		20006004 /* QuickActionsCustomizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsCustomizeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -582,6 +594,7 @@
 				20003001 /* BookCatalog.swift */,
 				20003100 /* SensaEmoji.swift */,
 				20005001 /* VisionTypes.swift */,
+				20006001 /* QuickActionDefinition.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -711,6 +724,7 @@
 				20000600 /* TimeJournalEntryViewModel.swift */,
 				50001000 /* ThreeCircles */,
 				20005002 /* VisionWizardViewModel.swift */,
+				20006003 /* QuickActionsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -733,6 +747,7 @@
 				50000043 /* Emergency */,
 				50000044 /* Home */,
 				50000045 /* Onboarding */,
+				50006001 /* Shared */,
 				50000046 /* Settings */,
 				50000047 /* Tools */,
 				50000300 /* Today */,
@@ -860,6 +875,7 @@
 				20000309 /* RecentActivityRow.swift */,
 				20000090 /* StreakHeroCard.swift */,
 				20005011 /* VisionCard.swift */,
+				20006004 /* QuickActionsCustomizeView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -867,10 +883,11 @@
 		50000045 /* Onboarding */ = {
 			isa = PBXGroup;
 			children = (
+				20000998 /* AddictionSetupView.swift */,
 				20000091 /* AccountSetupView.swift */,
+				20000999 /* MotivationSetupView.swift */,
 				20000092 /* OnboardingFlow.swift */,
 				20000093 /* PermissionsView.swift */,
-				20000094 /* RecoverySetupView.swift */,
 				20000095 /* WelcomeView.swift */,
 			);
 			path = Onboarding;
@@ -895,6 +912,7 @@
 				20000212 /* TestingModeView.swift */,
 				20000992 /* SeedPersonaPickerView.swift */,
 				20000994 /* LanguageSettingsView.swift */,
+				20000995 /* AppPermissionsView.swift */,
 			);
 			path = Settings;
 			sourceTree = "<group>";
@@ -1053,6 +1071,14 @@
 				20005008 /* VisionReviewStepView.swift */,
 			);
 			path = Vision;
+			sourceTree = "<group>";
+		};
+		50006001 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				20006002 /* ActivityDestinationView.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1265,7 +1291,8 @@
 				10000091 /* AccountSetupView.swift in Sources */,
 				10000092 /* OnboardingFlow.swift in Sources */,
 				10000093 /* PermissionsView.swift in Sources */,
-				10000094 /* RecoverySetupView.swift in Sources */,
+				10000998 /* AddictionSetupView.swift in Sources */,
+				10000999 /* MotivationSetupView.swift in Sources */,
 				10000095 /* WelcomeView.swift in Sources */,
 				10000096 /* AboutView.swift in Sources */,
 				10000097 /* AddictionManagementView.swift in Sources */,
@@ -1276,6 +1303,7 @@
 				10000101 /* PrivacySettingsView.swift in Sources */,
 				10000102 /* ProfileEditView.swift in Sources */,
 				10000103 /* SettingsView.swift in Sources */,
+				10000995 /* AppPermissionsView.swift in Sources */,
 				10000104 /* SupportNetworkView.swift in Sources */,
 				10000105 /* FASTERScaleToolView.swift in Sources */,
 				10000107 /* PanicButtonView.swift in Sources */,
@@ -1356,6 +1384,10 @@
 				10005009 /* VisionHubView.swift in Sources */,
 				10005010 /* VisionHistoryView.swift in Sources */,
 				10005011 /* VisionCard.swift in Sources */,
+				10006001 /* QuickActionDefinition.swift in Sources */,
+				10006002 /* ActivityDestinationView.swift in Sources */,
+				10006003 /* QuickActionsViewModel.swift in Sources */,
+				10006004 /* QuickActionsCustomizeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
