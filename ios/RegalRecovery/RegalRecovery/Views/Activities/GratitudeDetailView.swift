@@ -175,7 +175,7 @@ struct GratitudeDetailView: View {
                             HStack {
                                 Spacer()
                                     .frame(width: 32)
-                                RRBadge(text: category.rawValue, color: category.color)
+                                RRBadge(text: item.displayCategoryName ?? category.rawValue, color: category.color)
                             }
                         }
                     }

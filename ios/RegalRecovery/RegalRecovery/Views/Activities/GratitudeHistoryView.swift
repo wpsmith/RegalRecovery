@@ -197,9 +197,9 @@ struct GratitudeHistoryView: View {
 
                 // Category pills + photo indicator
                 HStack(spacing: 6) {
-                    let categories = uniqueCategories(in: entry)
-                    ForEach(categories, id: \.self) { category in
-                        RRBadge(text: category.rawValue, color: category.color)
+                    let categoryNames = uniqueCategoryDisplayNames(in: entry)
+                    ForEach(categoryNames, id: \.name) { item in
+                        RRBadge(text: item.name, color: item.color)
                     }
 
                     if entry.photoLocalPath != nil {
@@ -381,7 +381,7 @@ struct GratitudeHistoryView: View {
                                             .foregroundStyle(Color.rrTextSecondary)
 
                                         if let category = fav.item.category {
-                                            RRBadge(text: category.rawValue, color: category.color)
+                                            RRBadge(text: fav.item.displayCategoryName ?? category.rawValue, color: category.color)
                                         }
 
                                         Spacer()
@@ -449,6 +449,25 @@ struct GratitudeHistoryView: View {
         return result
     }
 
+    private struct CategoryDisplayItem {
+        let name: String
+        let color: Color
+    }
+
+    private func uniqueCategoryDisplayNames(in entry: RRGratitudeEntry) -> [CategoryDisplayItem] {
+        var seen = Set<String>()
+        var result: [CategoryDisplayItem] = []
+        for item in entry.items {
+            if let category = item.category {
+                let displayName = item.displayCategoryName ?? category.rawValue
+                if !seen.contains(displayName) {
+                    seen.insert(displayName)
+                    result.append(CategoryDisplayItem(name: displayName, color: category.color))
+                }
+            }
+        }
+        return result
+    }
 
     private func calendarDays(for month: Date) -> [Date?] {
         let calendar = Calendar.current
