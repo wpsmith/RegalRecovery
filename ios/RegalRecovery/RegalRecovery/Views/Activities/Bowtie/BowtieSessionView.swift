@@ -10,8 +10,10 @@ struct BowtieSessionView: View {
     @Query(sort: \RRKnownEmotionalTrigger.createdAt) private var triggers: [RRKnownEmotionalTrigger]
 
     @State private var viewModel = BowtieSessionViewModel()
+    @State private var selectedTab: BowtieSide? = nil
     @State private var showMarkerForm = false
     @State private var editingMarker: RRBowtieMarker?
+    @State private var pendingMarkerSide: BowtieSide = .past
     @State private var showDeleteConfirmation = false
 
     var body: some View {
@@ -217,6 +219,14 @@ struct BowtieSessionView: View {
     private var sessionContentView: some View {
         ScrollView {
             VStack(spacing: 16) {
+                Picker(String(localized: "Side"), selection: $selectedTab) {
+                    Text(String(localized: "Past")).tag(BowtieSide?.some(.past))
+                    Text(String(localized: "All")).tag(BowtieSide?.none)
+                    Text(String(localized: "Future")).tag(BowtieSide?.some(.future))
+                }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
+
                 BowtieTalliesCard(
                     pastInsignificance: viewModel.pastInsignificance,
                     pastIncompetence: viewModel.pastIncompetence,
@@ -226,29 +236,41 @@ struct BowtieSessionView: View {
                     futureImpotence: viewModel.futureImpotence
                 )
 
-                BowtieListEntryView(
-                    markers: viewModel.pastMarkers,
-                    side: .past,
-                    roleIds: Array(viewModel.selectedRoleIds),
-                    roles: viewModel.availableRoles,
-                    vocabulary: viewModel.selectedVocabulary,
-                    onAddMarker: { timeInterval in
-                        editingMarker = nil
-                        showMarkerForm = true
-                    },
-                    onEditMarker: { marker in
-                        editingMarker = marker
-                        showMarkerForm = true
-                    },
-                    onDeleteMarker: { marker in
-                        viewModel.removeMarker(marker, context: modelContext)
-                    },
-                    onProcessMarker: { _ in
-                        // Processing handled in a later task
-                    }
-                )
+                if selectedTab == nil || selectedTab == .past {
+                    bowtieListEntry(side: .past, markers: viewModel.pastMarkers)
+                }
+
+                if selectedTab == nil || selectedTab == .future {
+                    bowtieListEntry(side: .future, markers: viewModel.futureMarkers)
+                }
             }
             .padding()
         }
+    }
+
+    private func bowtieListEntry(side: BowtieSide, markers: [RRBowtieMarker]) -> some View {
+        BowtieListEntryView(
+            markers: markers,
+            side: side,
+            roleIds: Array(viewModel.selectedRoleIds),
+            roles: viewModel.availableRoles,
+            vocabulary: viewModel.selectedVocabulary,
+            onAddMarker: { timeInterval in
+                editingMarker = nil
+                pendingMarkerSide = side
+                showMarkerForm = true
+            },
+            onEditMarker: { marker in
+                editingMarker = marker
+                pendingMarkerSide = side
+                showMarkerForm = true
+            },
+            onDeleteMarker: { marker in
+                viewModel.removeMarker(marker, context: modelContext)
+            },
+            onProcessMarker: { _ in
+                // Processing handled in a later task
+            }
+        )
     }
 }

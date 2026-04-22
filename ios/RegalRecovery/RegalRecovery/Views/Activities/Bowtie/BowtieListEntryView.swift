@@ -75,7 +75,8 @@ struct BowtieListEntryView: View {
     // MARK: - Marker Card
 
     private func markerCard(_ marker: RRBowtieMarker) -> some View {
-        Button {
+        let isFuture = side == .future
+        return Button {
             onEditMarker(marker)
         } label: {
             RRCard {
@@ -88,6 +89,12 @@ struct BowtieListEntryView: View {
                             .foregroundStyle(Color.rrText)
 
                         Spacer()
+
+                        if isFuture {
+                            Image(systemName: "arrow.forward.circle")
+                                .foregroundStyle(Color.rrSecondary)
+                                .font(.subheadline)
+                        }
 
                         if marker.isProcessed {
                             Image(systemName: "checkmark.circle.fill")
@@ -126,6 +133,11 @@ struct BowtieListEntryView: View {
                     }
                 }
             }
+            .opacity(isFuture ? 0.85 : 1.0)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color.rrSecondary.opacity(0.4), lineWidth: isFuture ? 1 : 0)
+            )
         }
         .buttonStyle(.plain)
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {

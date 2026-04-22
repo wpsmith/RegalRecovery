@@ -36,20 +36,17 @@ struct BowtieTalliesCard: View {
 
                 // Rows
                 tallyRow(
-                    label: ThreeIType.insignificance.displayName,
-                    color: ThreeIType.insignificance.color,
+                    iType: .insignificance,
                     pastValue: pastInsignificance,
                     futureValue: futureInsignificance
                 )
                 tallyRow(
-                    label: ThreeIType.incompetence.displayName,
-                    color: ThreeIType.incompetence.color,
+                    iType: .incompetence,
                     pastValue: pastIncompetence,
                     futureValue: futureIncompetence
                 )
                 tallyRow(
-                    label: ThreeIType.impotence.displayName,
-                    color: ThreeIType.impotence.color,
+                    iType: .impotence,
                     pastValue: pastImpotence,
                     futureValue: futureImpotence
                 )
@@ -57,24 +54,28 @@ struct BowtieTalliesCard: View {
         }
     }
 
-    private func tallyRow(label: String, color: Color, pastValue: Int, futureValue: Int) -> some View {
+    private func tallyRow(iType: ThreeIType, pastValue: Int, futureValue: Int) -> some View {
         HStack {
             Text(pastValue > 0 ? "\(pastValue)" : "-")
                 .font(.body)
                 .fontWeight(.medium)
-                .foregroundStyle(pastValue > 0 ? color : Color.rrTextSecondary)
+                .foregroundStyle(pastValue > 0 ? iType.color : Color.rrTextSecondary)
                 .frame(maxWidth: .infinity)
 
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(color)
-                .frame(width: 80)
-                .multilineTextAlignment(.center)
+            HStack(spacing: 4) {
+                Image(systemName: iType.icon)
+                    .font(.caption2)
+                Text(iType.displayName)
+                    .font(.caption2)
+            }
+            .foregroundStyle(iType.color)
+            .frame(width: 100)
+            .multilineTextAlignment(.center)
 
             Text(futureValue > 0 ? "\(futureValue)" : "-")
                 .font(.body)
                 .fontWeight(.medium)
-                .foregroundStyle(futureValue > 0 ? color : Color.rrTextSecondary)
+                .foregroundStyle(futureValue > 0 ? iType.color : Color.rrTextSecondary)
                 .frame(maxWidth: .infinity)
         }
     }
