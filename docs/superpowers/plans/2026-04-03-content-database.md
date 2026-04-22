@@ -965,12 +965,12 @@ print("✓ Created 31 feature abouts");
 // =============================================================================
 
 db.affirmation_packs.insertOne({
-  ...base, packId: "pack_christian", name: "Christian Affirmations",
+  ...base, packId: "pack_christian", name: "Affirmations",
   description: "44 biblical affirmations for daily recovery",
   tier: "standard", price: 0, currency: "USD", affirmationCount: 5,
   category: "christian", thumbnailUrl: "", sortOrder: 1
 });
-print("✓ Created affirmation pack: Christian Affirmations");
+print("✓ Created affirmation pack: Affirmations");
 
 db.affirmations.insertMany([
   { ...base, affirmationId: "aff_001", packId: "pack_christian", statement: "I am fearfully and wonderfully made.", scriptureReference: "Psalm 139:14", category: "identity", language: "en", sortOrder: 1 },

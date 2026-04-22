@@ -134,20 +134,20 @@ struct WorkScreenTileTests {
 
 // MARK: - Today Screen Activity Item Tests (AFF-AC-166 through AFF-AC-175)
 
-@Suite("Today Screen Christian Affirmations")
+@Suite("Today Screen Affirmations")
 struct TodayScreenTests {
 
     init() {
         FeatureFlagStore.shared.setFlag("activity.affirmations", enabled: true)
     }
 
-    @Test("AFF-AC-166: Christian Affirmations in enabled activity list")
+    @Test("AFF-AC-166: Affirmations in enabled activity list")
     func showsChristianAffirmationsItem() {
         let activity = DailyEligibleActivity.enabled.first(where: {
             $0.activityType == ActivityType.affirmationLog.rawValue
         })
-        #expect(activity != nil, "Christian Affirmations should be in the enabled list")
-        #expect(activity?.displayName == "Christian Affirmations")
+        #expect(activity != nil, "Affirmations should be in the enabled list")
+        #expect(activity?.displayName == "Affirmations")
         #expect(activity?.activityType == "Affirmation Log")
         #expect(activity?.icon == "text.quote")
         #expect(activity?.featureFlagKey == "activity.affirmations")
@@ -186,7 +186,7 @@ struct TodayScreenTests {
         let item = TodayPlanItem(
             id: UUID(),
             activityType: ActivityType.affirmationLog.rawValue,
-            displayName: "Christian Affirmations",
+            displayName: "Affirmations",
             icon: "text.quote",
             iconColor: .rrPrimary,
             scheduledHour: 7,
@@ -235,12 +235,12 @@ struct TodayScreenTests {
 
     @Test("AFF-AC-174: Multiple instances show numbered display names")
     func multipleInstancesPerDay() {
-        let baseName = "Christian Affirmations"
+        let baseName = "Affirmations"
         let siblings = 2
         let displayName1 = siblings > 1 ? "\(baseName) #1" : baseName
         let displayName2 = siblings > 1 ? "\(baseName) #2" : baseName
-        #expect(displayName1 == "Christian Affirmations #1")
-        #expect(displayName2 == "Christian Affirmations #2")
+        #expect(displayName1 == "Affirmations #1")
+        #expect(displayName2 == "Affirmations #2")
     }
 
     @Test("AFF-AC-175: Skip transitions to .skipped and recalculates score")
@@ -250,7 +250,7 @@ struct TodayScreenTests {
             TodayPlanItem(
                 id: UUID(),
                 activityType: ActivityType.affirmationLog.rawValue,
-                displayName: "Christian Affirmations",
+                displayName: "Affirmations",
                 icon: "text.quote",
                 iconColor: .rrPrimary,
                 scheduledHour: 7,

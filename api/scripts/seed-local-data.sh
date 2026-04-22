@@ -741,14 +741,14 @@ db.affirmation_packs.insertOne({
   createdAt: ISODate("2026-01-01T00:00:00Z"),
   modifiedAt: ISODate("2026-01-01T00:00:00Z"),
   packId: "pack_christian",
-  name: "Christian Affirmations",
+  name: "Affirmations",
   description: "44 biblical affirmations for daily recovery",
   tier: "free",
   price: 0,
   affirmationCount: 44,
   category: "christian"
 });
-print("✓ Created affirmation pack: Christian Affirmations");
+print("✓ Created affirmation pack: Affirmations");
 
 db.affirmations.insertMany([
   {

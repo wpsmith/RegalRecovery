@@ -69,7 +69,7 @@ User Story → Acceptance Criteria → OpenAPI Spec → Contract Tests (RED) →
 | Asset | Path | Purpose |
 |-------|------|---------|
 | Motivations | `content/motivations.md` | Default motivation options for onboarding |
-| Christian Affirmations | `content/affirmations/christian-affirmations.md` | Freemium affirmation pack content |
+| Affirmations | `content/affirmations/christian-affirmations.md` | Freemium affirmation pack content |
 | AA Affirmations | `content/affirmations/aa-affirmations.md` | AA-aligned affirmation content |
 | Needs | `content/needs.md` | Quick-select needs for Time Journal |
 | Acting-In Behaviors | `content/acting-in.md` | 15 default acting-in behavior definitions |
@@ -208,9 +208,9 @@ Derived from `docs/feature-dependency-map.md`. Each wave must be complete before
 | Activity | Spec | Flag Key |
 |----------|------|----------|
 | Daily Sobriety Commitment | Activity spec | `activity.sobriety-commitment` |
-| Christian Affirmations | Activity spec | `activity.affirmations` |
+| Affirmations | Activity spec | `activity.affirmations` |
 | Urge Logging & Emergency Tools | Activity spec | `activity.urge-logging` |
-| Journaling/Jotting | Activity spec | `activity.journaling` |
+| Journaling | Activity spec | `activity.journaling` |
 | FASTER Scale | Activity spec | `activity.faster-scale` |
 | Recovery Check-ins | Activity spec | `activity.check-ins` |
 

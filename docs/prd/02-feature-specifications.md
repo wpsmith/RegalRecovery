@@ -25,9 +25,9 @@
 
 **Activities** — Activities a user can take (see Section 4.3 for detailed specs)
 - Daily Sobriety Commitment
-- Christian Affirmations
+- Affirmations
 - Urge Logging & Emergency Tools
-- Journaling/Jotting (bullets, free-form, prompted, structured)
+- Journaling (bullets, free-form, prompted, structured)
 - Emotional Journaling
 - Recovery Check-ins
 - Person Check-ins (Spouse, Sponsor, Counselor/Coach)
@@ -537,7 +537,7 @@ The Recovery Agent is not just a chatbot — it is a conversational interface to
 **1. Conversational Data Entry**
 - User tells the agent what they want to log, and the agent submits the data as an entry on their behalf
 - Examples:
-  - "Enter a journal entry" → User dictates the entry → Agent saves it as a Journaling/Jotting entry
+  - "Enter a journal entry" → User dictates the entry → Agent saves it as a Journaling entry
   - "Log an urge" → Agent walks through intensity, triggers, context → Saves as an Urge Log entry
   - "I just got off the phone with my sponsor" → Agent logs a Phone Call entry (direction: made, contact: sponsor, connected: yes)
   - "I'm feeling anxious, about a 7" → Agent saves as an Emotional Journaling entry (emotion: anxious, why: [asks follow-up], intensity: 7)
@@ -2135,7 +2135,7 @@ Users can enable/disable individual default questions and add custom questions v
 
 ---
 
-#### **ACTIVITY: Christian Affirmations**
+#### **ACTIVITY: Affirmations**
 
 **Priority:** P0 (Must-Have)
 
@@ -2230,7 +2230,7 @@ A live-event intervention tool for acute urges that makes the urge feel finite a
 
 ---
 
-#### **ACTIVITY: Journaling/Jotting**
+#### **ACTIVITY: Journaling**
 
 **Priority:** P0
 

@@ -882,6 +882,7 @@ enum DailyScoreLevel: String {
 struct DailyEligibleActivity {
     let activityType: String
     let displayNameKey: String
+    let shortNameKey: String
     let icon: String
     let multiplePerDay: Bool
     let maxPerDay: Int
@@ -896,6 +897,10 @@ struct DailyEligibleActivity {
         String(localized: String.LocalizationValue(displayNameKey))
     }
 
+    var shortName: String {
+        String(localized: String.LocalizationValue(shortNameKey))
+    }
+
     /// Activities filtered by feature flags (reactive via FeatureFlagStore)
     static var enabled: [DailyEligibleActivity] {
         all.filter { activity in
@@ -907,6 +912,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.sobrietyCommitment.rawValue,
             displayNameKey: "Morning Commitment",
+            shortNameKey: "Commitment",
             icon: "sun.max.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -919,7 +925,8 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.affirmationLog.rawValue,
-            displayNameKey: "Christian Affirmations",
+            displayNameKey: "Affirmations",
+            shortNameKey: "Affirmations",
             icon: "text.quote",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -932,7 +939,8 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: ActivityType.journal.rawValue,
-            displayNameKey: "Journaling / Jotting",
+            displayNameKey: "Journaling",
+            shortNameKey: "Journaling",
             icon: "note.text",
             multiplePerDay: true,
             maxPerDay: 10,
@@ -946,6 +954,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "devotional",
             displayNameKey: "Devotional",
+            shortNameKey: "Devotional",
             icon: "book.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -959,6 +968,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.prayer.rawValue,
             displayNameKey: "Prayer",
+            shortNameKey: "Prayer",
             icon: "hands.and.sparkles.fill",
             multiplePerDay: true,
             maxPerDay: 5,
@@ -972,6 +982,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "memoryVerseReview",
             displayNameKey: "Memory Verse Review",
+            shortNameKey: "Memory Verse",
             icon: "text.book.closed.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -985,6 +996,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.mood.rawValue,
             displayNameKey: "Mood Rating",
+            shortNameKey: "Mood",
             icon: "face.smiling",
             multiplePerDay: true,
             maxPerDay: 5,
@@ -998,6 +1010,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.gratitude.rawValue,
             displayNameKey: "Gratitude List",
+            shortNameKey: "Gratitude",
             icon: "leaf.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1011,6 +1024,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.phoneCalls.rawValue,
             displayNameKey: "Phone Calls",
+            shortNameKey: "Calls",
             icon: "phone.fill",
             multiplePerDay: true,
             maxPerDay: 10,
@@ -1024,6 +1038,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.exercise.rawValue,
             displayNameKey: "Exercise / Physical Activity",
+            shortNameKey: "Exercise",
             icon: "figure.run",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1037,6 +1052,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.meetingsAttended.rawValue,
             displayNameKey: "Meetings Attended",
+            shortNameKey: "Meetings",
             icon: "person.3.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1050,6 +1066,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "personCheckInSpouse",
             displayNameKey: "Spouse Check-in",
+            shortNameKey: "Spouse",
             icon: "heart.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1063,6 +1080,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.fanos.rawValue,
             displayNameKey: "FANOS Check-in",
+            shortNameKey: "FANOS",
             icon: "heart.fill",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1076,6 +1094,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.fitnap.rawValue,
             displayNameKey: "FITNAP Check-in",
+            shortNameKey: "FITNAP",
             icon: "heart.text.clipboard",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1089,6 +1108,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.fasterScale.rawValue,
             displayNameKey: "FASTER Scale",
+            shortNameKey: "FASTER",
             icon: "gauge.with.needle",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1102,6 +1122,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "pci",
             displayNameKey: "PCI",
+            shortNameKey: "PCI",
             icon: "checklist",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1115,6 +1136,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.weeklyGoals.rawValue,
             displayNameKey: "Weekly/Daily Goals Review",
+            shortNameKey: "Goals",
             icon: "target",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1128,6 +1150,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "nutrition",
             displayNameKey: "Nutrition (Meal Logging)",
+            shortNameKey: "Nutrition",
             icon: "fork.knife",
             multiplePerDay: true,
             maxPerDay: 5,
@@ -1141,6 +1164,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: ActivityType.timeJournal.rawValue,
             displayNameKey: "T30/60 Journaling",
+            shortNameKey: "Time Journal",
             icon: "clock.fill",
             multiplePerDay: true,
             maxPerDay: 24,
@@ -1154,6 +1178,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "actingInBehaviors",
             displayNameKey: "Acting In Behaviors Check-in",
+            shortNameKey: "Acting In",
             icon: "shield.lefthalf.filled",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1167,6 +1192,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "voiceJournal",
             displayNameKey: "Voice Journal",
+            shortNameKey: "Voice Journal",
             icon: "mic.fill",
             multiplePerDay: true,
             maxPerDay: 10,
@@ -1180,6 +1206,7 @@ struct DailyEligibleActivity {
         DailyEligibleActivity(
             activityType: "bookReading",
             displayNameKey: "Recovery Reading",
+            shortNameKey: "Reading",
             icon: "book.fill",
             multiplePerDay: false,
             maxPerDay: 1,

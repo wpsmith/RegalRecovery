@@ -152,7 +152,7 @@ All documents in all collections carry these fields:
   "createdAt": ISODate("2026-01-01T00:00:00Z"),
   "modifiedAt": ISODate("2026-01-01T00:00:00Z"),
   "packId": "pack_christian",
-  "name": "Christian Affirmations",
+  "name": "Affirmations",
   "description": "44 biblical affirmations for daily recovery",
   "tier": "standard",
   "price": 0,

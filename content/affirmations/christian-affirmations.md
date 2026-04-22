@@ -1,4 +1,4 @@
-# Christian Affirmations
+# Affirmations
 
 ## Daily Biblical Affirmations
 

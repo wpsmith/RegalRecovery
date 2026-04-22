@@ -595,9 +595,9 @@ Translation: *"When I try to read the affirmations in English, I understand them
 
 **Activities** — Activities a user can take (see Section 4.3 for detailed specs)
 - Daily Sobriety Commitment
-- Christian Affirmations
+- Affirmations
 - Urge Logging & Emergency Tools
-- Journaling/Jotting (bullets, free-form, prompted, structured)
+- Journaling (bullets, free-form, prompted, structured)
 - Emotional Journaling
 - Recovery Check-ins
 - Person Check-ins (Spouse, Sponsor, Counselor/Coach)

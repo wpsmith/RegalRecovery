@@ -138,9 +138,9 @@ The most critical missing piece across all four documents is an explicit MVP def
 - Feature 21 (Meeting Finder, basic)
 - Feature 23 (Offline-First, core scope)
 - Activity: Daily Sobriety Commitment
-- Activity: Christian Affirmations (basic pack)
+- Activity: Affirmations (basic pack)
 - Activity: Urge Logging & Emergency Tools
-- Activity: Journaling/Jotting
+- Activity: Journaling
 - Activity: Recovery Check-ins
 - Activity: FASTER Scale
 - Basic content (freemium affirmations, devotionals, prayers)

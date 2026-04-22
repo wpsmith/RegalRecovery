@@ -592,9 +592,9 @@ Translation: *"When I try to read the affirmations in English, I understand them
 
 **6. Activities** — Activities a user can take
 - Daily Sobriety Commitment
-- Christian Affirmations
+- Affirmations
 - Urge Logging & Emergency Tools
-- Journaling/Jotting (bullets, free-form, prompted, structured)
+- Journaling (bullets, free-form, prompted, structured)
 - Emotional Journaling
 - Recovery Check-ins
 - Person Check-ins (Spouse, Sponsor, Counselor/Coach)
@@ -1039,7 +1039,7 @@ Users can enable/disable individual default questions and add custom questions v
 
 ---
 
-#### **ACTIVITY: Christian Affirmations**
+#### **ACTIVITY: Affirmations**
 
 **Priority:** P0 (Must-Have)
 
@@ -1113,7 +1113,7 @@ A live-event intervention tool for acute urges that makes the urge feel finite a
 
 ---
 
-#### **ACTIVITY: Journaling/Jotting**
+#### **ACTIVITY: Journaling**
 
 **Priority:** P0
 

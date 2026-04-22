@@ -1617,18 +1617,18 @@
         }
       }
     },
-    "Christian Affirmations": {
+    "Affirmations": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Afirmaciones cristianas"
+            "value": "Afirmaciones"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Affirmations chrétiennes"
+            "value": "Affirmations"
           }
         }
       }
@@ -4529,18 +4529,18 @@
         }
       }
     },
-    "Journaling / Jotting": {
+    "Journaling": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Diario / Anotación"
+            "value": "Diario"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Journalisation / Note rapide"
+            "value": "Journalisation"
           }
         }
       }

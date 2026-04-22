@@ -1218,7 +1218,7 @@ Affirmation pack metadata (free and paid).
   "createdAt": ISODate("2026-01-01T00:00:00.000Z"),
   "modifiedAt": ISODate("2026-01-01T00:00:00.000Z"),
   "packId": "pack_christian",
-  "name": "Christian Affirmations",
+  "name": "Affirmations",
   "description": "44 biblical affirmations for daily recovery",
   "tier": "free",
   "price": 0,

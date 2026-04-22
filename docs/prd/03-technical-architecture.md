@@ -639,9 +639,9 @@ Every feature, activity, and tool has a corresponding flag:
 | `feature.spotify` | boolean | Feature 30: Spotify Integration |
 | `feature.dark-mode` | boolean | Feature 31: Light/Dark Mode |
 | `activity.sobriety-commitment` | boolean | Daily Sobriety Commitment |
-| `activity.affirmations` | boolean | Christian Affirmations |
+| `activity.affirmations` | boolean | Affirmations |
 | `activity.urge-logging` | boolean | Urge Logging & Emergency Tools |
-| `activity.journaling` | boolean | Journaling/Jotting |
+| `activity.journaling` | boolean | Journaling |
 | `activity.emotional-journaling` | boolean | Emotional Journaling |
 | `activity.time-journal` | boolean | Time Journal |
 | `activity.check-ins` | boolean | Recovery Check-ins |

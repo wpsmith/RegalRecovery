@@ -112,8 +112,8 @@ The following activities can be added to the daily plan:
 | Activity | Multiple Per Day? | Default State | Typical Time |
 |---|---|---|---|
 | Morning Commitment | No (once) | **ON** (only default) | Morning |
-| Christian Affirmations | No (once, can browse more) | OFF | Morning |
-| Journaling / Jotting | Yes (unlimited) | OFF | Any |
+| Affirmations | No (once, can browse more) | OFF | Morning |
+| Journaling | Yes (unlimited) | OFF | Any |
 | Devotional | No (once) | OFF | Morning |
 | Prayer | Yes (multiple sessions) | OFF | Morning / Evening |
 | Memory Verse Review | No (once per spaced repetition cycle) | OFF | Morning |
