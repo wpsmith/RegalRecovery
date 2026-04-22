@@ -42,6 +42,7 @@ struct QuickActionDefinition: Identifiable, Equatable {
         ActivityType.postMortem.rawValue: "Post-Mortem",
         ActivityType.stepWork.rawValue: "12-Step",
         "emotionalJournal": "EmoJournal",
+        ActivityType.triggerLog.rawValue: "Trigger",
     ]
 }
 
@@ -129,6 +130,19 @@ extension QuickActionDefinition {
                 section: .journalingReflection,
                 featureFlagKey: "activity.emotional-journal",
                 presentationStyle: .navigationLink
+            )
+        )
+
+        definitions.append(
+            QuickActionDefinition(
+                id: ActivityType.triggerLog.rawValue,
+                displayName: String(localized: "Trigger Log"),
+                shortTitle: shortTitles[ActivityType.triggerLog.rawValue] ?? "Trigger",
+                icon: "bolt.trianglebadge.exclamationmark.fill",
+                iconColor: Color(red: 0.345, green: 0.337, blue: 0.839),
+                section: .selfCare,
+                featureFlagKey: "activity.triggers",
+                presentationStyle: .fullScreenCover
             )
         )
 

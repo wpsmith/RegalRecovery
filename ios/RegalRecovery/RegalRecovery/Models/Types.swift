@@ -99,6 +99,7 @@ enum ActivityType: String, CaseIterable {
     case stepWork = "12-Step Work"
     case weeklyGoals = "Weekly Goals"
     case affirmationLog = "Affirmation Log"
+    case triggerLog = "Trigger Log"
 
     var displayName: String {
         switch self {
@@ -119,6 +120,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return String(localized: "12-Step Work")
         case .weeklyGoals: return String(localized: "Weekly Goals")
         case .affirmationLog: return String(localized: "Affirmation Log")
+        case .triggerLog: return String(localized: "Trigger Log")
         }
     }
 
@@ -141,6 +143,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return "stairs"
         case .weeklyGoals: return "target"
         case .affirmationLog: return "text.quote"
+        case .triggerLog: return "bolt.trianglebadge.exclamationmark.fill"
         }
     }
 
@@ -162,6 +165,7 @@ enum ActivityType: String, CaseIterable {
         case .stepWork: return .rrSecondary
         case .weeklyGoals: return .rrPrimary
         case .affirmationLog: return .rrSecondary
+        case .triggerLog: return Color(red: 0.345, green: 0.337, blue: 0.839)
         }
     }
 
@@ -171,7 +175,7 @@ enum ActivityType: String, CaseIterable {
             return .sobrietyCommitment
         case .journal, .timeJournal, .fasterScale, .postMortem:
             return .journalingReflection
-        case .urgeLog, .mood, .gratitude, .prayer, .exercise:
+        case .urgeLog, .mood, .gratitude, .prayer, .exercise, .triggerLog:
             return .selfCare
         case .phoneCalls, .meetingsAttended, .fanos, .fitnap:
             return .connection
@@ -1216,6 +1220,20 @@ struct DailyEligibleActivity {
             typicalBlock: "Evening",
             featureFlagKey: "activity.book-reading",
             section: .growth
+        ),
+        DailyEligibleActivity(
+            activityType: ActivityType.triggerLog.rawValue,
+            displayNameKey: "Trigger Log",
+            shortNameKey: "Triggers",
+            icon: "bolt.trianglebadge.exclamationmark.fill",
+            multiplePerDay: true,
+            maxPerDay: 20,
+            defaultEnabled: false,
+            typicalHour: 12,
+            typicalMinute: 0,
+            typicalBlock: "Anytime",
+            featureFlagKey: "activity.triggers",
+            section: .selfCare
         ),
     ]
 }
