@@ -37,6 +37,23 @@ struct JournalEntryDetailView: View {
                     .opacity(0.85)
                 }
 
+                // Book source badge
+                if entry.sourceBookId != nil {
+                    HStack(spacing: 6) {
+                        Image(systemName: "book.closed.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Color.rrPrimary)
+                        Text("From Library")
+                            .font(RRFont.caption)
+                            .fontWeight(.medium)
+                            .foregroundStyle(Color.rrPrimary)
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(Color.rrPrimary.opacity(0.08))
+                    .clipShape(Capsule())
+                }
+
                 // Metadata row
                 HStack(spacing: 6) {
                     Text(entry.mode.capitalized)

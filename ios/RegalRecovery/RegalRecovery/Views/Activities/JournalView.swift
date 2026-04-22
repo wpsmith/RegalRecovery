@@ -286,6 +286,12 @@ enum JournalMode: String, CaseIterable {
 struct JournalView: View {
     var devotionalPrompt: String? = nil
     var devotionalTitle: String? = nil
+    var bookParagraphPrompt: String? = nil
+    var bookTitle: String? = nil
+    var chapterTitle: String? = nil
+    var sourceBookId: String? = nil
+    var sourceChapterId: String? = nil
+    var sourceParagraphIndex: Int? = nil
 
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRJournalEntry.date, order: .reverse) private var entries: [RRJournalEntry]
@@ -317,18 +323,23 @@ struct JournalView: View {
                     devotionalContextCard(title: devotionalTitle, reflection: devotionalPrompt)
                 }
 
+                // Book paragraph context card (when opened from a book)
+                if let bookParagraphPrompt, let bookTitle, let chapterTitle {
+                    bookParagraphContextCard(bookTitle: bookTitle, chapterTitle: chapterTitle, paragraph: bookParagraphPrompt)
+                }
+
                 // Mode selector
-                if devotionalPrompt == nil {
+                if devotionalPrompt == nil && bookParagraphPrompt == nil {
                     modeSelector
                 }
 
                 // Prompt offering (prompted mode only)
-                if mode == .prompted && devotionalPrompt == nil {
+                if mode == .prompted && devotionalPrompt == nil && bookParagraphPrompt == nil {
                     promptSection
                 }
 
                 // Editor or Jot section
-                if mode == .jotting && devotionalPrompt == nil {
+                if mode == .jotting && devotionalPrompt == nil && bookParagraphPrompt == nil {
                     jotSection
                 } else {
                     editorSection
@@ -355,7 +366,7 @@ struct JournalView: View {
             JournalingInfoView()
         }
         .onAppear {
-            if devotionalPrompt != nil {
+            if devotionalPrompt != nil || bookParagraphPrompt != nil {
                 mode = .freeform
             }
         }
@@ -549,6 +560,36 @@ struct JournalView: View {
         .padding(.horizontal)
     }
 
+    // MARK: - Book Paragraph Context Card
+
+    private func bookParagraphContextCard(bookTitle: String, chapterTitle: String, paragraph: String) -> some View {
+        RRCard {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 8) {
+                    Image(systemName: "book.closed.fill")
+                        .foregroundStyle(Color.rrPrimary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(bookTitle)
+                            .font(RRFont.headline)
+                            .foregroundStyle(Color.rrText)
+                        Text(chapterTitle)
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                }
+
+                Text("\"\(paragraph)\"")
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrTextSecondary)
+                    .italic()
+                    .lineSpacing(4)
+                    .lineLimit(6)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(.horizontal)
+    }
+
     // MARK: - Devotional Context Card
 
     private func devotionalContextCard(title: String, reflection: String) -> some View {
@@ -724,13 +765,16 @@ struct JournalView: View {
         guard !plainText.isEmpty else { return }
 
         let userId = users.first?.id ?? UUID()
-        let promptText = devotionalTitle ?? currentPrompt?.text
+        let promptText = bookTitle ?? devotionalTitle ?? currentPrompt?.text
         let entry = RRJournalEntry(
             userId: userId,
             date: Date(),
             mode: mode.rawValue,
             content: plainText,
-            prompt: promptText
+            prompt: promptText,
+            sourceBookId: sourceBookId,
+            sourceChapterId: sourceChapterId,
+            sourceParagraphIndex: sourceParagraphIndex
         )
         entry.setRichContent(from: attributedText)
         modelContext.insert(entry)

@@ -383,6 +383,9 @@ final class RRJournalEntry {
     var prompt: String?
     var isEphemeral: Bool
     var ephemeralExpiresAt: Date?
+    var sourceBookId: String?
+    var sourceChapterId: String?
+    var sourceParagraphIndex: Int?
     var createdAt: Date
     var modifiedAt: Date
 
@@ -396,6 +399,9 @@ final class RRJournalEntry {
         prompt: String? = nil,
         isEphemeral: Bool = false,
         ephemeralExpiresAt: Date? = nil,
+        sourceBookId: String? = nil,
+        sourceChapterId: String? = nil,
+        sourceParagraphIndex: Int? = nil,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
@@ -408,6 +414,9 @@ final class RRJournalEntry {
         self.prompt = prompt
         self.isEphemeral = isEphemeral
         self.ephemeralExpiresAt = ephemeralExpiresAt
+        self.sourceBookId = sourceBookId
+        self.sourceChapterId = sourceChapterId
+        self.sourceParagraphIndex = sourceParagraphIndex
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }

@@ -17,6 +17,7 @@ struct BookTableOfContentsView: View {
                 chapterList
             }
             .padding(.vertical, 24)
+            .padding(.bottom, 80)
         }
         .background(Color.rrBackground)
         .navigationTitle(book.localizedTitle)
