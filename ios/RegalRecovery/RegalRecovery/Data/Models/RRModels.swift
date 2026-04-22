@@ -1525,6 +1525,9 @@ enum RRModelConfiguration {
         RRDailyScore.self,
         RRVisionStatement.self,
         RRQuickActionItem.self,
+        RRTriggerDefinition.self,
+        RRTriggerLogEntry.self,
+        RRCopingStrategy.self,
     ]
 
     static var schema: Schema {

@@ -27,6 +27,9 @@
 		10000501 /* RRTimeJournalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000501 /* RRTimeJournalEntry.swift */; };
 		10D7D990 /* TriggerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F0E /* TriggerTypes.swift */; };
 		10D7D991 /* TriggerSeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F0F /* TriggerSeedData.swift */; };
+		10D7D992 /* RRTriggerDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F10 /* RRTriggerDefinition.swift */; };
+		10D7D993 /* RRTriggerLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F11 /* RRTriggerLogEntry.swift */; };
+		10D7D994 /* RRCopingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F12 /* RRCopingStrategy.swift */; };
 		10000510 /* TimeJournalDailyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000510 /* TimeJournalDailyView.swift */; };
 		10000511 /* TimeJournalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000511 /* TimeJournalHeaderView.swift */; };
 		10000512 /* TimeJournalTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000512 /* TimeJournalTimelineView.swift */; };
@@ -280,6 +283,9 @@
 		20000501 /* RRTimeJournalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTimeJournalEntry.swift; sourceTree = "<group>"; };
 		20258F0E /* TriggerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerTypes.swift; sourceTree = "<group>"; };
 		20258F0F /* TriggerSeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerSeedData.swift; sourceTree = "<group>"; };
+		20258F10 /* RRTriggerDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTriggerDefinition.swift; sourceTree = "<group>"; };
+		20258F11 /* RRTriggerLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTriggerLogEntry.swift; sourceTree = "<group>"; };
+		20258F12 /* RRCopingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRCopingStrategy.swift; sourceTree = "<group>"; };
 		20000510 /* TimeJournalDailyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalDailyView.swift; sourceTree = "<group>"; };
 		20000511 /* TimeJournalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeaderView.swift; sourceTree = "<group>"; };
 		20000512 /* TimeJournalTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTimelineView.swift; sourceTree = "<group>"; };
@@ -621,6 +627,9 @@
 				20000501 /* RRTimeJournalEntry.swift */,
 				20258F0E /* TriggerTypes.swift */,
 				20258F0F /* TriggerSeedData.swift */,
+				20258F10 /* RRTriggerDefinition.swift */,
+				20258F11 /* RRTriggerLogEntry.swift */,
+				20258F12 /* RRCopingStrategy.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1182,6 +1191,9 @@
 				10000501 /* RRTimeJournalEntry.swift in Sources */,
 				10D7D990 /* TriggerTypes.swift in Sources */,
 				10D7D991 /* TriggerSeedData.swift in Sources */,
+				10D7D992 /* RRTriggerDefinition.swift in Sources */,
+				10D7D993 /* RRTriggerLogEntry.swift in Sources */,
+				10D7D994 /* RRCopingStrategy.swift in Sources */,
 				10000510 /* TimeJournalDailyView.swift in Sources */,
 				10000511 /* TimeJournalHeaderView.swift in Sources */,
 				10000512 /* TimeJournalTimelineView.swift in Sources */,
