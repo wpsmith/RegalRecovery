@@ -709,7 +709,10 @@ struct BackboneFlowView: View {
                 VStack(spacing: 12) {
                     if let onJournalRequested {
                         Button {
-                            onJournalRequested(viewModel.lifeSituation)
+                            let emotions = viewModel.selectedEmotions.sorted().joined(separator: ", ")
+                            let needs = viewModel.selectedNeeds.sorted().joined(separator: ", ")
+                            let journalContext = "Bowtie Processing: \(viewModel.lifeSituation)\nEmotions: \(emotions)\nNeeds: \(needs)"
+                            onJournalRequested(journalContext)
                             dismiss()
                         } label: {
                             HStack(spacing: 8) {

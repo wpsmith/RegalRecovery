@@ -1,5 +1,7 @@
 import SwiftUI
 
+// MARK: - FASTERResultsView
+
 struct FASTERResultsView: View {
     @Bindable var viewModel: FASTERCheckInViewModel
     let onSave: () -> Void
@@ -20,6 +22,8 @@ struct FASTERResultsView: View {
                 adaptiveContentCard
 
                 journalSection
+
+                bowtieSuggestion
 
                 VStack(spacing: 12) {
                     RRButton("Save Check-In", icon: "checkmark.circle") {
@@ -57,6 +61,27 @@ struct FASTERResultsView: View {
                     .font(RRFont.body)
                     .foregroundStyle(Color.rrTextSecondary)
                     .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var bowtieSuggestion: some View {
+        if FeatureFlagStore.shared.isEnabled("activity.bowtie"),
+           viewModel.assessedStage.rawValue >= FASTERStage.speedingUp.rawValue {
+            RRCard {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Your FASTER Scale shows acceleration. A Bowtie Diagram can help you see what emotional activations are driving it.")
+                        .font(RRFont.subheadline)
+                        .foregroundStyle(Color.rrTextSecondary)
+                    NavigationLink {
+                        BowtieSessionView()
+                    } label: {
+                        Label("Start Bowtie Diagram", systemImage: "diamond.fill")
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.rrPrimary)
+                }
             }
         }
     }
