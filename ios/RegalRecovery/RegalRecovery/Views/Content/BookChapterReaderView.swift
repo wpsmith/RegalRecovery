@@ -11,6 +11,8 @@ struct BookChapterReaderView: View {
     @State private var text: String = ""
     @State private var tts = TextToSpeechService()
     @State private var showPlayer = false
+    @State private var saveTask: Task<Void, Never>?
+    @State private var journalParagraph: ParagraphJournalContext?
 
     private static let readingBackground = Color(red: 0.98, green: 0.96, blue: 0.93)
 
@@ -45,7 +47,7 @@ struct BookChapterReaderView: View {
                         .padding(.bottom, 40)
 
                     navigationFooter
-                        .padding(.bottom, 24)
+                        .padding(.bottom, 100)
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 32)
@@ -79,6 +81,7 @@ struct BookChapterReaderView: View {
             )
             .onPreferenceChange(BookReaderScrollOffsetPreferenceKey.self) { value in
                 scrollOffset = value
+                debouncedSaveProgress()
             }
             .onChange(of: tts.currentParagraphIndex) { _, newIndex in
                 guard tts.state != .stopped else { return }
@@ -90,6 +93,18 @@ struct BookChapterReaderView: View {
                 if showPlayer {
                     ttsPlayerBar
                 }
+            }
+        }
+        .sheet(item: $journalParagraph) { paragraph in
+            NavigationStack {
+                JournalView(
+                    bookParagraphPrompt: paragraph.text,
+                    bookTitle: book.localizedTitle,
+                    chapterTitle: chapter.title,
+                    sourceBookId: book.id,
+                    sourceChapterId: chapter.id,
+                    sourceParagraphIndex: paragraph.index
+                )
             }
         }
         .navigationTitle(chapter.title)
@@ -106,8 +121,16 @@ struct BookChapterReaderView: View {
             text = book.loadText(for: chapter)
             let language = TextToSpeechService.resolveLanguage()
             tts.load(paragraphs: paragraphs, language: language)
+
+            // Handle short chapters that fit entirely in viewport
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if contentHeight <= viewportHeight {
+                    updateProgress(1.0)
+                }
+            }
         }
         .onDisappear {
+            saveTask?.cancel()
             tts.stop()
             saveProgress()
         }
@@ -173,6 +196,18 @@ struct BookChapterReaderView: View {
                 )
                 .animation(.easeInOut(duration: 0.2), value: tts.currentParagraphIndex)
                 .id(index)
+                .contextMenu {
+                    Button {
+                        journalParagraph = ParagraphJournalContext(text: paragraph, index: index)
+                    } label: {
+                        Label("Journal About This", systemImage: "note.text.badge.plus")
+                    }
+                    Button {
+                        UIPasteboard.general.string = paragraph
+                    } label: {
+                        Label("Copy", systemImage: "doc.on.doc")
+                    }
+                }
             }
         }
     }
@@ -209,6 +244,16 @@ struct BookChapterReaderView: View {
     private var navigationFooter: some View {
         VStack(spacing: 16) {
             Divider()
+                .background(
+                    GeometryReader { geo in
+                        Color.clear
+                            .onChange(of: geo.frame(in: .named("bookReaderScroll")).minY) { _, minY in
+                                if minY < viewportHeight {
+                                    updateProgress(1.0)
+                                }
+                            }
+                    }
+                )
 
             HStack {
                 if let prev = previousChapter {
@@ -378,6 +423,15 @@ struct BookChapterReaderView: View {
 
     // MARK: - Progress Tracking
 
+    private func debouncedSaveProgress() {
+        saveTask?.cancel()
+        saveTask = Task {
+            try? await Task.sleep(for: .milliseconds(500))
+            guard !Task.isCancelled else { return }
+            await MainActor.run { saveProgress() }
+        }
+    }
+
     private func saveProgress() {
         let scrollableHeight = contentHeight - viewportHeight
         guard scrollableHeight > 0 else {
@@ -401,6 +455,14 @@ struct BookChapterReaderView: View {
             }
         }
     }
+}
+
+// MARK: - Paragraph Journal Context
+
+struct ParagraphJournalContext: Identifiable {
+    let id = UUID()
+    let text: String
+    let index: Int
 }
 
 // MARK: - Scroll Offset Preference Key

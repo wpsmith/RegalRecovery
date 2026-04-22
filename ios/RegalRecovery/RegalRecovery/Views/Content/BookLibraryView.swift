@@ -3,6 +3,7 @@ import SwiftUI
 struct BookLibraryView: View {
     @State private var hasMigrated = false
     @State private var showLanguagePicker = false
+    @State private var refreshTrigger = UUID()
 
     private var langManager: BookLanguageManager { .shared }
     private var isNonEnglish: Bool { langManager.currentLanguage != "en" }
@@ -17,8 +18,10 @@ struct BookLibraryView: View {
                     .buttonStyle(.plain)
                 }
             }
+            .id(refreshTrigger)
             .padding(.horizontal, 16)
             .padding(.vertical, 20)
+            .padding(.bottom, 80)
         }
         .background(Color.rrBackground)
         .navigationTitle("")
@@ -36,6 +39,7 @@ struct BookLibraryView: View {
                 migrateProgressIfNeeded()
                 hasMigrated = true
             }
+            refreshTrigger = UUID()
         }
     }
 

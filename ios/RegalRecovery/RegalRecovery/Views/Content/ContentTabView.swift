@@ -85,6 +85,7 @@ struct ContentTabView: View {
                             }
                         }
                         .padding()
+                        .padding(.bottom, 80)
                     }
                     .background(Color.rrBackground)
                 }
