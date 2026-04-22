@@ -239,6 +239,8 @@
 		10001205 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001205 /* LocationService.swift */; };
 		10005001 /* VisionTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005001 /* VisionTypes.swift */; };
 		10006000 /* BowtieTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006000 /* BowtieTypes.swift */; };
+		10006001 /* RolesManagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006001 /* RolesManagerViewModel.swift */; };
+		10006002 /* RolesManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006002 /* RolesManagerView.swift */; };
 		10005002 /* VisionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005002 /* VisionWizardViewModel.swift */; };
 		10005003 /* VisionWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005003 /* VisionWizardView.swift */; };
 		10005004 /* VisionPromptsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005004 /* VisionPromptsStepView.swift */; };
@@ -490,6 +492,9 @@
 		20001205 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
 		20005001 /* VisionTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionTypes.swift; sourceTree = "<group>"; };
 		20006000 /* BowtieTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieTypes.swift; sourceTree = "<group>"; };
+		20006001 /* RolesManagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerViewModel.swift; sourceTree = "<group>"; };
+		20006002 /* RolesManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerView.swift; sourceTree = "<group>"; };
+		20006003 /* RolesManagerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerViewModelTests.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
 		20005003 /* VisionWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardView.swift; sourceTree = "<group>"; };
 		20005004 /* VisionPromptsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPromptsStepView.swift; sourceTree = "<group>"; };
@@ -714,6 +719,7 @@
 				20000600 /* TimeJournalEntryViewModel.swift */,
 				50001000 /* ThreeCircles */,
 				20005002 /* VisionWizardViewModel.swift */,
+				50006001 /* Bowtie */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -726,6 +732,30 @@
 				20001005 /* PatternViewModel.swift */,
 			);
 			path = ThreeCircles;
+			sourceTree = "<group>";
+		};
+		50006001 /* Bowtie */ = {
+			isa = PBXGroup;
+			children = (
+				20006001 /* RolesManagerViewModel.swift */,
+			);
+			path = Bowtie;
+			sourceTree = "<group>";
+		};
+		50006002 /* Bowtie */ = {
+			isa = PBXGroup;
+			children = (
+				20006002 /* RolesManagerView.swift */,
+			);
+			path = Bowtie;
+			sourceTree = "<group>";
+		};
+		50006003 /* Bowtie */ = {
+			isa = PBXGroup;
+			children = (
+				20006003 /* RolesManagerViewModelTests.swift */,
+			);
+			path = Bowtie;
 			sourceTree = "<group>";
 		};
 		50000040 /* Views */ = {
@@ -785,6 +815,7 @@
 			isa = PBXGroup;
 			children = (
 				50001100 /* Affirmations */,
+				50006002 /* Bowtie */,
 				20000053 /* ActivitiesListView.swift */,
 				20000055 /* EmotionalJournalView.swift */,
 				20000056 /* EveningReviewView.swift */,
@@ -1024,6 +1055,7 @@
 				20000113 /* ProfileViewModelTests.swift */,
 				20000114 /* StreakViewModelTests.swift */,
 				20000115 /* UrgeLogViewModelTests.swift */,
+				50006003 /* Bowtie */,
 			);
 			path = Unit;
 			sourceTree = "<group>";
@@ -1350,6 +1382,8 @@
 				10001205 /* LocationService.swift in Sources */,
 				10005001 /* VisionTypes.swift in Sources */,
 				10006000 /* BowtieTypes.swift in Sources */,
+				10006001 /* RolesManagerViewModel.swift in Sources */,
+				10006002 /* RolesManagerView.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,
 				10005004 /* VisionPromptsStepView.swift in Sources */,
