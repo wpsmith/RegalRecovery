@@ -185,6 +185,8 @@
 		10000950 /* AffirmationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000950 /* AffirmationTypes.swift */; };
 		10000951 /* AffirmationsAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000951 /* AffirmationsAPIClient.swift */; };
 		10000960 /* AffirmationTodayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000960 /* AffirmationTodayCard.swift */; };
+		10000996 /* AddictionSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000996 /* AddictionSelectorView.swift */; };
+		10000997 /* SetupMyPlanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000997 /* SetupMyPlanCard.swift */; };
 		10001000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* ThreeCirclesTypes.swift */; };
 		10001001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* ThreeCirclesAPIClient.swift */; };
 		10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001003 /* ThreeCirclesBuilderViewModel.swift */; };
@@ -332,6 +334,8 @@
 		20000951 /* AffirmationsAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationsAPIClient.swift; sourceTree = "<group>"; };
 		20000954 /* AffirmationNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationNavigationTests.swift; sourceTree = "<group>"; };
 		20000960 /* AffirmationTodayCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AffirmationTodayCard.swift; sourceTree = "<group>"; };
+		20000996 /* AddictionSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddictionSelectorView.swift; sourceTree = "<group>"; };
+		20000997 /* SetupMyPlanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupMyPlanCard.swift; sourceTree = "<group>"; };
 		20001000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
 		20001001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
 		20001003 /* ThreeCirclesBuilderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesBuilderViewModel.swift; sourceTree = "<group>"; };
@@ -909,6 +913,8 @@
 				20000311 /* ActivityDetailView.swift */,
 				20000908 /* GratitudeWidgetCard.swift */,
 				20000960 /* AffirmationTodayCard.swift */,
+				20000996 /* AddictionSelectorView.swift */,
+				20000997 /* SetupMyPlanCard.swift */,
 				20000312 /* TimeJournalTodayCard.swift */,
 			);
 			path = Today;
@@ -1325,6 +1331,8 @@
 				10001027 /* QuarterlyReviewView.swift in Sources */,
 				10001028 /* ReviewReflectionView.swift in Sources */,
 				10000960 /* AffirmationTodayCard.swift in Sources */,
+				10000996 /* AddictionSelectorView.swift in Sources */,
+				10000997 /* SetupMyPlanCard.swift in Sources */,
 				10003000 /* BookData.swift in Sources */,
 				10003001 /* BookCatalog.swift in Sources */,
 				10003100 /* SensaEmoji.swift in Sources */,

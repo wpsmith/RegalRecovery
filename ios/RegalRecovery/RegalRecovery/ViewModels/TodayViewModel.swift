@@ -55,6 +55,7 @@ class TodayViewModel {
     var morningCommitmentDone: Bool = false
     var recoveryWorkCards: [RecoveryWorkCard] = []
     var hasPlan: Bool = false
+    var hasAddictions: Bool = false
     /// Activity types present in today's plan (for gating standalone cards).
     var planActivityTypes: Set<String> = []
     var userName: String = ""
@@ -68,6 +69,7 @@ class TodayViewModel {
     // MARK: - Load
 
     func load(context: ModelContext) {
+        loadAddictions(context: context)
         loadUser(context: context)
         loadStreak(context: context)
         loadSobriety(context: context)
@@ -92,6 +94,12 @@ class TodayViewModel {
     }
 
     // MARK: - Private Loading
+
+    private func loadAddictions(context: ModelContext) {
+        let descriptor = FetchDescriptor<RRAddiction>()
+        let addictions = (try? context.fetch(descriptor)) ?? []
+        hasAddictions = !addictions.isEmpty
+    }
 
     private func loadUser(context: ModelContext) {
         let descriptor = FetchDescriptor<RRUser>()
