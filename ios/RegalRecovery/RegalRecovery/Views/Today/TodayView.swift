@@ -39,20 +39,24 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if viewModel.hasPlan {
-                    planContent
+                if !viewModel.hasAddictions {
+                    addictionSelectorState
+                } else if !viewModel.hasPlan {
+                    noPlanState
                 } else {
-                    emptyState
+                    planContent
                 }
             }
             .background(Color.rrBackground)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        RecoveryPlanSetupView()
-                    } label: {
-                        Image(systemName: "slider.horizontal.3")
-                            .foregroundStyle(Color.rrPrimary)
+                if viewModel.hasAddictions {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        NavigationLink {
+                            RecoveryPlanSetupView()
+                        } label: {
+                            Image(systemName: "slider.horizontal.3")
+                                .foregroundStyle(Color.rrPrimary)
+                        }
                     }
                 }
             }
@@ -105,10 +109,12 @@ struct TodayView: View {
 
             Spacer()
 
-            RRBadge(
-                text: "Day \(viewModel.streakDays)",
-                color: .rrPrimary
-            )
+            if viewModel.hasPlan {
+                RRBadge(
+                    text: "Day \(viewModel.streakDays)",
+                    color: .rrPrimary
+                )
+            }
         }
     }
 
@@ -362,40 +368,26 @@ struct TodayView: View {
         }
     }
 
-    // MARK: - Empty State
+    // MARK: - Addiction Selector State (no addictions)
 
-    private var emptyState: some View {
-        VStack(spacing: 20) {
-            Spacer()
+    private var addictionSelectorState: some View {
+        AddictionSelectorView {
+            viewModel.load(context: modelContext)
+        }
+    }
 
-            Image(systemName: "calendar.badge.plus")
-                .font(.system(size: 56))
-                .foregroundStyle(Color.rrPrimary.opacity(0.6))
+    // MARK: - No Plan State (has addictions, no plan)
 
-            Text("Set up your recovery plan to get started")
-                .font(RRFont.title3)
-                .foregroundStyle(Color.rrText)
-                .multilineTextAlignment(.center)
-
-            Text("Your daily plan will appear here, showing each activity and tracking your progress throughout the day.")
-                .font(RRFont.body)
-                .foregroundStyle(Color.rrTextSecondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-
-            NavigationLink {
-                RecoveryPlanSetupView()
-            } label: {
-                Text("Set Up My Plan")
-                    .font(RRFont.headline)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 32)
-                    .padding(.vertical, 14)
-                    .background(Color.rrPrimary)
-                    .clipShape(Capsule())
+    private var noPlanState: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                greetingHeader
+                SetupMyPlanCard()
+                quickActions
+                todayActivityLogSection
             }
-
-            Spacer()
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
         }
     }
 
