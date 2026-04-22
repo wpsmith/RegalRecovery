@@ -6,6 +6,10 @@ struct OnboardingFlow: View {
     @State private var currentPage = 0
     @State private var userName = ""
     @State private var userEmail = ""
+    @State private var selectedAddictions: [(name: String, date: Date)] = [
+        (name: "Sex Addiction (SA)", date: Date()),
+        (name: "Pornography", date: Date())
+    ]
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -20,13 +24,22 @@ struct OnboardingFlow: View {
                 }
                 .tag(1)
 
-                RecoverySetupView(name: $userName, email: $userEmail) {
+                AddictionSetupView(selectedAddictions: $selectedAddictions) {
                     withAnimation { currentPage = 3 }
                 }
                 .tag(2)
 
+                MotivationSetupView(
+                    name: userName,
+                    email: userEmail,
+                    selectedAddictions: selectedAddictions
+                ) {
+                    withAnimation { currentPage = 4 }
+                }
+                .tag(3)
+
                 PermissionsView(onComplete: onComplete)
-                    .tag(3)
+                    .tag(4)
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
             .indexViewStyle(.page(backgroundDisplayMode: .always))
