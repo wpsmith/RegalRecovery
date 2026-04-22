@@ -263,6 +263,9 @@
 		abbc40f7cf20460b903ba30f /* IntensitySliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */; };
 		a9a3750c54ef40ee8c05b253 /* CopingToolkitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67130aa3407649408ca80664 /* CopingToolkitView.swift */; };
 		d1587efa20c846c488ceb2ca /* TriggerLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = cab54e32a8ba4da192b44647 /* TriggerLogView.swift */; };
+		10D7D995 /* TriggerLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D7D995 /* TriggerLibraryView.swift */; };
+		10D7D996 /* TriggerLogHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D7D996 /* TriggerLogHistoryView.swift */; };
+		10D7D997 /* TriggerLogDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D7D997 /* TriggerLogDetailView.swift */; };
 		B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F001 /* Localizable.xcstrings */; };
 		B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
@@ -537,6 +540,9 @@
 		20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntensitySliderView.swift; sourceTree = "<group>"; };
 		67130aa3407649408ca80664 /* CopingToolkitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopingToolkitView.swift; sourceTree = "<group>"; };
 		cab54e32a8ba4da192b44647 /* TriggerLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogView.swift; sourceTree = "<group>"; };
+		20D7D995 /* TriggerLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLibraryView.swift; sourceTree = "<group>"; };
+		20D7D996 /* TriggerLogHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogHistoryView.swift; sourceTree = "<group>"; };
+		20D7D997 /* TriggerLogDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogDetailView.swift; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1135,6 +1141,9 @@
 			children = (
 				91315bc0a3d146579e193edb /* Components */,
 				cab54e32a8ba4da192b44647 /* TriggerLogView.swift */,
+				20D7D995 /* TriggerLibraryView.swift */,
+				20D7D996 /* TriggerLogHistoryView.swift */,
+				20D7D997 /* TriggerLogDetailView.swift */,
 			);
 			path = Triggers;
 			sourceTree = "<group>";
@@ -1467,6 +1476,9 @@
 				abbc40f7cf20460b903ba30f /* IntensitySliderView.swift in Sources */,
 				a9a3750c54ef40ee8c05b253 /* CopingToolkitView.swift in Sources */,
 				d1587efa20c846c488ceb2ca /* TriggerLogView.swift in Sources */,
+				10D7D995 /* TriggerLibraryView.swift in Sources */,
+				10D7D996 /* TriggerLogHistoryView.swift in Sources */,
+				10D7D997 /* TriggerLogDetailView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
