@@ -86,6 +86,21 @@ class QuickActionsViewModel {
         markChanged()
     }
 
+    func removeAction(id: UUID) {
+        guard canRemove, let index = items.firstIndex(where: { $0.id == id }) else { return }
+        items.remove(at: index)
+        markChanged()
+    }
+
+    func moveAction(fromId sourceId: UUID, toId destinationId: UUID) {
+        guard let sourceIndex = items.firstIndex(where: { $0.id == sourceId }),
+              let destIndex = items.firstIndex(where: { $0.id == destinationId }),
+              sourceIndex != destIndex else { return }
+        let item = items.remove(at: sourceIndex)
+        items.insert(item, at: destIndex)
+        markChanged()
+    }
+
     func moveAction(from source: IndexSet, to destination: Int) {
         items.move(fromOffsets: source, toOffset: destination)
         markChanged()
