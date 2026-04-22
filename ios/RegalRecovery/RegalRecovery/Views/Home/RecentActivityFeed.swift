@@ -9,7 +9,12 @@ struct RecentActivityFeed: View {
 
             VStack(spacing: 0) {
                 ForEach(activities) { activity in
-                    RecentActivityRow(activity: activity)
+                    NavigationLink {
+                        ActivityDetailView(activity: activity)
+                    } label: {
+                        RecentActivityRow(activity: activity)
+                    }
+                    .buttonStyle(.plain)
 
                     if activity.id != activities.last?.id {
                         Divider()

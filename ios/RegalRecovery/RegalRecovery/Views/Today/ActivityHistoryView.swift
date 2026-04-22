@@ -26,7 +26,7 @@ struct ActivityHistoryView: View {
             let label = c.type == "morning" ? "Morning Commitment" : "Evening Review"
             let icon = c.type == "morning" ? "sunrise.fill" : "moon.stars.fill"
             let color: Color = c.type == "morning" ? .rrSecondary : .rrPrimary
-            all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: color)))
+            all.append((c.date, RecentActivity(title: label, detail: "Completed", time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: color, sourceType: c.type == "morning" ? .morningCommitment : .eveningReview, sourceId: c.id)))
         }
         for m in moodEntries {
             let detail: String = {
@@ -34,37 +34,37 @@ struct ActivityHistoryView: View {
                 if let secondary = m.secondaryEmotion { parts.append(secondary) }
                 return parts.joined(separator: " · ")
             }()
-            all.append((m.date, RecentActivity(title: "Mood Check-In", detail: detail, time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: ActivityType.mood.icon, iconColor: ActivityType.mood.iconColor)))
+            all.append((m.date, RecentActivity(title: "Mood Check-In", detail: detail, time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: ActivityType.mood.icon, iconColor: ActivityType.mood.iconColor, sourceType: .mood, sourceId: m.id)))
         }
         for p in prayerLogs {
-            all.append((p.date, RecentActivity(title: "Prayer", detail: p.prayerType, time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: ActivityType.prayer.icon, iconColor: ActivityType.prayer.iconColor)))
+            all.append((p.date, RecentActivity(title: "Prayer", detail: p.prayerType, time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: ActivityType.prayer.icon, iconColor: ActivityType.prayer.iconColor, sourceType: .prayer, sourceId: p.id)))
         }
         for e in exerciseLogs {
-            all.append((e.date, RecentActivity(title: "Exercise", detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: ActivityType.exercise.icon, iconColor: ActivityType.exercise.iconColor)))
+            all.append((e.date, RecentActivity(title: "Exercise", detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: ActivityType.exercise.icon, iconColor: ActivityType.exercise.iconColor, sourceType: .exercise, sourceId: e.id)))
         }
         for f in fasterEntries {
             let stage = FASTERStage(rawValue: f.stage) ?? .forgettingPriorities
-            all.append((f.date, RecentActivity(title: "FASTER Scale", detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: ActivityType.fasterScale.icon, iconColor: stage.color)))
+            all.append((f.date, RecentActivity(title: "FASTER Scale", detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: ActivityType.fasterScale.icon, iconColor: stage.color, sourceType: .fasterScale, sourceId: f.id)))
         }
         for j in journals {
             let snippet = String(j.content.prefix(40))
-            all.append((j.date, RecentActivity(title: "Journal", detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: ActivityType.journal.icon, iconColor: ActivityType.journal.iconColor)))
+            all.append((j.date, RecentActivity(title: "Journal", detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: ActivityType.journal.icon, iconColor: ActivityType.journal.iconColor, sourceType: .journal, sourceId: j.id)))
         }
         for g in gratitudeEntries {
-            all.append((g.date, RecentActivity(title: "Gratitude", detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: ActivityType.gratitude.icon, iconColor: ActivityType.gratitude.iconColor)))
+            all.append((g.date, RecentActivity(title: "Gratitude", detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: ActivityType.gratitude.icon, iconColor: ActivityType.gratitude.iconColor, sourceType: .gratitude, sourceId: g.id)))
         }
         for u in urgeLogs {
-            all.append((u.date, RecentActivity(title: "Urge Log", detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: Date()), icon: ActivityType.urgeLog.icon, iconColor: ActivityType.urgeLog.iconColor)))
+            all.append((u.date, RecentActivity(title: "Urge Log", detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: Date()), icon: ActivityType.urgeLog.icon, iconColor: ActivityType.urgeLog.iconColor, sourceType: .urgeLog, sourceId: u.id)))
         }
         for pc in phoneCallLogs {
-            all.append((pc.date, RecentActivity(title: "Phone Call", detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: Date()), icon: ActivityType.phoneCalls.icon, iconColor: ActivityType.phoneCalls.iconColor)))
+            all.append((pc.date, RecentActivity(title: "Phone Call", detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: Date()), icon: ActivityType.phoneCalls.icon, iconColor: ActivityType.phoneCalls.iconColor, sourceType: .phoneCall, sourceId: pc.id)))
         }
         for ml in meetingLogs {
-            all.append((ml.date, RecentActivity(title: "Meeting", detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: ActivityType.meetingsAttended.icon, iconColor: ActivityType.meetingsAttended.iconColor)))
+            all.append((ml.date, RecentActivity(title: "Meeting", detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: ActivityType.meetingsAttended.icon, iconColor: ActivityType.meetingsAttended.iconColor, sourceType: .meeting, sourceId: ml.id)))
         }
         for sc in spouseCheckIns {
             let type: ActivityType = sc.framework == "FANOS" ? .fanos : .fitnap
-            all.append((sc.date, RecentActivity(title: "\(sc.framework) Check-in", detail: sc.framework, time: fmt.localizedString(for: sc.date, relativeTo: Date()), icon: type.icon, iconColor: type.iconColor)))
+            all.append((sc.date, RecentActivity(title: "\(sc.framework) Check-in", detail: sc.framework, time: fmt.localizedString(for: sc.date, relativeTo: Date()), icon: type.icon, iconColor: type.iconColor, sourceType: sc.framework == "FANOS" ? .fanos : .fitnap, sourceId: sc.id)))
         }
 
         return all.sorted { $0.date > $1.date }
@@ -111,7 +111,12 @@ struct ActivityHistoryView: View {
                             .padding(.bottom, 8)
 
                         ForEach(section.items) { activity in
-                            RecentActivityRow(activity: activity)
+                            NavigationLink {
+                                ActivityDetailView(activity: activity)
+                            } label: {
+                                RecentActivityRow(activity: activity)
+                            }
+                            .buttonStyle(.plain)
 
                             if activity.id != section.items.last?.id {
                                 Divider()

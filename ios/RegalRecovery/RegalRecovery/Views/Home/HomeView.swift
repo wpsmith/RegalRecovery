@@ -65,7 +65,7 @@ struct HomeView: View {
         for c in commitments.prefix(3) {
             let label = c.type == "morning" ? String(localized: "Morning Commitment") : String(localized: "Evening Review")
             let icon = c.type == "morning" ? "sunrise.fill" : "moon.stars.fill"
-            all.append((c.date, RecentActivity(title: label, detail: String(localized: "Completed"), time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: c.type == "morning" ? .rrSecondary : .rrPrimary)))
+            all.append((c.date, RecentActivity(title: label, detail: String(localized: "Completed"), time: fmt.localizedString(for: c.date, relativeTo: Date()), icon: icon, iconColor: c.type == "morning" ? .rrSecondary : .rrPrimary, sourceType: c.type == "morning" ? .morningCommitment : .eveningReview, sourceId: c.id)))
         }
         for m in moodEntries.prefix(3) {
             let detail: String = {
@@ -73,33 +73,33 @@ struct HomeView: View {
                 if let secondary = m.secondaryEmotion { parts.append(secondary) }
                 return parts.joined(separator: " · ")
             }()
-            all.append((m.date, RecentActivity(title: "Mood Check-In", detail: detail, time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: "face.smiling", iconColor: .yellow)))
+            all.append((m.date, RecentActivity(title: "Mood Check-In", detail: detail, time: fmt.localizedString(for: m.date, relativeTo: Date()), icon: "face.smiling", iconColor: .yellow, sourceType: .mood, sourceId: m.id)))
         }
         for p in prayerLogs.prefix(3) {
-            all.append((p.date, RecentActivity(title: String(localized: "Prayer"), detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: "hands.and.sparkles.fill", iconColor: .rrPrimary)))
+            all.append((p.date, RecentActivity(title: String(localized: "Prayer"), detail: "\(p.durationMinutes) min", time: fmt.localizedString(for: p.date, relativeTo: Date()), icon: "hands.and.sparkles.fill", iconColor: .rrPrimary, sourceType: .prayer, sourceId: p.id)))
         }
         for e in exerciseLogs.prefix(3) {
-            all.append((e.date, RecentActivity(title: String(localized: "Exercise"), detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: "figure.run", iconColor: .blue)))
+            all.append((e.date, RecentActivity(title: String(localized: "Exercise"), detail: "\(e.durationMinutes) min \(e.exerciseType)", time: fmt.localizedString(for: e.date, relativeTo: Date()), icon: "figure.run", iconColor: .blue, sourceType: .exercise, sourceId: e.id)))
         }
         for f in fasterEntries.prefix(3) {
             let stage = FASTERStage(rawValue: f.stage) ?? .restoration
-            all.append((f.date, RecentActivity(title: String(localized: "FASTER Scale"), detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: "gauge.with.needle", iconColor: stage.color)))
+            all.append((f.date, RecentActivity(title: String(localized: "FASTER Scale"), detail: stage.name, time: fmt.localizedString(for: f.date, relativeTo: Date()), icon: "gauge.with.needle", iconColor: stage.color, sourceType: .fasterScale, sourceId: f.id)))
         }
         for j in journals.prefix(3) {
             let snippet = String(j.content.prefix(40))
-            all.append((j.date, RecentActivity(title: String(localized: "Journal"), detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: "note.text", iconColor: .purple)))
+            all.append((j.date, RecentActivity(title: String(localized: "Journal"), detail: snippet, time: fmt.localizedString(for: j.date, relativeTo: Date()), icon: "note.text", iconColor: .purple, sourceType: .journal, sourceId: j.id)))
         }
         for g in gratitudeEntries.prefix(2) {
-            all.append((g.date, RecentActivity(title: String(localized: "Gratitude"), detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: "leaf.fill", iconColor: .rrSuccess)))
+            all.append((g.date, RecentActivity(title: String(localized: "Gratitude"), detail: "\(g.items.count) items", time: fmt.localizedString(for: g.date, relativeTo: Date()), icon: "leaf.fill", iconColor: .rrSuccess, sourceType: .gratitude, sourceId: g.id)))
         }
         for u in urgeLogs.prefix(2) {
-            all.append((u.date, RecentActivity(title: String(localized: "Urge Log"), detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: Date()), icon: "exclamationmark.triangle.fill", iconColor: .orange)))
+            all.append((u.date, RecentActivity(title: String(localized: "Urge Log"), detail: "\(u.intensity)/10", time: fmt.localizedString(for: u.date, relativeTo: Date()), icon: "exclamationmark.triangle.fill", iconColor: .orange, sourceType: .urgeLog, sourceId: u.id)))
         }
         for pc in phoneCalls.prefix(2) {
-            all.append((pc.date, RecentActivity(title: String(localized: "Phone Call"), detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: Date()), icon: "phone.fill", iconColor: .green)))
+            all.append((pc.date, RecentActivity(title: String(localized: "Phone Call"), detail: "\(pc.contactName), \(pc.durationMinutes) min", time: fmt.localizedString(for: pc.date, relativeTo: Date()), icon: "phone.fill", iconColor: .green, sourceType: .phoneCall, sourceId: pc.id)))
         }
         for ml in meetingLogs.prefix(2) {
-            all.append((ml.date, RecentActivity(title: String(localized: "Meeting"), detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: "person.3.fill", iconColor: .rrPrimary)))
+            all.append((ml.date, RecentActivity(title: String(localized: "Meeting"), detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: "person.3.fill", iconColor: .rrPrimary, sourceType: .meeting, sourceId: ml.id)))
         }
 
         return all.sorted { $0.date > $1.date }.prefix(10).map(\.item)

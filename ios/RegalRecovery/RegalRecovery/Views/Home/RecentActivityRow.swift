@@ -28,6 +28,12 @@ struct RecentActivityRow: View {
             Text(activity.time)
                 .font(RRFont.caption2)
                 .foregroundStyle(Color.rrTextSecondary)
+
+            if activity.sourceType != nil {
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(Color.rrTextSecondary)
+            }
         }
         .padding(.vertical, 8)
     }
