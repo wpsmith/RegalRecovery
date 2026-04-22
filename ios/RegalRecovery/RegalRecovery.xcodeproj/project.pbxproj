@@ -259,6 +259,13 @@
 		10006004 /* QuickActionsCustomizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006004 /* QuickActionsCustomizeView.swift */; };
 		10006007 /* MotivationCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006007 /* MotivationCaptureSheet.swift */; };
 		10006008 /* MotivationLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006008 /* MotivationLibraryViewModel.swift */; };
+		10006009 /* MotivationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006009 /* MotivationDetailView.swift */; };
+		10006010 /* MotivationDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006010 /* MotivationDiscoveryView.swift */; };
+		10006011 /* MotivationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006011 /* MotivationRepository.swift */; };
+		10006012 /* SwiftDataMotivationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006012 /* SwiftDataMotivationRepository.swift */; };
+		10006013 /* MotivationSurfacingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006013 /* MotivationSurfacingService.swift */; };
+		10006014 /* MotivationDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006014 /* MotivationDiscoveryViewModel.swift */; };
+		10006015 /* MotivationLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006015 /* MotivationLibraryView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -522,6 +529,13 @@
 		20006004 /* QuickActionsCustomizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsCustomizeView.swift; sourceTree = "<group>"; };
 		20006007 /* MotivationCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationCaptureSheet.swift; sourceTree = "<group>"; };
 		20006008 /* MotivationLibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryViewModel.swift; sourceTree = "<group>"; };
+		20006009 /* MotivationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDetailView.swift; sourceTree = "<group>"; };
+		20006010 /* MotivationDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryView.swift; sourceTree = "<group>"; };
+		20006011 /* MotivationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationRepository.swift; sourceTree = "<group>"; };
+		20006012 /* SwiftDataMotivationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataMotivationRepository.swift; sourceTree = "<group>"; };
+		20006013 /* MotivationSurfacingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingService.swift; sourceTree = "<group>"; };
+		20006014 /* MotivationDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryViewModel.swift; sourceTree = "<group>"; };
+		20006015 /* MotivationLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -637,6 +651,8 @@
 				20000990 /* SeedPersonas.swift */,
 				20000991 /* SeedPersonaData.swift */,
 				20000011 /* SwiftDataRepositories.swift */,
+				20006011 /* MotivationRepository.swift */,
+				20006012 /* SwiftDataMotivationRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -660,6 +676,7 @@
 				20001205 /* LocationService.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
 				20001001 /* ThreeCirclesAPIClient.swift */,
+				20006013 /* MotivationSurfacingService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -738,6 +755,7 @@
 				20005002 /* VisionWizardViewModel.swift */,
 				20006003 /* QuickActionsViewModel.swift */,
 				20006008 /* MotivationLibraryViewModel.swift */,
+				20006014 /* MotivationDiscoveryViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -1092,6 +1110,9 @@
 			children = (
 				20006100 /* MotivationSurfacingCard.swift */,
 				20006007 /* MotivationCaptureSheet.swift */,
+				20006009 /* MotivationDetailView.swift */,
+				20006010 /* MotivationDiscoveryView.swift */,
+				20006015 /* MotivationLibraryView.swift */,
 			);
 			path = Motivations;
 			sourceTree = "<group>";
@@ -1416,6 +1437,13 @@
 				10006004 /* QuickActionsCustomizeView.swift in Sources */,
 				10006007 /* MotivationCaptureSheet.swift in Sources */,
 				10006008 /* MotivationLibraryViewModel.swift in Sources */,
+				10006009 /* MotivationDetailView.swift in Sources */,
+				10006010 /* MotivationDiscoveryView.swift in Sources */,
+				10006011 /* MotivationRepository.swift in Sources */,
+				10006012 /* SwiftDataMotivationRepository.swift in Sources */,
+				10006013 /* MotivationSurfacingService.swift in Sources */,
+				10006014 /* MotivationDiscoveryViewModel.swift in Sources */,
+				10006015 /* MotivationLibraryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
