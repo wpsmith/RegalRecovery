@@ -258,6 +258,7 @@
 		10D7D994 /* RRCopingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F12 /* RRCopingStrategy.swift */; };
 		15F2773FFA15EE1EABA2F341 /* TriggerLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */; };
 		25C3A7B1DF46EE2ABC567890 /* TriggerLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D8F4C5BE91AA73ED245681 /* TriggerLibraryViewModel.swift */; };
+		3F7B8A9CDE21FF34AB678901 /* TriggerInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D9E1A2BCD56EE78FG901234 /* TriggerInsightsViewModel.swift */; };
 		B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F001 /* Localizable.xcstrings */; };
 		B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
@@ -523,6 +524,8 @@
 		20258F12 /* RRCopingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRCopingStrategy.swift; sourceTree = "<group>"; };
 		30000001 /* RegalRecovery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegalRecovery.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37D8F4C5BE91AA73ED245681 /* TriggerLibraryViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TriggerLibraryViewModel.swift; path = Triggers/TriggerLibraryViewModel.swift; sourceTree = "<group>"; };
+		4D9E1A2BCD56EE78FG901234 /* TriggerInsightsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TriggerInsightsViewModel.swift; path = Triggers/TriggerInsightsViewModel.swift; sourceTree = "<group>"; };
+		6E0F2B3BCE67FF89HI012345 /* TriggerInsightsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerInsightsViewModelTests.swift; sourceTree = "<group>"; };
 		84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TriggerLogViewModel.swift; path = Triggers/TriggerLogViewModel.swift; sourceTree = "<group>"; };
 		9E5A2D1BCF78AA45CE123456 /* TriggerLibraryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerLibraryViewModelTests.swift; sourceTree = "<group>"; };
 		AD4C9FD9C8C50339F8B09D2C /* TriggerLogViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerLogViewModelTests.swift; sourceTree = "<group>"; };
@@ -923,9 +926,10 @@
 				20000114 /* StreakViewModelTests.swift */,
 				2021035A /* TriggerTypesTests.swift */,
 				2021035B /* TriggerSeedDataTests.swift */,
-				20000115 /* UrgeLogViewModelTests.swift */,
+				6E0F2B3BCE67FF89HI012345 /* TriggerInsightsViewModelTests.swift */,
 				9E5A2D1BCF78AA45CE123456 /* TriggerLibraryViewModelTests.swift */,
 				AD4C9FD9C8C50339F8B09D2C /* TriggerLogViewModelTests.swift */,
+				20000115 /* UrgeLogViewModelTests.swift */,
 			);
 			path = Unit;
 			sourceTree = "<group>";
@@ -1110,6 +1114,7 @@
 		B0B07FC2981F06521F796C44 /* Triggers */ = {
 			isa = PBXGroup;
 			children = (
+				4D9E1A2BCD56EE78FG901234 /* TriggerInsightsViewModel.swift */,
 				37D8F4C5BE91AA73ED245681 /* TriggerLibraryViewModel.swift */,
 				84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */,
 			);
@@ -1427,6 +1432,7 @@
 				10006002 /* ActivityDestinationView.swift in Sources */,
 				10006003 /* QuickActionsViewModel.swift in Sources */,
 				10006004 /* QuickActionsCustomizeView.swift in Sources */,
+				3F7B8A9CDE21FF34AB678901 /* TriggerInsightsViewModel.swift in Sources */,
 				25C3A7B1DF46EE2ABC567890 /* TriggerLibraryViewModel.swift in Sources */,
 				15F2773FFA15EE1EABA2F341 /* TriggerLogViewModel.swift in Sources */,
 			);
