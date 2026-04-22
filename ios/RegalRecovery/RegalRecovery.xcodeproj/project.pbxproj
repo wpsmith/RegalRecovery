@@ -258,6 +258,7 @@
 		10006003 /* QuickActionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006003 /* QuickActionsViewModel.swift */; };
 		10006004 /* QuickActionsCustomizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006004 /* QuickActionsCustomizeView.swift */; };
 		10006007 /* MotivationCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006007 /* MotivationCaptureSheet.swift */; };
+		10006008 /* MotivationLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006008 /* MotivationLibraryViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -520,6 +521,7 @@
 		20006003 /* QuickActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsViewModel.swift; sourceTree = "<group>"; };
 		20006004 /* QuickActionsCustomizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsCustomizeView.swift; sourceTree = "<group>"; };
 		20006007 /* MotivationCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationCaptureSheet.swift; sourceTree = "<group>"; };
+		20006008 /* MotivationLibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -735,6 +737,7 @@
 				50001000 /* ThreeCircles */,
 				20005002 /* VisionWizardViewModel.swift */,
 				20006003 /* QuickActionsViewModel.swift */,
+				20006008 /* MotivationLibraryViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -1088,6 +1091,7 @@
 			isa = PBXGroup;
 			children = (
 				20006100 /* MotivationSurfacingCard.swift */,
+				20006007 /* MotivationCaptureSheet.swift */,
 			);
 			path = Motivations;
 			sourceTree = "<group>";
@@ -1410,6 +1414,8 @@
 				10006002 /* ActivityDestinationView.swift in Sources */,
 				10006003 /* QuickActionsViewModel.swift in Sources */,
 				10006004 /* QuickActionsCustomizeView.swift in Sources */,
+				10006007 /* MotivationCaptureSheet.swift in Sources */,
+				10006008 /* MotivationLibraryViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
