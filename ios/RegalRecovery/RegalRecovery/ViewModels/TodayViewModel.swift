@@ -452,6 +452,30 @@ class TodayViewModel {
             }
         }
 
+        // Affirmation Sessions
+        let affirmationDesc = FetchDescriptor<RRActivity>(
+            predicate: #Predicate { $0.activityType == "Affirmation Log" && $0.date >= todayStart && $0.date < tomorrow },
+            sortBy: [SortDescriptor(\.date, order: .reverse)]
+        )
+        if let results = try? context.fetch(affirmationDesc) {
+            for a in results {
+                let cardsViewed: Int = {
+                    if case .int(let v) = a.data.data["cardsViewed"] { return v }
+                    return 0
+                }()
+                let totalCards: Int = {
+                    if case .int(let v) = a.data.data["totalCards"] { return v }
+                    return 0
+                }()
+                let durationSeconds: Int = {
+                    if case .int(let v) = a.data.data["durationSeconds"] { return v }
+                    return 0
+                }()
+                let detail = "\(cardsViewed)/\(totalCards) cards, \(formatDuration(durationSeconds))"
+                all.append((a.date, RecentActivity(title: "Affirmations", detail: detail, time: fmt.localizedString(for: a.date, relativeTo: now), icon: ActivityType.affirmationLog.icon, iconColor: ActivityType.affirmationLog.iconColor)))
+            }
+        }
+
         todayActivityLog = all.sorted { $0.date > $1.date }.map(\.item)
     }
 
@@ -701,6 +725,15 @@ class TodayViewModel {
         default: period = String(localized: "Good evening")
         }
         return "\(period), \(name)"
+    }
+
+    private func formatDuration(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        if minutes > 0 {
+            return "\(minutes)m \(remainingSeconds)s"
+        }
+        return "\(remainingSeconds)s"
     }
 
     private func activityColor(for activityType: String) -> Color {

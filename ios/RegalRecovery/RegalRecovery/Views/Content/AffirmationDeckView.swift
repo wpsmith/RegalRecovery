@@ -1,10 +1,17 @@
 import SwiftUI
+import SwiftData
 
 struct AffirmationDeckView: View {
     let packName: String
     let affirmations: [Affirmation]
 
+    @Environment(\.modelContext) private var modelContext
+    @Query private var users: [RRUser]
+
     @State private var currentIndex = 0
+    @State private var sessionStartDate = Date()
+    @State private var viewedIndices: Set<Int> = [0]
+    @State private var hasLoggedSession = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,8 +22,31 @@ struct AffirmationDeckView: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .automatic))
+            .onChange(of: currentIndex) { _, newIndex in
+                viewedIndices.insert(newIndex)
+            }
         }
         .background(Color.rrBackground)
+        .onDisappear { logSession() }
+    }
+
+    private func logSession() {
+        guard !hasLoggedSession else { return }
+        let durationSeconds = Int(Date().timeIntervalSince(sessionStartDate))
+        guard durationSeconds >= 3 else { return }
+        let activity = RRActivity(
+            userId: users.first?.id ?? UUID(),
+            activityType: ActivityType.affirmationLog.rawValue,
+            date: Date(),
+            data: JSONPayload([
+                "cardsViewed": AnyCodableValue.int(viewedIndices.count),
+                "totalCards": AnyCodableValue.int(affirmations.count),
+                "durationSeconds": AnyCodableValue.int(durationSeconds),
+                "packName": AnyCodableValue.string(packName)
+            ])
+        )
+        modelContext.insert(activity)
+        hasLoggedSession = true
     }
 
     private func affirmationCard(_ affirmation: Affirmation, index: Int) -> some View {
