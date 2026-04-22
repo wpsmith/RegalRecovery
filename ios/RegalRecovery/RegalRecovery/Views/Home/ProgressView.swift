@@ -11,6 +11,7 @@ struct RecoveryProgressView: View {
     @Query(sort: \RRUrgeLog.date, order: .reverse) private var urges: [RRUrgeLog]
     @Query(sort: \RRMoodEntry.date, order: .reverse) private var moodEntries: [RRMoodEntry]
     @Query(sort: \RRDevotionalProgress.day) private var devotionalProgress: [RRDevotionalProgress]
+    @Query(sort: \RRGratitudeEntry.date, order: .reverse) private var gratitudeEntries: [RRGratitudeEntry]
 
     private var primaryStreak: RRStreak? { streaks.first }
 
@@ -97,6 +98,9 @@ struct RecoveryProgressView: View {
                         devotionalSection
                     }
                     weeklySummarySection
+                    if isFlagEnabled("activity.gratitude") && !gratitudeEntries.isEmpty {
+                        gratitudeSection
+                    }
                     monthlyStatsSection
                     stepProgressSection
 
@@ -382,6 +386,103 @@ struct RecoveryProgressView: View {
 
                         ProgressView(value: Double(completedSteps), total: 12.0)
                             .tint(Color.rrPrimary)
+                    }
+                }
+            }
+        }
+    }
+    // MARK: - Gratitude Trends
+
+    private var gratitudeStreak: Int {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+
+        let uniqueDays = Set(gratitudeEntries.map { formatter.string(from: cal.startOfDay(for: $0.date)) })
+            .compactMap { formatter.date(from: $0) }
+            .sorted(by: >)
+
+        guard let mostRecent = uniqueDays.first else { return 0 }
+        let daysSinceLast = cal.dateComponents([.day], from: mostRecent, to: today).day ?? 0
+        guard daysSinceLast <= 1 else { return 0 }
+
+        var streak = 1
+        var expected = mostRecent
+        for i in 1..<uniqueDays.count {
+            let prev = cal.date(byAdding: .day, value: -1, to: expected)!
+            if cal.isDate(uniqueDays[i], inSameDayAs: prev) {
+                streak += 1
+                expected = prev
+            } else {
+                break
+            }
+        }
+        return streak
+    }
+
+    private var gratitudeTopCategories: [(name: String, count: Int, color: Color)] {
+        var counts: [GratitudeCategory: Int] = [:]
+        for entry in gratitudeEntries {
+            for item in entry.items {
+                if let category = item.category {
+                    counts[category, default: 0] += 1
+                }
+            }
+        }
+        return counts
+            .sorted { $0.value > $1.value }
+            .prefix(3)
+            .map { (name: $0.key.rawValue, count: $0.value, color: $0.key.color) }
+    }
+
+    private var gratitudeTotalItems: Int {
+        gratitudeEntries.reduce(0) { $0 + $1.items.count }
+    }
+
+    private var gratitudeSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            RRSectionHeader(title: "Gratitude")
+
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
+                summaryCard(
+                    title: "Current Streak",
+                    value: "\(gratitudeStreak) days",
+                    detail: nil,
+                    icon: "flame.fill",
+                    iconColor: .orange
+                )
+
+                summaryCard(
+                    title: "Total Items",
+                    value: "\(gratitudeTotalItems)",
+                    detail: "\(gratitudeEntries.count) entries",
+                    icon: "leaf.fill",
+                    iconColor: .rrSuccess
+                )
+            }
+
+            if !gratitudeTopCategories.isEmpty {
+                RRCard {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Top Categories")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+
+                        ForEach(Array(gratitudeTopCategories.enumerated()), id: \.offset) { _, item in
+                            HStack(spacing: 8) {
+                                Circle()
+                                    .fill(item.color)
+                                    .frame(width: 8, height: 8)
+                                Text(item.name)
+                                    .font(RRFont.callout)
+                                    .foregroundStyle(Color.rrText)
+                                Spacer()
+                                Text("\(item.count)")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                        }
                     }
                 }
             }
