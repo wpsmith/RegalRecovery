@@ -9,6 +9,9 @@ struct TodayView: View {
     @State private var viewModel = TodayViewModel()
     @State private var hideCompleted = false
     @State private var showFASTERMood = false
+    @State private var quickActionsVM = QuickActionsViewModel()
+    @State private var showFASTERFromQuickAction = false
+    @State private var showQuickActionsCustomize = false
 
     // Time Journal SwiftData query for today's entries
     @Query private var allTimeJournalEntries: [RRTimeJournalEntry]
@@ -66,10 +69,19 @@ struct TodayView: View {
             .onChange(of: scenePhase) {
                 if scenePhase == .active {
                     viewModel.load(context: modelContext)
+                    quickActionsVM.load(context: modelContext)
                 }
             }
             .fullScreenCover(isPresented: $showFASTERMood) {
                 FASTERCheckInFlowView()
+            }
+            .fullScreenCover(isPresented: $showFASTERFromQuickAction) {
+                FASTERCheckInFlowView()
+            }
+            .sheet(isPresented: $showQuickActionsCustomize, onDismiss: {
+                quickActionsVM.load(context: modelContext)
+            }) {
+                QuickActionsCustomizeView(viewModel: quickActionsVM)
             }
             .onReceive(NotificationCenter.default.publisher(for: .emergencyDismissed)) { _ in
                 viewModel.load(context: modelContext)
@@ -99,6 +111,7 @@ struct TodayView: View {
         }
         .onAppear {
             viewModel.load(context: modelContext)
+            quickActionsVM.load(context: modelContext)
         }
     }
 
@@ -139,14 +152,40 @@ struct TodayView: View {
         if FeatureFlagStore.shared.isEnabled("feature.quick-actions") {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    Button { showFASTERMood = true } label: {
+                    ForEach(quickActionsVM.items) { item in
+                        if item.definition.presentationStyle == .fullScreenCover {
+                            Button { showFASTERFromQuickAction = true } label: {
+                                quickActionCard(
+                                    icon: item.definition.icon,
+                                    label: item.definition.displayName,
+                                    color: item.definition.iconColor
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            NavigationLink {
+                                ActivityDestinationView(activityType: item.definition.id)
+                            } label: {
+                                quickActionCard(
+                                    icon: item.definition.icon,
+                                    label: item.definition.displayName,
+                                    color: item.definition.iconColor
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    Button {
+                        showQuickActionsCustomize = true
+                    } label: {
                         VStack(spacing: 6) {
-                            Image(systemName: "gauge.with.needle")
+                            Image(systemName: "pencil.circle")
                                 .font(.title3)
-                                .foregroundStyle(Color.rrSuccess)
-                            Text("FASTER")
+                                .foregroundStyle(Color.rrTextSecondary)
+                            Text(String(localized: "Edit"))
                                 .font(RRFont.caption2)
-                                .foregroundStyle(Color.rrText)
+                                .foregroundStyle(Color.rrTextSecondary)
                         }
                         .frame(width: 72, height: 64)
                         .background(Color.rrSurface)
@@ -154,47 +193,24 @@ struct TodayView: View {
                         .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
                     }
                     .buttonStyle(.plain)
-
-                    quickActionCard(icon: "flame.fill", label: String(localized: "Log Urge"), color: .orange) {
-                        UrgeLogView()
-                    }
-                    quickActionCard(icon: "book.fill", label: String(localized: "Journaling"), color: .blue) {
-                        JournalView()
-                    }
-                    quickActionCard(icon: "hands.and.sparkles.fill", label: String(localized: "Pray"), color: .purple) {
-                        PrayerLogView()
-                    }
-                    quickActionCard(icon: "phone.fill", label: String(localized: "Call Someone"), color: .green) {
-                        PhoneCallLogView()
-                    }
                 }
             }
         }
     }
 
-    private func quickActionCard<Destination: View>(
-        icon: String,
-        label: String,
-        color: Color,
-        @ViewBuilder destination: () -> Destination
-    ) -> some View {
-        NavigationLink {
-            destination()
-        } label: {
-            VStack(spacing: 6) {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(color)
-                Text(label)
-                    .font(RRFont.caption2)
-                    .foregroundStyle(Color.rrText)
-            }
-            .frame(width: 72, height: 64)
-            .background(Color.rrSurface)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
+    private func quickActionCard(icon: String, label: String, color: Color) -> some View {
+        VStack(spacing: 6) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(color)
+            Text(label)
+                .font(RRFont.caption2)
+                .foregroundStyle(Color.rrText)
         }
-        .buttonStyle(.plain)
+        .frame(width: 72, height: 64)
+        .background(Color.rrSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
     }
 
     // MARK: - Time Journal Card
@@ -269,7 +285,17 @@ struct TodayView: View {
                 } else {
                     VStack(spacing: 0) {
                         ForEach(viewModel.todayActivityLog) { activity in
-                            RecentActivityRow(activity: activity)
+                            if activity.sourceType != nil {
+                                NavigationLink {
+                                    ActivityDetailView(activity: activity)
+                                } label: {
+                                    RecentActivityRow(activity: activity)
+                                        .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                            } else {
+                                RecentActivityRow(activity: activity)
+                            }
 
                             if activity.id != viewModel.todayActivityLog.last?.id {
                                 Divider()
@@ -398,57 +424,7 @@ struct TodayView: View {
 
     @ViewBuilder
     private func destinationView(for activityType: String) -> some View {
-        switch activityType {
-        case ActivityType.sobrietyCommitment.rawValue:
-            MorningCommitmentView()
-        case ActivityType.prayer.rawValue:
-            PrayerLogView()
-        case ActivityType.exercise.rawValue:
-            ExerciseLogView()
-        case ActivityType.journal.rawValue:
-            JournalView()
-        case ActivityType.mood.rawValue:
-            MoodRatingView()
-        case ActivityType.gratitude.rawValue:
-            GratitudeTabView()
-        case ActivityType.fasterScale.rawValue:
-            FASTERScaleView()
-        case "devotional":
-            DevotionalView()
-        case ActivityType.affirmationLog.rawValue:
-            if let packName = AffirmationSettingsManager.shared.packForToday(),
-               let pack = ContentData.affirmationPacks.first(where: { $0.name == packName }) {
-                AffirmationDeckView(packName: pack.name, affirmations: pack.affirmations)
-            } else {
-                AffirmationPackPickerView()
-            }
-        case ActivityType.phoneCalls.rawValue:
-            PhoneCallLogView()
-        case ActivityType.meetingsAttended.rawValue:
-            MeetingsAttendedView()
-        case ActivityType.fanos.rawValue:
-            FANOSCheckInView()
-        case ActivityType.fitnap.rawValue:
-            FITNAPCheckInView()
-        case "pci":
-            Text("PCI - Coming Soon")
-                .font(RRFont.title3)
-                .foregroundStyle(Color.rrTextSecondary)
-        case ActivityType.weeklyGoals.rawValue:
-            WeeklyGoalsView()
-        case ActivityType.stepWork.rawValue:
-            StepWorkView()
-        case ActivityType.timeJournal.rawValue:
-            TimeJournalDailyView()
-        case ActivityType.postMortem.rawValue:
-            PostMortemView()
-        case ActivityType.urgeLog.rawValue:
-            UrgeLogView()
-        default:
-            Text("Activity")
-                .font(RRFont.title3)
-                .foregroundStyle(Color.rrTextSecondary)
-        }
+        ActivityDestinationView(activityType: activityType)
     }
 }
 
