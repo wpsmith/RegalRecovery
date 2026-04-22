@@ -705,6 +705,7 @@ enum HistoryItemType: String {
     case meeting
     case fanos
     case fitnap
+    case triggerLog
 }
 
 struct RecentActivity: Identifiable {

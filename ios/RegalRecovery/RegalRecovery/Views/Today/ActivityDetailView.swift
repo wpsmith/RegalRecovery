@@ -75,6 +75,8 @@ struct ActivityDetailView: View {
             meetingDetail(id: id)
         case .fanos, .fitnap:
             spouseCheckInDetail(id: id)
+        case .triggerLog:
+            triggerLogDetail(id: id)
         }
     }
 
@@ -597,6 +599,90 @@ struct ActivityDetailView: View {
         }
     }
 
+    // MARK: - Trigger Log
+
+    private func triggerLogDetail(id: UUID) -> some View {
+        let item = fetchModel(RRTriggerLogEntry.self, id: id)
+        return Group {
+            if let entry = item {
+                VStack(spacing: 16) {
+                    RRCard {
+                        VStack(alignment: .leading, spacing: 12) {
+                            detailRow("Date", value: entry.timestamp.formatted(date: .long, time: .shortened))
+                            detailRow("Log Depth", value: entry.logDepth.displayName)
+                            if let intensity = entry.intensity {
+                                detailRow("Intensity", value: "\(intensity)/10")
+                            }
+                            if let riskLevel = entry.riskLevel {
+                                detailRow("Risk Level", value: riskLevel.displayName)
+                            }
+                        }
+                    }
+
+                    if !entry.triggerSnapshots.isEmpty {
+                        RRCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Triggers")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                FlowLayout(spacing: 8) {
+                                    ForEach(entry.triggerSnapshots, id: \.id) { snapshot in
+                                        RRBadge(text: snapshot.label, color: TriggerCategory(rawValue: snapshot.category)?.color ?? .gray)
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+
+                    if let mood = entry.mood {
+                        RRCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Mood")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                Text(mood)
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+
+                    if let situation = entry.situation {
+                        RRCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Situation")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                Text(situation)
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+
+                    if let reflection = entry.teacherReflection {
+                        RRCard {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Teacher Reflection")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                Text(reflection)
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                }
+            } else {
+                notFoundView
+            }
+        }
+    }
+
     private func fetchModel<T: PersistentModel>(_ type: T.Type, id: UUID) -> T? {
         let descriptor = FetchDescriptor<T>(predicate: #Predicate { _ in true })
         guard let results = try? modelContext.fetch(descriptor) else { return nil }
@@ -622,6 +708,7 @@ extension RRExerciseLog: HasUUID {}
 extension RRPhoneCallLog: HasUUID {}
 extension RRMeetingLog: HasUUID {}
 extension RRSpouseCheckIn: HasUUID {}
+extension RRTriggerLogEntry: HasUUID {}
 
 #Preview {
     NavigationStack {
