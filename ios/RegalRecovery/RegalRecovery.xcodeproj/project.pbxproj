@@ -252,6 +252,9 @@
 		10006030 /* BowtieOnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006030 /* BowtieOnboardingViewModel.swift */; };
 		10006040 /* BackboneProcessingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006040 /* BackboneProcessingViewModel.swift */; };
 		10006041 /* BackboneFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006041 /* BackboneFlowView.swift */; };
+		10006050 /* BowtieHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006050 /* BowtieHistoryViewModel.swift */; };
+		10006051 /* BowtieHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006051 /* BowtieHistoryView.swift */; };
+		10006052 /* BowtieInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006052 /* BowtieInsightsView.swift */; };
 		10006031 /* BowtieOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006031 /* BowtieOnboardingView.swift */; };
 		10006020 /* PPPEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006020 /* PPPEntryViewModel.swift */; };
 		10006021 /* PPPFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006021 /* PPPFormView.swift */; };
@@ -527,6 +530,10 @@
 		20006040 /* BackboneProcessingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneProcessingViewModel.swift; sourceTree = "<group>"; };
 		20006041 /* BackboneFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneFlowView.swift; sourceTree = "<group>"; };
 		20006042 /* BackboneProcessingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneProcessingViewModelTests.swift; sourceTree = "<group>"; };
+		20006050 /* BowtieHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryViewModel.swift; sourceTree = "<group>"; };
+		20006051 /* BowtieHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryView.swift; sourceTree = "<group>"; };
+		20006052 /* BowtieInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieInsightsView.swift; sourceTree = "<group>"; };
+		20006053 /* BowtieHistoryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryViewModelTests.swift; sourceTree = "<group>"; };
 		20006032 /* BowtieOnboardingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
 		20005003 /* VisionWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardView.swift; sourceTree = "<group>"; };
@@ -776,6 +783,7 @@
 				20006020 /* PPPEntryViewModel.swift */,
 				20006030 /* BowtieOnboardingViewModel.swift */,
 				20006040 /* BackboneProcessingViewModel.swift */,
+				20006050 /* BowtieHistoryViewModel.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -793,6 +801,8 @@
 				20006021 /* PPPFormView.swift */,
 				20006031 /* BowtieOnboardingView.swift */,
 				20006041 /* BackboneFlowView.swift */,
+				20006051 /* BowtieHistoryView.swift */,
+				20006052 /* BowtieInsightsView.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -806,6 +816,7 @@
 				20006022 /* PPPEntryViewModelTests.swift */,
 				20006032 /* BowtieOnboardingViewModelTests.swift */,
 				20006042 /* BackboneProcessingViewModelTests.swift */,
+				20006053 /* BowtieHistoryViewModelTests.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -1450,6 +1461,9 @@
 				10006031 /* BowtieOnboardingView.swift in Sources */,
 				10006040 /* BackboneProcessingViewModel.swift in Sources */,
 				10006041 /* BackboneFlowView.swift in Sources */,
+				10006050 /* BowtieHistoryViewModel.swift in Sources */,
+				10006051 /* BowtieHistoryView.swift in Sources */,
+				10006052 /* BowtieInsightsView.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,
 				10005004 /* VisionPromptsStepView.swift in Sources */,
