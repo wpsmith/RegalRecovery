@@ -25,6 +25,8 @@
 		10000500 /* TimeJournalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000500 /* TimeJournalTypes.swift */; };
 		10000008 /* RRModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000008 /* RRModels.swift */; };
 		10000501 /* RRTimeJournalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000501 /* RRTimeJournalEntry.swift */; };
+		10006005 /* MotivationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006005 /* MotivationTypes.swift */; };
+		10006006 /* RRMotivationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006006 /* RRMotivationModels.swift */; };
 		10000510 /* TimeJournalDailyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000510 /* TimeJournalDailyView.swift */; };
 		10000511 /* TimeJournalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000511 /* TimeJournalHeaderView.swift */; };
 		10000512 /* TimeJournalTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000512 /* TimeJournalTimelineView.swift */; };
@@ -276,6 +278,8 @@
 		20000500 /* TimeJournalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTypes.swift; sourceTree = "<group>"; };
 		20000008 /* RRModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRModels.swift; sourceTree = "<group>"; };
 		20000501 /* RRTimeJournalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTimeJournalEntry.swift; sourceTree = "<group>"; };
+		20006005 /* MotivationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationTypes.swift; sourceTree = "<group>"; };
+		20006006 /* RRMotivationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRMotivationModels.swift; sourceTree = "<group>"; };
 		20000510 /* TimeJournalDailyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalDailyView.swift; sourceTree = "<group>"; };
 		20000511 /* TimeJournalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeaderView.swift; sourceTree = "<group>"; };
 		20000512 /* TimeJournalTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTimelineView.swift; sourceTree = "<group>"; };
@@ -595,6 +599,7 @@
 				20003100 /* SensaEmoji.swift */,
 				20005001 /* VisionTypes.swift */,
 				20006001 /* QuickActionDefinition.swift */,
+				20006005 /* MotivationTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -613,6 +618,7 @@
 			children = (
 				20000008 /* RRModels.swift */,
 				20000501 /* RRTimeJournalEntry.swift */,
+				20006006 /* RRMotivationModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1170,6 +1176,8 @@
 				10000500 /* TimeJournalTypes.swift in Sources */,
 				10000008 /* RRModels.swift in Sources */,
 				10000501 /* RRTimeJournalEntry.swift in Sources */,
+				10006005 /* MotivationTypes.swift in Sources */,
+				10006006 /* RRMotivationModels.swift in Sources */,
 				10000510 /* TimeJournalDailyView.swift in Sources */,
 				10000511 /* TimeJournalHeaderView.swift in Sources */,
 				10000512 /* TimeJournalTimelineView.swift in Sources */,
