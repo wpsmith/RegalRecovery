@@ -819,6 +819,7 @@ enum SeedPersonaData {
                 date: daysAgo(day, hour: rng.nextInt(in: 10...22), minute: rng.nextInt(in: 0...59)),
                 intensity: intensity,
                 addictionId: addictionId,
+                addictionIds: [addictionId],
                 triggers: triggers,
                 notes: "Felt triggered. \(resolution).",
                 resolution: resolution,
