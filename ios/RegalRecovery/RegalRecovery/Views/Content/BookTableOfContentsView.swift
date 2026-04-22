@@ -148,6 +148,7 @@ struct BookTableOfContentsView: View {
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 14)
+        .contentShape(Rectangle())
     }
 
     private func chapterNumberView(_ chapter: BookChapter) -> some View {
