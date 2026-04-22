@@ -2,7 +2,7 @@ import SwiftData
 import SwiftUI
 
 struct AddictionManagementView: View {
-    @Query(sort: \RRAddiction.sortOrder) private var addictions: [RRAddiction]
+    @Query(sort: \RRAddiction.name) private var addictions: [RRAddiction]
     @Query private var streaks: [RRStreak]
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
     @Environment(\.modelContext) private var modelContext
@@ -10,22 +10,6 @@ struct AddictionManagementView: View {
     @State private var showAddSheet = false
     @State private var editMode: EditMode = .active
     @State private var expandedAddictionIds: Set<UUID> = []
-
-    private let sexualAddictionNames: Set<String> = [
-        "Sex", "Pornography", "Compulsive Sexual Behavior", "Cybersex",
-        "Exhibitionism", "Voyeurism", "Sex Buying", "Anonymous Sex",
-        "Affair / Infidelity", "Phone Sex / Sexting", "Sexual Fantasy",
-        "Masturbation", "Strip Clubs", "Fetish Behavior", "Sexual Massage",
-        "Love / Relationship",
-    ]
-
-    private var sexAddictions: [RRAddiction] {
-        addictions.filter { sexualAddictionNames.contains($0.name) }
-    }
-
-    private var otherAddictions: [RRAddiction] {
-        addictions.filter { !sexualAddictionNames.contains($0.name) }
-    }
 
     var body: some View {
         List {
@@ -35,38 +19,15 @@ struct AddictionManagementView: View {
                         .foregroundStyle(Color.rrTextSecondary)
                 }
             } else {
-                if !sexAddictions.isEmpty {
-                    Section("Sex Addictions") {
-                        Text("SA sobriety is defined as no sex with self and no sex with anyone other than your spouse. Any form of sex with yourself or outside of your marriage is a break in sobriety.")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                            .padding(.vertical, 4)
-                            .moveDisabled(true)
-                            .deleteDisabled(true)
-
-                        ForEach(sexAddictions) { addiction in
-                            addictionRow(addiction)
-                        }
-                        .onDelete { offsets in
-                            deleteAddictions(at: offsets, in: sexAddictions)
-                        }
-                        .onMove { source, destination in
-                            moveAddictions(from: source, to: destination, in: sexAddictions)
-                        }
+                Section {
+                    ForEach(addictions) { addiction in
+                        addictionRow(addiction)
                     }
-                }
-
-                if !otherAddictions.isEmpty {
-                    Section("Other Addictions") {
-                        ForEach(otherAddictions) { addiction in
-                            addictionRow(addiction)
-                        }
-                        .onDelete { offsets in
-                            deleteAddictions(at: offsets, in: otherAddictions)
-                        }
-                        .onMove { source, destination in
-                            moveAddictions(from: source, to: destination, in: otherAddictions)
-                        }
+                    .onDelete { offsets in
+                        deleteAddictions(at: offsets)
+                    }
+                    .onMove { source, destination in
+                        moveAddictions(from: source, to: destination)
                     }
                 }
             }
@@ -171,9 +132,9 @@ struct AddictionManagementView: View {
         modelContext.insert(streak)
     }
 
-    private func deleteAddictions(at offsets: IndexSet, in subset: [RRAddiction]) {
+    private func deleteAddictions(at offsets: IndexSet) {
         for index in offsets {
-            let addiction = subset[index]
+            let addiction = addictions[index]
             if let streak = streaks.first(where: { $0.addictionId == addiction.id }) {
                 modelContext.delete(streak)
             }
@@ -181,10 +142,9 @@ struct AddictionManagementView: View {
         }
     }
 
-    private func moveAddictions(from source: IndexSet, to destination: Int, in subset: [RRAddiction]) {
-        var reordered = subset
+    private func moveAddictions(from source: IndexSet, to destination: Int) {
+        var reordered = Array(addictions)
         reordered.move(fromOffsets: source, toOffset: destination)
-        // Update sort orders across all addictions in this subset
         for (index, addiction) in reordered.enumerated() {
             addiction.sortOrder = index
             addiction.modifiedAt = Date()
@@ -202,36 +162,23 @@ struct AddAddictionSheet: View {
     @State private var customAddictionName = ""
     @State private var sobrietyDate = Date()
 
-    private let sexualAddictions = [
+    private let allAddictions = [
         "Affair / Infidelity",
-        "Anonymous Sex",
-        "Compulsive Sexual Behavior",
-        "Cybersex",
-        "Exhibitionism",
-        "Fetish Behavior",
-        "Love / Relationship",
-        "Masturbation",
-        "Phone Sex / Sexting",
-        "Pornography",
-        "Sex",
-        "Sex Buying",
-        "Sexual Fantasy",
-        "Sexual Massage",
-        "Strip Clubs",
-        "Voyeurism",
-    ]
-
-    private let otherAddictions = [
         "Alcohol",
         "Amphetamines",
+        "Anonymous Sex",
         "Benzodiazepines",
         "Caffeine",
         "Cannabis / Marijuana",
         "Cocaine",
         "Codependency",
+        "Compulsive Sexual Behavior",
+        "Cybersex",
         "Eating / Food",
         "Exercise (Compulsive)",
+        "Exhibitionism",
         "Fantasy",
+        "Fetish Behavior",
         "Gambling",
         "Gaming",
         "Heroin / Opioids",
@@ -239,13 +186,23 @@ struct AddAddictionSheet: View {
         "Internet / Social Media",
         "Ketamine",
         "LSD / Psychedelics",
+        "Love / Relationship",
+        "Masturbation",
         "MDMA / Ecstasy",
         "Methamphetamine",
         "Nicotine / Tobacco",
+        "Phone Sex / Sexting",
+        "Pornography",
         "Prescription Drugs",
+        "Sex",
+        "Sex Buying",
+        "Sexual Fantasy",
+        "Sexual Massage",
         "Shopping / Spending",
         "Steroids",
+        "Strip Clubs",
         "Synthetic Drugs",
+        "Voyeurism",
         "Work",
         "Other",
     ]
@@ -263,17 +220,8 @@ struct AddAddictionSheet: View {
                 Section {
                     Picker("Type", selection: $selectedType) {
                         Text("Select a type").tag("")
-
-                        Section("Sexual Addictions") {
-                            ForEach(sexualAddictions, id: \.self) { type in
-                                Text(type).tag(type)
-                            }
-                        }
-
-                        Section("Other Addictions") {
-                            ForEach(otherAddictions, id: \.self) { type in
-                                Text(type).tag(type)
-                            }
+                        ForEach(allAddictions, id: \.self) { type in
+                            Text(type).tag(type)
                         }
                     }
                 }

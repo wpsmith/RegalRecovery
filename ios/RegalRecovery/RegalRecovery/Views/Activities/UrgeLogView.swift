@@ -18,6 +18,9 @@ struct UrgeLogView: View {
     @State private var showCustomTriggerField = false
     @AppStorage("customUrgeLogTriggers") private var customTriggersData: Data = Data()
 
+    private var singleAddiction: Bool { addictions.count <= 1 }
+    private var totalSteps: Int { singleAddiction ? 3 : 4 }
+
     private let defaultTriggers = ["Stress", "Loneliness", "Boredom", "Anger", "Tiredness", "Social Media", "Late Night", "Conflict"]
 
     private var customTriggers: [String] {
@@ -47,23 +50,14 @@ struct UrgeLogView: View {
             VStack(spacing: 24) {
                 // Page indicators
                 HStack(spacing: 8) {
-                    ForEach(0..<4, id: \.self) { index in
+                    ForEach(0..<totalSteps, id: \.self) { index in
                         Circle()
                             .fill(index == currentStep ? Color.rrPrimary : Color.rrTextSecondary.opacity(0.3))
                             .frame(width: 10, height: 10)
                     }
                 }
 
-                switch currentStep {
-                case 0:
-                    step1Intensity
-                case 1:
-                    step2Addiction
-                case 2:
-                    step3Triggers
-                default:
-                    step4Notes
-                }
+                currentStepView
 
                 // Navigation
                 HStack(spacing: 12) {
@@ -83,7 +77,7 @@ struct UrgeLogView: View {
                         }
                     }
 
-                    if currentStep < 3 {
+                    if currentStep < totalSteps - 1 {
                         Button {
                             withAnimation { currentStep += 1 }
                         } label: {
@@ -104,6 +98,29 @@ struct UrgeLogView: View {
             .padding(.vertical)
         }
         .background(Color.rrBackground)
+        .onAppear {
+            if singleAddiction, let id = addictions.first?.id {
+                selectedAddictionIds = [id]
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var currentStepView: some View {
+        if singleAddiction {
+            switch currentStep {
+            case 0: step1Intensity
+            case 1: step3Triggers
+            default: step4Notes
+            }
+        } else {
+            switch currentStep {
+            case 0: step1Intensity
+            case 1: step2Addiction
+            case 2: step3Triggers
+            default: step4Notes
+            }
+        }
     }
 
     // MARK: - Step 1: Intensity

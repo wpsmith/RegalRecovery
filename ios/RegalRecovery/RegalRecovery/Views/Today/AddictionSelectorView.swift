@@ -13,32 +13,29 @@ struct AddictionSelectorView: View {
     @State private var selectedAddictions: Set<String> = []
     @State private var sobrietyDate = Date()
 
-    // MARK: - Addiction Type Lists
+    // MARK: - Addiction Type List
 
-    private let sexualAddictions = [
-        "Pornography",
-        "Sex",
-        "Compulsive Sexual Behavior",
-        "Cybersex",
+    private let allAddictions = [
         "Affair / Infidelity",
-        "Masturbation",
-        "Phone Sex / Sexting",
-        "Sexual Fantasy",
-        "Love / Relationship",
-    ]
-
-    private let otherAddictions = [
         "Alcohol",
         "Cannabis / Marijuana",
         "Cocaine",
+        "Compulsive Sexual Behavior",
+        "Cybersex",
         "Gambling",
         "Gaming",
         "Heroin / Opioids",
+        "Internet / Social Media",
+        "Love / Relationship",
+        "Masturbation",
         "Methamphetamine",
         "Nicotine / Tobacco",
+        "Phone Sex / Sexting",
+        "Pornography",
         "Prescription Drugs",
+        "Sex",
+        "Sexual Fantasy",
         "Shopping / Spending",
-        "Internet / Social Media",
         "Other",
     ]
 
@@ -67,29 +64,9 @@ struct AddictionSelectorView: View {
                 }
                 .padding(.top, 32)
 
-                // Sexual addictions section
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Sexual Addictions")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
-                        ForEach(sexualAddictions, id: \.self) { type in
-                            addictionChip(type)
-                        }
-                    }
-                }
-
-                // Other addictions section
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Other Addictions")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
-                        ForEach(otherAddictions, id: \.self) { type in
-                            addictionChip(type)
-                        }
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 120), spacing: 8)], spacing: 8) {
+                    ForEach(allAddictions, id: \.self) { type in
+                        addictionChip(type)
                     }
                 }
 

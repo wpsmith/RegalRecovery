@@ -7,7 +7,6 @@ struct SettingsView: View {
     @Query private var supportContacts: [RRSupportContact]
     @Query(filter: #Predicate<RRDailyPlanItem> { $0.isEnabled == true })
     private var enabledPlanItems: [RRDailyPlanItem]
-    @State private var showDeleteAlert = false
     @State private var ephemeralMode = false
     @State private var expandedSections: Set<String> = ["Profile", "Support Network", "My Recovery Foundation", "Preferences", "Privacy & Data", "Debug"]
 
@@ -157,7 +156,7 @@ struct SettingsView: View {
                 // MARK: - Privacy & Data Section
                 Section {
                     if expandedSections.contains("Privacy & Data") {
-                        NavigationLink("Privacy & Data Sharing") {
+                        NavigationLink("Export My Data") {
                             PrivacySettingsView()
                         }
 
@@ -165,10 +164,6 @@ struct SettingsView: View {
                             AppPermissionsView()
                         } label: {
                             settingsRow(icon: "checkmark.shield.fill", iconColor: .rrPrimary, title: "App Permissions", subtitle: "Manage notification, location, and privacy permissions")
-                        }
-
-                        Button("Delete My Account", role: .destructive) {
-                            showDeleteAlert = true
                         }
 
                         Toggle(isOn: $ephemeralMode) {
@@ -224,12 +219,6 @@ struct SettingsView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .alert("Delete Account?", isPresented: $showDeleteAlert) {
-                Button("Delete", role: .destructive) { }
-                Button("Cancel", role: .cancel) { }
-            } message: {
-                Text("This will permanently delete your account after 30 days.")
-            }
         }
     }
 
