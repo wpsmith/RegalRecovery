@@ -3,6 +3,7 @@ import SwiftUI
 struct BowtieCompletionOverlay: View {
     let onDismiss: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var message: String = BowtieCompletionMessages.random()
     @State private var appeared = false
 
@@ -13,11 +14,13 @@ struct BowtieCompletionOverlay: View {
                 .onTapGesture {
                     onDismiss()
                 }
+                .accessibilityHidden(true)
 
             VStack(spacing: 24) {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 56))
                     .foregroundStyle(.green)
+                    .accessibilityHidden(true)
 
                 Text(String(localized: "Session Complete"))
                     .font(.title2)
@@ -42,6 +45,8 @@ struct BowtieCompletionOverlay: View {
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .padding(.horizontal, 32)
+                .accessibilityLabel(String(localized: "Done"))
+                .accessibilityHint(String(localized: "Double tap to dismiss"))
             }
             .padding(32)
             .background(
@@ -52,10 +57,16 @@ struct BowtieCompletionOverlay: View {
             .padding(.horizontal, 24)
             .scaleEffect(appeared ? 1.0 : 0.8)
             .opacity(appeared ? 1.0 : 0.0)
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel(String(localized: "Session Complete. \(message)"))
         }
         .onAppear {
-            withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+            if reduceMotion {
                 appeared = true
+            } else {
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.75)) {
+                    appeared = true
+                }
             }
             DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                 onDismiss()

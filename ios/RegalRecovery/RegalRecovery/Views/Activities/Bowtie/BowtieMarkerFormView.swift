@@ -159,6 +159,9 @@ struct BowtieMarkerFormView: View {
                 .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
+            .accessibilityAddTraits(isActive ? .isSelected : [])
+            .accessibilityLabel(iType.displayName)
+            .accessibilityHint(isActive ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
 
             if isActive {
                 VStack(spacing: 4) {
@@ -171,6 +174,8 @@ struct BowtieMarkerFormView: View {
                         step: 1
                     )
                     .tint(iType.color)
+                    .accessibilityLabel(String(localized: "\(iType.displayName) intensity"))
+                    .accessibilityValue(String(localized: "\(currentIntensity) of 10"))
 
                     HStack {
                         Text(String(localized: "Low"))
@@ -232,6 +237,9 @@ struct BowtieMarkerFormView: View {
                 .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
+            .accessibilityAddTraits(isActive ? .isSelected : [])
+            .accessibilityLabel(emotion.displayName)
+            .accessibilityHint(isActive ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
 
             if isActive {
                 VStack(spacing: 4) {
@@ -244,6 +252,8 @@ struct BowtieMarkerFormView: View {
                         step: 1
                     )
                     .tint(emotion.color)
+                    .accessibilityLabel(String(localized: "\(emotion.displayName) intensity"))
+                    .accessibilityValue(String(localized: "\(currentIntensity) of 10"))
 
                     HStack {
                         Text(String(localized: "Low"))
@@ -309,6 +319,9 @@ struct BowtieMarkerFormView: View {
                 )
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityLabel(trigger.label)
+        .accessibilityHint(isSelected ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
     }
 
     // MARK: - Description

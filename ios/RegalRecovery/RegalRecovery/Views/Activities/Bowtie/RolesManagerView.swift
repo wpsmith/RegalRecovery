@@ -70,8 +70,11 @@ struct RolesManagerView: View {
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(Color.rrPrimary)
                         .font(.title2)
+                        .frame(minWidth: 44, minHeight: 44)
                 }
                 .disabled(newRoleName.trimmingCharacters(in: .whitespaces).isEmpty)
+                .accessibilityLabel(String(localized: "Add role"))
+                .accessibilityHint(String(localized: "Double tap to add a new role"))
             }
         } header: {
             Text("Add Role")
@@ -197,6 +200,9 @@ struct RolesManagerView: View {
                             )
                     }
                     .buttonStyle(.plain)
+                    .accessibilityAddTraits(selectedSuggestions.contains(suggestion) ? .isSelected : [])
+                    .accessibilityLabel(suggestion)
+                    .accessibilityHint(selectedSuggestions.contains(suggestion) ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
                 }
             }
         } header: {

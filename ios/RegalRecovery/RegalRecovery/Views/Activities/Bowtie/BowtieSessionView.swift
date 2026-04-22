@@ -220,6 +220,9 @@ struct BowtieSessionView: View {
                 )
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityLabel(role.label)
+        .accessibilityHint(isSelected ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
     }
 
     // MARK: - Session Content View

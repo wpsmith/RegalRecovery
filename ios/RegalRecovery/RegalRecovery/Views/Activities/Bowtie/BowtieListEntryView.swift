@@ -47,8 +47,11 @@ struct BowtieListEntryView: View {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(Color.rrPrimary)
+                        .frame(minWidth: 44, minHeight: 44)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Add marker"))
+                .accessibilityHint(String(localized: "Double tap to add a marker at this time interval"))
             }
 
             let intervalMarkers = markers.filter { $0.timeIntervalHours == interval }
@@ -76,6 +79,9 @@ struct BowtieListEntryView: View {
 
     private func markerCard(_ marker: RRBowtieMarker) -> some View {
         let isFuture = side == .future
+        let iTypeNames = marker.iActivations.map(\.iType.displayName).joined(separator: ", ")
+        let maxIntensity = marker.iActivations.map(\.intensity).max() ?? 0
+
         return Button {
             onEditMarker(marker)
         } label: {
@@ -128,8 +134,10 @@ struct BowtieListEntryView: View {
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundStyle(Color.rrPrimary)
+                                .frame(minHeight: 44)
                         }
                         .buttonStyle(.plain)
+                        .accessibilityHint(String(localized: "Double tap to begin processing this marker"))
                     }
                 }
             }
@@ -140,6 +148,10 @@ struct BowtieListEntryView: View {
             )
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(roleName(for: marker.roleId)), \(iTypeNames), intensity \(maxIntensity)")
+        .accessibilityValue(marker.isProcessed ? String(localized: "Processed") : String(localized: "Not yet processed"))
+        .accessibilityHint(String(localized: "Double tap to edit this marker"))
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
                 onDeleteMarker(marker)

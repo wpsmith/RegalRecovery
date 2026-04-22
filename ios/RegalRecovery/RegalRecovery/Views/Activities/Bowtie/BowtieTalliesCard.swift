@@ -78,5 +78,7 @@ struct BowtieTalliesCard: View {
                 .foregroundStyle(futureValue > 0 ? iType.color : Color.rrTextSecondary)
                 .frame(maxWidth: .infinity)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "\(iType.displayName): past \(pastValue), future \(futureValue)"))
     }
 }

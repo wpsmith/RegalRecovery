@@ -4,6 +4,7 @@ import SwiftData
 struct BowtieOnboardingView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = BowtieOnboardingViewModel()
     @State private var swipeDirection: SwipeDirection = .forward
 
@@ -29,22 +30,30 @@ struct BowtieOnboardingView: View {
                     }
                 }
                 .id(viewModel.currentStep)
-                .transition(swipeDirection == .forward
+                .transition(reduceMotion ? .opacity : (swipeDirection == .forward
                     ? .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
-                    : .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
+                    : .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing))))
                 .gesture(
                     DragGesture(minimumDistance: 50)
                         .onEnded { value in
                             let horizontal = value.translation.width
                             if horizontal < -50 && !viewModel.isLastStep {
                                 swipeDirection = .forward
-                                withAnimation(.easeInOut(duration: 0.3)) {
+                                if reduceMotion {
                                     viewModel.goForward()
+                                } else {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        viewModel.goForward()
+                                    }
                                 }
                             } else if horizontal > 50 && !viewModel.isFirstStep {
                                 swipeDirection = .backward
-                                withAnimation(.easeInOut(duration: 0.3)) {
+                                if reduceMotion {
                                     viewModel.goBack()
+                                } else {
+                                    withAnimation(.easeInOut(duration: 0.3)) {
+                                        viewModel.goBack()
+                                    }
                                 }
                             }
                         }
@@ -56,12 +65,16 @@ struct BowtieOnboardingView: View {
                     if !viewModel.isFirstStep {
                         Button {
                             swipeDirection = .backward
-                            withAnimation(.easeInOut(duration: 0.3)) {
+                            if reduceMotion {
                                 viewModel.goBack()
+                            } else {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.goBack()
+                                }
                             }
                         } label: {
                             Image(systemName: "chevron.left")
-                                .font(.system(size: 17, weight: .semibold))
+                                .font(.body.weight(.semibold))
                                 .foregroundStyle(Color.rrText)
                         }
                     }
@@ -105,6 +118,7 @@ struct BowtieOnboardingView: View {
                     .font(.system(size: 60))
                     .foregroundStyle(Color.rrPrimary)
                     .accessibilityHidden(true)
+                    .dynamicTypeSize(...DynamicTypeSize.accessibility1)
 
                 VStack(spacing: 16) {
                     Text(String(localized: "What is the Bowtie Diagram?"))
@@ -297,8 +311,12 @@ struct BowtieOnboardingView: View {
     private var nextButton: some View {
         Button {
             swipeDirection = .forward
-            withAnimation(.easeInOut(duration: 0.3)) {
+            if reduceMotion {
                 viewModel.goForward()
+            } else {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    viewModel.goForward()
+                }
             }
         } label: {
             HStack(spacing: 8) {
@@ -331,6 +349,9 @@ struct BowtieOnboardingView: View {
                 )
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityLabel(label)
+        .accessibilityHint(isSelected ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
     }
 }
 

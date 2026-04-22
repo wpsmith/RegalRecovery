@@ -64,6 +64,7 @@ struct BowtieHistoryView: View {
             Image(systemName: "bowtie")
                 .font(.system(size: 48))
                 .foregroundStyle(Color.rrTextSecondary.opacity(0.5))
+                .accessibilityHidden(true)
 
             Text(String(localized: "The Bowtie Diagram helps you see what's really going on inside \u{2014} the subtle wounds and unmet needs that build up beneath the surface. When you're ready, this is where you start building that awareness."))
                 .font(RRFont.body)
@@ -144,6 +145,8 @@ struct BowtieHistoryView: View {
                 .foregroundStyle(processed == totalMarkers ? Color.rrPrimary : Color.rrTextSecondary)
         }
         .padding(.vertical, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(String(localized: "Double tap to view session details"))
     }
 
     private func tallySummaryLabel(label: String, is_: Int, ic: Int, im: Int) -> some View {
@@ -265,7 +268,9 @@ private struct BowtieSessionDetailView: View {
             HStack(spacing: 8) {
                 ForEach(marker.iActivations) { activation in
                     HStack(spacing: 3) {
-                        RRColorDot(activation.iType.color, size: 8)
+                        Image(systemName: activation.iType.icon)
+                            .font(.caption2)
+                            .foregroundStyle(activation.iType.color)
                         Text("\(activation.iType.displayName) \(activation.intensity)")
                             .font(RRFont.caption)
                             .foregroundStyle(Color.rrTextSecondary)

@@ -4,6 +4,7 @@ import SwiftData
 struct BackboneFlowView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var viewModel = BackboneProcessingViewModel()
     @State private var swipeDirection: SwipeDirection = .forward
     let marker: RRBowtieMarker
@@ -33,22 +34,30 @@ struct BackboneFlowView: View {
                 }
             }
             .id(viewModel.currentStep)
-            .transition(swipeDirection == .forward
+            .transition(reduceMotion ? .opacity : (swipeDirection == .forward
                 ? .asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .leading))
-                : .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing)))
+                : .asymmetric(insertion: .move(edge: .leading), removal: .move(edge: .trailing))))
             .gesture(
                 DragGesture(minimumDistance: 50)
                     .onEnded { value in
                         let horizontal = value.translation.width
                         if horizontal < -50 && viewModel.canAdvance {
                             swipeDirection = .forward
-                            withAnimation(.easeInOut(duration: 0.3)) {
+                            if reduceMotion {
                                 viewModel.goForward()
+                            } else {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.goForward()
+                                }
                             }
                         } else if horizontal > 50 && !viewModel.isFirstStep {
                             swipeDirection = .backward
-                            withAnimation(.easeInOut(duration: 0.3)) {
+                            if reduceMotion {
                                 viewModel.goBack()
+                            } else {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    viewModel.goBack()
+                                }
                             }
                         }
                     }
@@ -65,13 +74,17 @@ struct BackboneFlowView: View {
                         dismiss()
                     } else {
                         swipeDirection = .backward
-                        withAnimation(.easeInOut(duration: 0.3)) {
+                        if reduceMotion {
                             viewModel.goBack()
+                        } else {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.goBack()
+                            }
                         }
                     }
                 } label: {
                     Image(systemName: "chevron.left")
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.body.weight(.semibold))
                         .foregroundStyle(Color.rrText)
                 }
             }
@@ -111,7 +124,7 @@ struct BackboneFlowView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 12) {
                     Image(systemName: "text.bubble")
-                        .font(.system(size: 36))
+                        .font(.largeTitle)
                         .foregroundStyle(Color.rrPrimary)
 
                     Text("What is happening in this moment?")
@@ -166,7 +179,7 @@ struct BackboneFlowView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 12) {
                     Image(systemName: "heart.text.square")
-                        .font(.system(size: 36))
+                        .font(.largeTitle)
                         .foregroundStyle(Color.rrPrimary)
 
                     Text("What are you feeling?")
@@ -257,7 +270,7 @@ struct BackboneFlowView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 36))
+                        .font(.largeTitle)
                         .foregroundStyle(Color.rrPrimary)
 
                     Text("Which I's are activated?")
@@ -315,6 +328,9 @@ struct BackboneFlowView: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .accessibilityAddTraits(isActive ? .isSelected : [])
+                .accessibilityLabel(iType.displayName)
+                .accessibilityHint(isActive ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
 
                 if isActive {
                     Divider()
@@ -337,6 +353,8 @@ struct BackboneFlowView: View {
                             step: 1
                         )
                         .tint(iType.color)
+                        .accessibilityLabel(String(localized: "\(iType.displayName) intensity"))
+                        .accessibilityValue(String(localized: "\(intensity) of 10"))
 
                         HStack {
                             Text("Low")
@@ -348,7 +366,7 @@ struct BackboneFlowView: View {
                                 .foregroundStyle(Color.rrTextSecondary)
                         }
                     }
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))
                 }
             }
         }
@@ -363,7 +381,7 @@ struct BackboneFlowView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 12) {
                     Image(systemName: "hands.and.sparkles")
-                        .font(.system(size: 36))
+                        .font(.largeTitle)
                         .foregroundStyle(Color.rrPrimary)
 
                     Text("Spiritual Reflection")
@@ -411,7 +429,7 @@ struct BackboneFlowView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 12) {
                     Image(systemName: "heart.circle")
-                        .font(.system(size: 36))
+                        .font(.largeTitle)
                         .foregroundStyle(Color.rrPrimary)
 
                     Text("What do you need?")
@@ -502,7 +520,7 @@ struct BackboneFlowView: View {
             VStack(spacing: 24) {
                 VStack(spacing: 12) {
                     Image(systemName: "figure.2.arms.open")
-                        .font(.system(size: 36))
+                        .font(.largeTitle)
                         .foregroundStyle(Color.rrPrimary)
 
                     Text("Choose actions for intimacy")
@@ -613,8 +631,12 @@ struct BackboneFlowView: View {
             if !viewModel.isFirstStep {
                 Button {
                     swipeDirection = .backward
-                    withAnimation(.easeInOut(duration: 0.3)) {
+                    if reduceMotion {
                         viewModel.goBack()
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.goBack()
+                        }
                     }
                 } label: {
                     HStack(spacing: 4) {
@@ -636,8 +658,12 @@ struct BackboneFlowView: View {
                     viewModel.save(marker: marker, context: modelContext)
                 } else {
                     swipeDirection = .forward
-                    withAnimation(.easeInOut(duration: 0.3)) {
+                    if reduceMotion {
                         viewModel.goForward()
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.goForward()
+                        }
                     }
                 }
             } label: {
@@ -680,6 +706,8 @@ struct BackboneFlowView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityLabel(label)
+        .accessibilityHint(isSelected ? String(localized: "Double tap to deselect") : String(localized: "Double tap to select"))
     }
 
     // MARK: - Completion Overlay
@@ -694,6 +722,7 @@ struct BackboneFlowView: View {
                 Image(systemName: "checkmark.circle.fill")
                     .font(.system(size: 56))
                     .foregroundStyle(.green)
+                    .accessibilityHidden(true)
 
                 Text(String(localized: "Processing Complete"))
                     .font(.title2)

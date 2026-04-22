@@ -175,6 +175,7 @@ struct BowtieDiagramView: View {
                         )
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(String(localized: "Add marker at \(interval) hours on \(side.displayName) side"))
                 .position(x: x, y: layout.center.y)
             }
         }
@@ -197,7 +198,7 @@ struct BowtieDiagramView: View {
                 // Past labels
                 ForEach(intervals, id: \.self) { interval in
                     Text("\(interval)h")
-                        .font(.system(size: 9))
+                        .font(.caption2)
                         .foregroundStyle(Color.rrTextSecondary)
                         .position(x: layout.pastX(for: interval), y: 10)
                 }
@@ -205,7 +206,7 @@ struct BowtieDiagramView: View {
                 // Future labels
                 ForEach(intervals, id: \.self) { interval in
                     Text("\(interval)h")
-                        .font(.system(size: 9))
+                        .font(.caption2)
                         .foregroundStyle(Color.rrTextSecondary)
                         .position(x: layout.futureX(for: interval), y: 10)
                 }

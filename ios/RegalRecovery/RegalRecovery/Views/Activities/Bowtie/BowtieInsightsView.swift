@@ -88,6 +88,8 @@ struct BowtieInsightsView: View {
             }
             .frame(height: 8)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "\(label): \(value)"))
     }
 
     // MARK: - Role Activation
@@ -171,9 +173,11 @@ struct BowtieInsightsView: View {
                         .rotationEffect(.degrees(-90))
 
                     Text("\(percentage)%")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(.title.weight(.bold))
                         .foregroundStyle(Color.rrText)
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(localized: "Anticipatory awareness: \(percentage) percent"))
 
                 if ratio > 0.5 {
                     Text(String(localized: "Your anticipatory awareness is strong \u{2014} you're spending more time preparing than reacting."))
@@ -215,9 +219,11 @@ struct BowtieInsightsView: View {
                         .rotationEffect(.degrees(-90))
 
                     Text("\(percentage)%")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(.title.weight(.bold))
                         .foregroundStyle(Color.rrText)
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(localized: "Backbone completion: \(percentage) percent"))
 
                 Text(String(localized: "\(percentage)% of your activation points have been fully processed."))
                     .font(RRFont.subheadline)
