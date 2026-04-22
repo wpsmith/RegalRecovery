@@ -7,6 +7,7 @@ struct AffirmationDeckView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Query private var users: [RRUser]
+    @Query(sort: \RRAffirmationFavorite.createdAt) private var favorites: [RRAffirmationFavorite]
 
     @State private var currentIndex = 0
     @State private var sessionStartDate = Date()
@@ -67,11 +68,11 @@ struct AffirmationDeckView: View {
             }
 
             Button {
-                // Toggle favorite — no-op in dummy app
+                toggleFavorite(affirmation)
             } label: {
-                Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
+                Image(systemName: isFavorited(affirmation) ? "heart.fill" : "heart")
                     .font(.title2)
-                    .foregroundStyle(affirmation.isFavorite ? Color.rrDestructive : Color.rrTextSecondary)
+                    .foregroundStyle(isFavorited(affirmation) ? Color.rrDestructive : Color.rrTextSecondary)
             }
 
             Spacer()
@@ -91,6 +92,27 @@ struct AffirmationDeckView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 32)
         )
+    }
+
+    // MARK: - Favorites
+
+    private func isFavorited(_ affirmation: Affirmation) -> Bool {
+        favorites.contains { $0.affirmationText == affirmation.text && $0.scripture == affirmation.scripture }
+    }
+
+    private func toggleFavorite(_ affirmation: Affirmation) {
+        if let existing = favorites.first(where: { $0.affirmationText == affirmation.text && $0.scripture == affirmation.scripture }) {
+            modelContext.delete(existing)
+        } else {
+            let favorite = RRAffirmationFavorite(
+                userId: users.first?.id ?? UUID(),
+                affirmationText: affirmation.text,
+                scripture: affirmation.scripture,
+                packName: packName
+            )
+            modelContext.insert(favorite)
+        }
+        try? modelContext.save()
     }
 }
 

@@ -98,11 +98,11 @@ enum ContentData {
     // MARK: - Default Favorite Affirmations
 
     static let defaultFavoriteAffirmations: [Affirmation] = [
-        Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: true),
-        Affirmation(text: "I am forever free from condemnation.", scripture: "Romans 8:1-2", isFavorite: true),
-        Affirmation(text: "I can do all things through Christ who strengthens me.", scripture: "Philippians 4:13", isFavorite: true),
-        Affirmation(text: "I am a new creation in Christ.", scripture: "2 Corinthians 5:17", isFavorite: true),
-        Affirmation(text: "God's power is made perfect in my weakness.", scripture: "2 Corinthians 12:9", isFavorite: true),
+        Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: false),
+        Affirmation(text: "I am forever free from condemnation.", scripture: "Romans 8:1-2", isFavorite: false),
+        Affirmation(text: "I can do all things through Christ who strengthens me.", scripture: "Philippians 4:13", isFavorite: false),
+        Affirmation(text: "I am a new creation in Christ.", scripture: "2 Corinthians 5:17", isFavorite: false),
+        Affirmation(text: "God's power is made perfect in my weakness.", scripture: "2 Corinthians 12:9", isFavorite: false),
     ]
 
     // MARK: - Today's Affirmation

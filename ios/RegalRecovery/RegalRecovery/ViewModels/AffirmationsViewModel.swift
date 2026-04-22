@@ -4,7 +4,6 @@ import Observation
 @Observable
 class AffirmationsViewModel {
     var packs: [AffirmationPack] = []
-    var favorites: [Affirmation] = []
     var todaysAffirmation: Affirmation?
     var deliveryMode: String = "random" // random, package, dayOfWeek
 
@@ -21,23 +20,15 @@ class AffirmationsViewModel {
 
     func load() async {
         packs = MockData.affirmationPacks
-        favorites = MockData.favoriteAffirmations
         todaysAffirmation = getTodaysAffirmation()
-    }
-
-    func toggleFavorite(_ affirmation: Affirmation) async throws {
-        if let index = favorites.firstIndex(where: { $0.id == affirmation.id }) {
-            favorites.remove(at: index)
-        } else {
-            favorites.append(affirmation)
-        }
     }
 
     /// Weighted rotation algorithm:
     /// - 40% chance: affirmation related to recent triggers
-    /// - 30% chance: from favorites
-    /// - 20% chance: least-recently-shown affirmation
-    /// - 10% chance: random from any pack
+    /// - 40% chance: least-recently-shown affirmation
+    /// - 20% chance: random from any pack
+    /// Note: favorites are now managed via SwiftData (RRAffirmationFavorite),
+    /// not in-memory on the view model.
     func getTodaysAffirmation() -> Affirmation {
         let all = allAffirmations
         guard !all.isEmpty else {
@@ -53,16 +44,7 @@ class AffirmationsViewModel {
             }
         }
 
-        if roll < 0.7 {
-            // Favorites
-            if !favorites.isEmpty {
-                let selected = favorites.randomElement()!
-                lastShownDates[selected.id] = Date()
-                return selected
-            }
-        }
-
-        if roll < 0.9 {
+        if roll < 0.8 {
             // Least-recently-shown (under-served)
             let sorted = all.sorted { a, b in
                 let dateA = lastShownDates[a.id] ?? .distantPast
@@ -75,7 +57,7 @@ class AffirmationsViewModel {
             }
         }
 
-        // 10% random fallback (or fallback if other buckets were empty)
+        // 20% random fallback (or fallback if other buckets were empty)
         let selected = all.randomElement()!
         lastShownDates[selected.id] = Date()
         return selected

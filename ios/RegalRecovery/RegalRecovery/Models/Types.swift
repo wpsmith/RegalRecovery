@@ -100,6 +100,28 @@ enum ActivityType: String, CaseIterable {
     case weeklyGoals = "Weekly Goals"
     case affirmationLog = "Affirmation Log"
 
+    var displayName: String {
+        switch self {
+        case .sobrietyCommitment: return String(localized: "Daily Sobriety Commitment")
+        case .journal: return String(localized: "Journal / Jotting")
+        case .timeJournal: return String(localized: "Time Journal")
+        case .fasterScale: return String(localized: "FASTER Scale")
+        case .postMortem: return String(localized: "Post-Mortem Analysis")
+        case .urgeLog: return String(localized: "Urge Log")
+        case .mood: return String(localized: "Mood Rating")
+        case .gratitude: return String(localized: "Gratitude List")
+        case .prayer: return String(localized: "Prayer")
+        case .exercise: return String(localized: "Exercise")
+        case .phoneCalls: return String(localized: "Phone Calls")
+        case .meetingsAttended: return String(localized: "Meetings Attended")
+        case .fanos: return String(localized: "FANOS Check-in")
+        case .fitnap: return String(localized: "FITNAP Check-in")
+        case .stepWork: return String(localized: "12-Step Work")
+        case .weeklyGoals: return String(localized: "Weekly Goals")
+        case .affirmationLog: return String(localized: "Affirmation Log")
+        }
+    }
+
     var icon: String {
         switch self {
         case .sobrietyCommitment: return "sun.max.fill"
@@ -588,11 +610,13 @@ struct AffirmationPack: Identifiable {
     let affirmations: [Affirmation]
 }
 
-struct Affirmation: Identifiable {
+struct Affirmation: Identifiable, Hashable {
     let id = UUID()
     let text: String
     let scripture: String
-    let isFavorite: Bool
+    var isFavorite: Bool
+
+    var stableKey: String { text }
 }
 
 // MARK: - Devotional

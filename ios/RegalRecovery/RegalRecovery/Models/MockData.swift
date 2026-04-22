@@ -175,7 +175,7 @@ enum MockData {
 
     static let affirmationPacks: [AffirmationPack] = [
         AffirmationPack(name: "I Am Accepted", count: 11, affirmations: [
-            Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: true),
+            Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: false),
             Affirmation(text: "I am Christ's friend.", scripture: "John 15:15", isFavorite: false),
             Affirmation(text: "I have been justified.", scripture: "Romans 5:1", isFavorite: false),
             Affirmation(text: "I am united with the Lord.", scripture: "1 Corinthians 6:17", isFavorite: false),
@@ -188,7 +188,7 @@ enum MockData {
             Affirmation(text: "I am complete in Christ.", scripture: "Colossians 2:10", isFavorite: false),
         ]),
         AffirmationPack(name: "I Am Secure", count: 11, affirmations: [
-            Affirmation(text: "I am forever free from condemnation.", scripture: "Romans 8:1-2", isFavorite: true),
+            Affirmation(text: "I am forever free from condemnation.", scripture: "Romans 8:1-2", isFavorite: false),
             Affirmation(text: "I am assured all things work together for good.", scripture: "Romans 8:28", isFavorite: false),
             Affirmation(text: "I am free from any condemning charges against me.", scripture: "Romans 8:31-34", isFavorite: false),
             Affirmation(text: "I cannot be separated from the love of God.", scripture: "Romans 8:35-39", isFavorite: false),
@@ -211,7 +211,7 @@ enum MockData {
             Affirmation(text: "I am seated with Christ in the heavenly realm.", scripture: "Ephesians 2:6", isFavorite: false),
             Affirmation(text: "I am God's workmanship.", scripture: "Ephesians 2:10", isFavorite: false),
             Affirmation(text: "I may approach God with freedom and confidence.", scripture: "Ephesians 3:12", isFavorite: false),
-            Affirmation(text: "I can do all things through Christ who strengthens me.", scripture: "Philippians 4:13", isFavorite: true),
+            Affirmation(text: "I can do all things through Christ who strengthens me.", scripture: "Philippians 4:13", isFavorite: false),
         ]),
         AffirmationPack(name: "Morning Affirmations", count: 14, affirmations: [
             Affirmation(text: "God woke me up this morning for a purpose.", scripture: "", isFavorite: false),
@@ -252,14 +252,14 @@ enum MockData {
     ]
 
     static let favoriteAffirmations: [Affirmation] = [
-        Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: true),
-        Affirmation(text: "I am forever free from condemnation.", scripture: "Romans 8:1-2", isFavorite: true),
-        Affirmation(text: "I can do all things through Christ who strengthens me.", scripture: "Philippians 4:13", isFavorite: true),
-        Affirmation(text: "I am a new creation in Christ.", scripture: "2 Corinthians 5:17", isFavorite: true),
-        Affirmation(text: "God's power is made perfect in my weakness.", scripture: "2 Corinthians 12:9", isFavorite: true),
+        Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: false),
+        Affirmation(text: "I am forever free from condemnation.", scripture: "Romans 8:1-2", isFavorite: false),
+        Affirmation(text: "I can do all things through Christ who strengthens me.", scripture: "Philippians 4:13", isFavorite: false),
+        Affirmation(text: "I am a new creation in Christ.", scripture: "2 Corinthians 5:17", isFavorite: false),
+        Affirmation(text: "God's power is made perfect in my weakness.", scripture: "2 Corinthians 12:9", isFavorite: false),
     ]
 
-    static let todaysAffirmation = Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: true)
+    static let todaysAffirmation = Affirmation(text: "I am God's child.", scripture: "John 1:12", isFavorite: false)
 
     // MARK: - Devotional
 

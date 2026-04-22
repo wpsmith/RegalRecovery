@@ -118,8 +118,8 @@ struct ContentTabView: View {
                     HStack {
                         RRBadge(text: "Today's Affirmation", color: .rrPrimary)
                         Spacer()
-                        Image(systemName: affirmation.isFavorite ? "heart.fill" : "heart")
-                            .foregroundStyle(Color.rrDestructive)
+                        Image(systemName: isAffirmationFavorited(affirmation) ? "heart.fill" : "heart")
+                            .foregroundStyle(isAffirmationFavorited(affirmation) ? Color.rrDestructive : Color.rrTextSecondary)
                     }
 
                     Text("\"\(affirmation.text)\"")
@@ -210,6 +210,10 @@ struct ContentTabView: View {
         case "AA Promises": return "hands.and.sparkles.fill"
         default: return "text.quote"
         }
+    }
+
+    private func isAffirmationFavorited(_ affirmation: Affirmation) -> Bool {
+        favorites.contains { $0.affirmationText == affirmation.text }
     }
 
     private var favoriteAffirmations: [Affirmation] {
