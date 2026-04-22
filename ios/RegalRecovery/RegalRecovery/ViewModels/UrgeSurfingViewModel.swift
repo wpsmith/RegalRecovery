@@ -24,6 +24,8 @@ class UrgeSurfingViewModel {
     var showCompanionBreathing = false
     var showCompanionPrayer = false
     var showCompanionAffirmations = false
+    var activitiesUsed: Set<String> = []
+    private var startTime: Date?
 
     // Wave animation
     var wavePhaseOffset: Double = 0
@@ -61,6 +63,8 @@ class UrgeSurfingViewModel {
         secondsElapsed = 0
         currentMilestone = nil
         milestoneMessage = nil
+        activitiesUsed = []
+        startTime = Date()
 
         // Auto-log urge
         let urgeId = UUID()
@@ -92,17 +96,39 @@ class UrgeSurfingViewModel {
         currentMilestone = nil
         milestoneMessage = nil
         wavePhaseOffset = 0
+        activitiesUsed = []
+        startTime = nil
     }
 
-    /// Mark the auto-logged urge as successfully surfed.
+    /// Mark the auto-logged urge as successfully surfed and log the session.
     func markSurfed(modelContext: ModelContext) {
+        let durationMinutes = secondsElapsed / 60
+        let activitiesList = activitiesUsed.sorted()
+
         guard let urgeId = autoLoggedUrgeId else { return }
         let descriptor = FetchDescriptor<RRUrgeLog>(
             predicate: #Predicate { $0.id == urgeId }
         )
         if let urgeLog = try? modelContext.fetch(descriptor).first {
-            urgeLog.resolution = "Urge surfed (\(secondsElapsed / 60)m)"
+            var resolution = "Urge surfed (\(durationMinutes)m)"
+            if !activitiesList.isEmpty {
+                resolution += " — \(activitiesList.joined(separator: ", "))"
+            }
+            urgeLog.resolution = resolution
         }
+
+        let activity = RRActivity(
+            userId: UUID(),
+            activityType: "Urge Surfing",
+            date: startTime ?? Date(),
+            data: JSONPayload([
+                "durationSeconds": .int(secondsElapsed),
+                "durationMinutes": .int(durationMinutes),
+                "activitiesUsed": .array(activitiesList.map { .string($0) }),
+                "completed": .bool(phase == .completed),
+            ])
+        )
+        modelContext.insert(activity)
         try? modelContext.save()
     }
 

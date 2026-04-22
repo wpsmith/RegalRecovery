@@ -204,11 +204,13 @@ struct UrgeSurfingTimerView: View {
     private var companionTools: some View {
         HStack(spacing: 16) {
             companionButton(icon: "wind", label: "Breathe") {
+                viewModel.activitiesUsed.insert("Breathing")
                 viewModel.showCompanionBreathing = true
             }
 
             if let phone = sponsor?.phone {
                 companionButton(icon: "phone.fill", label: "Call Sponsor") {
+                    viewModel.activitiesUsed.insert("Call Sponsor")
                     if let url = URL(string: "tel:\(phone.filter(\.isNumber))") {
                         UIApplication.shared.open(url)
                     }
@@ -216,10 +218,12 @@ struct UrgeSurfingTimerView: View {
             }
 
             companionButton(icon: "hands.and.sparkles.fill", label: "Pray") {
+                viewModel.activitiesUsed.insert("Prayer")
                 viewModel.showCompanionPrayer = true
             }
 
             companionButton(icon: "text.quote", label: "Affirm") {
+                viewModel.activitiesUsed.insert("Affirmations")
                 viewModel.showCompanionAffirmations = true
             }
         }
