@@ -5,6 +5,7 @@ struct QuickActionsRow: View {
     @Environment(\.modelContext) private var modelContext
     @State private var viewModel = QuickActionsViewModel()
     @State private var showFASTER = false
+    @State private var showTriggerLog = false
     @State private var showCustomize = false
 
     var body: some View {
@@ -16,7 +17,11 @@ struct QuickActionsRow: View {
                     ForEach(viewModel.items) { item in
                         if item.definition.presentationStyle == .fullScreenCover {
                             Button {
-                                showFASTER = true
+                                if item.definition.id == ActivityType.fasterScale.rawValue {
+                                    showFASTER = true
+                                } else if item.definition.id == ActivityType.triggerLog.rawValue {
+                                    showTriggerLog = true
+                                }
                             } label: {
                                 quickActionLabel(item.definition.shortTitle, icon: item.definition.icon)
                             }
@@ -45,6 +50,9 @@ struct QuickActionsRow: View {
         }
         .fullScreenCover(isPresented: $showFASTER) {
             FASTERCheckInFlowView()
+        }
+        .fullScreenCover(isPresented: $showTriggerLog) {
+            TriggerLogView()
         }
         .sheet(isPresented: $showCustomize, onDismiss: {
             viewModel.load(context: modelContext)
