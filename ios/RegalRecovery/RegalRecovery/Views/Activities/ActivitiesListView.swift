@@ -18,6 +18,12 @@ struct ActivitiesListView: View {
     @Query(sort: \RRGoal.title) private var goals: [RRGoal]
     @Query(sort: \RRAffirmationFavorite.createdAt, order: .reverse) private var affirmationFavorites: [RRAffirmationFavorite]
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
+    @Query(filter: #Predicate<RRBowtieSession> { $0.status == "draft" },
+           sort: \RRBowtieSession.modifiedAt, order: .reverse)
+    private var bowtieDrafts: [RRBowtieSession]
+    @Query(filter: #Predicate<RRBowtieSession> { $0.status == "complete" },
+           sort: \RRBowtieSession.modifiedAt, order: .reverse)
+    private var completedBowties: [RRBowtieSession]
 
     // MARK: - Subtitle Helpers
 
@@ -160,6 +166,17 @@ struct ActivitiesListView: View {
             return user.motivations.joined(separator: ", ")
         }
         return String(localized: "Faith, Family, Freedom")
+    }
+
+    private var bowtieSubtitle: String {
+        if let draft = bowtieDrafts.first {
+            let dayLabel = Calendar.current.isDateInToday(draft.modifiedAt) ? String(localized: "Today") : relativeDay(draft.modifiedAt)
+            return String(localized: "\(dayLabel) — Draft")
+        }
+        if let latest = completedBowties.first {
+            return relativeDay(latest.completedAt ?? latest.modifiedAt)
+        }
+        return String(localized: "Emotional awareness tool")
     }
 
     private func relativeDay(_ date: Date) -> String {
@@ -409,6 +426,31 @@ struct ActivitiesListView: View {
                                 title: String(localized: "3 Circles"),
                                 subtitle: String(localized: "Boundary Tool")
                             )
+                        }
+                    }
+
+                    if isFlagEnabled("activity.bowtie") {
+                        NavigationLink {
+                            Text("Bowtie Diagram")
+                        } label: {
+                            HStack {
+                                RRActivityRow(
+                                    icon: "diamond.fill",
+                                    iconColor: .rrPrimary,
+                                    title: String(localized: "Bowtie Diagram"),
+                                    subtitle: bowtieSubtitle
+                                )
+                                if !bowtieDrafts.isEmpty {
+                                    Text("Continue")
+                                        .font(.caption2)
+                                        .fontWeight(.medium)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(Color.rrPrimary.opacity(0.15))
+                                        .foregroundStyle(.rrPrimary)
+                                        .clipShape(Capsule())
+                                }
+                            }
                         }
                     }
 
