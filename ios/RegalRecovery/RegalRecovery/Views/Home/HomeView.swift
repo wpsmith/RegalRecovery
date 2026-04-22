@@ -16,6 +16,8 @@ struct HomeView: View {
     @Query(sort: \RRUrgeLog.date, order: .reverse) private var urgeLogs: [RRUrgeLog]
     @Query(sort: \RRPhoneCallLog.date, order: .reverse) private var phoneCalls: [RRPhoneCallLog]
     @Query(sort: \RRMeetingLog.date, order: .reverse) private var meetingLogs: [RRMeetingLog]
+    @Query(filter: #Predicate<RRActivity> { $0.activityType == "Affirmation Log" }, sort: \RRActivity.date, order: .reverse)
+    private var affirmationSessions: [RRActivity]
     @Query(filter: #Predicate<RRVisionStatement> { $0.isCurrent == true })
     private var currentVisions: [RRVisionStatement]
 
@@ -101,6 +103,22 @@ struct HomeView: View {
         for ml in meetingLogs.prefix(2) {
             all.append((ml.date, RecentActivity(title: String(localized: "Meeting"), detail: ml.meetingName, time: fmt.localizedString(for: ml.date, relativeTo: Date()), icon: "person.3.fill", iconColor: .rrPrimary, sourceType: .meeting, sourceId: ml.id)))
         }
+        for a in affirmationSessions.prefix(3) {
+            let cardsViewed: Int = {
+                if case .int(let v) = a.data.data["cardsViewed"] { return v }
+                return 0
+            }()
+            let totalCards: Int = {
+                if case .int(let v) = a.data.data["totalCards"] { return v }
+                return 0
+            }()
+            let durationSeconds: Int = {
+                if case .int(let v) = a.data.data["durationSeconds"] { return v }
+                return 0
+            }()
+            let detail = "\(cardsViewed)/\(totalCards) cards, \(formatDuration(durationSeconds))"
+            all.append((a.date, RecentActivity(title: String(localized: "Affirmations"), detail: detail, time: fmt.localizedString(for: a.date, relativeTo: Date()), icon: ActivityType.affirmationLog.icon, iconColor: ActivityType.affirmationLog.iconColor)))
+        }
 
         return all.sorted { $0.date > $1.date }.prefix(10).map(\.item)
     }
@@ -179,6 +197,15 @@ struct HomeView: View {
         case "Freedom": return "bird.fill"
         default:        return "star.fill"
         }
+    }
+
+    private func formatDuration(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        if minutes > 0 {
+            return "\(minutes)m \(remainingSeconds)s"
+        }
+        return "\(remainingSeconds)s"
     }
 
     private func motivationQuote(for motivation: String) -> String {

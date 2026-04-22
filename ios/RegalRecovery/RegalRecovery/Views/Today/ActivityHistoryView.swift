@@ -13,6 +13,8 @@ struct ActivityHistoryView: View {
     @Query(sort: \RRPhoneCallLog.date, order: .reverse) private var phoneCallLogs: [RRPhoneCallLog]
     @Query(sort: \RRMeetingLog.date, order: .reverse) private var meetingLogs: [RRMeetingLog]
     @Query(sort: \RRSpouseCheckIn.date, order: .reverse) private var spouseCheckIns: [RRSpouseCheckIn]
+    @Query(filter: #Predicate<RRActivity> { $0.activityType == "Affirmation Log" }, sort: \RRActivity.date, order: .reverse)
+    private var affirmationSessions: [RRActivity]
 
     @State private var displayLimit = 50
 
@@ -66,6 +68,22 @@ struct ActivityHistoryView: View {
             let type: ActivityType = sc.framework == "FANOS" ? .fanos : .fitnap
             all.append((sc.date, RecentActivity(title: "\(sc.framework) Check-in", detail: sc.framework, time: fmt.localizedString(for: sc.date, relativeTo: Date()), icon: type.icon, iconColor: type.iconColor, sourceType: sc.framework == "FANOS" ? .fanos : .fitnap, sourceId: sc.id)))
         }
+        for a in affirmationSessions {
+            let cardsViewed: Int = {
+                if case .int(let v) = a.data.data["cardsViewed"] { return v }
+                return 0
+            }()
+            let totalCards: Int = {
+                if case .int(let v) = a.data.data["totalCards"] { return v }
+                return 0
+            }()
+            let durationSeconds: Int = {
+                if case .int(let v) = a.data.data["durationSeconds"] { return v }
+                return 0
+            }()
+            let detail = "\(cardsViewed)/\(totalCards) cards, \(formatDuration(durationSeconds))"
+            all.append((a.date, RecentActivity(title: "Affirmations", detail: detail, time: fmt.localizedString(for: a.date, relativeTo: Date()), icon: ActivityType.affirmationLog.icon, iconColor: ActivityType.affirmationLog.iconColor)))
+        }
 
         return all.sorted { $0.date > $1.date }
     }
@@ -88,6 +106,15 @@ struct ActivityHistoryView: View {
                 let rhsDate = limited.first(where: { sectionLabel(for: $0.date) == rhs.key })?.date ?? .distantPast
                 return lhsDate > rhsDate
             }
+    }
+
+    private func formatDuration(_ seconds: Int) -> String {
+        let minutes = seconds / 60
+        let remainingSeconds = seconds % 60
+        if minutes > 0 {
+            return "\(minutes)m \(remainingSeconds)s"
+        }
+        return "\(remainingSeconds)s"
     }
 
     private func sectionLabel(for date: Date) -> String {
