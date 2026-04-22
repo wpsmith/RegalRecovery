@@ -916,3 +916,251 @@ actor SwiftDataSyncQueueRepository: SyncQueueRepository {
         return try modelContext.fetchCount(descriptor)
     }
 }
+
+// MARK: - Trigger Definition Repository
+
+@ModelActor
+actor SwiftDataTriggerDefinitionRepository: TriggerDefinitionRepository {
+    func getAll(userId: UUID) async throws -> [RRTriggerDefinition] {
+        let descriptor = FetchDescriptor<RRTriggerDefinition>(
+            predicate: #Predicate { $0.userId == userId },
+            sortBy: [
+                SortDescriptor(\.useCount, order: .reverse),
+                SortDescriptor(\.label)
+            ]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    func getByCategory(userId: UUID, category: TriggerCategory) async throws -> [RRTriggerDefinition] {
+        let categoryRaw = category.rawValue
+        let descriptor = FetchDescriptor<RRTriggerDefinition>(
+            predicate: #Predicate { $0.userId == userId && $0.categoryRaw == categoryRaw },
+            sortBy: [
+                SortDescriptor(\.useCount, order: .reverse),
+                SortDescriptor(\.label)
+            ]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    func getTopByUsage(userId: UUID, limit: Int) async throws -> [RRTriggerDefinition] {
+        var descriptor = FetchDescriptor<RRTriggerDefinition>(
+            predicate: #Predicate { $0.userId == userId && $0.useCount > 0 },
+            sortBy: [SortDescriptor(\.useCount, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+        return try modelContext.fetch(descriptor)
+    }
+
+    func save(_ definition: RRTriggerDefinition) async throws {
+        modelContext.insert(definition)
+        try modelContext.save()
+    }
+
+    func delete(id: UUID) async throws {
+        let descriptor = FetchDescriptor<RRTriggerDefinition>(
+            predicate: #Predicate { $0.id == id }
+        )
+        if let definition = try modelContext.fetch(descriptor).first {
+            modelContext.delete(definition)
+            try modelContext.save()
+        }
+    }
+
+    func incrementUseCount(id: UUID) async throws {
+        let descriptor = FetchDescriptor<RRTriggerDefinition>(
+            predicate: #Predicate { $0.id == id }
+        )
+        if let definition = try modelContext.fetch(descriptor).first {
+            definition.useCount += 1
+            definition.lastUsed = Date()
+            definition.modifiedAt = Date()
+            try modelContext.save()
+        }
+    }
+
+    func search(userId: UUID, query: String) async throws -> [RRTriggerDefinition] {
+        let allDefinitions = try await getAll(userId: userId)
+        let lowercasedQuery = query.lowercased()
+        return allDefinitions.filter { $0.label.lowercased().contains(lowercasedQuery) }
+    }
+
+    func seedDefaults(userId: UUID) async throws {
+        // Check if any non-custom triggers already exist for this user
+        let descriptor = FetchDescriptor<RRTriggerDefinition>(
+            predicate: #Predicate { $0.userId == userId && $0.isCustom == false }
+        )
+        let existingCount = try modelContext.fetchCount(descriptor)
+
+        guard existingCount == 0 else { return }
+
+        // Insert all default triggers
+        for seed in TriggerSeedData.allTriggers {
+            let definition = RRTriggerDefinition(
+                userId: userId,
+                label: seed.label,
+                category: seed.category,
+                isCustom: false
+            )
+            modelContext.insert(definition)
+        }
+        try modelContext.save()
+    }
+}
+
+// MARK: - Trigger Log Repository
+
+@ModelActor
+actor SwiftDataTriggerLogRepository: TriggerLogRepository {
+    func save(_ entry: RRTriggerLogEntry) async throws {
+        modelContext.insert(entry)
+        try modelContext.save()
+    }
+
+    func getEntries(userId: UUID, from startDate: Date?, to endDate: Date?, limit: Int) async throws -> [RRTriggerLogEntry] {
+        var descriptor: FetchDescriptor<RRTriggerLogEntry>
+
+        if let startDate, let endDate {
+            descriptor = FetchDescriptor<RRTriggerLogEntry>(
+                predicate: #Predicate { $0.userId == userId && $0.timestamp >= startDate && $0.timestamp <= endDate },
+                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+            )
+        } else {
+            descriptor = FetchDescriptor<RRTriggerLogEntry>(
+                predicate: #Predicate { $0.userId == userId },
+                sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+            )
+        }
+
+        descriptor.fetchLimit = limit
+        return try modelContext.fetch(descriptor)
+    }
+
+    func getEntry(id: UUID) async throws -> RRTriggerLogEntry? {
+        let descriptor = FetchDescriptor<RRTriggerLogEntry>(
+            predicate: #Predicate { $0.id == id }
+        )
+        return try modelContext.fetch(descriptor).first
+    }
+
+    func update(_ entry: RRTriggerLogEntry) async throws {
+        entry.modifiedAt = Date()
+        try modelContext.save()
+    }
+
+    func delete(id: UUID) async throws {
+        let descriptor = FetchDescriptor<RRTriggerLogEntry>(
+            predicate: #Predicate { $0.id == id }
+        )
+        if let entry = try modelContext.fetch(descriptor).first {
+            modelContext.delete(entry)
+            try modelContext.save()
+        }
+    }
+
+    func deleteAll(userId: UUID) async throws {
+        let descriptor = FetchDescriptor<RRTriggerLogEntry>(
+            predicate: #Predicate { $0.userId == userId }
+        )
+        let entries = try modelContext.fetch(descriptor)
+        for entry in entries {
+            modelContext.delete(entry)
+        }
+        try modelContext.save()
+    }
+
+    func getEntriesForDate(userId: UUID, date: Date) async throws -> [RRTriggerLogEntry] {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: date)
+        guard let end = calendar.date(byAdding: .day, value: 1, to: start) else { return [] }
+
+        let descriptor = FetchDescriptor<RRTriggerLogEntry>(
+            predicate: #Predicate { $0.userId == userId && $0.timestamp >= start && $0.timestamp < end },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    func countForDay(userId: UUID, date: Date) async throws -> Int {
+        let calendar = Calendar.current
+        let start = calendar.startOfDay(for: date)
+        guard let end = calendar.date(byAdding: .day, value: 1, to: start) else { return 0 }
+
+        let descriptor = FetchDescriptor<RRTriggerLogEntry>(
+            predicate: #Predicate { $0.userId == userId && $0.timestamp >= start && $0.timestamp < end }
+        )
+        return try modelContext.fetchCount(descriptor)
+    }
+}
+
+// MARK: - Coping Strategy Repository
+
+@ModelActor
+actor SwiftDataCopingStrategyRepository: CopingStrategyRepository {
+    func getAll(userId: UUID) async throws -> [RRCopingStrategy] {
+        let descriptor = FetchDescriptor<RRCopingStrategy>(
+            predicate: #Predicate { $0.userId == userId },
+            sortBy: [SortDescriptor(\.label)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    func getByCategory(userId: UUID, category: TriggerCategory) async throws -> [RRCopingStrategy] {
+        let categoryRaw = category.rawValue
+        let descriptor = FetchDescriptor<RRCopingStrategy>(
+            predicate: #Predicate { $0.userId == userId && $0.categoryRaw == categoryRaw },
+            sortBy: [SortDescriptor(\.effectivenessSum, order: .reverse)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    func save(_ strategy: RRCopingStrategy) async throws {
+        modelContext.insert(strategy)
+        try modelContext.save()
+    }
+
+    func delete(id: UUID) async throws {
+        let descriptor = FetchDescriptor<RRCopingStrategy>(
+            predicate: #Predicate { $0.id == id }
+        )
+        if let strategy = try modelContext.fetch(descriptor).first {
+            modelContext.delete(strategy)
+            try modelContext.save()
+        }
+    }
+
+    func recordEffectiveness(id: UUID, rating: Int) async throws {
+        let descriptor = FetchDescriptor<RRCopingStrategy>(
+            predicate: #Predicate { $0.id == id }
+        )
+        if let strategy = try modelContext.fetch(descriptor).first {
+            strategy.effectivenessSum += rating
+            strategy.effectivenessCount += 1
+            try modelContext.save()
+        }
+    }
+
+    func seedDefaults(userId: UUID) async throws {
+        // Check if any system strategies already exist for this user
+        let descriptor = FetchDescriptor<RRCopingStrategy>(
+            predicate: #Predicate { $0.userId == userId && $0.isSystem == true }
+        )
+        let existingCount = try modelContext.fetchCount(descriptor)
+
+        guard existingCount == 0 else { return }
+
+        // Insert all system coping strategies
+        for seed in TriggerSeedData.systemCopingStrategies {
+            let strategy = RRCopingStrategy(
+                userId: userId,
+                label: seed.label,
+                strategyDescription: seed.description,
+                category: seed.category,
+                isSystem: true
+            )
+            modelContext.insert(strategy)
+        }
+        try modelContext.save()
+    }
+}
