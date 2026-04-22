@@ -27,6 +27,7 @@
 		10000501 /* RRTimeJournalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000501 /* RRTimeJournalEntry.swift */; };
 		10006005 /* MotivationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006005 /* MotivationTypes.swift */; };
 		10006006 /* RRMotivationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006006 /* RRMotivationModels.swift */; };
+		10006100 /* MotivationSurfacingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006100 /* MotivationSurfacingCard.swift */; };
 		10000510 /* TimeJournalDailyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000510 /* TimeJournalDailyView.swift */; };
 		10000511 /* TimeJournalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000511 /* TimeJournalHeaderView.swift */; };
 		10000512 /* TimeJournalTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000512 /* TimeJournalTimelineView.swift */; };
@@ -256,6 +257,7 @@
 		10006002 /* ActivityDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006002 /* ActivityDestinationView.swift */; };
 		10006003 /* QuickActionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006003 /* QuickActionsViewModel.swift */; };
 		10006004 /* QuickActionsCustomizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006004 /* QuickActionsCustomizeView.swift */; };
+		10006007 /* MotivationCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006007 /* MotivationCaptureSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -280,6 +282,7 @@
 		20000501 /* RRTimeJournalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTimeJournalEntry.swift; sourceTree = "<group>"; };
 		20006005 /* MotivationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationTypes.swift; sourceTree = "<group>"; };
 		20006006 /* RRMotivationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRMotivationModels.swift; sourceTree = "<group>"; };
+		20006100 /* MotivationSurfacingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingCard.swift; sourceTree = "<group>"; };
 		20000510 /* TimeJournalDailyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalDailyView.swift; sourceTree = "<group>"; };
 		20000511 /* TimeJournalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeaderView.swift; sourceTree = "<group>"; };
 		20000512 /* TimeJournalTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTimelineView.swift; sourceTree = "<group>"; };
@@ -516,6 +519,7 @@
 		20006002 /* ActivityDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDestinationView.swift; sourceTree = "<group>"; };
 		20006003 /* QuickActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsViewModel.swift; sourceTree = "<group>"; };
 		20006004 /* QuickActionsCustomizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsCustomizeView.swift; sourceTree = "<group>"; };
+		20006007 /* MotivationCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationCaptureSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -960,6 +964,7 @@
 				20000107 /* PanicButtonView.swift */,
 				50001001 /* ThreeCircles */,
 				50005001 /* Vision */,
+				50006100 /* Motivations */,
 				20000108 /* ThreeCirclesView.swift */,
 				20000109 /* ToolsView.swift */,
 			);
@@ -1079,6 +1084,14 @@
 			path = Vision;
 			sourceTree = "<group>";
 		};
+		50006100 /* Motivations */ = {
+			isa = PBXGroup;
+			children = (
+				20006100 /* MotivationSurfacingCard.swift */,
+			);
+			path = Motivations;
+			sourceTree = "<group>";
+		};
 		50006001 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -1178,6 +1191,7 @@
 				10000501 /* RRTimeJournalEntry.swift in Sources */,
 				10006005 /* MotivationTypes.swift in Sources */,
 				10006006 /* RRMotivationModels.swift in Sources */,
+				10006100 /* MotivationSurfacingCard.swift in Sources */,
 				10000510 /* TimeJournalDailyView.swift in Sources */,
 				10000511 /* TimeJournalHeaderView.swift in Sources */,
 				10000512 /* TimeJournalTimelineView.swift in Sources */,
