@@ -249,6 +249,10 @@
 		10006015 /* BowtieTalliesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006015 /* BowtieTalliesCard.swift */; };
 		10006016 /* BowtieCompletionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006016 /* BowtieCompletionOverlay.swift */; };
 		10006019 /* BowtieDiagramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006019 /* BowtieDiagramView.swift */; };
+		10006030 /* BowtieOnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006030 /* BowtieOnboardingViewModel.swift */; };
+		10006031 /* BowtieOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006031 /* BowtieOnboardingView.swift */; };
+		10006020 /* PPPEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006020 /* PPPEntryViewModel.swift */; };
+		10006021 /* PPPFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006021 /* PPPFormView.swift */; };
 		10005002 /* VisionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005002 /* VisionWizardViewModel.swift */; };
 		10005003 /* VisionWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005003 /* VisionWizardView.swift */; };
 		10005004 /* VisionPromptsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005004 /* VisionPromptsStepView.swift */; };
@@ -513,6 +517,12 @@
 		20006019 /* BowtieDiagramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieDiagramView.swift; sourceTree = "<group>"; };
 		20006017 /* BowtieSessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionViewModelTests.swift; sourceTree = "<group>"; };
 		20006018 /* BowtieMarkerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerViewModelTests.swift; sourceTree = "<group>"; };
+		20006020 /* PPPEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPEntryViewModel.swift; sourceTree = "<group>"; };
+		20006021 /* PPPFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPFormView.swift; sourceTree = "<group>"; };
+		20006022 /* PPPEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPEntryViewModelTests.swift; sourceTree = "<group>"; };
+		20006030 /* BowtieOnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModel.swift; sourceTree = "<group>"; };
+		20006031 /* BowtieOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingView.swift; sourceTree = "<group>"; };
+		20006032 /* BowtieOnboardingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
 		20005003 /* VisionWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardView.swift; sourceTree = "<group>"; };
 		20005004 /* VisionPromptsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPromptsStepView.swift; sourceTree = "<group>"; };
@@ -758,6 +768,8 @@
 				20006001 /* RolesManagerViewModel.swift */,
 				20006010 /* BowtieSessionViewModel.swift */,
 				20006011 /* BowtieMarkerViewModel.swift */,
+				20006020 /* PPPEntryViewModel.swift */,
+				20006030 /* BowtieOnboardingViewModel.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -772,6 +784,8 @@
 				20006015 /* BowtieTalliesCard.swift */,
 				20006016 /* BowtieCompletionOverlay.swift */,
 				20006019 /* BowtieDiagramView.swift */,
+				20006021 /* PPPFormView.swift */,
+				20006031 /* BowtieOnboardingView.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -782,6 +796,7 @@
 				20006003 /* RolesManagerViewModelTests.swift */,
 				20006017 /* BowtieSessionViewModelTests.swift */,
 				20006018 /* BowtieMarkerViewModelTests.swift */,
+				20006022 /* PPPEntryViewModelTests.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -1420,6 +1435,8 @@
 				10006015 /* BowtieTalliesCard.swift in Sources */,
 				10006016 /* BowtieCompletionOverlay.swift in Sources */,
 				10006019 /* BowtieDiagramView.swift in Sources */,
+				10006020 /* PPPEntryViewModel.swift in Sources */,
+				10006021 /* PPPFormView.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,
 				10005004 /* VisionPromptsStepView.swift in Sources */,
