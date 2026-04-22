@@ -2,6 +2,7 @@ import SwiftUI
 import UserNotifications
 import CoreLocation
 import LocalAuthentication
+import AppTrackingTransparency
 
 // MARK: - Permission Page Model
 
@@ -55,6 +56,20 @@ struct PermissionsView: View {
             skipLabel: "Not Now"
         ),
         PermissionPage(
+            id: "locationAlways",
+            icon: "location.fill.viewfinder",
+            iconColor: .blue,
+            title: "Background Meeting Alerts",
+            headline: "Allow location access at all times so we can notify you when you're near a meeting.",
+            bullets: [
+                (icon: "bell.badge.fill", text: "Get notified about nearby meetings"),
+                (icon: "shield.checkered", text: "Location-aware safety reminders"),
+                (icon: "lock.shield.fill", text: "Your location is never shared or stored on our servers"),
+            ],
+            allowLabel: "Always Allow",
+            skipLabel: "Not Now"
+        ),
+        PermissionPage(
             id: "biometrics",
             icon: "faceid",
             iconColor: .rrPrimary,
@@ -66,6 +81,20 @@ struct PermissionsView: View {
                 (icon: "bolt.fill", text: "Unlock instantly with Face ID or Touch ID"),
             ],
             allowLabel: "Enable Face ID",
+            skipLabel: "Not Now"
+        ),
+        PermissionPage(
+            id: "tracking",
+            icon: "hand.raised.fill",
+            iconColor: .rrPrimary,
+            title: "Help Us Reach More People",
+            headline: "Allow tracking to help us understand how people discover Regal Recovery. This never shares your personal recovery data.",
+            bullets: [
+                (icon: "chart.bar.fill", text: "Helps us measure which outreach efforts work"),
+                (icon: "lock.shield.fill", text: "Your journal, logs, and recovery data stay private"),
+                (icon: "gearshape.fill", text: "You can change this anytime in Settings"),
+            ],
+            allowLabel: "Allow Tracking",
             skipLabel: "Not Now"
         ),
     ]
@@ -180,8 +209,12 @@ struct PermissionsView: View {
             requestNotifications()
         case "location":
             requestLocation()
+        case "locationAlways":
+            requestLocationAlways()
         case "biometrics":
             requestBiometrics()
+        case "tracking":
+            requestTracking()
         default:
             advance()
         }
@@ -196,6 +229,17 @@ struct PermissionsView: View {
     private func requestLocation() {
         locationManager.onResult = { advance() }
         locationManager.requestPermission()
+    }
+
+    private func requestLocationAlways() {
+        locationManager.onResult = { advance() }
+        locationManager.requestAlwaysPermission()
+    }
+
+    private func requestTracking() {
+        ATTrackingManager.requestTrackingAuthorization { _ in
+            DispatchQueue.main.async { advance() }
+        }
     }
 
     private func requestBiometrics() {
@@ -258,6 +302,15 @@ private class OnboardingLocationManager: NSObject, CLLocationManagerDelegate {
         let status = manager.authorizationStatus
         if status == .notDetermined {
             manager.requestWhenInUseAuthorization()
+        } else {
+            onResult?()
+        }
+    }
+
+    func requestAlwaysPermission() {
+        let status = manager.authorizationStatus
+        if status == .authorizedWhenInUse {
+            manager.requestAlwaysAuthorization()
         } else {
             onResult?()
         }

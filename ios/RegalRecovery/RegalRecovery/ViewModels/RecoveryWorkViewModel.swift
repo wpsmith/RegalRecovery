@@ -9,6 +9,15 @@ enum WorkTileCategory: String, CaseIterable {
     case tools = "Tools"
     case assessments = "Assessments"
 
+    var displayName: String {
+        switch self {
+        case .foundationTools: return String(localized: "Foundation Tools")
+        case .activities: return String(localized: "Activities")
+        case .tools: return String(localized: "Tools")
+        case .assessments: return String(localized: "Assessments")
+        }
+    }
+
     var icon: String {
         switch self {
         case .foundationTools: return "building.columns.fill"
@@ -73,7 +82,7 @@ class RecoveryWorkViewModel {
         tiles.append(contentsOf: [
             WorkTileItem(
                 id: "foundation.3circles",
-                title: "3 Circles",
+                title: String(localized: "3 Circles"),
                 icon: "circles.hexagongrid.fill",
                 iconColor: .rrDestructive,
                 category: .foundationTools,
@@ -83,7 +92,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "foundation.relapse-prevention",
-                title: "Relapse Prevention",
+                title: String(localized: "Relapse Prevention"),
                 icon: "doc.text.magnifyingglass",
                 iconColor: .orange,
                 category: .foundationTools,
@@ -93,17 +102,17 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "foundation.vision",
-                title: "Vision Statement",
+                title: String(localized: "Vision Statement"),
                 icon: "eye.fill",
                 iconColor: .rrSecondary,
                 category: .foundationTools,
-                featureFlagKey: nil,
-                implemented: false,
-                activityTypeKey: nil
+                featureFlagKey: "feature.vision",
+                implemented: true,
+                activityTypeKey: "visionStatement"
             ),
             WorkTileItem(
                 id: "foundation.support-network",
-                title: "Support Network",
+                title: String(localized: "Support Network"),
                 icon: "person.2.fill",
                 iconColor: .rrPrimary,
                 category: .foundationTools,
@@ -113,7 +122,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "foundation.recovery-plan",
-                title: "My Recovery Plan",
+                title: String(localized: "My Recovery Plan"),
                 icon: "calendar.badge.clock",
                 iconColor: .rrSecondary,
                 category: .foundationTools,
@@ -127,7 +136,7 @@ class RecoveryWorkViewModel {
         tiles.append(contentsOf: [
             WorkTileItem(
                 id: "activity.backbone",
-                title: "Backbone",
+                title: String(localized: "Backbone"),
                 icon: "shield.checkered",
                 iconColor: .rrPrimary,
                 category: .activities,
@@ -137,7 +146,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.sobriety-commitment",
-                title: "Sobriety Commitment",
+                title: String(localized: "Sobriety Commitment"),
                 icon: "sun.max.fill",
                 iconColor: .rrSecondary,
                 category: .activities,
@@ -147,7 +156,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.affirmations",
-                title: "Affirmations",
+                title: String(localized: "Affirmations"),
                 icon: "text.quote",
                 iconColor: .rrPrimary,
                 category: .activities,
@@ -157,7 +166,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.urge-logging",
-                title: "Urge Logging",
+                title: String(localized: "Urge Logging"),
                 icon: "exclamationmark.triangle.fill",
                 iconColor: .orange,
                 category: .activities,
@@ -167,7 +176,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.journaling",
-                title: "Journaling",
+                title: String(localized: "Journaling"),
                 icon: "note.text",
                 iconColor: .purple,
                 category: .activities,
@@ -177,7 +186,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.emotional-journal",
-                title: "Emotional Journal",
+                title: String(localized: "Emotional Journal"),
                 icon: "heart.text.square.fill",
                 iconColor: .pink,
                 category: .activities,
@@ -187,7 +196,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.faster-scale",
-                title: "FASTER Scale",
+                title: String(localized: "FASTER Scale"),
                 icon: "gauge.with.needle",
                 iconColor: .rrSuccess,
                 category: .activities,
@@ -197,7 +206,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.time-journal",
-                title: "Time Journal",
+                title: String(localized: "Time Journal"),
                 icon: "clock.fill",
                 iconColor: .purple,
                 category: .activities,
@@ -207,7 +216,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.fanos",
-                title: "FANOS",
+                title: String(localized: "FANOS"),
                 icon: "heart.fill",
                 iconColor: .pink,
                 category: .activities,
@@ -217,7 +226,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.fitnap",
-                title: "FITNAP",
+                title: String(localized: "FITNAP"),
                 icon: "heart.text.clipboard",
                 iconColor: .pink,
                 category: .activities,
@@ -227,7 +236,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.meetings",
-                title: "Meetings",
+                title: String(localized: "Meetings"),
                 icon: "person.3.fill",
                 iconColor: .rrPrimary,
                 category: .activities,
@@ -237,7 +246,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.post-mortem",
-                title: "Post-Mortem",
+                title: String(localized: "Post-Mortem"),
                 icon: "magnifyingglass.circle",
                 iconColor: .rrDestructive,
                 category: .tools,
@@ -247,7 +256,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.step-work",
-                title: "12-Step Work",
+                title: String(localized: "12-Step Work"),
                 icon: "stairs",
                 iconColor: .rrPrimary,
                 category: .tools,
@@ -257,7 +266,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.goals",
-                title: "Weekly Goals",
+                title: String(localized: "Weekly Goals"),
                 icon: "target",
                 iconColor: .rrSecondary,
                 category: .activities,
@@ -267,7 +276,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.devotionals",
-                title: "Devotional",
+                title: String(localized: "Devotional"),
                 icon: "book.fill",
                 iconColor: .brown,
                 category: .activities,
@@ -277,7 +286,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.exercise",
-                title: "Exercise",
+                title: String(localized: "Exercise"),
                 icon: "figure.run",
                 iconColor: .rrSuccess,
                 category: .activities,
@@ -287,7 +296,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.mood",
-                title: "Mood Rating",
+                title: String(localized: "Mood Rating"),
                 icon: "face.smiling",
                 iconColor: .yellow,
                 category: .activities,
@@ -297,7 +306,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.gratitude",
-                title: "Gratitude",
+                title: String(localized: "Gratitude"),
                 icon: "leaf.fill",
                 iconColor: .rrSuccess,
                 category: .activities,
@@ -307,7 +316,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.phone-calls",
-                title: "Phone Calls",
+                title: String(localized: "Phone Calls"),
                 icon: "phone.fill",
                 iconColor: .rrPrimary,
                 category: .activities,
@@ -317,7 +326,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.prayer",
-                title: "Prayer",
+                title: String(localized: "Prayer"),
                 icon: "hands.and.sparkles.fill",
                 iconColor: .rrSecondary,
                 category: .activities,
@@ -327,7 +336,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.integrity-inventory",
-                title: "Integrity Inventory",
+                title: String(localized: "Integrity Inventory"),
                 icon: "checkmark.shield.fill",
                 iconColor: .rrPrimary,
                 category: .activities,
@@ -337,7 +346,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.memory-verse",
-                title: "Memory Verse",
+                title: String(localized: "Memory Verse"),
                 icon: "text.book.closed.fill",
                 iconColor: .brown,
                 category: .tools,
@@ -347,7 +356,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.pci",
-                title: "PCI",
+                title: String(localized: "PCI"),
                 icon: "checklist",
                 iconColor: .rrDestructive,
                 category: .activities,
@@ -357,7 +366,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.nutrition",
-                title: "Nutrition",
+                title: String(localized: "Nutrition"),
                 icon: "fork.knife",
                 iconColor: .green,
                 category: .activities,
@@ -367,7 +376,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.acting-in-behaviors",
-                title: "Acting In Behaviors",
+                title: String(localized: "Acting In Behaviors"),
                 icon: "shield.lefthalf.filled",
                 iconColor: .orange,
                 category: .foundationTools,
@@ -377,7 +386,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.book-reading",
-                title: "Recovery Reading",
+                title: String(localized: "Recovery Reading"),
                 icon: "book.fill",
                 iconColor: .brown,
                 category: .activities,
@@ -391,7 +400,7 @@ class RecoveryWorkViewModel {
         tiles.append(contentsOf: [
             WorkTileItem(
                 id: "tool.urge-surfing",
-                title: "Urge Surfing Timer",
+                title: String(localized: "Urge Surfing Timer"),
                 icon: "timer",
                 iconColor: .orange,
                 category: .tools,
@@ -401,7 +410,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "tool.meeting-finder",
-                title: "Meeting Finder",
+                title: String(localized: "Meeting Finder"),
                 icon: "map.fill",
                 iconColor: .rrPrimary,
                 category: .tools,
@@ -415,7 +424,7 @@ class RecoveryWorkViewModel {
         tiles.append(contentsOf: [
             WorkTileItem(
                 id: "assessment.sast-r",
-                title: "SAST-R",
+                title: String(localized: "SAST-R"),
                 icon: "clipboard.fill",
                 iconColor: .purple,
                 category: .assessments,
@@ -425,7 +434,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "assessment.family-impact",
-                title: "Family Impact",
+                title: String(localized: "Family Impact"),
                 icon: "house.fill",
                 iconColor: .rrPrimary,
                 category: .assessments,
@@ -435,7 +444,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "assessment.denial",
-                title: "Denial Assessment",
+                title: String(localized: "Denial Assessment"),
                 icon: "eye.slash.fill",
                 iconColor: .orange,
                 category: .assessments,
@@ -445,7 +454,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "assessment.addiction-severity",
-                title: "Addiction Severity",
+                title: String(localized: "Addiction Severity"),
                 icon: "waveform.path.ecg",
                 iconColor: .rrDestructive,
                 category: .assessments,
@@ -455,7 +464,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "assessment.relationship-health",
-                title: "Relationship Health",
+                title: String(localized: "Relationship Health"),
                 icon: "heart.circle.fill",
                 iconColor: .pink,
                 category: .assessments,
@@ -641,17 +650,17 @@ class RecoveryWorkViewModel {
             let timeJournalTriggerReason: String = {
                 switch timeJournalDayStatus {
                 case .inProgress:
-                    return "\(timeJournalFilledCount) of \(timeJournalTotalSlots) slots filled today"
+                    return String(localized: "\(timeJournalFilledCount) of \(timeJournalTotalSlots) slots filled today")
                 case .overdue:
-                    return "Some time slots have passed without entries"
+                    return String(localized: "Some time slots have passed without entries")
                 case .completed:
-                    return "All time slots filled for today"
+                    return String(localized: "All time slots filled for today")
                 }
             }()
 
             timeJournalItems.append(RecoveryWorkItem(
                 activityType: "timeJournal",
-                title: "Time Journal",
+                title: String(localized: "Time Journal"),
                 triggerReason: timeJournalTriggerReason,
                 dueDate: calendar.startOfDay(for: now).addingTimeInterval(24 * 60 * 60 - 1),
                 priority: .high,
@@ -664,8 +673,8 @@ class RecoveryWorkViewModel {
         dueNow = timeJournalItems + [
             RecoveryWorkItem(
                 activityType: "threeCirclesReview",
-                title: "3 Circles Review",
-                triggerReason: "Last reviewed 62 days ago -- quarterly review recommended",
+                title: String(localized: "3 Circles Review"),
+                triggerReason: String(localized: "Last reviewed 62 days ago -- quarterly review recommended"),
                 dueDate: threeCirclesLastReview,
                 priority: .high,
                 status: .overdue,
@@ -677,8 +686,8 @@ class RecoveryWorkViewModel {
         thisWeek = [
             RecoveryWorkItem(
                 activityType: "backboneReview",
-                title: "Backbone Review",
-                triggerReason: "Monthly recovery foundation check-in due",
+                title: String(localized: "Backbone Review"),
+                triggerReason: String(localized: "Monthly recovery foundation check-in due"),
                 dueDate: backboneDueDate,
                 priority: .medium,
                 status: .notStarted,
@@ -687,8 +696,8 @@ class RecoveryWorkViewModel {
             ),
             RecoveryWorkItem(
                 activityType: "assessment.sast-r",
-                title: "SAST-R Assessment",
-                triggerReason: "90-day periodic assessment -- track your progress",
+                title: String(localized: "SAST-R Assessment"),
+                triggerReason: String(localized: "90-day periodic assessment -- track your progress"),
                 dueDate: sastRDueDate,
                 priority: .medium,
                 status: .notStarted,
@@ -700,8 +709,8 @@ class RecoveryWorkViewModel {
         thisMonth = [
             RecoveryWorkItem(
                 activityType: "relapsePreventionPlan",
-                title: "Relapse Prevention Plan Review",
-                triggerReason: "Quarterly review helps keep your plan current",
+                title: String(localized: "Relapse Prevention Plan Review"),
+                triggerReason: String(localized: "Quarterly review helps keep your plan current"),
                 dueDate: rppDueDate,
                 priority: .low,
                 status: .notStarted,
@@ -710,8 +719,8 @@ class RecoveryWorkViewModel {
             ),
             RecoveryWorkItem(
                 activityType: "visionStatement",
-                title: "Vision Statement Refresh",
-                triggerReason: "Revisit your recovery vision and values quarterly",
+                title: String(localized: "Vision Statement Refresh"),
+                triggerReason: String(localized: "Revisit your recovery vision and values quarterly"),
                 dueDate: calendar.date(byAdding: .day, value: 21, to: now),
                 priority: .low,
                 status: .notStarted,
@@ -727,8 +736,8 @@ class RecoveryWorkViewModel {
         completed = [
             RecoveryWorkItem(
                 activityType: "postMortem",
-                title: "Post-Mortem Analysis",
-                triggerReason: "Completed after slip on day 45",
+                title: String(localized: "Post-Mortem Analysis"),
+                triggerReason: String(localized: "Completed after slip on day 45"),
                 dueDate: calendar.date(byAdding: .day, value: -225, to: now),
                 priority: .high,
                 status: .completed,
@@ -737,8 +746,8 @@ class RecoveryWorkViewModel {
             ),
             RecoveryWorkItem(
                 activityType: "threeCirclesReview",
-                title: "3 Circles Review",
-                triggerReason: "Initial setup during onboarding",
+                title: String(localized: "3 Circles Review"),
+                triggerReason: String(localized: "Initial setup during onboarding"),
                 dueDate: calendar.date(byAdding: .day, value: -270, to: now),
                 priority: .medium,
                 status: .completed,
@@ -747,8 +756,8 @@ class RecoveryWorkViewModel {
             ),
             RecoveryWorkItem(
                 activityType: "assessment.sast-r",
-                title: "SAST-R Assessment",
-                triggerReason: "Intake assessment completed",
+                title: String(localized: "SAST-R Assessment"),
+                triggerReason: String(localized: "Intake assessment completed"),
                 dueDate: calendar.date(byAdding: .day, value: -270, to: now),
                 priority: .medium,
                 status: .completed,

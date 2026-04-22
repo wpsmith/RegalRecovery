@@ -141,7 +141,7 @@ struct RecoveryWorkView: View {
                     Image(systemName: category.icon)
                         .font(.subheadline)
                         .foregroundStyle(Color.rrPrimary)
-                    Text(category.rawValue)
+                    Text(category.displayName)
                         .font(RRFont.title3)
                         .foregroundStyle(Color.rrText)
                 }
@@ -255,6 +255,8 @@ struct RecoveryWorkView: View {
             SupportNetworkView()
         case "recoveryPlan":
             RecoveryPlanSetupView()
+        case "visionStatement":
+            VisionHubView()
         case "threeCircles":
             ThreeCirclesView()
         case "analytics":

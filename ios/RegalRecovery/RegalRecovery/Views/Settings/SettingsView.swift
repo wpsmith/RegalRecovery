@@ -7,7 +7,6 @@ struct SettingsView: View {
     @Query private var supportContacts: [RRSupportContact]
     @Query(filter: #Predicate<RRDailyPlanItem> { $0.isEnabled == true })
     private var enabledPlanItems: [RRDailyPlanItem]
-    @State private var showExportAlert = false
     @State private var showDeleteAlert = false
     @State private var ephemeralMode = false
     @State private var expandedSections: Set<String> = ["Profile", "Support Network", "My Recovery Foundation", "Preferences", "Privacy & Data", "Debug"]
@@ -162,8 +161,10 @@ struct SettingsView: View {
                             PrivacySettingsView()
                         }
 
-                        Button("Export My Data") {
-                            showExportAlert = true
+                        NavigationLink {
+                            AppPermissionsView()
+                        } label: {
+                            settingsRow(icon: "checkmark.shield.fill", iconColor: .rrPrimary, title: "App Permissions", subtitle: "Manage notification, location, and privacy permissions")
                         }
 
                         Button("Delete My Account", role: .destructive) {
@@ -223,13 +224,6 @@ struct SettingsView: View {
                 }
             }
             .listStyle(.insetGrouped)
-            .alert("Export My Data", isPresented: $showExportAlert) {
-                Button("Export as JSON") { }
-                Button("Export as PDF") { }
-                Button("Cancel", role: .cancel) { }
-            } message: {
-                Text("Your data export is ready.")
-            }
             .alert("Delete Account?", isPresented: $showDeleteAlert) {
                 Button("Delete", role: .destructive) { }
                 Button("Cancel", role: .cancel) { }
@@ -256,6 +250,22 @@ struct SettingsView: View {
                     .frame(width: 12)
                 Text(LocalizedStringKey(title))
                 Spacer()
+            }
+        }
+    }
+
+    private func settingsRow(icon: String, iconColor: Color, title: String, subtitle: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(iconColor)
+                .frame(width: 24)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrText)
+                Text(subtitle)
+                    .font(RRFont.caption)
+                    .foregroundStyle(Color.rrTextSecondary)
             }
         }
     }

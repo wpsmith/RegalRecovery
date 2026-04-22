@@ -10,8 +10,7 @@ struct RecoveryPlanSetupView: View {
 
     @State private var showingActivityPicker = false
     @State private var showUnsavedAlert = false
-    @State private var showAlgorithmDebug = false
-    @State private var editMode: EditMode = .active
+@State private var editMode: EditMode = .active
     @State private var showCommitmentSetupPrompt = false
     @State private var pendingActivity: DailyEligibleActivity?
     @State private var showCommitmentSetup = false
@@ -87,22 +86,6 @@ struct RecoveryPlanSetupView: View {
                 .disabled(viewModel.isSaving)
             }
 
-            // MARK: - Debug
-            Section {
-                Button {
-                    showAlgorithmDebug = true
-                } label: {
-                    HStack {
-                        Image(systemName: "ladybug.fill")
-                            .foregroundStyle(.orange)
-                        Text("Score Algorithm Debug")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrText)
-                    }
-                }
-            } header: {
-                Text("Debug")
-            }
         }
         .listStyle(.insetGrouped)
         .environment(\.editMode, $editMode)
@@ -130,24 +113,6 @@ struct RecoveryPlanSetupView: View {
                     showingActivityPicker = false
                 }
             )
-        }
-        .sheet(isPresented: $showAlgorithmDebug) {
-            NavigationStack {
-                ScrollView {
-                    Text(viewModel.scoreAlgorithmDebug())
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(Color.rrText)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding()
-                }
-                .background(Color.rrBackground)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button("Done") { showAlgorithmDebug = false }
-                    }
-                }
-            }
-            .presentationDetents([.medium])
         }
         .alert("Unsaved Changes", isPresented: $showUnsavedAlert) {
             Button("Save & Exit") {

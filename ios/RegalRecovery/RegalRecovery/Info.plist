@@ -24,6 +24,10 @@
 	<string>Regal Recovery accesses your contacts to help you quickly add your sponsor, counselor, and accountability partners to your support network.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Regal Recovery uses your location to find SA and Celebrate Recovery meetings near you and to provide context in your time journal.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Regal Recovery uses your location to find nearby meetings and provide context in your time journal, even when the app is in the background.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Regal Recovery uses this to understand how our app is discovered, helping us reach more people in recovery. Your recovery data is never shared with advertisers.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Regal Recovery uses the camera to let you capture photos for your gratitude journal and recovery milestones.</string>
 	<key>LSRequiresIPhoneOS</key>

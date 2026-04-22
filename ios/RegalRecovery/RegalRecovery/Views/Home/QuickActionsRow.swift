@@ -1,7 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct QuickActionsRow: View {
+    @Environment(\.modelContext) private var modelContext
+    @State private var viewModel = QuickActionsViewModel()
     @State private var showFASTER = false
+    @State private var showCustomize = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -9,56 +13,46 @@ struct QuickActionsRow: View {
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    Button { showFASTER = true } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "gauge.with.dots.needle.33percent")
-                                .font(.caption)
-                            Text("FASTER")
-                                .font(RRFont.caption)
-                                .fontWeight(.medium)
-                            Text("NEW")
-                                .font(.system(size: 9, weight: .bold))
-                                .padding(.horizontal, 5)
-                                .padding(.vertical, 2)
-                                .foregroundStyle(.white)
-                                .background(Color.rrSecondary)
-                                .clipShape(Capsule())
+                    ForEach(viewModel.items) { item in
+                        if item.definition.presentationStyle == .fullScreenCover {
+                            Button {
+                                showFASTER = true
+                            } label: {
+                                quickActionLabel(item.definition.displayName, icon: item.definition.icon)
+                            }
+                        } else {
+                            NavigationLink {
+                                ActivityDestinationView(activityType: item.definition.id)
+                            } label: {
+                                quickActionLabel(item.definition.displayName, icon: item.definition.icon)
+                            }
                         }
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 10)
-                        .foregroundStyle(Color.rrPrimary)
-                        .background(Color.rrPrimary.opacity(0.1))
-                        .clipShape(Capsule())
                     }
 
-                    NavigationLink { UrgeLogView() } label: {
-                        quickActionLabel("Log Urge", icon: "exclamationmark.triangle.fill")
-                    }
-
-                    NavigationLink { JournalView() } label: {
-                        quickActionLabel("Journal", icon: "note.text")
-                    }
-
-                    NavigationLink { EmotionalJournalView() } label: {
-                        quickActionLabel("EmoJournal", icon: "heart.text.square.fill")
-                    }
-
-                    NavigationLink { PrayerLogView() } label: {
-                        quickActionLabel("Prayer", icon: "hands.clap.fill")
-                    }
-
-                    NavigationLink { MoodRatingView() } label: {
-                        quickActionLabel("Mood", icon: "face.smiling")
-                    }
-
-                    NavigationLink { GratitudeTabView() } label: {
-                        quickActionLabel("Gratitude", icon: "leaf.fill")
+                    Button {
+                        showCustomize = true
+                    } label: {
+                        Image(systemName: "pencil.circle")
+                            .font(.body)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 10)
+                            .foregroundStyle(Color.rrTextSecondary)
+                            .background(Color.rrPrimary.opacity(0.06))
+                            .clipShape(Capsule())
                     }
                 }
             }
         }
         .fullScreenCover(isPresented: $showFASTER) {
             FASTERCheckInFlowView()
+        }
+        .sheet(isPresented: $showCustomize, onDismiss: {
+            viewModel.load(context: modelContext)
+        }) {
+            QuickActionsCustomizeView(viewModel: viewModel)
+        }
+        .task {
+            viewModel.load(context: modelContext)
         }
     }
 
@@ -83,5 +77,6 @@ struct QuickActionsRow: View {
         QuickActionsRow()
             .padding()
             .background(Color.rrBackground)
+            .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
     }
 }

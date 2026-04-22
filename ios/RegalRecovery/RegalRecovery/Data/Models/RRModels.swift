@@ -1462,6 +1462,32 @@ final class RRVisionStatement {
     }
 }
 
+// MARK: - Quick Action Item
+
+@Model
+final class RRQuickActionItem {
+
+    @Attribute(.unique) var id: UUID
+    var activityType: String
+    var sortOrder: Int
+    var createdAt: Date
+    var modifiedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        activityType: String,
+        sortOrder: Int = 0,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.activityType = activityType
+        self.sortOrder = sortOrder
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1498,6 +1524,7 @@ enum RRModelConfiguration {
         RRDailyPlanItem.self,
         RRDailyScore.self,
         RRVisionStatement.self,
+        RRQuickActionItem.self,
     ]
 
     static var schema: Schema {
