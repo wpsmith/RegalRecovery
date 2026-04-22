@@ -248,6 +248,7 @@
 		10006014 /* BowtieMarkerFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006014 /* BowtieMarkerFormView.swift */; };
 		10006015 /* BowtieTalliesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006015 /* BowtieTalliesCard.swift */; };
 		10006016 /* BowtieCompletionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006016 /* BowtieCompletionOverlay.swift */; };
+		10006019 /* BowtieDiagramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006019 /* BowtieDiagramView.swift */; };
 		10005002 /* VisionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005002 /* VisionWizardViewModel.swift */; };
 		10005003 /* VisionWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005003 /* VisionWizardView.swift */; };
 		10005004 /* VisionPromptsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005004 /* VisionPromptsStepView.swift */; };
@@ -509,6 +510,7 @@
 		20006014 /* BowtieMarkerFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerFormView.swift; sourceTree = "<group>"; };
 		20006015 /* BowtieTalliesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieTalliesCard.swift; sourceTree = "<group>"; };
 		20006016 /* BowtieCompletionOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieCompletionOverlay.swift; sourceTree = "<group>"; };
+		20006019 /* BowtieDiagramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieDiagramView.swift; sourceTree = "<group>"; };
 		20006017 /* BowtieSessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionViewModelTests.swift; sourceTree = "<group>"; };
 		20006018 /* BowtieMarkerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerViewModelTests.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
@@ -769,6 +771,7 @@
 				20006014 /* BowtieMarkerFormView.swift */,
 				20006015 /* BowtieTalliesCard.swift */,
 				20006016 /* BowtieCompletionOverlay.swift */,
+				20006019 /* BowtieDiagramView.swift */,
 			);
 			path = Bowtie;
 			sourceTree = "<group>";
@@ -1416,6 +1419,7 @@
 				10006014 /* BowtieMarkerFormView.swift in Sources */,
 				10006015 /* BowtieTalliesCard.swift in Sources */,
 				10006016 /* BowtieCompletionOverlay.swift in Sources */,
+				10006019 /* BowtieDiagramView.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,
 				10005004 /* VisionPromptsStepView.swift in Sources */,

@@ -6,6 +6,7 @@ struct BowtieSessionView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
     @Query(sort: \RRKnownEmotionalTrigger.createdAt) private var triggers: [RRKnownEmotionalTrigger]
 
@@ -219,6 +220,23 @@ struct BowtieSessionView: View {
     private var sessionContentView: some View {
         ScrollView {
             VStack(spacing: 16) {
+                if sizeClass == .regular {
+                    BowtieDiagramView(
+                        markers: viewModel.markers,
+                        onTapInterval: { side, interval in
+                            editingMarker = nil
+                            pendingMarkerSide = side
+                            showMarkerForm = true
+                        },
+                        onTapMarker: { marker in
+                            editingMarker = marker
+                            pendingMarkerSide = marker.bowtieSide
+                            showMarkerForm = true
+                        }
+                    )
+                    .padding(.horizontal)
+                }
+
                 Picker(String(localized: "Side"), selection: $selectedTab) {
                     Text(String(localized: "Past")).tag(BowtieSide?.some(.past))
                     Text(String(localized: "All")).tag(BowtieSide?.none)
