@@ -259,6 +259,8 @@
 		15F2773FFA15EE1EABA2F341 /* TriggerLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */; };
 		25C3A7B1DF46EE2ABC567890 /* TriggerLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D8F4C5BE91AA73ED245681 /* TriggerLibraryViewModel.swift */; };
 		3F7B8A9CDE21FF34AB678901 /* TriggerInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D9E1A2BCD56EE78FG901234 /* TriggerInsightsViewModel.swift */; };
+		089e093dc4b94ea5b7fdb24e /* TriggerChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2c21b3c8fe2845c3876cb3e9 /* TriggerChipView.swift */; };
+		abbc40f7cf20460b903ba30f /* IntensitySliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */; };
 		B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F001 /* Localizable.xcstrings */; };
 		B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
@@ -529,6 +531,8 @@
 		84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TriggerLogViewModel.swift; path = Triggers/TriggerLogViewModel.swift; sourceTree = "<group>"; };
 		9E5A2D1BCF78AA45CE123456 /* TriggerLibraryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerLibraryViewModelTests.swift; sourceTree = "<group>"; };
 		AD4C9FD9C8C50339F8B09D2C /* TriggerLogViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerLogViewModelTests.swift; sourceTree = "<group>"; };
+		2c21b3c8fe2845c3876cb3e9 /* TriggerChipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerChipView.swift; sourceTree = "<group>"; };
+		20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntensitySliderView.swift; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -766,6 +770,7 @@
 				50000046 /* Settings */,
 				50000047 /* Tools */,
 				50000300 /* Today */,
+				97b090c283904de0b021ab3e /* Triggers */,
 				50000100 /* Work */,
 			);
 			path = Views;
@@ -1121,6 +1126,23 @@
 			name = Triggers;
 			sourceTree = "<group>";
 		};
+		97b090c283904de0b021ab3e /* Triggers */ = {
+			isa = PBXGroup;
+			children = (
+				91315bc0a3d146579e193edb /* Components */,
+			);
+			path = Triggers;
+			sourceTree = "<group>";
+		};
+		91315bc0a3d146579e193edb /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				2c21b3c8fe2845c3876cb3e9 /* TriggerChipView.swift */,
+				20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1435,6 +1457,8 @@
 				3F7B8A9CDE21FF34AB678901 /* TriggerInsightsViewModel.swift in Sources */,
 				25C3A7B1DF46EE2ABC567890 /* TriggerLibraryViewModel.swift in Sources */,
 				15F2773FFA15EE1EABA2F341 /* TriggerLogViewModel.swift in Sources */,
+				089e093dc4b94ea5b7fdb24e /* TriggerChipView.swift in Sources */,
+				abbc40f7cf20460b903ba30f /* IntensitySliderView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
