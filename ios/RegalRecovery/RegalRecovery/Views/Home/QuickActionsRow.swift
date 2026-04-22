@@ -18,13 +18,13 @@ struct QuickActionsRow: View {
                             Button {
                                 showFASTER = true
                             } label: {
-                                quickActionLabel(item.definition.displayName, icon: item.definition.icon)
+                                quickActionLabel(item.definition.shortTitle, icon: item.definition.icon)
                             }
                         } else {
                             NavigationLink {
                                 ActivityDestinationView(activityType: item.definition.id)
                             } label: {
-                                quickActionLabel(item.definition.displayName, icon: item.definition.icon)
+                                quickActionLabel(item.definition.shortTitle, icon: item.definition.icon)
                             }
                         }
                     }

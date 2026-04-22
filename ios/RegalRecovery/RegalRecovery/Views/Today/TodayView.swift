@@ -157,7 +157,7 @@ struct TodayView: View {
                             Button { showFASTERFromQuickAction = true } label: {
                                 quickActionCard(
                                     icon: item.definition.icon,
-                                    label: item.definition.displayName,
+                                    label: item.definition.shortTitle,
                                     color: item.definition.iconColor
                                 )
                             }
@@ -168,7 +168,7 @@ struct TodayView: View {
                             } label: {
                                 quickActionCard(
                                     icon: item.definition.icon,
-                                    label: item.definition.displayName,
+                                    label: item.definition.shortTitle,
                                     color: item.definition.iconColor
                                 )
                             }

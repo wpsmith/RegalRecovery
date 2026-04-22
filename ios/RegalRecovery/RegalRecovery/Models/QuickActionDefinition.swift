@@ -3,6 +3,7 @@ import SwiftUI
 struct QuickActionDefinition: Identifiable, Equatable {
     let id: String
     let displayName: String
+    let shortTitle: String
     let icon: String
     let iconColor: Color
     let section: ActivitySection
@@ -13,6 +14,35 @@ struct QuickActionDefinition: Identifiable, Equatable {
         case navigationLink
         case fullScreenCover
     }
+
+    private static let shortTitles: [String: String] = [
+        ActivityType.sobrietyCommitment.rawValue: "Commit",
+        ActivityType.affirmationLog.rawValue: "Affirm",
+        ActivityType.journal.rawValue: "Journal",
+        "devotional": "Devotional",
+        ActivityType.prayer.rawValue: "Pray",
+        "memoryVerseReview": "Verse",
+        ActivityType.mood.rawValue: "Mood",
+        ActivityType.gratitude.rawValue: "Gratitude",
+        ActivityType.phoneCalls.rawValue: "Calls",
+        ActivityType.exercise.rawValue: "Exercise",
+        ActivityType.meetingsAttended.rawValue: "Meetings",
+        "personCheckInSpouse": "Spouse",
+        ActivityType.fanos.rawValue: "FANOS",
+        ActivityType.fitnap.rawValue: "FITNAP",
+        ActivityType.fasterScale.rawValue: "FASTER",
+        "pci": "PCI",
+        ActivityType.weeklyGoals.rawValue: "Goals",
+        "nutrition": "Nutrition",
+        ActivityType.timeJournal.rawValue: "T30/60",
+        "actingInBehaviors": "Acting In",
+        "voiceJournal": "Voice",
+        "bookReading": "Reading",
+        ActivityType.urgeLog.rawValue: "Log Urge",
+        ActivityType.postMortem.rawValue: "Post-Mortem",
+        ActivityType.stepWork.rawValue: "12-Step",
+        "emotionalJournal": "EmoJournal",
+    ]
 }
 
 // MARK: - Catalog
@@ -25,6 +55,7 @@ extension QuickActionDefinition {
             return QuickActionDefinition(
                 id: activity.activityType,
                 displayName: activity.displayName,
+                shortTitle: shortTitles[activity.activityType] ?? activity.displayName,
                 icon: activity.icon,
                 iconColor: color,
                 section: activity.section,
@@ -39,6 +70,7 @@ extension QuickActionDefinition {
             definitions[idx] = QuickActionDefinition(
                 id: original.id,
                 displayName: original.displayName,
+                shortTitle: original.shortTitle,
                 icon: original.icon,
                 iconColor: original.iconColor,
                 section: original.section,
@@ -52,6 +84,7 @@ extension QuickActionDefinition {
             QuickActionDefinition(
                 id: ActivityType.urgeLog.rawValue,
                 displayName: String(localized: "Urge Log"),
+                shortTitle: shortTitles[ActivityType.urgeLog.rawValue] ?? "Log Urge",
                 icon: "exclamationmark.triangle.fill",
                 iconColor: .orange,
                 section: .sobrietyCommitment,
@@ -64,6 +97,7 @@ extension QuickActionDefinition {
             QuickActionDefinition(
                 id: ActivityType.postMortem.rawValue,
                 displayName: String(localized: "Post-Mortem"),
+                shortTitle: shortTitles[ActivityType.postMortem.rawValue] ?? "Post-Mortem",
                 icon: "magnifyingglass.circle.fill",
                 iconColor: .rrDestructive,
                 section: .sobrietyCommitment,
@@ -76,6 +110,7 @@ extension QuickActionDefinition {
             QuickActionDefinition(
                 id: ActivityType.stepWork.rawValue,
                 displayName: String(localized: "12-Step Work"),
+                shortTitle: shortTitles[ActivityType.stepWork.rawValue] ?? "12-Step",
                 icon: "list.number",
                 iconColor: .rrSecondary,
                 section: .growth,
@@ -88,6 +123,7 @@ extension QuickActionDefinition {
             QuickActionDefinition(
                 id: "emotionalJournal",
                 displayName: String(localized: "EmoJournal"),
+                shortTitle: shortTitles["emotionalJournal"] ?? "EmoJournal",
                 icon: "heart.text.square.fill",
                 iconColor: .pink,
                 section: .journalingReflection,
