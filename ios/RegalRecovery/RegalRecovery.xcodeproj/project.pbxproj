@@ -268,6 +268,7 @@
 		10D7D997 /* TriggerLogDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D7D997 /* TriggerLogDetailView.swift */; };
 		91afdd6a /* TriggerInsightsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453ed699ad1c466883a04105 /* TriggerInsightsDashboardView.swift */; };
 		68fa73c0 /* TriggerHeatMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3aa7e7e8dded4053b2fba1b1 /* TriggerHeatMapView.swift */; };
+		b11737576e8745299f5db1c4 /* TriggerOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1a3b59a7d24b460db7c71752 /* TriggerOnboardingView.swift */; };
 		B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F001 /* Localizable.xcstrings */; };
 		B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */; };
 /* End PBXBuildFile section */
@@ -547,6 +548,7 @@
 		20D7D997 /* TriggerLogDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogDetailView.swift; sourceTree = "<group>"; };
 		453ed699ad1c466883a04105 /* TriggerInsightsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerInsightsDashboardView.swift; sourceTree = "<group>"; };
 		3aa7e7e8dded4053b2fba1b1 /* TriggerHeatMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerHeatMapView.swift; sourceTree = "<group>"; };
+		1a3b59a7d24b460db7c71752 /* TriggerOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerOnboardingView.swift; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1149,6 +1151,7 @@
 				20D7D996 /* TriggerLogHistoryView.swift */,
 				20D7D997 /* TriggerLogDetailView.swift */,
 				453ed699ad1c466883a04105 /* TriggerInsightsDashboardView.swift */,
+				1a3b59a7d24b460db7c71752 /* TriggerOnboardingView.swift */,
 			);
 			path = Triggers;
 			sourceTree = "<group>";
@@ -1487,6 +1490,7 @@
 				10D7D997 /* TriggerLogDetailView.swift in Sources */,
 				91afdd6a /* TriggerInsightsDashboardView.swift in Sources */,
 				68fa73c0 /* TriggerHeatMapView.swift in Sources */,
+				b11737576e8745299f5db1c4 /* TriggerOnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
