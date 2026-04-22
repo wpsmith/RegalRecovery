@@ -25,6 +25,7 @@
 		10000500 /* TimeJournalTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000500 /* TimeJournalTypes.swift */; };
 		10000008 /* RRModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000008 /* RRModels.swift */; };
 		10000501 /* RRTimeJournalEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000501 /* RRTimeJournalEntry.swift */; };
+		10D7D990 /* TriggerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F0E /* TriggerTypes.swift */; };
 		10000510 /* TimeJournalDailyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000510 /* TimeJournalDailyView.swift */; };
 		10000511 /* TimeJournalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000511 /* TimeJournalHeaderView.swift */; };
 		10000512 /* TimeJournalTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000512 /* TimeJournalTimelineView.swift */; };
@@ -276,6 +277,7 @@
 		20000500 /* TimeJournalTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTypes.swift; sourceTree = "<group>"; };
 		20000008 /* RRModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRModels.swift; sourceTree = "<group>"; };
 		20000501 /* RRTimeJournalEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTimeJournalEntry.swift; sourceTree = "<group>"; };
+		20258F0E /* TriggerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerTypes.swift; sourceTree = "<group>"; };
 		20000510 /* TimeJournalDailyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalDailyView.swift; sourceTree = "<group>"; };
 		20000511 /* TimeJournalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeaderView.swift; sourceTree = "<group>"; };
 		20000512 /* TimeJournalTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTimelineView.swift; sourceTree = "<group>"; };
@@ -467,6 +469,7 @@
 		20000113 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
 		20000114 /* StreakViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModelTests.swift; sourceTree = "<group>"; };
 		20000115 /* UrgeLogViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModelTests.swift; sourceTree = "<group>"; };
+		2021035A /* TriggerTypesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerTypesTests.swift; sourceTree = "<group>"; };
 		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20000208 /* RecoveryWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkView.swift; sourceTree = "<group>"; };
@@ -613,6 +616,7 @@
 			children = (
 				20000008 /* RRModels.swift */,
 				20000501 /* RRTimeJournalEntry.swift */,
+				20258F0E /* TriggerTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1038,6 +1042,7 @@
 				20000112 /* EmotionalJournalViewModelTests.swift */,
 				20000113 /* ProfileViewModelTests.swift */,
 				20000114 /* StreakViewModelTests.swift */,
+				2021035A /* TriggerTypesTests.swift */,
 				20000115 /* UrgeLogViewModelTests.swift */,
 			);
 			path = Unit;
@@ -1170,6 +1175,7 @@
 				10000500 /* TimeJournalTypes.swift in Sources */,
 				10000008 /* RRModels.swift in Sources */,
 				10000501 /* RRTimeJournalEntry.swift in Sources */,
+				10D7D990 /* TriggerTypes.swift in Sources */,
 				10000510 /* TimeJournalDailyView.swift in Sources */,
 				10000511 /* TimeJournalHeaderView.swift in Sources */,
 				10000512 /* TimeJournalTimelineView.swift in Sources */,
