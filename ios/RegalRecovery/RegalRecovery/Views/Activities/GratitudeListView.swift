@@ -28,19 +28,14 @@ struct GratitudeListView: View {
                         firstUseCard
                     }
 
-                    // Daily prompt card
-                    if !viewModel.dailyPromptDismissed, let prompt = viewModel.dailyPrompt {
-                        dailyPromptCard(prompt: prompt)
-                    }
+                    // Prompt section
+                    promptSection
 
                     // Entry card
                     entryCard
 
                     // Mood selector
                     moodCard
-
-                    // Prompt link
-                    promptLink
 
                     // Save button
                     saveButton
@@ -58,11 +53,6 @@ struct GratitudeListView: View {
                 .padding(.vertical)
             }
             .background(Color.rrBackground)
-
-            // Prompt overlay
-            if viewModel.showPrompt {
-                promptOverlay
-            }
         }
         .onAppear { viewModel.loadDailyPrompt(userId: userId) }
         .animation(.easeInOut(duration: 0.3), value: viewModel.showSaveAnimation)
@@ -183,13 +173,18 @@ struct GratitudeListView: View {
         VStack(alignment: .leading, spacing: 6) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    ForEach(GratitudeCategory.allCases) { category in
+                    // Built-in categories (excluding .custom — replaced by saved tags + new tag)
+                    ForEach(GratitudeCategory.allCases.filter { $0 != .custom }) { category in
                         let isSelected = viewModel.items[safe: index]?.category == category
+                            && !(viewModel.items[safe: index]?.usingSavedTag ?? false)
                         Button {
                             if isSelected {
                                 viewModel.items[index].category = nil
+                                viewModel.items[index].usingSavedTag = false
                             } else {
                                 viewModel.items[index].category = category
+                                viewModel.items[index].usingSavedTag = false
+                                viewModel.items[index].customTagName = ""
                             }
                         } label: {
                             HStack(spacing: 4) {
@@ -206,10 +201,69 @@ struct GratitudeListView: View {
                         }
                         .buttonStyle(.plain)
                     }
+
+                    // Saved custom tags
+                    ForEach(viewModel.savedCustomTags, id: \.self) { tag in
+                        let isSelected = viewModel.items[safe: index]?.category == .custom
+                            && viewModel.items[safe: index]?.customTagName == tag
+                            && (viewModel.items[safe: index]?.usingSavedTag ?? false)
+                        Button {
+                            if isSelected {
+                                viewModel.items[index].category = nil
+                                viewModel.items[index].customTagName = ""
+                                viewModel.items[index].usingSavedTag = false
+                            } else {
+                                viewModel.items[index].category = .custom
+                                viewModel.items[index].customTagName = tag
+                                viewModel.items[index].usingSavedTag = true
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "tag.fill")
+                                    .font(.caption2)
+                                Text(tag)
+                                    .font(RRFont.caption2)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 5)
+                            .foregroundStyle(isSelected ? .white : Color.rrTextSecondary)
+                            .background(isSelected ? Color.rrTextSecondary : Color.rrTextSecondary.opacity(0.1))
+                            .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    // "+ New Tag" button
+                    let isNewCustom = viewModel.items[safe: index]?.category == .custom
+                        && !(viewModel.items[safe: index]?.usingSavedTag ?? false)
+                    Button {
+                        if isNewCustom {
+                            viewModel.items[index].category = nil
+                            viewModel.items[index].customTagName = ""
+                        } else {
+                            viewModel.items[index].category = .custom
+                            viewModel.items[index].customTagName = ""
+                            viewModel.items[index].usingSavedTag = false
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus")
+                                .font(.caption2)
+                            Text("New Tag")
+                                .font(RRFont.caption2)
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .foregroundStyle(isNewCustom ? .white : Color.rrTextSecondary)
+                        .background(isNewCustom ? Color.rrTextSecondary : Color.rrTextSecondary.opacity(0.1))
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
                 }
             }
 
-            if viewModel.items[safe: index]?.category == .custom {
+            if viewModel.items[safe: index]?.category == .custom
+                && !(viewModel.items[safe: index]?.usingSavedTag ?? false) {
                 TextField("Tag name (e.g., Pets, Music)", text: customTagNameBinding(for: index))
                     .font(RRFont.caption)
                     .textFieldStyle(.roundedBorder)
@@ -262,75 +316,68 @@ struct GratitudeListView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Prompt Link
+    // MARK: - Prompt Section
 
-    private var promptLink: some View {
-        Button {
-            viewModel.requestPrompt(userId: userId)
-        } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "lightbulb.fill")
-                    .font(.caption)
-                Text("Need a prompt?")
-                    .font(RRFont.callout)
-            }
-            .foregroundStyle(Color.rrPrimary)
-        }
-    }
-
-    // MARK: - Prompt Overlay
-
-    private var promptOverlay: some View {
-        ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
-                .onTapGesture {
-                    viewModel.dismissPrompt()
-                }
-
-            if let prompt = viewModel.currentPrompt {
-                RRCard {
-                    VStack(spacing: 16) {
+    private var promptSection: some View {
+        VStack(spacing: 12) {
+            if !viewModel.showPrompt {
+                Button {
+                    viewModel.requestPrompt(userId: userId)
+                } label: {
+                    HStack(spacing: 6) {
                         Image(systemName: "lightbulb.fill")
-                            .font(.title2)
-                            .foregroundStyle(Color.rrPrimary)
+                            .font(.caption)
+                        Text("Need a prompt?")
+                            .font(RRFont.callout)
+                    }
+                    .foregroundStyle(Color.rrPrimary)
+                }
+            }
+
+            if viewModel.showPrompt, let prompt = viewModel.currentPrompt {
+                RRCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Image(systemName: "lightbulb.fill")
+                                .font(.title3)
+                                .foregroundStyle(.yellow)
+                            Text("Prompt")
+                                .font(RRFont.headline)
+                                .foregroundStyle(Color.rrText)
+                            Spacer()
+                            Button {
+                                withAnimation { viewModel.dismissPrompt() }
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.body)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
 
                         Text(prompt.text)
                             .font(RRFont.body)
                             .foregroundStyle(Color.rrText)
-                            .multilineTextAlignment(.center)
                             .fixedSize(horizontal: false, vertical: true)
 
                         RRBadge(text: prompt.category, color: .rrPrimary)
 
-                        VStack(spacing: 10) {
-                            RRButton("Use this", icon: "checkmark") {
-                                viewModel.usePrompt()
-                            }
-
-                            Button {
-                                viewModel.nextPrompt()
-                            } label: {
+                        Button {
+                            viewModel.nextPrompt()
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.caption)
                                 Text("Different prompt")
                                     .font(RRFont.callout)
                                     .fontWeight(.medium)
-                                    .foregroundStyle(Color.rrPrimary)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 10)
                             }
-
-                            Button {
-                                viewModel.dismissPrompt()
-                            } label: {
-                                Text("Dismiss")
-                                    .font(RRFont.caption)
-                                    .foregroundStyle(Color.rrTextSecondary)
-                            }
+                            .foregroundStyle(Color.rrPrimary)
                         }
                     }
                 }
-                .padding(.horizontal, 32)
-                .transition(.scale.combined(with: .opacity))
+                .padding(.horizontal)
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
     }
@@ -421,56 +468,6 @@ struct GratitudeListView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Daily Prompt Card
-
-    private func dailyPromptCard(prompt: GratitudePrompt) -> some View {
-        RRCard {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "lightbulb.fill")
-                        .font(.title3)
-                        .foregroundStyle(.yellow)
-
-                    Text("Today\u{2019}s Prompt")
-                        .font(RRFont.headline)
-                        .foregroundStyle(Color.rrText)
-
-                    Spacer()
-
-                    Button {
-                        withAnimation { viewModel.dismissDailyPrompt() }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.body)
-                            .foregroundStyle(Color.rrTextSecondary)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                Text(prompt.text)
-                    .font(RRFont.body)
-                    .foregroundStyle(Color.rrText)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                RRBadge(text: prompt.category, color: .rrPrimary)
-
-                Button {
-                    withAnimation { viewModel.useDailyPrompt() }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "checkmark")
-                            .font(.caption)
-                        Text("Use this prompt")
-                            .font(RRFont.callout)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(Color.rrPrimary)
-                }
-            }
-        }
-        .padding(.horizontal)
-        .transition(.move(edge: .top).combined(with: .opacity))
-    }
 
     // MARK: - Helpers
 

@@ -9,6 +9,7 @@ struct GratitudeItemDraft: Identifiable {
     var text: String = ""
     var category: GratitudeCategory?
     var customTagName: String = ""
+    var usingSavedTag: Bool = false
 }
 
 // MARK: - Gratitude Entry ViewModel
@@ -42,11 +43,17 @@ class GratitudeEntryViewModel {
     var showSaveAnimation: Bool = false
     var dailyPromptDismissed: Bool = false
     var dailyPrompt: GratitudePrompt?
+    var savedCustomTags: [String] = []
 
     // MARK: - Services
 
     private let promptService = GratitudePromptService()
     private var postSaveIndex: Int = 0
+    private static let customTagsKey = "gratitude.customTags"
+
+    init() {
+        savedCustomTags = UserDefaults.standard.stringArray(forKey: Self.customTagsKey) ?? []
+    }
 
     // MARK: - Computed
 
@@ -77,6 +84,13 @@ class GratitudeEntryViewModel {
         if text.count > Self.maxCharacters {
             text = String(text.prefix(Self.maxCharacters))
         }
+    }
+
+    // MARK: - Custom Tags
+
+    func removeCustomTag(_ tag: String) {
+        savedCustomTags.removeAll { $0 == tag }
+        UserDefaults.standard.set(savedCustomTags, forKey: Self.customTagsKey)
     }
 
     // MARK: - Mood
@@ -150,6 +164,15 @@ class GratitudeEntryViewModel {
         }
 
         guard !gratitudeItems.isEmpty else { return }
+
+        // Persist any new custom tags
+        let newTags = gratitudeItems
+            .compactMap { $0.customTagName }
+            .filter { !$0.isEmpty && !savedCustomTags.contains($0) }
+        if !newTags.isEmpty {
+            savedCustomTags.append(contentsOf: newTags)
+            UserDefaults.standard.set(savedCustomTags, forKey: Self.customTagsKey)
+        }
 
         let promptText: String? = currentPrompt.map { $0.text }
 
