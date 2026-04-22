@@ -92,6 +92,15 @@ struct GratitudeItem: Codable, Hashable, Identifiable {
     var id: UUID = UUID()
     var text: String
     var category: GratitudeCategory?
+    var customTagName: String?
     var isFavorite: Bool = false
     var sortOrder: Int
+
+    var displayCategoryName: String? {
+        guard let category else { return nil }
+        if category == .custom {
+            return customTagName?.isEmpty == false ? customTagName : category.rawValue
+        }
+        return category.rawValue
+    }
 }

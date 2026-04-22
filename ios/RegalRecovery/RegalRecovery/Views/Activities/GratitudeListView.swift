@@ -28,6 +28,11 @@ struct GratitudeListView: View {
                         firstUseCard
                     }
 
+                    // Daily prompt card
+                    if !viewModel.dailyPromptDismissed, let prompt = viewModel.dailyPrompt {
+                        dailyPromptCard(prompt: prompt)
+                    }
+
                     // Entry card
                     entryCard
 
@@ -59,6 +64,7 @@ struct GratitudeListView: View {
                 promptOverlay
             }
         }
+        .onAppear { viewModel.loadDailyPrompt(userId: userId) }
         .animation(.easeInOut(duration: 0.3), value: viewModel.showSaveAnimation)
         .animation(.easeInOut(duration: 0.2), value: viewModel.showPrompt)
     }
@@ -174,31 +180,40 @@ struct GratitudeListView: View {
     // MARK: - Category Pills
 
     private func categoryPills(for index: Int) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                ForEach(GratitudeCategory.allCases) { category in
-                    let isSelected = viewModel.items[safe: index]?.category == category
-                    Button {
-                        if isSelected {
-                            viewModel.items[index].category = nil
-                        } else {
-                            viewModel.items[index].category = category
+        VStack(alignment: .leading, spacing: 6) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(GratitudeCategory.allCases) { category in
+                        let isSelected = viewModel.items[safe: index]?.category == category
+                        Button {
+                            if isSelected {
+                                viewModel.items[index].category = nil
+                            } else {
+                                viewModel.items[index].category = category
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: category.icon)
+                                    .font(.caption2)
+                                Text(category.rawValue)
+                                    .font(RRFont.caption2)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 5)
+                            .foregroundStyle(isSelected ? .white : category.color)
+                            .background(isSelected ? category.color : category.color.opacity(0.1))
+                            .clipShape(Capsule())
                         }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: category.icon)
-                                .font(.caption2)
-                            Text(category.rawValue)
-                                .font(RRFont.caption2)
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 5)
-                        .foregroundStyle(isSelected ? .white : category.color)
-                        .background(isSelected ? category.color : category.color.opacity(0.1))
-                        .clipShape(Capsule())
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
+            }
+
+            if viewModel.items[safe: index]?.category == .custom {
+                TextField("Tag name (e.g., Pets, Music)", text: customTagNameBinding(for: index))
+                    .font(RRFont.caption)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(maxWidth: 200)
             }
         }
         .padding(.leading, 34)
@@ -390,7 +405,7 @@ struct GratitudeListView: View {
                                         HStack(spacing: 4) {
                                             Image(systemName: category.icon)
                                                 .font(.caption2)
-                                            Text(category.rawValue)
+                                            Text(item.displayCategoryName ?? category.rawValue)
                                                 .font(RRFont.caption2)
                                         }
                                         .foregroundStyle(category.color)
@@ -406,7 +421,68 @@ struct GratitudeListView: View {
         .padding(.horizontal)
     }
 
+    // MARK: - Daily Prompt Card
+
+    private func dailyPromptCard(prompt: GratitudePrompt) -> some View {
+        RRCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "lightbulb.fill")
+                        .font(.title3)
+                        .foregroundStyle(.yellow)
+
+                    Text("Today\u{2019}s Prompt")
+                        .font(RRFont.headline)
+                        .foregroundStyle(Color.rrText)
+
+                    Spacer()
+
+                    Button {
+                        withAnimation { viewModel.dismissDailyPrompt() }
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.body)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                Text(prompt.text)
+                    .font(RRFont.body)
+                    .foregroundStyle(Color.rrText)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                RRBadge(text: prompt.category, color: .rrPrimary)
+
+                Button {
+                    withAnimation { viewModel.useDailyPrompt() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark")
+                            .font(.caption)
+                        Text("Use this prompt")
+                            .font(RRFont.callout)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundStyle(Color.rrPrimary)
+                }
+            }
+        }
+        .padding(.horizontal)
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
     // MARK: - Helpers
+
+    private func customTagNameBinding(for index: Int) -> Binding<String> {
+        Binding(
+            get: { viewModel.items[safe: index]?.customTagName ?? "" },
+            set: { newValue in
+                guard viewModel.items.indices.contains(index) else { return }
+                viewModel.items[index].customTagName = newValue
+            }
+        )
+    }
 
     private func binding(for index: Int) -> Binding<String> {
         Binding(

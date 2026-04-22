@@ -8,6 +8,7 @@ struct GratitudeItemDraft: Identifiable {
     let id: UUID = UUID()
     var text: String = ""
     var category: GratitudeCategory?
+    var customTagName: String = ""
 }
 
 // MARK: - Gratitude Entry ViewModel
@@ -39,6 +40,8 @@ class GratitudeEntryViewModel {
     var currentPrompt: GratitudePrompt?
     var savedMessage: String?
     var showSaveAnimation: Bool = false
+    var dailyPromptDismissed: Bool = false
+    var dailyPrompt: GratitudePrompt?
 
     // MARK: - Services
 
@@ -112,6 +115,26 @@ class GratitudeEntryViewModel {
         showPrompt = false
     }
 
+    // MARK: - Daily Prompt (auto-prompt before entry)
+
+    func loadDailyPrompt(userId: UUID) {
+        if dailyPrompt == nil && !dailyPromptDismissed {
+            dailyPrompt = promptService.dailyPrompt(for: userId, on: Date())
+        }
+    }
+
+    func dismissDailyPrompt() {
+        dailyPromptDismissed = true
+    }
+
+    func useDailyPrompt() {
+        guard let prompt = dailyPrompt else { return }
+        var draft = GratitudeItemDraft()
+        draft.text = prompt.text
+        items.append(draft)
+        dailyPromptDismissed = true
+    }
+
     // MARK: - Save
 
     func save(context: ModelContext, userId: UUID) {
@@ -121,6 +144,7 @@ class GratitudeEntryViewModel {
             return GratitudeItem(
                 text: trimmed,
                 category: draft.category,
+                customTagName: draft.category == .custom ? draft.customTagName : nil,
                 sortOrder: index
             )
         }
@@ -149,6 +173,8 @@ class GratitudeEntryViewModel {
         moodScore = nil
         currentPrompt = nil
         showPrompt = false
+        dailyPrompt = nil
+        dailyPromptDismissed = false
 
         // Auto-clear confirmation after delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 4) { [weak self] in
