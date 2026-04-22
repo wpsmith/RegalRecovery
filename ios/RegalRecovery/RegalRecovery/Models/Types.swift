@@ -1155,7 +1155,7 @@ struct DailyEligibleActivity {
         ),
         DailyEligibleActivity(
             activityType: "bookReading",
-            displayNameKey: "Book Reading",
+            displayNameKey: "Recovery Reading",
             icon: "book.fill",
             multiplePerDay: false,
             maxPerDay: 1,

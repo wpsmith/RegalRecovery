@@ -125,7 +125,6 @@ class FeatureFlagViewModel {
         FeatureFlag(key: "activity.time-journal", label: "Time Journal", enabled: true),
         FeatureFlag(key: "activity.fanos", label: "FANOS Check-in", enabled: false),
         FeatureFlag(key: "activity.fitnap", label: "FITNAP Check-in", enabled: false),
-        FeatureFlag(key: "activity.spouse-check-ins", label: "Spouse Check-ins", enabled: false),
         FeatureFlag(key: "activity.meetings", label: "Meetings Attended", enabled: true),
         FeatureFlag(key: "activity.post-mortem", label: "Post-Mortem Analysis", enabled: true),
         FeatureFlag(key: "activity.step-work", label: "12-Step Work", enabled: true),

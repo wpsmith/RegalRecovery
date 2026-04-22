@@ -335,9 +335,11 @@ enum SeedPersonaData {
         let entryCount = rng.nextInt(in: 2...3)
         for _ in 0..<entryCount {
             let ago = rng.nextInt(in: 1...max(1, persona.daysInApp))
+            let moods = ["Okay", "Good", "Struggling", "Grateful", "Anxious"]
             let mood = RRMoodEntry(
                 userId: userId,
                 date: daysAgo(ago, hour: 14),
+                primaryMood: moods[rng.nextInt(in: 0...(moods.count - 1))],
                 score: rng.nextInt(in: 3...7),
                 createdAt: daysAgo(ago, hour: 14)
             )
@@ -385,9 +387,19 @@ enum SeedPersonaData {
             let raw = baseScore + trend + rng.nextInt(in: 0...variance) - (variance / 2)
             let score = max(1, min(10, raw))
 
+            let moods = ["Okay", "Good", "Struggling", "Grateful", "Anxious"]
+            let primaryMood: String
+            switch score {
+            case 1...3: primaryMood = "Struggling"
+            case 4...5: primaryMood = "Okay"
+            case 6...7: primaryMood = "Good"
+            case 8...10: primaryMood = "Grateful"
+            default: primaryMood = moods[rng.nextInt(in: 0...(moods.count - 1))]
+            }
             let mood = RRMoodEntry(
                 userId: userId,
                 date: daysAgo(day, hour: rng.nextInt(in: 7...21)),
+                primaryMood: primaryMood,
                 score: score,
                 createdAt: daysAgo(day, hour: 14)
             )

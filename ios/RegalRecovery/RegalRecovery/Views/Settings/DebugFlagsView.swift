@@ -12,8 +12,8 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.onboarding", label: "Onboarding", enabled: true),
         FeatureFlag(key: "feature.themes", label: "Themes", enabled: true),
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
-        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
-        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
+        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: true),
+        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: true),
     ]
 
     @State private var activities: [FeatureFlag] = [
@@ -27,7 +27,6 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.time-journal", label: "Time Journal", enabled: true),
         FeatureFlag(key: "activity.fanos", label: "FANOS Check-in", enabled: false),
         FeatureFlag(key: "activity.fitnap", label: "FITNAP Check-in", enabled: false),
-        FeatureFlag(key: "activity.spouse-check-ins", label: "Spouse Check-ins", enabled: false),
         FeatureFlag(key: "activity.meetings", label: "Meetings Attended", enabled: true),
         FeatureFlag(key: "activity.post-mortem", label: "Post-Mortem Analysis", enabled: true),
         FeatureFlag(key: "activity.step-work", label: "12-Step Work", enabled: true),
@@ -244,8 +243,8 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.onboarding", label: "Onboarding", enabled: true),
         FeatureFlag(key: "feature.themes", label: "Themes", enabled: true),
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
-        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: false),
-        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: false),
+        FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: true),
+        FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: true),
     ]
 
     private static let defaultActivities: [FeatureFlag] = [
@@ -257,7 +256,6 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.time-journal", label: "Time Journal", enabled: true),
         FeatureFlag(key: "activity.fanos", label: "FANOS Check-in", enabled: false),
         FeatureFlag(key: "activity.fitnap", label: "FITNAP Check-in", enabled: false),
-        FeatureFlag(key: "activity.spouse-check-ins", label: "Spouse Check-ins", enabled: false),
         FeatureFlag(key: "activity.meetings", label: "Meetings Attended", enabled: true),
         FeatureFlag(key: "activity.post-mortem", label: "Post-Mortem Analysis", enabled: true),
         FeatureFlag(key: "activity.step-work", label: "12-Step Work", enabled: true),

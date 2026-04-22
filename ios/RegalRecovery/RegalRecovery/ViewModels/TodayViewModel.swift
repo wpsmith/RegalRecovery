@@ -501,6 +501,9 @@ class TodayViewModel {
         if activityType == ActivityType.fasterScale.rawValue {
             return fetchDates(RRFASTEREntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
+        if activityType == ActivityType.urgeLog.rawValue {
+            return fetchDates(RRUrgeLog.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
+        }
         if activityType == ActivityType.phoneCalls.rawValue {
             return fetchDates(RRPhoneCallLog.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }

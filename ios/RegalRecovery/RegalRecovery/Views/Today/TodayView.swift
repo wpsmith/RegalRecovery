@@ -5,6 +5,7 @@ import SwiftData
 /// that replaces the dashboard HomeView.
 struct TodayView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     @State private var viewModel = TodayViewModel()
     @State private var hideCompleted = false
     @State private var showFASTERMood = false
@@ -58,6 +59,11 @@ struct TodayView: View {
             .onAppear {
                 viewModel.load(context: modelContext)
             }
+            .onChange(of: scenePhase) {
+                if scenePhase == .active {
+                    viewModel.load(context: modelContext)
+                }
+            }
             .fullScreenCover(isPresented: $showFASTERMood) {
                 FASTERCheckInFlowView()
             }
@@ -83,6 +89,9 @@ struct TodayView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+        }
+        .onAppear {
+            viewModel.load(context: modelContext)
         }
     }
 

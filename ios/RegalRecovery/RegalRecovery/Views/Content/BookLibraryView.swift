@@ -251,7 +251,7 @@ struct BookLanguagePickerView: View {
                     Text("Language")
                 }
             }
-            .navigationTitle("Book Language")
+            .navigationTitle("Reading Language")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

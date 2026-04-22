@@ -9,6 +9,7 @@ final class FeatureFlagStore {
     private(set) var version: Int = 0
 
     private init() {
+        runMigrations()
         seedDefaultsIfNeeded()
     }
 
@@ -27,6 +28,22 @@ final class FeatureFlagStore {
     /// Call after bulk flag operations (Enable All, Disable All, Reset)
     func flagsDidChange() {
         version += 1
+    }
+
+    // MARK: - Migrations
+
+    private func runMigrations() {
+        let defaults = UserDefaults.standard
+        let migrationKey = "ff.migration.version"
+        let currentVersion = defaults.integer(forKey: migrationKey)
+
+        if currentVersion < 1 {
+            // Enable 3circles and vision for existing installs
+            defaults.set(true, forKey: "ff.feature.3circles")
+            defaults.set(true, forKey: "ff.feature.vision")
+        }
+
+        defaults.set(1, forKey: migrationKey)
     }
 
     // MARK: - Default Seeding
@@ -89,7 +106,6 @@ final class FeatureFlagStore {
         "activity.time-journal": true,
         "activity.fanos": true,
         "activity.fitnap": false,
-        "activity.spouse-check-ins": false,
         "activity.meetings": true,
         "activity.post-mortem": true,
         "activity.step-work": true,
@@ -103,10 +119,8 @@ final class FeatureFlagStore {
         "activity.integrity-inventory": true,
         "activity.pci": true,
         "activity.memory-verse": false,
-        "activity.nutrition": false,
         "activity.acting-in-behaviors": false,
         "activity.voice-journal": false,
-        "activity.book-reading": false,
 
         // App Architecture
         "feature.today-view": false,
@@ -115,8 +129,8 @@ final class FeatureFlagStore {
         "feature.activities": true,
 
         // Recovery Work & Tools
-        "feature.3circles": false,
-        "feature.vision": false,
+        "feature.3circles": true,
+        "feature.vision": true,
         "feature.partners.redemptiveliving.backbone": false,
         "feature.relapse-prevention-plan": false,
         "feature.post-mortem": false,

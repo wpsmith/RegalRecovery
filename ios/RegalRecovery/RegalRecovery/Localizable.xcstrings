@@ -1393,34 +1393,34 @@
         }
       }
     },
-    "Book Language": {
+    "Reading Language": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Idioma del libro"
+            "value": "Idioma de lectura"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Langue du livre"
+            "value": "Langue de lecture"
           }
         }
       }
     },
-    "Book Reading": {
+    "Recovery Reading": {
       "localizations": {
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lectura de libros"
+            "value": "Lectura de recuperación"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Lecture de livres"
+            "value": "Lecture de rétablissement"
           }
         }
       }

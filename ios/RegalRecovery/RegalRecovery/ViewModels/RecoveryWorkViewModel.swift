@@ -376,18 +376,8 @@ class RecoveryWorkViewModel {
                 activityTypeKey: nil
             ),
             WorkTileItem(
-                id: "activity.voice-journal",
-                title: "Voice Journal",
-                icon: "mic.fill",
-                iconColor: .purple,
-                category: .activities,
-                featureFlagKey: nil,
-                implemented: false,
-                activityTypeKey: nil
-            ),
-            WorkTileItem(
                 id: "activity.book-reading",
-                title: "Book Reading",
+                title: "Recovery Reading",
                 icon: "book.fill",
                 iconColor: .brown,
                 category: .activities,

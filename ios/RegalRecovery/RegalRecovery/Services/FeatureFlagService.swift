@@ -128,8 +128,8 @@ final class FeatureFlagService {
         flags["feature.activities"] = true
 
         // Recovery Work & Tools
-        flags["feature.3circles"] = false
-        flags["feature.vision"] = false
+        flags["feature.3circles"] = true
+        flags["feature.vision"] = true
         flags["feature.partners.redemptiveliving.backbone"] = false
         flags["feature.relapse-prevention-plan"] = false
         flags["feature.post-mortem"] = false
