@@ -16,6 +16,7 @@ struct BowtieSessionView: View {
     @State private var editingMarker: RRBowtieMarker?
     @State private var pendingMarkerSide: BowtieSide = .past
     @State private var showDeleteConfirmation = false
+    @State private var showOnboarding = !BowtieOnboardingViewModel.isOnboardingCompleted
 
     var body: some View {
         NavigationStack {
@@ -94,6 +95,12 @@ struct BowtieSessionView: View {
             .onAppear {
                 viewModel.loadRoles(context: modelContext)
                 viewModel.checkForDraft(context: modelContext)
+            }
+            .fullScreenCover(isPresented: $showOnboarding) {
+                BowtieOnboardingView()
+                    .onDisappear {
+                        viewModel.loadRoles(context: modelContext)
+                    }
             }
         }
     }

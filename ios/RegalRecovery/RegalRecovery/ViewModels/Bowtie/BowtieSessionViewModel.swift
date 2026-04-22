@@ -172,4 +172,44 @@ class BowtieSessionViewModel {
         markers.filter { $0.side == BowtieSide.future.rawValue }
             .sorted { $0.timeIntervalHours < $1.timeIntervalHours }
     }
+
+    // MARK: - Guided Mode
+
+    var guidedCurrentRoleIndex: Int = 0
+    var guidedCurrentSide: BowtieSide = .past
+
+    var guidedCurrentRole: RRUserRole? {
+        let selectedRoles = availableRoles.filter { selectedRoleIds.contains($0.id) }
+        guard guidedCurrentRoleIndex < selectedRoles.count else { return nil }
+        return selectedRoles[guidedCurrentRoleIndex]
+    }
+
+    var guidedPromptText: String {
+        guard let role = guidedCurrentRole else { return "" }
+        switch guidedCurrentSide {
+        case .past:
+            return String(localized: "Over the last 48 hours, as a \(role.label), has anything stirred the Three I's?")
+        case .future:
+            return String(localized: "Looking ahead, as a \(role.label), is anything coming that might stir your emotions?")
+        }
+    }
+
+    var guidedIsComplete: Bool {
+        let selectedRoles = availableRoles.filter { selectedRoleIds.contains($0.id) }
+        return guidedCurrentSide == .future && guidedCurrentRoleIndex >= selectedRoles.count
+    }
+
+    func guidedAdvance() {
+        let selectedRoles = availableRoles.filter { selectedRoleIds.contains($0.id) }
+        if guidedCurrentRoleIndex + 1 < selectedRoles.count {
+            guidedCurrentRoleIndex += 1
+        } else if guidedCurrentSide == .past {
+            guidedCurrentSide = .future
+            guidedCurrentRoleIndex = 0
+        }
+    }
+
+    func guidedSkipRole() {
+        guidedAdvance()
+    }
 }
