@@ -5,8 +5,18 @@ struct RecentActivityRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: activity.icon)
-                .font(.caption)
+            Group {
+                if activity.icon.hasPrefix("asset:") {
+                    Image(String(activity.icon.dropFirst(6)))
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                } else {
+                    Image(systemName: activity.icon)
+                        .font(.caption)
+                }
+            }
                 .foregroundStyle(activity.iconColor)
                 .frame(width: 32, height: 32)
                 .background(activity.iconColor.opacity(0.12))

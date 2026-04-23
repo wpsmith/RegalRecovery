@@ -1259,7 +1259,7 @@ struct DailyEligibleActivity {
             activityType: "bowtie",
             displayNameKey: "Bowtie Diagram",
             shortNameKey: "Bowtie",
-            icon: "suit.diamond.fill",
+            icon: "asset:bowtie.icon",
             multiplePerDay: false,
             maxPerDay: 1,
             defaultEnabled: false,

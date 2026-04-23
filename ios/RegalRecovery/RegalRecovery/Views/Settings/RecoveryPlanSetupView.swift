@@ -232,8 +232,18 @@ private struct ActivityPickerSheet: View {
                                 onSelect(activity)
                             } label: {
                                 HStack(spacing: 10) {
-                                    Image(systemName: activity.icon)
-                                        .font(.caption)
+                                    Group {
+                                        if activity.icon.hasPrefix("asset:") {
+                                            Image(String(activity.icon.dropFirst(6)))
+                                                .renderingMode(.template)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 14, height: 14)
+                                        } else {
+                                            Image(systemName: activity.icon)
+                                                .font(.caption)
+                                        }
+                                    }
                                         .foregroundStyle(iconColor(for: activity))
                                         .frame(width: 22, height: 22)
                                     Text(activity.displayName)

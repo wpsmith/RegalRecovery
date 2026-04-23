@@ -40,8 +40,18 @@ struct PlanActivityRowView: View {
 
             // Row 2: Icon + activity name + rename button
             HStack(spacing: 8) {
-                Image(systemName: item.activity.icon)
-                    .font(.caption)
+                Group {
+                    if item.activity.icon.hasPrefix("asset:") {
+                        Image(String(item.activity.icon.dropFirst(6)))
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 14, height: 14)
+                    } else {
+                        Image(systemName: item.activity.icon)
+                            .font(.caption)
+                    }
+                }
                     .foregroundStyle(iconColor)
                     .frame(width: 22, height: 22)
 
