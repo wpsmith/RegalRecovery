@@ -281,18 +281,19 @@ private struct ActingOutStepView: View {
 
                         ForEach(addictions, id: \.id) { addiction in
                             Button {
-                                viewModel.addictionId = addiction.id
+                                viewModel.addictionId = addiction.id.uuidString
                             } label: {
                                 HStack {
-                                    Image(systemName: viewModel.addictionId == addiction.id ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(viewModel.addictionId == addiction.id ? Color.rrPrimary : Color.rrTextSecondary)
+                                    let isSelected = viewModel.addictionId == addiction.id.uuidString
+                                    Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(isSelected ? Color.rrPrimary : Color.rrTextSecondary)
                                     Text(addiction.name)
                                         .font(RRFont.body)
                                         .foregroundStyle(Color.rrText)
                                     Spacer()
                                 }
                                 .padding(12)
-                                .background(viewModel.addictionId == addiction.id ? Color.rrPrimary.opacity(0.1) : Color.rrSurface)
+                                .background(viewModel.addictionId == addiction.id.uuidString ? Color.rrPrimary.opacity(0.1) : Color.rrSurface)
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             }
                         }
@@ -403,9 +404,9 @@ private struct ThroughoutTheDayStepView: View {
             // Timeline view showing time journal and activities
             if !viewModel.timeBlocksForDay.isEmpty || !viewModel.activitiesForDay.isEmpty {
                 VStack(spacing: 12) {
-                    ForEach(viewModel.timeBlocksForDay.sorted { $0.timestamp > $1.timestamp }, id: \.id) { block in
+                    ForEach(viewModel.timeBlocksForDay.sorted(by: { $0.date > $1.date }), id: \.id) { block in
                         TimelineEntryCard(
-                            time: block.timestamp,
+                            time: block.date,
                             title: block.activity,
                             detail: block.need,
                             icon: "clock.fill",
@@ -414,13 +415,14 @@ private struct ThroughoutTheDayStepView: View {
                         .padding(.horizontal)
                     }
 
-                    ForEach(viewModel.activitiesForDay.sorted { $0.date > $1.date }, id: \.id) { activity in
+                    ForEach(viewModel.activitiesForDay.sorted(by: { $0.date > $1.date }), id: \.id) { activity in
+                        let eligibleActivity = DailyEligibleActivity.all.first(where: { $0.activityType == activity.activityType })
                         TimelineEntryCard(
                             time: activity.date,
-                            title: activity.activityType,
-                            detail: activity.summary ?? "",
-                            icon: activity.icon ?? "circle.fill",
-                            color: activity.iconColor ?? .rrPrimary
+                            title: eligibleActivity?.displayName ?? activity.activityType,
+                            detail: "",
+                            icon: eligibleActivity?.icon ?? "circle.fill",
+                            color: eligibleActivity?.section.iconColor ?? .rrPrimary
                         )
                         .padding(.horizontal)
                     }
@@ -1214,7 +1216,7 @@ private struct ImmediatelyAfterStepView: View {
                     }
                     .tint(Color.rrPrimary)
 
-                    if viewModel.afterReachedOut {
+                    if viewModel.reachedOut {
                         TextField("Who did you reach out to?", text: Binding(
                             get: { viewModel.reachedOutTo ?? "" },
                             set: { viewModel.reachedOutTo = $0.isEmpty ? nil : $0 }
@@ -1395,7 +1397,7 @@ private struct FASTERHistoryChart: View {
     }
 
     private func yPositionFor(stage: Int, in height: CGFloat, stageCount: CGFloat) -> CGFloat {
-        let stages = FASTERStage.allCases.reversed()
+        let stages = Array(FASTERStage.allCases.reversed())
         guard let fasterStage = FASTERStage(rawValue: stage),
               let index = stages.firstIndex(of: fasterStage) else { return 0 }
 

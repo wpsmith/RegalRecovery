@@ -715,6 +715,7 @@ class PostMortemViewModel {
         logger.info("Saved post-mortem draft: \(postMortem.id)")
     }
 
+    @MainActor
     func complete(context: ModelContext) throws {
         guard canComplete else {
             throw PostMortemError.incompleteData(errors: validateForCompletion())
