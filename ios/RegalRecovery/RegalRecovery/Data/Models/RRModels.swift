@@ -1488,6 +1488,213 @@ final class RRQuickActionItem {
     }
 }
 
+// MARK: - Post-Mortem
+
+@Model
+final class RRPostMortem {
+
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var analysisId: String       // Server-assigned "pm_xxxxx" ID
+    var timestamp: Date          // Event timestamp (immutable)
+    var status: String           // "draft" or "complete"
+    var eventType: String        // "relapse", "near-miss", "combined"
+    var relapseId: String?       // Link to relapse record
+    var addictionId: String?     // Associated addiction
+
+    // Sections stored as JSON strings (complex nested data)
+    var sectionsJSON: String?           // JSON-encoded PostMortemSectionsPayload
+    var sectionsCompleted: [String]     // e.g. ["dayBefore", "morning"]
+    var sectionsRemaining: [String]     // e.g. ["throughoutTheDay", "buildUp", ...]
+
+    // Trigger data
+    var triggerSummary: [String]        // ["emotional", "digital", ...]
+    var triggerDetailsJSON: String?     // JSON-encoded [TriggerDetailPayload]
+
+    // FASTER mapping
+    var fasterMappingJSON: String?      // JSON-encoded [FasterMappingEntryPayload]
+
+    // Action plan
+    var actionPlanJSON: String?         // JSON-encoded [ActionPlanItemPayload]
+    var actionItemCount: Int
+
+    // Sharing
+    var sharingJSON: String?            // JSON-encoded SharingStatusPayload
+
+    // Linked entities
+    var linkedEntitiesJSON: String?     // JSON-encoded LinkedEntitiesPayload
+
+    // Timestamps
+    var completedAt: Date?
+    var message: String?                // Compassionate message from server
+    var synced: Bool
+    var createdAt: Date
+    var modifiedAt: Date
+
+    init(
+        id: UUID = UUID(),
+        userId: UUID,
+        analysisId: String = "",
+        timestamp: Date,
+        status: String = "draft",
+        eventType: String,
+        relapseId: String? = nil,
+        addictionId: String? = nil,
+        sectionsJSON: String? = nil,
+        sectionsCompleted: [String] = [],
+        sectionsRemaining: [String] = ["dayBefore", "morning", "throughoutTheDay", "buildUp", "actingOut", "immediatelyAfter"],
+        triggerSummary: [String] = [],
+        triggerDetailsJSON: String? = nil,
+        fasterMappingJSON: String? = nil,
+        actionPlanJSON: String? = nil,
+        actionItemCount: Int = 0,
+        sharingJSON: String? = nil,
+        linkedEntitiesJSON: String? = nil,
+        completedAt: Date? = nil,
+        message: String? = nil,
+        synced: Bool = false,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.userId = userId
+        self.analysisId = analysisId
+        self.timestamp = timestamp
+        self.status = status
+        self.eventType = eventType
+        self.relapseId = relapseId
+        self.addictionId = addictionId
+        self.sectionsJSON = sectionsJSON
+        self.sectionsCompleted = sectionsCompleted
+        self.sectionsRemaining = sectionsRemaining
+        self.triggerSummary = triggerSummary
+        self.triggerDetailsJSON = triggerDetailsJSON
+        self.fasterMappingJSON = fasterMappingJSON
+        self.actionPlanJSON = actionPlanJSON
+        self.actionItemCount = actionItemCount
+        self.sharingJSON = sharingJSON
+        self.linkedEntitiesJSON = linkedEntitiesJSON
+        self.completedAt = completedAt
+        self.message = message
+        self.synced = synced
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+extension RRPostMortem {
+    var sections: PostMortemSectionsPayload? {
+        get {
+            guard let json = sectionsJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode(PostMortemSectionsPayload.self, from: data) else {
+                return nil
+            }
+            return decoded
+        }
+        set {
+            if let encoded = newValue,
+               let data = try? JSONEncoder().encode(encoded),
+               let json = String(data: data, encoding: .utf8) {
+                sectionsJSON = json
+            } else {
+                sectionsJSON = nil
+            }
+        }
+    }
+
+    var triggerDetails: [TriggerDetailPayload] {
+        get {
+            guard let json = triggerDetailsJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([TriggerDetailPayload].self, from: data) else {
+                return []
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                triggerDetailsJSON = json
+            }
+        }
+    }
+
+    var fasterMapping: [FasterMappingEntryPayload] {
+        get {
+            guard let json = fasterMappingJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([FasterMappingEntryPayload].self, from: data) else {
+                return []
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                fasterMappingJSON = json
+            }
+        }
+    }
+
+    var actionPlan: [ActionPlanItemPayload] {
+        get {
+            guard let json = actionPlanJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([ActionPlanItemPayload].self, from: data) else {
+                return []
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                actionPlanJSON = json
+            }
+        }
+    }
+
+    var sharing: SharingStatusPayload? {
+        get {
+            guard let json = sharingJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode(SharingStatusPayload.self, from: data) else {
+                return nil
+            }
+            return decoded
+        }
+        set {
+            if let encoded = newValue,
+               let data = try? JSONEncoder().encode(encoded),
+               let json = String(data: data, encoding: .utf8) {
+                sharingJSON = json
+            } else {
+                sharingJSON = nil
+            }
+        }
+    }
+
+    var linkedEntities: LinkedEntitiesPayload? {
+        get {
+            guard let json = linkedEntitiesJSON,
+                  let data = json.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode(LinkedEntitiesPayload.self, from: data) else {
+                return nil
+            }
+            return decoded
+        }
+        set {
+            if let encoded = newValue,
+               let data = try? JSONEncoder().encode(encoded),
+               let json = String(data: data, encoding: .utf8) {
+                linkedEntitiesJSON = json
+            } else {
+                linkedEntitiesJSON = nil
+            }
+        }
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1525,6 +1732,7 @@ enum RRModelConfiguration {
         RRDailyScore.self,
         RRVisionStatement.self,
         RRQuickActionItem.self,
+        RRPostMortem.self,
     ]
 
     static var schema: Schema {

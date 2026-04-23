@@ -72,6 +72,7 @@
 		10000040 /* MoodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000040 /* MoodViewModel.swift */; };
 		10000041 /* NotificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000041 /* NotificationViewModel.swift */; };
 		10000042 /* PhoneCallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000042 /* PhoneCallViewModel.swift */; };
+		10000054 /* PostMortemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000054 /* PostMortemViewModel.swift */; };
 		10000043 /* PrayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000043 /* PrayerViewModel.swift */; };
 		10000044 /* PrivacyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000044 /* PrivacyViewModel.swift */; };
 		10000045 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000045 /* ProfileViewModel.swift */; };
@@ -389,6 +390,7 @@
 		20000040 /* MoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodViewModel.swift; sourceTree = "<group>"; };
 		20000041 /* NotificationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewModel.swift; sourceTree = "<group>"; };
 		20000042 /* PhoneCallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCallViewModel.swift; sourceTree = "<group>"; };
+		20000054 /* PostMortemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemViewModel.swift; sourceTree = "<group>"; };
 		20000043 /* PrayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerViewModel.swift; sourceTree = "<group>"; };
 		20000044 /* PrivacyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyViewModel.swift; sourceTree = "<group>"; };
 		20000045 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
@@ -469,6 +471,7 @@
 		20000113 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
 		20000114 /* StreakViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModelTests.swift; sourceTree = "<group>"; };
 		20000115 /* UrgeLogViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModelTests.swift; sourceTree = "<group>"; };
+		20000116 /* PostMortemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemTests.swift; sourceTree = "<group>"; };
 		20000200 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000201 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		20000208 /* RecoveryWorkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryWorkView.swift; sourceTree = "<group>"; };
@@ -704,6 +707,7 @@
 				20000040 /* MoodViewModel.swift */,
 				20000041 /* NotificationViewModel.swift */,
 				20000042 /* PhoneCallViewModel.swift */,
+				20000054 /* PostMortemViewModel.swift */,
 				20000043 /* PrayerViewModel.swift */,
 				20000044 /* PrivacyViewModel.swift */,
 				20000045 /* ProfileViewModel.swift */,
@@ -1039,6 +1043,7 @@
 			children = (
 				20000110 /* AffirmationsViewModelTests.swift */,
 				20000112 /* EmotionalJournalViewModelTests.swift */,
+				20000116 /* PostMortemTests.swift */,
 				20000113 /* ProfileViewModelTests.swift */,
 				20000114 /* StreakViewModelTests.swift */,
 				20000115 /* UrgeLogViewModelTests.swift */,
@@ -1234,6 +1239,7 @@
 				10000040 /* MoodViewModel.swift in Sources */,
 				10000041 /* NotificationViewModel.swift in Sources */,
 				10000042 /* PhoneCallViewModel.swift in Sources */,
+				10000054 /* PostMortemViewModel.swift in Sources */,
 				10000043 /* PrayerViewModel.swift in Sources */,
 				10000044 /* PrivacyViewModel.swift in Sources */,
 				10000045 /* ProfileViewModel.swift in Sources */,

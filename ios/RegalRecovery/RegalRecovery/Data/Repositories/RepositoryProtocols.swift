@@ -221,3 +221,27 @@ protocol SyncQueueRepository: Sendable {
     func incrementRetry(id: String) async throws
     func pendingCount() async throws -> Int
 }
+
+// MARK: - Post-Mortem Repository
+
+protocol PostMortemRepository: Sendable {
+    @MainActor func save(_ postMortem: RRPostMortem) throws
+    @MainActor func getById(_ id: UUID) throws -> RRPostMortem?
+    @MainActor func getByAnalysisId(_ analysisId: String, userId: UUID) throws -> RRPostMortem?
+    @MainActor func getByRelapseId(_ relapseId: String, userId: UUID) throws -> RRPostMortem?
+    @MainActor func list(
+        userId: UUID,
+        startDate: Date?,
+        endDate: Date?,
+        addictionId: String?,
+        status: String?,
+        eventType: String?,
+        limit: Int,
+        cursor: Date?
+    ) throws -> [RRPostMortem]
+    @MainActor func findDrafts(userId: UUID) throws -> [RRPostMortem]
+    @MainActor func update(_ postMortem: RRPostMortem) throws
+    @MainActor func delete(_ postMortem: RRPostMortem) throws
+    @MainActor func getCompletedForInsights(userId: UUID, addictionId: String?) throws -> [RRPostMortem]
+    @MainActor func countByStatus(userId: UUID) throws -> (drafts: Int, complete: Int)
+}

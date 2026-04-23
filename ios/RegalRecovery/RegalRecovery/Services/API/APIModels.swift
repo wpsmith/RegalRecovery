@@ -654,3 +654,265 @@ struct AnyCodable: Codable, Sendable {
         }
     }
 }
+
+// MARK: - Post-Mortem Models
+
+// MARK: Request Types
+
+/// Request to create a new post-mortem analysis.
+struct CreatePostMortemRequest: Codable, Sendable {
+    let timestamp: String
+    let eventType: String
+    let relapseId: String?
+    let addictionId: String?
+    let sections: PostMortemSectionsPayload?
+}
+
+/// Request to update an existing post-mortem analysis.
+struct UpdatePostMortemRequest: Codable, Sendable {
+    let sections: PostMortemSectionsPayload?
+    let triggerSummary: [String]?
+    let triggerDetails: [TriggerDetailPayload]?
+    let fasterMapping: [FasterMappingEntryPayload]?
+    let actionPlan: [ActionPlanItemPayload]?
+}
+
+/// Request to share a post-mortem with support contacts.
+struct SharePostMortemRequest: Codable, Sendable {
+    let shares: [ShareEntry]
+
+    struct ShareEntry: Codable, Sendable {
+        let contactId: String
+        let shareType: String
+    }
+}
+
+/// Request to convert an action item to a commitment or goal.
+struct ConvertActionItemRequest: Codable, Sendable {
+    let targetType: String
+    let title: String
+    let frequency: String?
+    let targetDate: String?
+}
+
+// MARK: Response/Domain Types
+
+/// Summary view of a post-mortem (used in list responses).
+struct PostMortemSummaryData: Codable, Sendable {
+    let analysisId: String
+    let timestamp: String
+    let status: String
+    let eventType: String
+    let relapseId: String?
+    let addictionId: String?
+    let sectionsCompleted: [String]?
+    let sectionsRemaining: [String]?
+    let triggerSummary: [String]?
+    let actionItemCount: Int?
+    let completedAt: String?
+}
+
+/// Full post-mortem analysis with all details.
+struct PostMortemAnalysisData: Codable, Sendable {
+    let analysisId: String
+    let timestamp: String
+    let status: String
+    let eventType: String
+    let relapseId: String?
+    let addictionId: String?
+    let sections: PostMortemSectionsPayload?
+    let triggerSummary: [String]?
+    let triggerDetails: [TriggerDetailPayload]?
+    let fasterMapping: [FasterMappingEntryPayload]?
+    let actionPlan: [ActionPlanItemPayload]?
+    let sharing: SharingStatusPayload?
+    let linkedEntities: LinkedEntitiesPayload?
+    let completedAt: String?
+    let message: String?
+}
+
+/// Cross-analysis pattern insights.
+struct PostMortemInsightsData: Codable, Sendable {
+    let totalAnalyses: Int
+    let commonTriggers: [TriggerFrequency]?
+    let commonFasterStageAtBreak: StageFrequency?
+    let commonTimeOfDay: TimeOfDayFrequency?
+    let recurringDecisionPoints: [DecisionPointTheme]?
+    let deepTriggerPatterns: [TriggerDetailPayload]?
+}
+
+// MARK: Nested/Shared Types
+
+/// The six guided walkthrough sections.
+struct PostMortemSectionsPayload: Codable, Sendable {
+    let dayBefore: DayBeforeSectionPayload?
+    let morning: MorningSectionPayload?
+    let throughoutTheDay: ThroughoutTheDaySectionPayload?
+    let buildUp: BuildUpSectionPayload?
+    let actingOut: ActingOutSectionPayload?
+    let immediatelyAfter: ImmediatelyAfterSectionPayload?
+}
+
+/// Day Before section: emotional/spiritual state the day before the event.
+struct DayBeforeSectionPayload: Codable, Sendable {
+    let text: String?
+    let moodRating: Int?
+    let recoveryPracticesKept: Bool?
+    let unresolvedConflicts: String?
+}
+
+/// Morning section: how the day started, with auto-populated data.
+struct MorningSectionPayload: Codable, Sendable {
+    let text: String?
+    let moodRating: Int?
+    let morningCommitmentCompleted: Bool?
+    let affirmationViewed: Bool?
+    let autoPopulated: MorningAutoPopulated?
+}
+
+/// Auto-populated data from recovery records for the Morning section.
+struct MorningAutoPopulated: Codable, Sendable {
+    let morningCommitmentCompleted: Bool?
+    let moodRating: Int?
+    let affirmationViewed: Bool?
+}
+
+/// Throughout The Day section: time-block entries and free-form entries.
+struct ThroughoutTheDaySectionPayload: Codable, Sendable {
+    let timeBlocks: [TimeBlockPayload]?
+    let freeFormEntries: [FreeFormEntryPayload]?
+}
+
+/// Time block entry for Throughout The Day section.
+struct TimeBlockPayload: Codable, Sendable {
+    let period: String?
+    let startTime: String?
+    let endTime: String?
+    let activity: String?
+    let location: String?
+    let company: String?
+    let thoughts: String?
+    let feelings: String?
+    let warningSigns: [String]?
+}
+
+/// Free-form entry for Throughout The Day section.
+struct FreeFormEntryPayload: Codable, Sendable {
+    let time: String?
+    let text: String?
+}
+
+/// Build-Up section: triggers, decision points, and missed help opportunities.
+struct BuildUpSectionPayload: Codable, Sendable {
+    let firstNoticed: String?
+    let triggers: [TriggerDetailPayload]?
+    let responseToWarnings: String?
+    let missedHelpOpportunities: [MissedHelpOpportunityPayload]?
+    let decisionPoints: [DecisionPointPayload]?
+}
+
+/// Missed help opportunity in Build-Up section.
+struct MissedHelpOpportunityPayload: Codable, Sendable {
+    let description: String?
+    let reason: String?
+}
+
+/// Decision point in Build-Up section.
+struct DecisionPointPayload: Codable, Sendable {
+    let timeOfDay: String?
+    let description: String?
+    let couldHaveDone: String?
+    let insteadDid: String?
+}
+
+/// Acting Out section: description of the episode.
+struct ActingOutSectionPayload: Codable, Sendable {
+    let description: String?
+    let addictionId: String?
+    let durationMinutes: Int?
+    let linkedRelapseId: String?
+}
+
+/// Immediately After section: feelings and actions after the event.
+struct ImmediatelyAfterSectionPayload: Codable, Sendable {
+    let feelings: [String]?
+    let feelingsWheelSelections: [String]?
+    let whatDidNext: String?
+    let reachedOut: Bool?
+    let reachedOutTo: String?
+    let wishDoneDifferently: String?
+}
+
+/// Trigger detail with optional deep exploration (surface, underlying, core wound).
+struct TriggerDetailPayload: Codable, Sendable {
+    let category: String?
+    let surface: String?
+    let underlying: String?
+    let coreWound: String?
+}
+
+/// FASTER Scale mapping entry for a specific time of day.
+struct FasterMappingEntryPayload: Codable, Sendable {
+    let timeOfDay: String?
+    let stage: String?
+}
+
+/// Action plan item with optional conversion to commitment or goal.
+struct ActionPlanItemPayload: Codable, Sendable {
+    let actionId: String?
+    let timelinePoint: String?
+    let action: String?
+    let category: String?
+    let convertedToCommitmentId: String?
+    let convertedToGoalId: String?
+}
+
+/// Sharing status for a post-mortem.
+struct SharingStatusPayload: Codable, Sendable {
+    let isShared: Bool?
+    let sharedWith: [SharedWithEntry]?
+}
+
+/// Shared-with entry in sharing status.
+struct SharedWithEntry: Codable, Sendable {
+    let contactId: String?
+    let shareType: String?
+    let sharedAt: String?
+}
+
+/// Linked entities: references to related recovery data.
+struct LinkedEntitiesPayload: Codable, Sendable {
+    let relapseId: String?
+    let urgeLogIds: [String]?
+    let fasterEntryIds: [String]?
+    let checkInIds: [String]?
+}
+
+// MARK: Insight Helper Types
+
+/// Trigger frequency in cross-analysis insights.
+struct TriggerFrequency: Codable, Sendable {
+    let category: String
+    let frequency: Int
+    let percentage: Double?
+}
+
+/// FASTER stage frequency in cross-analysis insights.
+struct StageFrequency: Codable, Sendable {
+    let stage: String
+    let frequency: Int
+    let percentage: Double?
+}
+
+/// Time of day frequency in cross-analysis insights.
+struct TimeOfDayFrequency: Codable, Sendable {
+    let period: String
+    let frequency: Int
+    let percentage: Double?
+}
+
+/// Decision point theme in cross-analysis insights.
+struct DecisionPointTheme: Codable, Sendable {
+    let theme: String
+    let frequency: Int
+}
