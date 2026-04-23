@@ -431,7 +431,7 @@ struct ActivitiesListView: View {
 
                     if isFlagEnabled("activity.bowtie") {
                         NavigationLink {
-                            Text("Bowtie Diagram")
+                            BowtieSessionView()
                         } label: {
                             HStack {
                                 RRActivityRow(
