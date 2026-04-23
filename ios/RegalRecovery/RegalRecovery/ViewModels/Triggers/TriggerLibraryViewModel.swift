@@ -22,26 +22,55 @@ final class TriggerLibraryViewModel {
     // MARK: - State Properties
 
     var allTriggers: [LibraryItem] = []
+    var myTriggerIds: Set<UUID> = []
     var searchQuery: String = ""
     var selectedCategory: TriggerCategory?
+    var collapsedCategories: Set<TriggerCategory> = []
     var isLoading = false
     var error: String?
 
-    // Custom trigger creation
     var newTriggerLabel: String = ""
     var newTriggerCategory: TriggerCategory = .emotional
 
-    // MARK: - Computed Properties
+    // MARK: - My Triggers
+
+    var myTriggers: [LibraryItem] {
+        let items = allTriggers.filter { myTriggerIds.contains($0.id) }
+        if !searchQuery.isEmpty {
+            let query = searchQuery.lowercased()
+            return items.filter { $0.label.lowercased().contains(query) }
+        }
+        return items.sorted { $0.useCount > $1.useCount }
+    }
+
+    var myTriggersGroupedByCategory: [(category: TriggerCategory, items: [LibraryItem])] {
+        TriggerCategory.allCases.compactMap { category in
+            let items = myTriggers.filter { $0.category == category }
+            return items.isEmpty ? nil : (category: category, items: items)
+        }
+    }
+
+    func isInMyTriggers(_ id: UUID) -> Bool {
+        myTriggerIds.contains(id)
+    }
+
+    func addToMyTriggers(_ id: UUID) {
+        myTriggerIds.insert(id)
+    }
+
+    func removeFromMyTriggers(_ id: UUID) {
+        myTriggerIds.remove(id)
+    }
+
+    // MARK: - All Triggers (full library)
 
     var filteredTriggers: [LibraryItem] {
         var results = allTriggers
 
-        // Filter by category if selected
         if let category = selectedCategory {
             results = results.filter { $0.category == category }
         }
 
-        // Filter by search query if non-empty
         if !searchQuery.isEmpty {
             let query = searchQuery.lowercased()
             results = results.filter { $0.label.lowercased().contains(query) }
@@ -51,43 +80,49 @@ final class TriggerLibraryViewModel {
     }
 
     var groupedByCategory: [(category: TriggerCategory, items: [LibraryItem])] {
-        var grouped: [(category: TriggerCategory, items: [LibraryItem])] = []
-
-        for category in TriggerCategory.allCases {
+        TriggerCategory.allCases.compactMap { category in
             let items = filteredTriggers.filter { $0.category == category }
-            if !items.isEmpty {
-                grouped.append((category: category, items: items))
-            }
+            return items.isEmpty ? nil : (category: category, items: items)
         }
-
-        return grouped
     }
+
+    // MARK: - Custom Triggers
 
     var customTriggers: [LibraryItem] {
         allTriggers.filter { $0.isCustom }
     }
 
-    // MARK: - Methods
+    // MARK: - Collapsible Sections
+
+    func isCategoryCollapsed(_ category: TriggerCategory) -> Bool {
+        collapsedCategories.contains(category)
+    }
+
+    func toggleCategoryCollapsed(_ category: TriggerCategory) {
+        if collapsedCategories.contains(category) {
+            collapsedCategories.remove(category)
+        } else {
+            collapsedCategories.insert(category)
+        }
+    }
+
+    // MARK: - Validation
 
     func validateCustomTrigger(label: String, category: TriggerCategory) -> ValidationResult {
-        // Empty/whitespace-only label
         let trimmedLabel = label.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmedLabel.isEmpty {
             return ValidationResult(isValid: false, message: "Please enter a trigger name.")
         }
 
-        // Label > 100 characters
         if trimmedLabel.count > 100 {
             return ValidationResult(isValid: false, message: "Trigger name must be 100 characters or less.")
         }
 
-        // Duplicate label (case-insensitive match)
         let existingLabels = allTriggers.map { $0.label.lowercased() }
         if existingLabels.contains(trimmedLabel.lowercased()) {
             return ValidationResult(isValid: false, message: "A trigger with this name already exists.")
         }
 
-        // Valid
         return ValidationResult(isValid: true, message: nil)
     }
 }

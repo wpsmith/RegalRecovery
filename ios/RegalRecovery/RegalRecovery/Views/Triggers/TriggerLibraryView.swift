@@ -22,17 +22,22 @@ struct TriggerLibraryView: View {
 
             searchBar
 
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    if selectedTab == 0 {
-                        myTriggersTab
-                    } else if selectedTab == 1 {
-                        allTriggersTab
-                    } else {
+            if selectedTab == 2 {
+                ScrollView {
+                    LazyVStack(spacing: 12) {
                         customTriggersTab
                     }
+                    .padding(16)
                 }
-                .padding(16)
+            } else {
+                List {
+                    if selectedTab == 0 {
+                        myTriggersTab
+                    } else {
+                        allTriggersTab
+                    }
+                }
+                .listStyle(.plain)
             }
         }
         .navigationTitle("Trigger Library")
@@ -94,18 +99,36 @@ struct TriggerLibraryView: View {
 
     // MARK: - My Triggers Tab
 
+    @ViewBuilder
     private var myTriggersTab: some View {
-        Group {
-            if viewModel.filteredTriggers.isEmpty {
+        if viewModel.myTriggers.isEmpty && viewModel.searchQuery.isEmpty {
+            Section {
                 ContentUnavailableView(
-                    "No triggers found",
+                    "No triggers added yet",
                     systemImage: "bolt.trianglebadge.exclamationmark",
-                    description: Text("Try adjusting your search or browse all triggers.")
+                    description: Text("Browse All Triggers and swipe to add triggers here.")
                 )
                 .frame(maxWidth: .infinity, minHeight: 300)
-            } else {
-                ForEach(viewModel.filteredTriggers.sorted(by: { $0.useCount > $1.useCount })) { trigger in
-                    triggerRow(trigger)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+        } else {
+            ForEach(viewModel.myTriggersGroupedByCategory, id: \.category) { group in
+                Section {
+                    if !viewModel.isCategoryCollapsed(group.category) {
+                        ForEach(group.items) { trigger in
+                            triggerRow(trigger)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button(role: .destructive) {
+                                        viewModel.removeFromMyTriggers(trigger.id)
+                                    } label: {
+                                        Label("Remove", systemImage: "minus.circle")
+                                    }
+                                }
+                        }
+                    }
+                } header: {
+                    categoryHeader(group.category, count: group.items.count)
                 }
             }
         }
@@ -113,50 +136,56 @@ struct TriggerLibraryView: View {
 
     // MARK: - All Triggers Tab
 
+    @ViewBuilder
     private var allTriggersTab: some View {
-        Group {
-            if viewModel.filteredTriggers.isEmpty {
+        if viewModel.filteredTriggers.isEmpty {
+            Section {
                 ContentUnavailableView(
                     "No triggers found",
                     systemImage: "bolt.trianglebadge.exclamationmark",
                     description: Text("Try adjusting your search.")
                 )
                 .frame(maxWidth: .infinity, minHeight: 300)
-            } else {
-                ForEach(viewModel.groupedByCategory, id: \.category) { group in
-                    VStack(alignment: .leading, spacing: 12) {
-                        // Section header
-                        HStack(spacing: 8) {
-                            Image(systemName: group.category.icon)
-                                .font(.subheadline)
-                                .foregroundStyle(group.category.color)
-
-                            Text(group.category.displayName)
-                                .font(.headline)
-                                .foregroundStyle(.rrText)
-
-                            Text("\(group.items.count)")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(group.category.color)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(
-                                    Capsule()
-                                        .fill(group.category.color.opacity(0.15))
-                                )
-
-                            Spacer()
-                        }
-                        .padding(.top, 8)
-
-                        // Items in this category
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+            }
+        } else {
+            ForEach(viewModel.groupedByCategory, id: \.category) { group in
+                Section {
+                    if !viewModel.isCategoryCollapsed(group.category) {
                         ForEach(group.items) { trigger in
-                            triggerRow(trigger)
+                            allTriggersRow(trigger)
+                                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                    swipeAction(for: trigger)
+                                }
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    swipeAction(for: trigger)
+                                }
                         }
                     }
+                } header: {
+                    categoryHeader(group.category, count: group.items.count)
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func swipeAction(for trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
+        if viewModel.isInMyTriggers(trigger.id) {
+            Button {
+                viewModel.removeFromMyTriggers(trigger.id)
+            } label: {
+                Label("Remove", systemImage: "minus.circle")
+            }
+            .tint(.rrDestructive)
+        } else {
+            Button {
+                viewModel.addToMyTriggers(trigger.id)
+            } label: {
+                Label("Add to Mine", systemImage: "plus.circle")
+            }
+            .tint(.rrSuccess)
         }
     }
 
@@ -179,24 +208,60 @@ struct TriggerLibraryView: View {
         }
     }
 
+    // MARK: - Category Header
+
+    private func categoryHeader(_ category: TriggerCategory, count: Int) -> some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.25)) {
+                viewModel.toggleCategoryCollapsed(category)
+            }
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: viewModel.isCategoryCollapsed(category) ? "chevron.right" : "chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(.rrTextSecondary)
+                    .frame(width: 12)
+
+                Image(systemName: category.icon)
+                    .font(.subheadline)
+                    .foregroundStyle(category.color)
+
+                Text(category.displayName)
+                    .font(.headline)
+                    .foregroundStyle(.rrText)
+
+                Text("\(count)")
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(category.color)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(category.color.opacity(0.15))
+                    )
+
+                Spacer()
+            }
+            .contentShape(Rectangle())
+        }
+    }
+
     // MARK: - Trigger Row
 
     private func triggerRow(_ trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
         HStack(spacing: 12) {
-            // Category icon
             Image(systemName: trigger.category.icon)
                 .font(.subheadline)
                 .foregroundStyle(trigger.category.color)
                 .frame(width: 24)
 
-            // Label
             Text(trigger.label)
                 .font(.body)
                 .foregroundStyle(.rrText)
 
             Spacer()
 
-            // Use count badge (if > 0)
             if trigger.useCount > 0 {
                 Text("\(trigger.useCount)")
                     .font(.caption2)
@@ -210,11 +275,36 @@ struct TriggerLibraryView: View {
                     )
             }
 
-            // Edit icon (if custom)
             if trigger.isCustom {
                 Image(systemName: "pencil.circle")
                     .font(.title3)
                     .foregroundStyle(.rrPrimary)
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color(.secondarySystemBackground))
+        )
+    }
+
+    private func allTriggersRow(_ trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: trigger.category.icon)
+                .font(.subheadline)
+                .foregroundStyle(trigger.category.color)
+                .frame(width: 24)
+
+            Text(trigger.label)
+                .font(.body)
+                .foregroundStyle(.rrText)
+
+            Spacer()
+
+            if viewModel.isInMyTriggers(trigger.id) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(.rrSuccess)
             }
         }
         .padding(12)
@@ -291,8 +381,15 @@ struct TriggerLibraryView: View {
         let result = viewModel.validateCustomTrigger(label: newTriggerLabel, category: newTriggerCategory)
 
         if result.isValid {
-            // In real implementation, this would add to repository/database
-            // For now, just dismiss
+            let item = TriggerLibraryViewModel.LibraryItem(
+                id: UUID(),
+                label: newTriggerLabel.trimmingCharacters(in: .whitespacesAndNewlines),
+                category: newTriggerCategory,
+                isCustom: true,
+                useCount: 0
+            )
+            viewModel.allTriggers.append(item)
+            viewModel.addToMyTriggers(item.id)
             resetForm()
             showAddCustom = false
         } else {
@@ -307,12 +404,8 @@ struct TriggerLibraryView: View {
     }
 }
 
-#Preview("My Triggers") {
-    TriggerLibraryView()
-}
-
-#Preview("Empty Custom") {
-    let view = TriggerLibraryView()
-    // Note: selectedTab state cannot be set directly in preview
-    view
+#Preview {
+    NavigationStack {
+        TriggerLibraryView()
+    }
 }
