@@ -7,6 +7,7 @@ struct TriggerLibraryView: View {
     @State private var newTriggerLabel = ""
     @State private var newTriggerCategory: TriggerCategory = .emotional
     @State private var validationMessage: String?
+    @State private var showingInfoFor: TriggerLibraryViewModel.LibraryItem?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -52,6 +53,9 @@ struct TriggerLibraryView: View {
         }
         .sheet(isPresented: $showAddCustom) {
             addCustomTriggerSheet
+        }
+        .sheet(item: $showingInfoFor) { trigger in
+            threeIsInfoSheet(trigger)
         }
         .task {
             if viewModel.allTriggers.isEmpty {
@@ -117,13 +121,26 @@ struct TriggerLibraryView: View {
                 Section {
                     if !viewModel.isCategoryCollapsed(group.category) {
                         ForEach(group.items) { trigger in
-                            triggerRow(trigger)
+                            myTriggerRow(trigger)
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                     Button(role: .destructive) {
                                         viewModel.removeFromMyTriggers(trigger.id)
                                     } label: {
                                         Label("Remove", systemImage: "minus.circle")
                                     }
+                                }
+                                .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                    Button {
+                                        viewModel.toggleFavorite(trigger.id)
+                                    } label: {
+                                        if viewModel.isFavorite(trigger.id) {
+                                            Label("Unfavorite", systemImage: "star.slash")
+                                        } else {
+                                            Label("Favorite", systemImage: "star.fill")
+                                        }
+                                    }
+                                    .tint(.yellow)
+                                    .disabled(!viewModel.canFavorite(trigger.id))
                                 }
                         }
                     }
@@ -156,10 +173,10 @@ struct TriggerLibraryView: View {
                         ForEach(group.items) { trigger in
                             allTriggersRow(trigger)
                                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                    swipeAction(for: trigger)
+                                    addRemoveSwipeAction(for: trigger)
                                 }
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    swipeAction(for: trigger)
+                                    addRemoveSwipeAction(for: trigger)
                                 }
                         }
                     }
@@ -171,7 +188,7 @@ struct TriggerLibraryView: View {
     }
 
     @ViewBuilder
-    private func swipeAction(for trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
+    private func addRemoveSwipeAction(for trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
         if viewModel.isInMyTriggers(trigger.id) {
             Button {
                 viewModel.removeFromMyTriggers(trigger.id)
@@ -247,7 +264,84 @@ struct TriggerLibraryView: View {
         }
     }
 
-    // MARK: - Trigger Row
+    // MARK: - Row Views
+
+    private func myTriggerRow(_ trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: trigger.category.icon)
+                .font(.subheadline)
+                .foregroundStyle(trigger.category.color)
+                .frame(width: 24)
+
+            Text(trigger.label)
+                .font(.body)
+                .foregroundStyle(.rrText)
+
+            if trigger.category == .threeIs {
+                Button {
+                    showingInfoFor = trigger
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.subheadline)
+                        .foregroundStyle(.rrTextSecondary)
+                }
+                .buttonStyle(.plain)
+            }
+
+            Spacer()
+
+            if viewModel.isFavorite(trigger.id) {
+                Image(systemName: "star.fill")
+                    .font(.caption)
+                    .foregroundStyle(.yellow)
+            }
+
+            if trigger.useCount > 0 {
+                Text("\(trigger.useCount)")
+                    .font(.caption2)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.rrTextSecondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(
+                        Capsule()
+                            .fill(Color(.tertiarySystemBackground))
+                    )
+            }
+        }
+    }
+
+    private func allTriggersRow(_ trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: trigger.category.icon)
+                .font(.subheadline)
+                .foregroundStyle(trigger.category.color)
+                .frame(width: 24)
+
+            Text(trigger.label)
+                .font(.body)
+                .foregroundStyle(.rrText)
+
+            if trigger.category == .threeIs {
+                Button {
+                    showingInfoFor = trigger
+                } label: {
+                    Image(systemName: "info.circle")
+                        .font(.subheadline)
+                        .foregroundStyle(.rrTextSecondary)
+                }
+                .buttonStyle(.plain)
+            }
+
+            Spacer()
+
+            if viewModel.isInMyTriggers(trigger.id) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(.rrSuccess)
+            }
+        }
+    }
 
     private func triggerRow(_ trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
         HStack(spacing: 12) {
@@ -262,19 +356,6 @@ struct TriggerLibraryView: View {
 
             Spacer()
 
-            if trigger.useCount > 0 {
-                Text("\(trigger.useCount)")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.rrTextSecondary)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(Color(.tertiarySystemBackground))
-                    )
-            }
-
             if trigger.isCustom {
                 Image(systemName: "pencil.circle")
                     .font(.title3)
@@ -288,30 +369,59 @@ struct TriggerLibraryView: View {
         )
     }
 
-    private func allTriggersRow(_ trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: trigger.category.icon)
-                .font(.subheadline)
-                .foregroundStyle(trigger.category.color)
-                .frame(width: 24)
+    // MARK: - 3 I's Info Sheet
 
-            Text(trigger.label)
-                .font(.body)
-                .foregroundStyle(.rrText)
+    private func threeIsInfoSheet(_ trigger: TriggerLibraryViewModel.LibraryItem) -> some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    HStack(spacing: 12) {
+                        Image(systemName: TriggerCategory.threeIs.icon)
+                            .font(.title2)
+                            .foregroundStyle(TriggerCategory.threeIs.color)
 
-            Spacer()
+                        Text(trigger.label)
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(.rrText)
+                    }
 
-            if viewModel.isInMyTriggers(trigger.id) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.body)
-                    .foregroundStyle(.rrSuccess)
+                    if let description = TriggerSeedData.threeIsDescriptions[trigger.label] {
+                        Text(description)
+                            .font(.body)
+                            .foregroundStyle(.rrText)
+                            .lineSpacing(4)
+                    }
+
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("About the 3 I's", systemImage: "info.circle")
+                            .font(.headline)
+                            .foregroundStyle(.rrText)
+
+                        Text("The 3 I's — Incompetence, Impotence, and Insignificance — are core wounds identified in recovery literature. Most people carry one or two of these as their primary drivers. Identifying which ones resonate most deeply with you helps reveal the unmet needs beneath your acting-out behaviors.")
+                            .font(.subheadline)
+                            .foregroundStyle(.rrTextSecondary)
+                            .lineSpacing(3)
+
+                        Text("You can favorite up to 2 of the 3 I's to mark the ones that resonate most with your experience.")
+                            .font(.subheadline)
+                            .foregroundStyle(.rrTextSecondary)
+                            .lineSpacing(3)
+                    }
+                }
+                .padding(24)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showingInfoFor = nil
+                    }
+                }
             }
         }
-        .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(.secondarySystemBackground))
-        )
+        .presentationDetents([.medium])
     }
 
     // MARK: - Add Custom Trigger Sheet
@@ -328,7 +438,7 @@ struct TriggerLibraryView: View {
 
                 Section {
                     Picker("Category", selection: $newTriggerCategory) {
-                        ForEach(TriggerCategory.allCases) { category in
+                        ForEach(TriggerCategory.allCases.filter({ $0 != .threeIs })) { category in
                             HStack {
                                 Image(systemName: category.icon)
                                     .foregroundStyle(category.color)
@@ -402,6 +512,11 @@ struct TriggerLibraryView: View {
         newTriggerCategory = .emotional
         validationMessage = nil
     }
+}
+
+extension TriggerLibraryViewModel.LibraryItem: @retroactive Hashable {
+    static func == (lhs: Self, rhs: Self) -> Bool { lhs.id == rhs.id }
+    func hash(into hasher: inout Hasher) { hasher.combine(id) }
 }
 
 #Preview {

@@ -3,6 +3,7 @@ import SwiftUI
 // MARK: - Trigger Category
 
 enum TriggerCategory: String, CaseIterable, Codable, Identifiable {
+    case threeIs
     case emotional
     case physical
     case environmental
@@ -15,6 +16,7 @@ enum TriggerCategory: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
+        case .threeIs: return String(localized: "The 3 I's")
         case .emotional: return String(localized: "Emotional")
         case .physical: return String(localized: "Physical")
         case .environmental: return String(localized: "Environmental")
@@ -27,6 +29,7 @@ enum TriggerCategory: String, CaseIterable, Codable, Identifiable {
 
     var icon: String {
         switch self {
+        case .threeIs: return "exclamationmark.3"
         case .emotional: return "heart.fill"
         case .physical: return "figure.stand"
         case .environmental: return "mappin.and.ellipse"
@@ -39,6 +42,7 @@ enum TriggerCategory: String, CaseIterable, Codable, Identifiable {
 
     var color: Color {
         switch self {
+        case .threeIs: return Color(red: 0.698, green: 0.133, blue: 0.133)
         case .emotional: return Color(red: 0.345, green: 0.337, blue: 0.839)
         case .physical: return Color(red: 0.180, green: 0.573, blue: 0.545)
         case .environmental: return Color(red: 0.204, green: 0.580, blue: 0.353)
@@ -51,6 +55,7 @@ enum TriggerCategory: String, CaseIterable, Codable, Identifiable {
 
     var itemCount: Int {
         switch self {
+        case .threeIs: return 3
         case .emotional: return 24
         case .physical: return 13
         case .environmental: return 17

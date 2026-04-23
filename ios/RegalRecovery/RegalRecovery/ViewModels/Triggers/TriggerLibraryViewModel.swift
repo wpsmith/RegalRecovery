@@ -23,6 +23,7 @@ final class TriggerLibraryViewModel {
 
     var allTriggers: [LibraryItem] = []
     var myTriggerIds: Set<UUID> = []
+    var favoriteTriggerIds: Set<UUID> = []
     var searchQuery: String = ""
     var selectedCategory: TriggerCategory?
     var collapsedCategories: Set<TriggerCategory> = []
@@ -60,6 +61,37 @@ final class TriggerLibraryViewModel {
 
     func removeFromMyTriggers(_ id: UUID) {
         myTriggerIds.remove(id)
+        favoriteTriggerIds.remove(id)
+    }
+
+    // MARK: - Favorites
+
+    func isFavorite(_ id: UUID) -> Bool {
+        favoriteTriggerIds.contains(id)
+    }
+
+    func canFavorite(_ id: UUID) -> Bool {
+        if favoriteTriggerIds.contains(id) { return true }
+
+        guard let item = allTriggers.first(where: { $0.id == id }) else { return false }
+
+        if item.category == .threeIs {
+            let currentThreeIsFavorites = favoriteTriggerIds.filter { favId in
+                allTriggers.first(where: { $0.id == favId })?.category == .threeIs
+            }
+            return currentThreeIsFavorites.count < 2
+        }
+
+        return true
+    }
+
+    func toggleFavorite(_ id: UUID) {
+        if favoriteTriggerIds.contains(id) {
+            favoriteTriggerIds.remove(id)
+        } else if canFavorite(id) {
+            favoriteTriggerIds.insert(id)
+            myTriggerIds.insert(id)
+        }
     }
 
     // MARK: - All Triggers (full library)

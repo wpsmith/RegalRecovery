@@ -46,6 +46,20 @@ enum TriggerSeedData {
         allTriggers.filter { popularLabels.contains($0.label) }
     }
 
+    // MARK: - The 3 I's
+
+    private static let threeIsTriggers: [TriggerSeed] = [
+        TriggerSeed(label: "Incompetence", category: .threeIs),
+        TriggerSeed(label: "Impotence", category: .threeIs),
+        TriggerSeed(label: "Insignificance", category: .threeIs),
+    ]
+
+    static let threeIsDescriptions: [String: String] = [
+        "Incompetence": "The feeling that you are not good enough — that you lack the ability to handle life, relationships, or responsibilities. This wound says \"I can't do anything right\" and drives compensating behaviors to prove competence or to numb the shame of perceived failure.",
+        "Impotence": "The feeling that you are powerless — that you have no control over your circumstances, relationships, or emotions. This wound says \"Nothing I do matters\" and drives either desperate attempts to seize control or total surrender to compulsive behavior.",
+        "Insignificance": "The feeling that you don't matter — that you are invisible, unimportant, or easily replaceable. This wound says \"Nobody sees me\" and drives attention-seeking, people-pleasing, or withdrawal into fantasy where you feel valued.",
+    ]
+
     // MARK: - Category-Specific Triggers
 
     private static let emotionalTriggers: [TriggerSeed] = [
@@ -192,6 +206,7 @@ enum TriggerSeedData {
     // MARK: - All Triggers
 
     static let allTriggers: [TriggerSeed] =
+        threeIsTriggers +
         emotionalTriggers +
         physicalTriggers +
         environmentalTriggers +
