@@ -121,6 +121,16 @@ class RecoveryWorkViewModel {
                 activityTypeKey: "visionStatement"
             ),
             WorkTileItem(
+                id: "foundation.motivations",
+                title: String(localized: "Motivations"),
+                icon: "flame.fill",
+                iconColor: .orange,
+                category: .foundationTools,
+                featureFlagKey: "feature.motivations",
+                implemented: true,
+                activityTypeKey: "motivations"
+            ),
+            WorkTileItem(
                 id: "foundation.support-network",
                 title: String(localized: "Support Network"),
                 icon: "person.2.fill",

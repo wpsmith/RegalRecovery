@@ -40,7 +40,7 @@ struct ToolsView: View {
                             subtitle: "Your Recovery Why"
                         )
                     }
-                    if FeatureFlagStore.shared.isEnabled("activity.motivations") {
+                    if FeatureFlagStore.shared.isEnabled("feature.motivations") {
                         toolCard(
                             destination: MotivationLibraryView(),
                             icon: "flame.fill",

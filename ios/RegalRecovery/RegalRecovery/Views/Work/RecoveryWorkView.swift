@@ -261,6 +261,8 @@ struct RecoveryWorkView: View {
             UrgeSurfingConfigView()
         case "triggerLibrary":
             TriggerLibraryView()
+        case "motivations":
+            MotivationLibraryView()
         case "threeCircles":
             ThreeCirclesView()
         case "analytics":
