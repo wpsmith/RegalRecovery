@@ -16,7 +16,7 @@ struct MotivationLibraryView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if libraryViewModel.isEmpty {
+                if allMotivations.isEmpty {
                     emptyState
                 } else {
                     motivationList
@@ -25,7 +25,7 @@ struct MotivationLibraryView: View {
             .background(Color.rrBackground)
             .navigationTitle("Motivations")
             .toolbar {
-                if !libraryViewModel.isEmpty {
+                if !allMotivations.isEmpty {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
                             showCaptureSheet = true
