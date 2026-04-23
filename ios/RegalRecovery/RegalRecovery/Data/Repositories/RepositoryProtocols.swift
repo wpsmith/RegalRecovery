@@ -245,3 +245,40 @@ protocol PostMortemRepository: Sendable {
     @MainActor func getCompletedForInsights(userId: UUID, addictionId: String?) throws -> [RRPostMortem]
     @MainActor func countByStatus(userId: UUID) throws -> (drafts: Int, complete: Int)
 }
+
+// MARK: - Trigger Definition Repository
+
+protocol TriggerDefinitionRepository: Sendable {
+    func getAll(userId: UUID) async throws -> [RRTriggerDefinition]
+    func getByCategory(userId: UUID, category: TriggerCategory) async throws -> [RRTriggerDefinition]
+    func getTopByUsage(userId: UUID, limit: Int) async throws -> [RRTriggerDefinition]
+    func save(_ definition: RRTriggerDefinition) async throws
+    func delete(id: UUID) async throws
+    func incrementUseCount(id: UUID) async throws
+    func search(userId: UUID, query: String) async throws -> [RRTriggerDefinition]
+    func seedDefaults(userId: UUID) async throws
+}
+
+// MARK: - Trigger Log Repository
+
+protocol TriggerLogRepository: Sendable {
+    func save(_ entry: RRTriggerLogEntry) async throws
+    func getEntries(userId: UUID, from: Date?, to: Date?, limit: Int) async throws -> [RRTriggerLogEntry]
+    func getEntry(id: UUID) async throws -> RRTriggerLogEntry?
+    func update(_ entry: RRTriggerLogEntry) async throws
+    func delete(id: UUID) async throws
+    func deleteAll(userId: UUID) async throws
+    func getEntriesForDate(userId: UUID, date: Date) async throws -> [RRTriggerLogEntry]
+    func countForDay(userId: UUID, date: Date) async throws -> Int
+}
+
+// MARK: - Coping Strategy Repository
+
+protocol CopingStrategyRepository: Sendable {
+    func getAll(userId: UUID) async throws -> [RRCopingStrategy]
+    func getByCategory(userId: UUID, category: TriggerCategory) async throws -> [RRCopingStrategy]
+    func save(_ strategy: RRCopingStrategy) async throws
+    func delete(id: UUID) async throws
+    func recordEffectiveness(id: UUID, rating: Int) async throws
+    func seedDefaults(userId: UUID) async throws
+}

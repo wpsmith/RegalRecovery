@@ -116,8 +116,6 @@
 		10000117 /* ContentData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000117 /* ContentData.swift */; };
 		10000118 /* FASTERMoodPromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000118 /* FASTERMoodPromptView.swift */; };
 		10000200 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000200 /* Assets.xcassets */; };
-		10000202 /* UrgeSurfingTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000202 /* UrgeSurfingTimerView.swift */; };
-		10000203 /* UrgeSurfingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000203 /* UrgeSurfingViewModel.swift */; };
 		10000204 /* PlanNotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000204 /* PlanNotificationScheduler.swift */; };
 		10000205 /* RecoveryPlanSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000205 /* RecoveryPlanSetupView.swift */; };
 		10000206 /* PlanActivityRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000206 /* PlanActivityRowView.swift */; };
@@ -203,6 +201,8 @@
 		10000997 /* SetupMyPlanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000997 /* SetupMyPlanCard.swift */; };
 		10000998 /* AddictionSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000998 /* AddictionSetupView.swift */; };
 		10000999 /* MotivationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000999 /* MotivationSetupView.swift */; };
+		10001000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* ThreeCirclesTypes.swift */; };
+		10001001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* ThreeCirclesAPIClient.swift */; };
 		10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001003 /* ThreeCirclesBuilderViewModel.swift */; };
 		10001004 /* CircleSetDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001004 /* CircleSetDetailViewModel.swift */; };
 		10001005 /* PatternViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001005 /* PatternViewModel.swift */; };
@@ -303,22 +303,38 @@
 		B1D80FD3EE117EFA1430602F /* PCISetupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD9987DFCC6D5A757E5C1F1 /* PCISetupFlowView.swift */; };
 		ddf8aca8 /* PCISetupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02e976c6 /* PCISetupViewModel.swift */; };
 		fd51683e95044ec58be820d5 /* PCIDimensionContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4c4d445bc9364c2fa97b153d /* PCIDimensionContent.swift */; };
-		10001000 /* PCIProfileEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* PCIProfileEditViewModel.swift */; };
-		10001001 /* PCIProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* PCIProfileEditView.swift */; };
-		10001002 /* PCICriticalItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001002 /* PCICriticalItemEditView.swift */; };
-		10009000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009000 /* ThreeCirclesTypes.swift */; };
-		10009001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009001 /* ThreeCirclesAPIClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		02e976c6 /* PCISetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCISetupViewModel.swift; sourceTree = "<group>"; };
 		1CE8EDBD8EF9557997DD08D3 /* PCIDimensionEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIDimensionEntryView.swift; sourceTree = "<group>"; };
+		10D7D990 /* TriggerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F0E /* TriggerTypes.swift */; };
+		10D7D991 /* TriggerSeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F0F /* TriggerSeedData.swift */; };
+		10D7D992 /* RRTriggerDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F10 /* RRTriggerDefinition.swift */; };
+		10D7D993 /* RRTriggerLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F11 /* RRTriggerLogEntry.swift */; };
+		10D7D994 /* RRCopingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20258F12 /* RRCopingStrategy.swift */; };
+		15F2773FFA15EE1EABA2F341 /* TriggerLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */; };
+		25C3A7B1DF46EE2ABC567890 /* TriggerLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D8F4C5BE91AA73ED245681 /* TriggerLibraryViewModel.swift */; };
+		3F7B8A9CDE21FF34AB678901 /* TriggerInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D9E1A2BCD56EE78FG901234 /* TriggerInsightsViewModel.swift */; };
+		089e093dc4b94ea5b7fdb24e /* TriggerChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2c21b3c8fe2845c3876cb3e9 /* TriggerChipView.swift */; };
+		abbc40f7cf20460b903ba30f /* IntensitySliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */; };
+		a9a3750c54ef40ee8c05b253 /* CopingToolkitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67130aa3407649408ca80664 /* CopingToolkitView.swift */; };
+		d1587efa20c846c488ceb2ca /* TriggerLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = cab54e32a8ba4da192b44647 /* TriggerLogView.swift */; };
+		10D7D995 /* TriggerLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D7D995 /* TriggerLibraryView.swift */; };
+		10D7D996 /* TriggerLogHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D7D996 /* TriggerLogHistoryView.swift */; };
+		10D7D997 /* TriggerLogDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D7D997 /* TriggerLogDetailView.swift */; };
+		91afdd6a /* TriggerInsightsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 453ed699ad1c466883a04105 /* TriggerInsightsDashboardView.swift */; };
+		68fa73c0 /* TriggerHeatMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3aa7e7e8dded4053b2fba1b1 /* TriggerHeatMapView.swift */; };
+		b11737576e8745299f5db1c4 /* TriggerOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1a3b59a7d24b460db7c71752 /* TriggerOnboardingView.swift */; };
+		B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F001 /* Localizable.xcstrings */; };
+		B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
 		20000001 /* RegalRecoveryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegalRecoveryApp.swift; sourceTree = "<group>"; };
 		20001000 /* PCIProfileEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIProfileEditViewModel.swift; sourceTree = "<group>"; };
 		20001001 /* PCIProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIProfileEditView.swift; sourceTree = "<group>"; };
 		20001002 /* PCICriticalItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICriticalItemEditView.swift; sourceTree = "<group>"; };
-		20009000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
-		20009001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
 		20000002 /* Color+RR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+RR.swift"; sourceTree = "<group>"; };
 		20000003 /* ColorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorTheme.swift; sourceTree = "<group>"; };
 		20000004 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
@@ -521,6 +537,8 @@
 		20000997 /* SetupMyPlanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupMyPlanCard.swift; sourceTree = "<group>"; };
 		20000998 /* AddictionSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddictionSetupView.swift; sourceTree = "<group>"; };
 		20000999 /* MotivationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSetupView.swift; sourceTree = "<group>"; };
+		20001000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
+		20001001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
 		20001003 /* ThreeCirclesBuilderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesBuilderViewModel.swift; sourceTree = "<group>"; };
 		20001004 /* CircleSetDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleSetDetailViewModel.swift; sourceTree = "<group>"; };
 		20001005 /* PatternViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternViewModel.swift; sourceTree = "<group>"; };
@@ -627,6 +645,36 @@
 		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		BFD9987DFCC6D5A757E5C1F1 /* PCISetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCISetupFlowView.swift; sourceTree = "<group>"; };
 		F7C6E48DCD91F04F58511767 /* PCISetupConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCISetupConfirmationView.swift; sourceTree = "<group>"; };
+		20007001 /* QuickActionDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDefinition.swift; sourceTree = "<group>"; };
+		20007002 /* ActivityDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDestinationView.swift; sourceTree = "<group>"; };
+		20006003 /* QuickActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsViewModel.swift; sourceTree = "<group>"; };
+		20006004 /* QuickActionsCustomizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsCustomizeView.swift; sourceTree = "<group>"; };
+		2021035A /* TriggerTypesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerTypesTests.swift; sourceTree = "<group>"; };
+		2021035B /* TriggerSeedDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerSeedDataTests.swift; sourceTree = "<group>"; };
+		20258F0E /* TriggerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerTypes.swift; sourceTree = "<group>"; };
+		20258F0F /* TriggerSeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerSeedData.swift; sourceTree = "<group>"; };
+		20258F10 /* RRTriggerDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTriggerDefinition.swift; sourceTree = "<group>"; };
+		20258F11 /* RRTriggerLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTriggerLogEntry.swift; sourceTree = "<group>"; };
+		20258F12 /* RRCopingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRCopingStrategy.swift; sourceTree = "<group>"; };
+		30000001 /* RegalRecovery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegalRecovery.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		37D8F4C5BE91AA73ED245681 /* TriggerLibraryViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TriggerLibraryViewModel.swift; path = Triggers/TriggerLibraryViewModel.swift; sourceTree = "<group>"; };
+		4D9E1A2BCD56EE78FG901234 /* TriggerInsightsViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TriggerInsightsViewModel.swift; path = Triggers/TriggerInsightsViewModel.swift; sourceTree = "<group>"; };
+		6E0F2B3BCE67FF89HI012345 /* TriggerInsightsViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerInsightsViewModelTests.swift; sourceTree = "<group>"; };
+		84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TriggerLogViewModel.swift; path = Triggers/TriggerLogViewModel.swift; sourceTree = "<group>"; };
+		9E5A2D1BCF78AA45CE123456 /* TriggerLibraryViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerLibraryViewModelTests.swift; sourceTree = "<group>"; };
+		AD4C9FD9C8C50339F8B09D2C /* TriggerLogViewModelTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = TriggerLogViewModelTests.swift; sourceTree = "<group>"; };
+		2c21b3c8fe2845c3876cb3e9 /* TriggerChipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerChipView.swift; sourceTree = "<group>"; };
+		20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntensitySliderView.swift; sourceTree = "<group>"; };
+		67130aa3407649408ca80664 /* CopingToolkitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopingToolkitView.swift; sourceTree = "<group>"; };
+		cab54e32a8ba4da192b44647 /* TriggerLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogView.swift; sourceTree = "<group>"; };
+		20D7D995 /* TriggerLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLibraryView.swift; sourceTree = "<group>"; };
+		20D7D996 /* TriggerLogHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogHistoryView.swift; sourceTree = "<group>"; };
+		20D7D997 /* TriggerLogDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogDetailView.swift; sourceTree = "<group>"; };
+		453ed699ad1c466883a04105 /* TriggerInsightsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerInsightsDashboardView.swift; sourceTree = "<group>"; };
+		3aa7e7e8dded4053b2fba1b1 /* TriggerHeatMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerHeatMapView.swift; sourceTree = "<group>"; };
+		1a3b59a7d24b460db7c71752 /* TriggerOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerOnboardingView.swift; sourceTree = "<group>"; };
+		B0A1B2C3D4E5F001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -702,7 +750,7 @@
 				20000950 /* AffirmationTypes.swift */,
 				20000900 /* GratitudeTypes.swift */,
 				20000006 /* MockData.swift */,
-				20009000 /* ThreeCirclesTypes.swift */,
+				20001000 /* ThreeCirclesTypes.swift */,
 				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
 				20000514 /* PCITypes.swift */,
@@ -733,6 +781,11 @@
 				20000008 /* RRModels.swift */,
 				20000501 /* RRTimeJournalEntry.swift */,
 				20006006 /* RRMotivationModels.swift */,
+				20258F0E /* TriggerTypes.swift */,
+				20258F0F /* TriggerSeedData.swift */,
+				20258F10 /* RRTriggerDefinition.swift */,
+				20258F11 /* RRTriggerLogEntry.swift */,
+				20258F12 /* RRCopingStrategy.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -769,7 +822,7 @@
 				20001204 /* TextToSpeechService.swift */,
 				20001205 /* LocationService.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
-				20009001 /* ThreeCirclesAPIClient.swift */,
+				20001001 /* ThreeCirclesAPIClient.swift */,
 				20000517 /* PCIMissedDayService.swift */,
 				20006062 /* MotivationSurfacingService.swift */,
 			);
@@ -857,6 +910,8 @@
 				50006001 /* Bowtie */,
 				20006070 /* MotivationLibraryViewModel.swift */,
 				20006071 /* MotivationDiscoveryViewModel.swift */,
+				20006003 /* QuickActionsViewModel.swift */,
+				B0B07FC2981F06521F796C44 /* Triggers */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -920,6 +975,7 @@
 				50000046 /* Settings */,
 				50000047 /* Tools */,
 				50000300 /* Today */,
+				97b090c283904de0b021ab3e /* Triggers */,
 				50000100 /* Work */,
 			);
 			path = Views;
@@ -1085,6 +1141,12 @@
 				20000114 /* StreakViewModelTests.swift */,
 				20000115 /* UrgeLogViewModelTests.swift */,
 				50006003 /* Bowtie */,
+				2021035A /* TriggerTypesTests.swift */,
+				2021035B /* TriggerSeedDataTests.swift */,
+				6E0F2B3BCE67FF89HI012345 /* TriggerInsightsViewModelTests.swift */,
+				9E5A2D1BCF78AA45CE123456 /* TriggerLibraryViewModelTests.swift */,
+				AD4C9FD9C8C50339F8B09D2C /* TriggerLogViewModelTests.swift */,
+				20000115 /* UrgeLogViewModelTests.swift */,
 			);
 			path = Unit;
 			sourceTree = "<group>";
@@ -1325,6 +1387,41 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		B0B07FC2981F06521F796C44 /* Triggers */ = {
+			isa = PBXGroup;
+			children = (
+				4D9E1A2BCD56EE78FG901234 /* TriggerInsightsViewModel.swift */,
+				37D8F4C5BE91AA73ED245681 /* TriggerLibraryViewModel.swift */,
+				84AE9B2EAFDD826E75D76179 /* TriggerLogViewModel.swift */,
+			);
+			name = Triggers;
+			sourceTree = "<group>";
+		};
+		97b090c283904de0b021ab3e /* Triggers */ = {
+			isa = PBXGroup;
+			children = (
+				91315bc0a3d146579e193edb /* Components */,
+				cab54e32a8ba4da192b44647 /* TriggerLogView.swift */,
+				20D7D995 /* TriggerLibraryView.swift */,
+				20D7D996 /* TriggerLogHistoryView.swift */,
+				20D7D997 /* TriggerLogDetailView.swift */,
+				453ed699ad1c466883a04105 /* TriggerInsightsDashboardView.swift */,
+				1a3b59a7d24b460db7c71752 /* TriggerOnboardingView.swift */,
+			);
+			path = Triggers;
+			sourceTree = "<group>";
+		};
+		91315bc0a3d146579e193edb /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				2c21b3c8fe2845c3876cb3e9 /* TriggerChipView.swift */,
+				20ccfeb9f2fa419fa47822f1 /* IntensitySliderView.swift */,
+				67130aa3407649408ca80664 /* CopingToolkitView.swift */,
+				3aa7e7e8dded4053b2fba1b1 /* TriggerHeatMapView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1410,11 +1507,8 @@
 				10000403 /* FASTERCheckInViewModel.swift in Sources */,
 				ddf8aca8 /* PCISetupViewModel.swift in Sources */,
 				10000520 /* PCICheckInViewModel.swift in Sources */,
-				10001000 /* PCIProfileEditViewModel.swift in Sources */,
 				10000521 /* PCIPsychoeducationView.swift in Sources */,
 				10000522 /* PCICriticalSelectionView.swift in Sources */,
-				10001001 /* PCIProfileEditView.swift in Sources */,
-				10001002 /* PCICriticalItemEditView.swift in Sources */,
 				10000523 /* PCIWeeklySummaryCard.swift in Sources */,
 				9994c967a07f4b07a50d4b1d /* PCITrendChartView.swift in Sources */,
 				10000524 /* PCIEntryPointView.swift in Sources */,
@@ -1439,6 +1533,11 @@
 				10006082 /* MotivationDiscoveryView.swift in Sources */,
 				10006083 /* MotivationLibraryView.swift in Sources */,
 				10006100 /* MotivationSurfacingCard.swift in Sources */,
+				10D7D990 /* TriggerTypes.swift in Sources */,
+				10D7D991 /* TriggerSeedData.swift in Sources */,
+				10D7D992 /* RRTriggerDefinition.swift in Sources */,
+				10D7D993 /* RRTriggerLogEntry.swift in Sources */,
+				10D7D994 /* RRCopingStrategy.swift in Sources */,
 				10000510 /* TimeJournalDailyView.swift in Sources */,
 				10000511 /* TimeJournalHeaderView.swift in Sources */,
 				10000512 /* TimeJournalTimelineView.swift in Sources */,
@@ -1603,8 +1702,8 @@
 				10000909 /* GratitudeSharingService.swift in Sources */,
 				10000950 /* AffirmationTypes.swift in Sources */,
 				10000951 /* AffirmationsAPIClient.swift in Sources */,
-				10009000 /* ThreeCirclesTypes.swift in Sources */,
-				10009001 /* ThreeCirclesAPIClient.swift in Sources */,
+				10001000 /* ThreeCirclesTypes.swift in Sources */,
+				10001001 /* ThreeCirclesAPIClient.swift in Sources */,
 				10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */,
 				10001004 /* CircleSetDetailViewModel.swift in Sources */,
 				10001005 /* PatternViewModel.swift in Sources */,
@@ -1684,6 +1783,19 @@
 				B1D80FD3EE117EFA1430602F /* PCISetupFlowView.swift in Sources */,
 				9103A401908DED56E83772C7 /* PCIDimensionEntryView.swift in Sources */,
 				91B02E045195FF9B6D69BD3E /* PCISetupConfirmationView.swift in Sources */,
+				3F7B8A9CDE21FF34AB678901 /* TriggerInsightsViewModel.swift in Sources */,
+				25C3A7B1DF46EE2ABC567890 /* TriggerLibraryViewModel.swift in Sources */,
+				15F2773FFA15EE1EABA2F341 /* TriggerLogViewModel.swift in Sources */,
+				089e093dc4b94ea5b7fdb24e /* TriggerChipView.swift in Sources */,
+				abbc40f7cf20460b903ba30f /* IntensitySliderView.swift in Sources */,
+				a9a3750c54ef40ee8c05b253 /* CopingToolkitView.swift in Sources */,
+				d1587efa20c846c488ceb2ca /* TriggerLogView.swift in Sources */,
+				10D7D995 /* TriggerLibraryView.swift in Sources */,
+				10D7D996 /* TriggerLogHistoryView.swift in Sources */,
+				10D7D997 /* TriggerLogDetailView.swift in Sources */,
+				91afdd6a /* TriggerInsightsDashboardView.swift in Sources */,
+				68fa73c0 /* TriggerHeatMapView.swift in Sources */,
+				b11737576e8745299f5db1c4 /* TriggerOnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

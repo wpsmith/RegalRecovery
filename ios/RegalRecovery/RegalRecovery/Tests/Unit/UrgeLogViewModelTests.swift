@@ -125,4 +125,23 @@ struct UrgeLogViewModelTests {
         #expect(entry.addictions.contains("Sex Addiction (SA)"))
         #expect(entry.addictions.contains("Pornography"))
     }
+
+    // MARK: - Trigger Library Integration Tests
+
+    @Test("default triggers contains 8 items for backward compatibility")
+    func defaultTriggersCount() {
+        #expect(UrgeLogViewModel.defaultTriggers.count == 8)
+    }
+
+    @Test("useFullLibrary switches to trigger library options")
+    func useFullLibrarySwitchesToLibrary() {
+        let vm = UrgeLogViewModel()
+        vm.triggerLibraryOptions = [
+            TriggerLogViewModel.TriggerOption(id: UUID(), label: "Stress", category: .emotional),
+            TriggerLogViewModel.TriggerOption(id: UUID(), label: "Fantasy", category: .cognitive),
+        ]
+        vm.useFullLibrary = true
+        #expect(vm.displayTriggers.count == 2)
+        #expect(vm.displayTriggers.contains("Fantasy"))
+    }
 }

@@ -2215,6 +2215,9 @@ enum RRModelConfiguration {
         RRBackboneProcessing.self,
         RRPPPEntry.self,
         RRPostMortem.self,
+        RRTriggerDefinition.self,
+        RRTriggerLogEntry.self,
+        RRCopingStrategy.self,
     ]
 
     static var schema: Schema {

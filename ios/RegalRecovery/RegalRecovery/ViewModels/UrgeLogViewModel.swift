@@ -34,11 +34,22 @@ class UrgeLogViewModel {
     var selectedAddictions: Set<String> = []
     var selectedTriggers: Set<String> = []
     var notes: String = ""
+    var linkedTriggerLogId: UUID?
 
-    static let availableTriggers = [
+    static let defaultTriggers = [
         "Stress", "Loneliness", "Boredom", "Anger",
         "Tiredness", "Social Media", "Late Night", "Conflict"
     ]
+
+    var triggerLibraryOptions: [TriggerLogViewModel.TriggerOption] = []
+    var useFullLibrary: Bool = false
+
+    var displayTriggers: [String] {
+        if useFullLibrary {
+            return triggerLibraryOptions.map(\.label)
+        }
+        return Self.defaultTriggers
+    }
 
     // MARK: - Load
 

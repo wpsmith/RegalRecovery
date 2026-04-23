@@ -9,6 +9,8 @@ struct QuickActionsRow: View {
     @State private var isEditing = false
     @State private var showActionPicker = false
     @State private var draggedItemId: UUID?
+    @State private var showTriggerLog = false
+    @State private var showCustomize = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -56,14 +58,13 @@ struct QuickActionsRow: View {
         .fullScreenCover(isPresented: $showFASTER) {
             FASTERCheckInFlowView()
         }
-        .sheet(isPresented: $showActionPicker) {
-            QuickActionInlinePickerSheet(
-                availableActions: viewModel.availableActions,
-                onSelect: { definition in
-                    viewModel.addAction(definition)
-                    showActionPicker = false
-                }
-            )
+        .fullScreenCover(isPresented: $showTriggerLog) {
+            TriggerLogView()
+        }
+        .sheet(isPresented: $showCustomize, onDismiss: {
+            viewModel.load(context: modelContext)
+        }) {
+            QuickActionsCustomizeView(viewModel: viewModel)
         }
         .task {
             viewModel.load(context: modelContext)

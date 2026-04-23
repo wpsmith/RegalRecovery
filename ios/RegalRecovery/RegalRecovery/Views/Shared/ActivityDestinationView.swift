@@ -50,6 +50,8 @@ struct ActivityDestinationView: View {
             UrgeLogView()
         case "emotionalJournal":
             EmotionalJournalView()
+        case ActivityType.triggerLog.rawValue:
+            TriggerLogView()
         default:
             Text("Activity")
                 .font(RRFont.title3)
