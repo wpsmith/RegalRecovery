@@ -134,10 +134,31 @@ struct BowtieSessionView: View {
                             .foregroundStyle(Color.rrTextSecondary)
 
                         if viewModel.availableRoles.isEmpty {
-                            Text(String(localized: "No roles configured yet. Add roles in Settings."))
-                                .font(.subheadline)
-                                .foregroundStyle(Color.rrTextSecondary)
-                                .padding(.vertical, 8)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(String(localized: "Tap roles to add them:"))
+                                    .font(.subheadline)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                FlowLayout(spacing: 8) {
+                                    ForEach(RoleSuggestions.defaults, id: \.self) { suggestion in
+                                        Button {
+                                            let role = RRUserRole(label: suggestion, sortOrder: viewModel.availableRoles.count)
+                                            modelContext.insert(role)
+                                            viewModel.loadRoles(context: modelContext)
+                                            viewModel.selectedRoleIds.insert(role.id)
+                                        } label: {
+                                            Text(suggestion)
+                                                .font(.subheadline)
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 6)
+                                                .background(Color.rrSurface)
+                                                .foregroundStyle(Color.rrText)
+                                                .clipShape(Capsule())
+                                                .overlay(Capsule().stroke(Color.gray.opacity(0.3), lineWidth: 1))
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
                         } else {
                             FlowLayout(spacing: 8) {
                                 ForEach(viewModel.availableRoles, id: \.id) { role in
