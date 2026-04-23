@@ -121,6 +121,7 @@ final class FeatureFlagService {
         flags["activity.integrity-inventory"] = false
         flags["activity.lbi"] = true
         flags["feature.lbi"] = true
+        flags["activity.triggers"] = true
 
         // App Architecture
         flags["feature.today-view"] = false
@@ -130,6 +131,7 @@ final class FeatureFlagService {
 
         // Recovery Work & Tools
         flags["feature.3circles"] = true
+        flags["feature.triggers"] = true
         flags["feature.vision"] = true
         flags["feature.partners.redemptiveliving.backbone"] = false
         flags["feature.relapse-prevention-plan"] = false
