@@ -124,8 +124,18 @@ struct RRActivityRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.body)
+            Group {
+                if icon.hasPrefix("asset:") {
+                    Image(String(icon.dropFirst(6)))
+                        .renderingMode(.template)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 18, height: 18)
+                } else {
+                    Image(systemName: icon)
+                        .font(.body)
+                }
+            }
                 .foregroundStyle(iconColor)
                 .frame(width: 28, height: 28)
             VStack(alignment: .leading, spacing: 2) {

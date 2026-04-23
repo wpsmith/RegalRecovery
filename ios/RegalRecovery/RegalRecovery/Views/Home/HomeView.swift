@@ -126,7 +126,7 @@ struct HomeView: View {
             let completedDate = b.completedAt ?? b.modifiedAt
             let markerCount = b.markers.count
             let detail = String(localized: "\(markerCount) markers, \(b.selectedRoleIds.count) roles")
-            all.append((completedDate, RecentActivity(title: String(localized: "Bowtie Diagram"), detail: detail, time: fmt.localizedString(for: completedDate, relativeTo: Date()), icon: "suit.diamond.fill", iconColor: .rrPrimary)))
+            all.append((completedDate, RecentActivity(title: String(localized: "Bowtie Diagram"), detail: detail, time: fmt.localizedString(for: completedDate, relativeTo: Date()), icon: "asset:bowtie.icon", iconColor: .rrPrimary)))
         }
 
         return all.sorted { $0.date > $1.date }.prefix(10).map(\.item)

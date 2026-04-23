@@ -447,7 +447,7 @@ class RecoveryWorkViewModel {
             WorkTileItem(
                 id: "activity.bowtie",
                 title: String(localized: "Bowtie Diagram"),
-                icon: "suit.diamond.fill",
+                icon: "asset:bowtie.icon",
                 iconColor: .rrPrimary,
                 category: .activities,
                 featureFlagKey: "activity.bowtie",

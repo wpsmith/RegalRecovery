@@ -435,7 +435,7 @@ struct ActivitiesListView: View {
                         } label: {
                             HStack {
                                 RRActivityRow(
-                                    icon: "suit.diamond.fill",
+                                    icon: "asset:bowtie.icon",
                                     iconColor: .rrPrimary,
                                     title: String(localized: "Bowtie Diagram"),
                                     subtitle: bowtieSubtitle
