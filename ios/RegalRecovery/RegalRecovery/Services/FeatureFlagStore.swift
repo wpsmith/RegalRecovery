@@ -43,7 +43,11 @@ final class FeatureFlagStore {
             defaults.set(true, forKey: "ff.feature.vision")
         }
 
-        defaults.set(1, forKey: migrationKey)
+        if currentVersion < 2 {
+            defaults.set(true, forKey: "ff.activity.bowtie")
+        }
+
+        defaults.set(2, forKey: migrationKey)
     }
 
     // MARK: - Default Seeding
