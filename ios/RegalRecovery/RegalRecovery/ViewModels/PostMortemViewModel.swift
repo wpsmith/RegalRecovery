@@ -1,27 +1,9 @@
 import Foundation
 import SwiftData
+import SwiftUI
 import OSLog
 
 // MARK: - Local Entry Types
-
-struct TimeBlockEntry: Identifiable, Equatable {
-    let id = UUID()
-    var period: String = "morning"  // morning, midday, afternoon, evening
-    var startTime = ""
-    var endTime = ""
-    var activity = ""
-    var location = ""
-    var company = ""
-    var thoughts = ""
-    var feelings = ""
-    var warningSigns: [String] = []
-}
-
-struct FreeFormEntry: Identifiable, Equatable {
-    let id = UUID()
-    var time = ""
-    var text = ""
-}
 
 struct TriggerEntry: Identifiable, Equatable {
     let id = UUID()
@@ -45,12 +27,6 @@ struct DecisionPointEntry: Identifiable, Equatable {
     var insteadDid = ""
 }
 
-struct FasterMappingEntry: Identifiable, Equatable {
-    let id = UUID()
-    var timeOfDay = ""
-    var stage = ""  // FASTER stage
-}
-
 struct ActionItemEntry: Identifiable, Equatable {
     let id = UUID()
     var timelinePoint = ""
@@ -60,10 +36,52 @@ struct ActionItemEntry: Identifiable, Equatable {
     var convertedToGoalId: String?
 }
 
+struct FreeFormEntry: Identifiable, Equatable {
+    let id = UUID()
+    var time = ""
+    var text = ""
+}
+
 struct ShareRecipient: Identifiable, Equatable {
     let id = UUID()
     var contactId = ""
     var shareType = "full"  // "full" or "summary"
+}
+
+// MARK: - New Data Loading Types
+
+struct DayActivityRecord: Identifiable {
+    let id = UUID()
+    let activityType: String
+    let title: String
+    let icon: String
+    let iconColor: Color
+    let wasCompleted: Bool
+}
+
+struct UserTriggerItem: Identifiable {
+    let id: UUID
+    let label: String
+    let category: String
+    var isSelected: Bool
+}
+
+struct FASTERHistoryEntry: Identifiable {
+    let id: UUID
+    let date: Date
+    let stage: Int  // FASTERStage rawValue
+    let moodScore: Int?
+    let stageName: String
+    let stageColor: Color
+}
+
+struct RecommendedActivity: Identifiable {
+    let id = UUID()
+    let activityType: String
+    let title: String
+    let icon: String
+    let iconColor: Color
+    let reason: String  // Why this is recommended
 }
 
 // MARK: - PostMortemViewModel
@@ -74,20 +92,17 @@ class PostMortemViewModel {
     // MARK: - Flow State
 
     enum FlowStep: Int, CaseIterable {
-        case eventType       // Step 0: Choose relapse/near-miss/combined
-        case dayBefore       // Step 1
-        case morning         // Step 2
-        case throughoutTheDay // Step 3
-        case buildUp         // Step 4
-        case actingOut       // Step 5
-        case immediatelyAfter // Step 6
-        case triggers        // Step 7: Trigger identification
-        case fasterMapping   // Step 8: FASTER timeline
-        case actionPlan      // Step 9: Action items
-        case review          // Step 10: Review & complete
+        case actingOut       // Step 1: What happened (acting out or near-miss)
+        case throughoutTheDay // Step 2: Work backwards 24hrs with Time Journal + activity data
+        case dayBefore       // Step 3: Show activity history (done vs not done), ask what's missing
+        case buildUp         // Step 4: Build-up, decision points, missed help
+        case triggers        // Step 5: Trigger identification, leverage My Triggers
+        case immediatelyAfter // Step 6: Feelings, what did next
+        case fasterHistory   // Step 7: 4-week FASTER graph (if using FASTER)
+        case actionPlan      // Step 8: Missed activities, recommendations, Quick Action-style tiles
     }
 
-    var currentStep: FlowStep = .eventType
+    var currentStep: FlowStep = .actingOut
     var isLoading = false
     var error: String?
     var showCompletionMessage = false
@@ -99,63 +114,63 @@ class PostMortemViewModel {
     var isDraft = true
     var existingDraftId: UUID?  // If resuming a draft
 
-    // MARK: - Event Type (Step 0)
+    // MARK: - Step 1: Acting Out / Near Miss
 
     var eventType: String = "relapse"  // "relapse", "near-miss", "combined"
     var relapseId: String?
     var addictionId: String?
     var timestamp = Date()
+    var actingOutDescription = ""
+    var actingOutDurationMinutes: Int?
 
-    // MARK: - Section Data (Steps 1-6)
+    // MARK: - Step 2: Throughout the Day (work backwards)
 
-    // Day Before
+    var timeBlocksForDay: [RRTimeBlock] = []  // Loaded from SwiftData
+    var activitiesForDay: [RRActivity] = []   // Loaded from SwiftData
+    var throughoutDayText = ""  // User's "What happened before that?" reflection
+    var freeFormEntries: [FreeFormEntry] = []  // User-added timeline entries
+
+    // MARK: - Step 3: Day Before
+
+    var dayBeforeActivities: [DayActivityRecord] = []  // What was done/not done
     var dayBeforeText = ""
     var dayBeforeMoodRating: Int = 5
-    var dayBeforeRecoveryPracticesKept = true
     var dayBeforeUnresolvedConflicts = ""
 
-    // Morning
-    var morningText = ""
-    var morningMoodRating: Int = 5
-    var morningCommitmentCompleted = false
-    var morningAffirmationViewed = false
+    // MARK: - Step 4: Build-Up
 
-    // Throughout the Day
-    var timeBlocks: [TimeBlockEntry] = []
-    var freeFormEntries: [FreeFormEntry] = []
+    var firstNoticed = ""
+    var triggers: [TriggerEntry] = []
+    var responseToWarnings = ""
+    var missedHelpOpportunities: [MissedHelpEntry] = []
+    var decisionPoints: [DecisionPointEntry] = []
 
-    // Build-Up
-    var buildUpFirstNoticed = ""
-    var buildUpTriggers: [TriggerEntry] = []
-    var buildUpResponseToWarnings = ""
-    var buildUpMissedHelpOpportunities: [MissedHelpEntry] = []
-    var buildUpDecisionPoints: [DecisionPointEntry] = []
+    // MARK: - Step 5: Triggers
 
-    // Acting Out
-    var actingOutDescription = ""
-    var actingOutAddictionId: String?
-    var actingOutDurationMinutes: Int?
-    var actingOutLinkedRelapseId: String?
-
-    // Immediately After
-    var afterFeelings: [String] = []
-    var afterFeelingsWheelSelections: [String] = []
-    var afterWhatDidNext = ""
-    var afterReachedOut = false
-    var afterReachedOutTo: String?
-    var afterWishDoneDifferently = ""
-
-    // MARK: - Triggers (Step 7)
-
-    var triggerSummary: [String] = []  // Categories: emotional, environmental, relational, physical, digital, spiritual
+    var userTriggers: [UserTriggerItem] = []  // Loaded from My Triggers
+    var triggerSummary: [String] = []  // Categories: emotional, environmental, relational, physical, cognitive, spiritual, situational
     var triggerDetails: [TriggerEntry] = []
 
-    // MARK: - FASTER Mapping (Step 8)
+    // MARK: - Step 6: Immediately After
 
-    var fasterMapping: [FasterMappingEntry] = []
+    var feelings: [String] = []
+    var feelingsWheelSelections: [String] = []
+    var whatDidNext = ""
+    var reachedOut = false
+    var reachedOutTo: String?
+    var wishDoneDifferently = ""
 
-    // MARK: - Action Plan (Step 9)
+    // MARK: - Step 7: FASTER History
 
+    var fasterHistory: [FASTERHistoryEntry] = []
+    var hasFasterData: Bool { !fasterHistory.isEmpty }
+    var selectedFasterEntry: FASTERHistoryEntry?  // For chart tap detail
+
+    // MARK: - Step 8: Action Plan
+
+    var missedActivities: [DayActivityRecord] = []      // Activities that weren't done on event day
+    var recommendedActivities: [RecommendedActivity] = [] // Activities not in plan
+    var selectedRecommendations: Set<String> = []         // Activity types user selected to add
     var actionItems: [ActionItemEntry] = []
 
     // MARK: - Sharing
@@ -170,9 +185,8 @@ class PostMortemViewModel {
 
     // MARK: - Constants
 
-    static let allSectionNames = ["dayBefore", "morning", "throughoutTheDay", "buildUp", "actingOut", "immediatelyAfter"]
-    static let triggerCategories = ["emotional", "environmental", "relational", "physical", "digital", "spiritual"]
-    static let fasterStages = ["restoration", "forgetting-priorities", "anxiety", "speeding-up", "ticked-off", "exhausted", "relapse"]
+    static let allSectionNames = ["actingOut", "throughoutTheDay", "dayBefore", "buildUp", "triggers", "immediatelyAfter"]
+    static let triggerCategories = ["emotional", "physical", "environmental", "relational", "cognitive", "spiritual", "situational"]
     static let actionCategories = ["spiritual", "relational", "emotional", "physical", "practical"]
 
     private let logger = Logger(subsystem: "com.regalrecovery.app", category: "PostMortemViewModel")
@@ -187,58 +201,52 @@ class PostMortemViewModel {
 
     func canAdvance() -> Bool {
         switch currentStep {
-        case .eventType:
-            // Validate event type selection
-            guard !eventType.isEmpty else { return false }
-            if eventType == "relapse" {
-                return relapseId != nil || addictionId != nil
-            }
-            if eventType == "near-miss" {
-                return relapseId == nil  // Near-miss cannot have relapseId
-            }
-            return true
+        case .actingOut:
+            return !actingOutDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        case .throughoutTheDay:
+            return true  // Optional step, can advance even if empty
 
         case .dayBefore:
             return !dayBeforeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
-        case .morning:
-            return !morningText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-
-        case .throughoutTheDay:
-            return !timeBlocks.isEmpty || !freeFormEntries.isEmpty
-
         case .buildUp:
-            return !buildUpFirstNoticed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-
-        case .actingOut:
-            return !actingOutDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-
-        case .immediatelyAfter:
-            return !afterWhatDidNext.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            return !firstNoticed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
         case .triggers:
             return true  // Optional step
 
-        case .fasterMapping:
-            return true  // Optional step
+        case .immediatelyAfter:
+            return !whatDidNext.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+
+        case .fasterHistory:
+            return true  // Optional step, auto-advance if no data
 
         case .actionPlan:
-            return actionItemCountValid
-
-        case .review:
             return canComplete
         }
     }
 
     func advance() {
         guard canAdvance() else { return }
-        if let nextStep = FlowStep(rawValue: currentStep.rawValue + 1) {
+
+        // Auto-skip FASTER history if no data
+        if currentStep == .immediatelyAfter && !hasFasterData {
+            if let nextStep = FlowStep(rawValue: FlowStep.actionPlan.rawValue) {
+                currentStep = nextStep
+            }
+        } else if let nextStep = FlowStep(rawValue: currentStep.rawValue + 1) {
             currentStep = nextStep
         }
     }
 
     func goBack() {
-        if let prevStep = FlowStep(rawValue: currentStep.rawValue - 1) {
+        // Auto-skip FASTER history going backwards if no data
+        if currentStep == .actionPlan && !hasFasterData {
+            if let prevStep = FlowStep(rawValue: FlowStep.immediatelyAfter.rawValue) {
+                currentStep = prevStep
+            }
+        } else if let prevStep = FlowStep(rawValue: currentStep.rawValue - 1) {
             currentStep = prevStep
         }
     }
@@ -248,22 +256,22 @@ class PostMortemViewModel {
     var completedSections: [String] {
         var sections: [String] = []
 
-        if !dayBeforeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            sections.append("dayBefore")
-        }
-        if !morningText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            sections.append("morning")
-        }
-        if !timeBlocks.isEmpty || !freeFormEntries.isEmpty {
-            sections.append("throughoutTheDay")
-        }
-        if !buildUpFirstNoticed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            sections.append("buildUp")
-        }
         if !actingOutDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             sections.append("actingOut")
         }
-        if !afterWhatDidNext.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+        if !throughoutDayText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !timeBlocksForDay.isEmpty || !activitiesForDay.isEmpty {
+            sections.append("throughoutTheDay")
+        }
+        if !dayBeforeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            sections.append("dayBefore")
+        }
+        if !firstNoticed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            sections.append("buildUp")
+        }
+        if !triggerSummary.isEmpty || !triggerDetails.isEmpty {
+            sections.append("triggers")
+        }
+        if !whatDidNext.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             sections.append("immediatelyAfter")
         }
 
@@ -283,14 +291,13 @@ class PostMortemViewModel {
     func validateForCompletion() -> [String] {
         var errors: [String] = []
 
-        // All 6 sections required
-        let missing = remainingSections
-        if !missing.isEmpty {
-            errors.append("Missing required sections: \(missing.joined(separator: ", "))")
+        // Acting out description required
+        if actingOutDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            errors.append("Acting out description is required")
         }
 
-        // At least 1 action item required
-        if actionItems.isEmpty {
+        // At least 1 action item required (custom or selected recommendation)
+        if actionItems.isEmpty && selectedRecommendations.isEmpty {
             errors.append("At least one action plan item is required")
         }
 
@@ -298,21 +305,11 @@ class PostMortemViewModel {
         if dayBeforeMoodRating < 1 || dayBeforeMoodRating > 10 {
             errors.append("Day before mood rating must be between 1 and 10")
         }
-        if morningMoodRating < 1 || morningMoodRating > 10 {
-            errors.append("Morning mood rating must be between 1 and 10")
-        }
 
         // Trigger categories must be valid
         for category in triggerSummary {
             if !Self.triggerCategories.contains(category) {
                 errors.append("Invalid trigger category: \(category)")
-            }
-        }
-
-        // FASTER stages must be valid
-        for entry in fasterMapping {
-            if !Self.fasterStages.contains(entry.stage) {
-                errors.append("Invalid FASTER stage: \(entry.stage)")
             }
         }
 
@@ -330,6 +327,209 @@ class PostMortemViewModel {
         validateForCompletion().isEmpty
     }
 
+    // MARK: - Data Loading Methods
+
+    @MainActor
+    func loadDayContext(context: ModelContext, userId: UUID, date: Date) {
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+
+        // Load time blocks for the day
+        let timeBlockDescriptor = FetchDescriptor<RRTimeBlock>(
+            predicate: #Predicate { block in
+                block.userId == userId && block.date >= startOfDay && block.date < endOfDay
+            },
+            sortBy: [SortDescriptor(\.startHour), SortDescriptor(\.startMinute)]
+        )
+        timeBlocksForDay = (try? context.fetch(timeBlockDescriptor)) ?? []
+
+        // Load activities for the day
+        let activityDescriptor = FetchDescriptor<RRActivity>(
+            predicate: #Predicate { activity in
+                activity.userId == userId && activity.date >= startOfDay && activity.date < endOfDay
+            },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        activitiesForDay = (try? context.fetch(activityDescriptor)) ?? []
+    }
+
+    @MainActor
+    func loadDayBeforeContext(context: ModelContext, userId: UUID, date: Date) {
+        let dayBefore = Calendar.current.date(byAdding: .day, value: -1, to: date)!
+        let startOfDayBefore = Calendar.current.startOfDay(for: dayBefore)
+        let endOfDayBefore = Calendar.current.date(byAdding: .day, value: 1, to: startOfDayBefore)!
+
+        // Load user's recovery plan
+        let planDescriptor = FetchDescriptor<RRRecoveryPlan>(
+            predicate: #Predicate { plan in
+                plan.userId == userId && plan.isActive
+            }
+        )
+        guard let plan = try? context.fetch(planDescriptor).first,
+              let planItems = plan.items else {
+            dayBeforeActivities = []
+            return
+        }
+
+        // For each planned activity, check if it was completed
+        var records: [DayActivityRecord] = []
+
+        for item in planItems where item.isEnabled {
+            // Find matching DailyEligibleActivity for display info
+            guard let eligibleActivity = DailyEligibleActivity.all.first(where: { $0.activityType == item.activityType }) else {
+                continue
+            }
+
+            // Check if activity was completed day before
+            let itemType = item.activityType
+            let activityDescriptor = FetchDescriptor<RRActivity>(
+                predicate: #Predicate { activity in
+                    activity.userId == userId &&
+                    activity.activityType == itemType &&
+                    activity.date >= startOfDayBefore &&
+                    activity.date < endOfDayBefore
+                }
+            )
+            let wasCompleted = (try? context.fetch(activityDescriptor).first) != nil
+
+            records.append(DayActivityRecord(
+                activityType: item.activityType,
+                title: eligibleActivity.displayName,
+                icon: eligibleActivity.icon,
+                iconColor: eligibleActivity.section.iconColor,
+                wasCompleted: wasCompleted
+            ))
+        }
+
+        dayBeforeActivities = records.sorted { !$0.wasCompleted && $1.wasCompleted }
+    }
+
+    @MainActor
+    func loadUserTriggers(context: ModelContext, userId: UUID) {
+        let descriptor = FetchDescriptor<RRTriggerDefinition>(
+            predicate: #Predicate { trigger in
+                trigger.userId == userId
+            },
+            sortBy: [SortDescriptor(\.useCount, order: .reverse), SortDescriptor(\.label)]
+        )
+
+        let definitions = (try? context.fetch(descriptor)) ?? []
+        userTriggers = definitions.map { def in
+            UserTriggerItem(
+                id: def.id,
+                label: def.label,
+                category: def.category.displayName,
+                isSelected: false
+            )
+        }
+    }
+
+    @MainActor
+    func loadFasterHistory(context: ModelContext, userId: UUID) {
+        let fourWeeksAgo = Calendar.current.date(byAdding: .day, value: -28, to: Date())!
+
+        let descriptor = FetchDescriptor<RRFASTEREntry>(
+            predicate: #Predicate { entry in
+                entry.userId == userId && entry.date >= fourWeeksAgo
+            },
+            sortBy: [SortDescriptor(\.date)]
+        )
+
+        let entries = (try? context.fetch(descriptor)) ?? []
+        fasterHistory = entries.map { entry in
+            let stage = FASTERStage(rawValue: entry.stage) ?? .restoration
+            return FASTERHistoryEntry(
+                id: entry.id,
+                date: entry.date,
+                stage: entry.stage,
+                moodScore: entry.moodScore,
+                stageName: stage.name,
+                stageColor: stage.color
+            )
+        }
+    }
+
+    @MainActor
+    func loadActionPlanContext(context: ModelContext, userId: UUID, date: Date) {
+        let startOfDay = Calendar.current.startOfDay(for: date)
+        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+
+        // Load user's recovery plan
+        let planDescriptor = FetchDescriptor<RRRecoveryPlan>(
+            predicate: #Predicate { plan in
+                plan.userId == userId && plan.isActive
+            }
+        )
+        guard let plan = try? context.fetch(planDescriptor).first,
+              let planItems = plan.items else {
+            missedActivities = []
+            recommendedActivities = []
+            return
+        }
+
+        // Identify missed activities on event day
+        var missed: [DayActivityRecord] = []
+        var activitiesInPlan = Set<String>()
+
+        for item in planItems where item.isEnabled {
+            activitiesInPlan.insert(item.activityType)
+
+            guard let eligibleActivity = DailyEligibleActivity.all.first(where: { $0.activityType == item.activityType }) else {
+                continue
+            }
+
+            let itemType = item.activityType
+            let activityDescriptor = FetchDescriptor<RRActivity>(
+                predicate: #Predicate { activity in
+                    activity.userId == userId &&
+                    activity.activityType == itemType &&
+                    activity.date >= startOfDay &&
+                    activity.date < endOfDay
+                }
+            )
+            let wasCompleted = (try? context.fetch(activityDescriptor).first) != nil
+
+            if !wasCompleted {
+                missed.append(DayActivityRecord(
+                    activityType: item.activityType,
+                    title: eligibleActivity.displayName,
+                    icon: eligibleActivity.icon,
+                    iconColor: eligibleActivity.section.iconColor,
+                    wasCompleted: false
+                ))
+            }
+        }
+
+        missedActivities = missed
+
+        // Recommend activities not in plan (basic recommendations for common recovery activities)
+        var recommendations: [RecommendedActivity] = []
+
+        let recommendableActivities: [(String, String, String, Color, String)] = [
+            (ActivityType.urgeLog.rawValue, "Urge Logging", "exclamationmark.triangle.fill", .orange, "Track triggers early"),
+            (ActivityType.fasterScale.rawValue, "FASTER Scale", "gauge.with.needle", .rrSuccess, "Daily emotional check-in"),
+            (ActivityType.journal.rawValue, "Journaling", "note.text", .purple, "Process thoughts and feelings"),
+            (ActivityType.prayer.rawValue, "Prayer", "hands.and.sparkles.fill", .rrSecondary, "Connect with God"),
+            (ActivityType.gratitude.rawValue, "Gratitude", "leaf.fill", .rrSuccess, "Shift focus to blessings"),
+            (ActivityType.exercise.rawValue, "Exercise", "figure.run", .rrSuccess, "Physical stress release"),
+            (ActivityType.phoneCalls.rawValue, "Phone Calls", "phone.fill", .rrPrimary, "Stay connected"),
+        ]
+
+        for (activityType, title, icon, color, reason) in recommendableActivities {
+            if !activitiesInPlan.contains(activityType) {
+                recommendations.append(RecommendedActivity(
+                    activityType: activityType,
+                    title: title,
+                    icon: icon,
+                    iconColor: color,
+                    reason: reason
+                ))
+            }
+        }
+
+        recommendedActivities = recommendations
+    }
+
     // MARK: - Trigger Management
 
     func addTrigger() {
@@ -342,26 +542,81 @@ class PostMortemViewModel {
         triggerDetails.remove(atOffsets: offsets)
     }
 
+    func addBuildUpTrigger() {
+        if triggers.count < 15 {
+            triggers.append(TriggerEntry())
+        }
+    }
+
+    func removeBuildUpTrigger(at index: Int) {
+        guard triggers.indices.contains(index) else { return }
+        triggers.remove(at: index)
+    }
+
+    func addCustomTrigger() {
+        if triggerDetails.count < 15 {
+            triggerDetails.append(TriggerEntry())
+        }
+    }
+
+    func removeCustomTrigger(at index: Int) {
+        guard triggerDetails.indices.contains(index) else { return }
+        triggerDetails.remove(at: index)
+    }
+
     func toggleTriggerCategory(_ category: String) {
         if triggerSummary.contains(category) {
             triggerSummary.removeAll { $0 == category }
         } else {
-            if triggerSummary.count < 6 {
+            if triggerSummary.count < 7 {
                 triggerSummary.append(category)
             }
         }
     }
 
-    // MARK: - FASTER Mapping
-
-    func addFasterMappingEntry() {
-        if fasterMapping.count < 24 {
-            fasterMapping.append(FasterMappingEntry())
+    func toggleUserTrigger(_ triggerId: UUID) {
+        if let index = userTriggers.firstIndex(where: { $0.id == triggerId }) {
+            userTriggers[index].isSelected.toggle()
         }
     }
 
-    func removeFasterMappingEntry(at offsets: IndexSet) {
-        fasterMapping.remove(atOffsets: offsets)
+    // MARK: - Build-Up Helpers
+
+    func addMissedHelpOpportunity() {
+        missedHelpOpportunities.append(MissedHelpEntry())
+    }
+
+    func removeMissedHelpOpportunity(at index: Int) {
+        guard missedHelpOpportunities.indices.contains(index) else { return }
+        missedHelpOpportunities.remove(at: index)
+    }
+
+    func addDecisionPoint() {
+        decisionPoints.append(DecisionPointEntry())
+    }
+
+    func removeDecisionPoint(at index: Int) {
+        guard decisionPoints.indices.contains(index) else { return }
+        decisionPoints.remove(at: index)
+    }
+
+    // MARK: - Feelings Management
+
+    func addFeeling(_ feeling: String) {
+        guard !feeling.isEmpty, !feelings.contains(feeling) else { return }
+        feelings.append(feeling)
+    }
+
+    func removeFeeling(_ feeling: String) {
+        feelings.removeAll { $0 == feeling }
+    }
+
+    // MARK: - Timeline Management
+
+    func addFreeFormEntry(time: Date, description: String) {
+        let timeFormatter = DateFormatter()
+        timeFormatter.timeStyle = .short
+        freeFormEntries.append(FreeFormEntry(time: timeFormatter.string(from: time), text: description))
     }
 
     // MARK: - Action Plan
@@ -376,8 +631,17 @@ class PostMortemViewModel {
         actionItems.remove(atOffsets: offsets)
     }
 
-    var actionItemCountValid: Bool {
-        actionItems.count >= 1 && actionItems.count <= 10
+    func removeActionItemAt(at index: Int) {
+        guard actionItems.indices.contains(index) else { return }
+        actionItems.remove(at: index)
+    }
+
+    func toggleRecommendation(_ activityType: String) {
+        if selectedRecommendations.contains(activityType) {
+            selectedRecommendations.remove(activityType)
+        } else {
+            selectedRecommendations.insert(activityType)
+        }
     }
 
     // MARK: - Draft Persistence (SwiftData)
@@ -414,7 +678,7 @@ class PostMortemViewModel {
         postMortem.sectionsCompleted = completedSections
         postMortem.sectionsRemaining = remainingSections
         postMortem.triggerSummary = triggerSummary
-        postMortem.actionItemCount = actionItems.count
+        postMortem.actionItemCount = actionItems.count + selectedRecommendations.count
         postMortem.synced = false
         postMortem.modifiedAt = Date()
 
@@ -432,19 +696,10 @@ class PostMortemViewModel {
         }
         postMortem.triggerDetails = triggerPayloads
 
-        // Serialize FASTER mapping
-        let fasterPayloads = fasterMapping.map { entry in
-            FasterMappingEntryPayload(
-                timeOfDay: entry.timeOfDay.isEmpty ? nil : entry.timeOfDay,
-                stage: entry.stage.isEmpty ? nil : entry.stage
-            )
-        }
-        postMortem.fasterMapping = fasterPayloads
-
-        // Serialize action plan
+        // Serialize action plan (include custom items + selected recommendations)
         let actionPayloads = actionItems.map { item in
             ActionPlanItemPayload(
-                actionId: nil,  // Server-assigned
+                actionId: nil,
                 timelinePoint: item.timelinePoint.isEmpty ? nil : item.timelinePoint,
                 action: item.action.isEmpty ? nil : item.action,
                 category: item.category.isEmpty ? nil : item.category,
@@ -458,6 +713,22 @@ class PostMortemViewModel {
         existingDraftId = postMortem.id
 
         logger.info("Saved post-mortem draft: \(postMortem.id)")
+    }
+
+    func complete(context: ModelContext) throws {
+        guard canComplete else {
+            throw PostMortemError.incompleteData(errors: validateForCompletion())
+        }
+
+        // Mark as complete locally
+        isDraft = false
+        showCompletionMessage = true
+        completionMessage = "Thank you for your honesty and courage. Every insight you have gained here is a step toward lasting freedom."
+
+        // Save final state to SwiftData
+        try saveDraft(context: context)
+
+        logger.info("Post-mortem completed locally")
     }
 
     @MainActor
@@ -475,45 +746,18 @@ class PostMortemViewModel {
             if let dayBefore = sections.dayBefore {
                 dayBeforeText = dayBefore.text ?? ""
                 dayBeforeMoodRating = dayBefore.moodRating ?? 5
-                dayBeforeRecoveryPracticesKept = dayBefore.recoveryPracticesKept ?? true
                 dayBeforeUnresolvedConflicts = dayBefore.unresolvedConflicts ?? ""
             }
 
-            if let morning = sections.morning {
-                morningText = morning.text ?? ""
-                morningMoodRating = morning.moodRating ?? 5
-                morningCommitmentCompleted = morning.morningCommitmentCompleted ?? false
-                morningAffirmationViewed = morning.affirmationViewed ?? false
-            }
-
             if let throughoutDay = sections.throughoutTheDay {
-                timeBlocks = throughoutDay.timeBlocks?.map { block in
-                    TimeBlockEntry(
-                        period: block.period ?? "morning",
-                        startTime: block.startTime ?? "",
-                        endTime: block.endTime ?? "",
-                        activity: block.activity ?? "",
-                        location: block.location ?? "",
-                        company: block.company ?? "",
-                        thoughts: block.thoughts ?? "",
-                        feelings: block.feelings ?? "",
-                        warningSigns: block.warningSigns ?? []
-                    )
-                } ?? []
-
-                freeFormEntries = throughoutDay.freeFormEntries?.map { entry in
-                    FreeFormEntry(
-                        time: entry.time ?? "",
-                        text: entry.text ?? ""
-                    )
-                } ?? []
+                throughoutDayText = throughoutDay.freeFormEntries?.first?.text ?? ""
             }
 
             if let buildUp = sections.buildUp {
-                buildUpFirstNoticed = buildUp.firstNoticed ?? ""
-                buildUpResponseToWarnings = buildUp.responseToWarnings ?? ""
+                firstNoticed = buildUp.firstNoticed ?? ""
+                responseToWarnings = buildUp.responseToWarnings ?? ""
 
-                buildUpTriggers = buildUp.triggers?.map { trigger in
+                triggers = buildUp.triggers?.map { trigger in
                     TriggerEntry(
                         category: trigger.category ?? "",
                         surface: trigger.surface ?? "",
@@ -522,14 +766,14 @@ class PostMortemViewModel {
                     )
                 } ?? []
 
-                buildUpMissedHelpOpportunities = buildUp.missedHelpOpportunities?.map { opportunity in
+                missedHelpOpportunities = buildUp.missedHelpOpportunities?.map { opportunity in
                     MissedHelpEntry(
                         description: opportunity.description ?? "",
                         reason: opportunity.reason ?? ""
                     )
                 } ?? []
 
-                buildUpDecisionPoints = buildUp.decisionPoints?.map { point in
+                decisionPoints = buildUp.decisionPoints?.map { point in
                     DecisionPointEntry(
                         timeOfDay: point.timeOfDay ?? "",
                         description: point.description ?? "",
@@ -541,18 +785,16 @@ class PostMortemViewModel {
 
             if let actingOut = sections.actingOut {
                 actingOutDescription = actingOut.description ?? ""
-                actingOutAddictionId = actingOut.addictionId
                 actingOutDurationMinutes = actingOut.durationMinutes
-                actingOutLinkedRelapseId = actingOut.linkedRelapseId
             }
 
             if let after = sections.immediatelyAfter {
-                afterFeelings = after.feelings ?? []
-                afterFeelingsWheelSelections = after.feelingsWheelSelections ?? []
-                afterWhatDidNext = after.whatDidNext ?? ""
-                afterReachedOut = after.reachedOut ?? false
-                afterReachedOutTo = after.reachedOutTo
-                afterWishDoneDifferently = after.wishDoneDifferently ?? ""
+                feelings = after.feelings ?? []
+                feelingsWheelSelections = after.feelingsWheelSelections ?? []
+                whatDidNext = after.whatDidNext ?? ""
+                reachedOut = after.reachedOut ?? false
+                reachedOutTo = after.reachedOutTo
+                wishDoneDifferently = after.wishDoneDifferently ?? ""
             }
         }
 
@@ -564,14 +806,6 @@ class PostMortemViewModel {
                 surface: payload.surface ?? "",
                 underlying: payload.underlying ?? "",
                 coreWound: payload.coreWound ?? ""
-            )
-        }
-
-        // Load FASTER mapping
-        fasterMapping = postMortem.fasterMapping.map { payload in
-            FasterMappingEntry(
-                timeOfDay: payload.timeOfDay ?? "",
-                stage: payload.stage ?? ""
             )
         }
 
@@ -720,12 +954,7 @@ class PostMortemViewModel {
                     coreWound: entry.coreWound.isEmpty ? nil : entry.coreWound
                 )
             },
-            fasterMapping: fasterMapping.isEmpty ? nil : fasterMapping.map { entry in
-                FasterMappingEntryPayload(
-                    timeOfDay: entry.timeOfDay.isEmpty ? nil : entry.timeOfDay,
-                    stage: entry.stage.isEmpty ? nil : entry.stage
-                )
-            },
+            fasterMapping: nil,  // Removed: now using real FASTER history instead
             actionPlan: actionItems.isEmpty ? nil : actionItems.map { item in
                 ActionPlanItemPayload(
                     actionId: nil,
@@ -744,40 +973,19 @@ class PostMortemViewModel {
             dayBefore: dayBeforeText.isEmpty ? nil : DayBeforeSectionPayload(
                 text: dayBeforeText,
                 moodRating: dayBeforeMoodRating,
-                recoveryPracticesKept: dayBeforeRecoveryPracticesKept,
+                recoveryPracticesKept: nil,  // Removed: replaced by activity history
                 unresolvedConflicts: dayBeforeUnresolvedConflicts.isEmpty ? nil : dayBeforeUnresolvedConflicts
             ),
-            morning: morningText.isEmpty ? nil : MorningSectionPayload(
-                text: morningText,
-                moodRating: morningMoodRating,
-                morningCommitmentCompleted: morningCommitmentCompleted,
-                affirmationViewed: morningAffirmationViewed,
-                autoPopulated: nil
+            morning: nil,  // Removed: morning section no longer exists
+            throughoutTheDay: throughoutDayText.isEmpty ? nil : ThroughoutTheDaySectionPayload(
+                timeBlocks: nil,  // Time blocks are loaded from RRTimeBlock, not user-entered
+                freeFormEntries: throughoutDayText.isEmpty ? nil : [
+                    FreeFormEntryPayload(time: nil, text: throughoutDayText)
+                ]
             ),
-            throughoutTheDay: (timeBlocks.isEmpty && freeFormEntries.isEmpty) ? nil : ThroughoutTheDaySectionPayload(
-                timeBlocks: timeBlocks.isEmpty ? nil : timeBlocks.map { block in
-                    TimeBlockPayload(
-                        period: block.period.isEmpty ? nil : block.period,
-                        startTime: block.startTime.isEmpty ? nil : block.startTime,
-                        endTime: block.endTime.isEmpty ? nil : block.endTime,
-                        activity: block.activity.isEmpty ? nil : block.activity,
-                        location: block.location.isEmpty ? nil : block.location,
-                        company: block.company.isEmpty ? nil : block.company,
-                        thoughts: block.thoughts.isEmpty ? nil : block.thoughts,
-                        feelings: block.feelings.isEmpty ? nil : block.feelings,
-                        warningSigns: block.warningSigns.isEmpty ? nil : block.warningSigns
-                    )
-                },
-                freeFormEntries: freeFormEntries.isEmpty ? nil : freeFormEntries.map { entry in
-                    FreeFormEntryPayload(
-                        time: entry.time.isEmpty ? nil : entry.time,
-                        text: entry.text.isEmpty ? nil : entry.text
-                    )
-                }
-            ),
-            buildUp: buildUpFirstNoticed.isEmpty ? nil : BuildUpSectionPayload(
-                firstNoticed: buildUpFirstNoticed,
-                triggers: buildUpTriggers.isEmpty ? nil : buildUpTriggers.map { trigger in
+            buildUp: firstNoticed.isEmpty ? nil : BuildUpSectionPayload(
+                firstNoticed: firstNoticed,
+                triggers: triggers.isEmpty ? nil : triggers.map { trigger in
                     TriggerDetailPayload(
                         category: trigger.category.isEmpty ? nil : trigger.category,
                         surface: trigger.surface.isEmpty ? nil : trigger.surface,
@@ -785,14 +993,14 @@ class PostMortemViewModel {
                         coreWound: trigger.coreWound.isEmpty ? nil : trigger.coreWound
                     )
                 },
-                responseToWarnings: buildUpResponseToWarnings.isEmpty ? nil : buildUpResponseToWarnings,
-                missedHelpOpportunities: buildUpMissedHelpOpportunities.isEmpty ? nil : buildUpMissedHelpOpportunities.map { opportunity in
+                responseToWarnings: responseToWarnings.isEmpty ? nil : responseToWarnings,
+                missedHelpOpportunities: missedHelpOpportunities.isEmpty ? nil : missedHelpOpportunities.map { opportunity in
                     MissedHelpOpportunityPayload(
                         description: opportunity.description.isEmpty ? nil : opportunity.description,
                         reason: opportunity.reason.isEmpty ? nil : opportunity.reason
                     )
                 },
-                decisionPoints: buildUpDecisionPoints.isEmpty ? nil : buildUpDecisionPoints.map { point in
+                decisionPoints: decisionPoints.isEmpty ? nil : decisionPoints.map { point in
                     DecisionPointPayload(
                         timeOfDay: point.timeOfDay.isEmpty ? nil : point.timeOfDay,
                         description: point.description.isEmpty ? nil : point.description,
@@ -803,19 +1011,33 @@ class PostMortemViewModel {
             ),
             actingOut: actingOutDescription.isEmpty ? nil : ActingOutSectionPayload(
                 description: actingOutDescription,
-                addictionId: actingOutAddictionId,
+                addictionId: addictionId,
                 durationMinutes: actingOutDurationMinutes,
-                linkedRelapseId: actingOutLinkedRelapseId
+                linkedRelapseId: relapseId
             ),
-            immediatelyAfter: afterWhatDidNext.isEmpty ? nil : ImmediatelyAfterSectionPayload(
-                feelings: afterFeelings.isEmpty ? nil : afterFeelings,
-                feelingsWheelSelections: afterFeelingsWheelSelections.isEmpty ? nil : afterFeelingsWheelSelections,
-                whatDidNext: afterWhatDidNext,
-                reachedOut: afterReachedOut,
-                reachedOutTo: afterReachedOutTo,
-                wishDoneDifferently: afterWishDoneDifferently.isEmpty ? nil : afterWishDoneDifferently
+            immediatelyAfter: whatDidNext.isEmpty ? nil : ImmediatelyAfterSectionPayload(
+                feelings: feelings.isEmpty ? nil : feelings,
+                feelingsWheelSelections: feelingsWheelSelections.isEmpty ? nil : feelingsWheelSelections,
+                whatDidNext: whatDidNext,
+                reachedOut: reachedOut,
+                reachedOutTo: reachedOutTo,
+                wishDoneDifferently: wishDoneDifferently.isEmpty ? nil : wishDoneDifferently
             )
         )
+    }
+}
+
+// MARK: - Activity Section Icon Color Extension
+
+extension ActivitySection {
+    var iconColor: Color {
+        switch self {
+        case .sobrietyCommitment: return .rrSecondary
+        case .journalingReflection: return .purple
+        case .selfCare: return .rrSuccess
+        case .connection: return .rrPrimary
+        case .growth: return .orange
+        }
     }
 }
 

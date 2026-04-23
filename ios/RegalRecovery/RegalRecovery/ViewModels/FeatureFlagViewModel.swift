@@ -136,7 +136,7 @@ class FeatureFlagViewModel {
         FeatureFlag(key: "activity.phone-calls", label: "Phone Calls", enabled: true),
         FeatureFlag(key: "activity.prayer", label: "Prayer", enabled: true),
         FeatureFlag(key: "activity.integrity-inventory", label: "Integrity Inventory", enabled: false),
-        FeatureFlag(key: "activity.lbi", label: "Life Balance", enabled: false),
+        FeatureFlag(key: "feature.lbi", label: "Life Balance", enabled: false),
     ]
 
     static let defaultAssessments: [FeatureFlag] = [

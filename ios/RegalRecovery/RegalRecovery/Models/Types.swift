@@ -1139,7 +1139,7 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.lbi",
+            featureFlagKey: "feature.lbi",
             section: .sobrietyCommitment
         ),
         DailyEligibleActivity(

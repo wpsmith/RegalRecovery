@@ -37,7 +37,12 @@ struct PostMortemView: View {
         }
         .onAppear {
             if let userId = users.first?.id {
-                _ = viewModel.resumeLatestDraft(context: modelContext, userId: userId)
+                let date = viewModel.timestamp
+                viewModel.loadDayContext(context: modelContext, userId: userId, date: date)
+                viewModel.loadDayBeforeContext(context: modelContext, userId: userId, date: date)
+                viewModel.loadUserTriggers(context: modelContext, userId: userId)
+                viewModel.loadFasterHistory(context: modelContext, userId: userId)
+                viewModel.loadActionPlanContext(context: modelContext, userId: userId, date: date)
             }
         }
     }
@@ -47,9 +52,9 @@ struct PostMortemView: View {
     private var progressBar: some View {
         VStack(spacing: 8) {
             HStack(spacing: 4) {
-                ForEach(PostMortemViewModel.FlowStep.allCases, id: \.rawValue) { step in
+                ForEach(Array(PostMortemViewModel.FlowStep.allCases.enumerated()), id: \.offset) { index, step in
                     Capsule()
-                        .fill(step.rawValue <= viewModel.currentStep.rawValue ? Color.rrPrimary : Color.rrTextSecondary.opacity(0.3))
+                        .fill(index <= viewModel.currentStep.rawValue ? Color.rrPrimary : Color.rrTextSecondary.opacity(0.3))
                         .frame(height: 4)
                 }
             }
@@ -72,28 +77,22 @@ struct PostMortemView: View {
     @ViewBuilder
     private var stepContent: some View {
         switch viewModel.currentStep {
-        case .eventType:
-            EventTypeStepView(viewModel: viewModel, addictions: addictions)
-        case .dayBefore:
-            DayBeforeSectionView(viewModel: viewModel)
-        case .morning:
-            MorningSectionView(viewModel: viewModel)
-        case .throughoutTheDay:
-            ThroughoutTheDayView(viewModel: viewModel)
-        case .buildUp:
-            BuildUpSectionView(viewModel: viewModel)
         case .actingOut:
-            ActingOutSectionView(viewModel: viewModel, addictions: addictions)
-        case .immediatelyAfter:
-            ImmediatelyAfterSectionView(viewModel: viewModel)
+            ActingOutStepView(viewModel: viewModel, addictions: addictions)
+        case .throughoutTheDay:
+            ThroughoutTheDayStepView(viewModel: viewModel)
+        case .dayBefore:
+            DayBeforeStepView(viewModel: viewModel)
+        case .buildUp:
+            BuildUpStepView(viewModel: viewModel)
         case .triggers:
             TriggersStepView(viewModel: viewModel)
-        case .fasterMapping:
-            FasterMappingStepView(viewModel: viewModel)
+        case .immediatelyAfter:
+            ImmediatelyAfterStepView(viewModel: viewModel)
+        case .fasterHistory:
+            FasterHistoryStepView(viewModel: viewModel)
         case .actionPlan:
             ActionPlanStepView(viewModel: viewModel)
-        case .review:
-            ReviewStepView(viewModel: viewModel, modelContext: modelContext)
         }
     }
 
@@ -121,32 +120,25 @@ struct PostMortemView: View {
 
             Button {
                 withAnimation {
-                    if viewModel.currentStep == .review {
-                        // Complete on review step
-                        Task {
-                            do {
-                                try viewModel.saveDraft(context: modelContext)
-                            } catch {
-                                viewModel.error = error.localizedDescription
+                    if viewModel.currentStep == .actionPlan {
+                        if viewModel.canComplete {
+                            Task {
+                                do {
+                                    try viewModel.complete(context: modelContext)
+                                    viewModel.showCompletionMessage = true
+                                } catch {
+                                    viewModel.error = error.localizedDescription
+                                }
                             }
                         }
-                        viewModel.showCompletionMessage = true
                     } else {
                         viewModel.advance()
-                        // Auto-save after each step
-                        Task {
-                            do {
-                                try viewModel.saveDraft(context: modelContext)
-                            } catch {
-                                viewModel.error = error.localizedDescription
-                            }
-                        }
                     }
                 }
             } label: {
                 HStack {
-                    Text(viewModel.currentStep == .review ? "Complete" : "Next")
-                    Image(systemName: viewModel.currentStep == .review ? "checkmark" : "chevron.right")
+                    Text(viewModel.currentStep == .actionPlan ? "Complete" : "Next")
+                    Image(systemName: viewModel.currentStep == .actionPlan ? "checkmark" : "chevron.right")
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
@@ -172,11 +164,46 @@ struct PostMortemView: View {
                 .font(RRFont.title)
                 .foregroundStyle(Color.rrText)
 
-            Text(viewModel.completionMessage ?? "Thank you for your honesty and courage. Every insight you have gained here is a step toward lasting freedom.")
+            Text("Thank you for your honesty and courage. Every insight you have gained here is a step toward lasting freedom.")
                 .font(RRFont.body)
                 .foregroundStyle(Color.rrTextSecondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
+
+            if !viewModel.selectedRecommendations.isEmpty || !viewModel.actionItems.isEmpty {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Action Items Added")
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrText)
+
+                    ForEach(Array(viewModel.selectedRecommendations), id: \.self) { activityType in
+                        if let activity = viewModel.recommendedActivities.first(where: { $0.activityType == activityType }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(Color.rrSuccess)
+                                Text(activity.title)
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrText)
+                            }
+                        }
+                    }
+
+                    ForEach(viewModel.actionItems, id: \.id) { item in
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(Color.rrSuccess)
+                            Text(item.action)
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrText)
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.rrSurface)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .padding(.horizontal)
+            }
 
             VStack(spacing: 12) {
                 RRButton("View Action Plan", icon: "list.bullet") {
@@ -194,13 +221,13 @@ struct PostMortemView: View {
             .padding(.horizontal)
         }
         .padding(.vertical, 40)
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
     }
 }
 
-// MARK: - Event Type Step
+// MARK: - Step 1: Acting Out
 
-private struct EventTypeStepView: View {
+private struct ActingOutStepView: View {
     @Bindable var viewModel: PostMortemViewModel
     let addictions: [RRAddiction]
 
@@ -208,14 +235,24 @@ private struct EventTypeStepView: View {
         VStack(spacing: 16) {
             RRCard {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("What type of event is this?")
+                    Text("What Happened?")
                         .font(RRFont.title3)
                         .foregroundStyle(Color.rrText)
+
+                    HStack(spacing: 6) {
+                        Image(systemName: "heart.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Color.rrPrimary)
+                        Text("This is a safe, judgment-free space. Your honesty here is a powerful step toward healing.")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                            .italic()
+                    }
 
                     VStack(spacing: 12) {
                         eventTypeButton("relapse", title: "Relapse", description: "I acted out", icon: "exclamationmark.triangle.fill", color: .red)
                         eventTypeButton("near-miss", title: "Near Miss", description: "I came close but didn't act out", icon: "shield.fill", color: .orange)
-                        eventTypeButton("combined", title: "Both", description: "Near miss followed by relapse", icon: "arrow.triangle.2.circlepath", color: .purple)
+                        eventTypeButton("combined", title: "Combined", description: "Near miss followed by relapse", icon: "arrow.triangle.2.circlepath", color: .purple)
                     }
                 }
             }
@@ -224,7 +261,8 @@ private struct EventTypeStepView: View {
             RRCard {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("When did this happen?")
-                        .font(RRFont.title3)
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
                         .foregroundStyle(Color.rrText)
 
                     DatePicker("Date & Time", selection: $viewModel.timestamp, displayedComponents: [.date, .hourAndMinute])
@@ -233,44 +271,28 @@ private struct EventTypeStepView: View {
             }
             .padding(.horizontal)
 
-            if viewModel.eventType == "relapse" {
-                RRCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Relapse ID (optional)")
-                            .font(RRFont.subheadline)
-                            .foregroundStyle(Color.rrText)
-
-                        TextField("Enter relapse ID if available", text: Binding(
-                            get: { viewModel.relapseId ?? "" },
-                            set: { viewModel.relapseId = $0.isEmpty ? nil : $0 }
-                        ))
-                        .textFieldStyle(.roundedBorder)
-                    }
-                }
-                .padding(.horizontal)
-            }
-
-            if addictions.count > 1 {
+            if viewModel.eventType == "relapse" && addictions.count > 1 {
                 RRCard {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Which addiction?")
-                            .font(RRFont.title3)
+                            .font(RRFont.subheadline)
+                            .fontWeight(.semibold)
                             .foregroundStyle(Color.rrText)
 
                         ForEach(addictions, id: \.id) { addiction in
                             Button {
-                                viewModel.addictionId = addiction.id.uuidString
+                                viewModel.addictionId = addiction.id
                             } label: {
                                 HStack {
-                                    Image(systemName: viewModel.addictionId == addiction.id.uuidString ? "checkmark.circle.fill" : "circle")
-                                        .foregroundStyle(viewModel.addictionId == addiction.id.uuidString ? Color.rrPrimary : Color.rrTextSecondary)
+                                    Image(systemName: viewModel.addictionId == addiction.id ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(viewModel.addictionId == addiction.id ? Color.rrPrimary : Color.rrTextSecondary)
                                     Text(addiction.name)
                                         .font(RRFont.body)
                                         .foregroundStyle(Color.rrText)
                                     Spacer()
                                 }
                                 .padding(12)
-                                .background(viewModel.addictionId == addiction.id.uuidString ? Color.rrPrimary.opacity(0.1) : Color.rrSurface)
+                                .background(viewModel.addictionId == addiction.id ? Color.rrPrimary.opacity(0.1) : Color.rrSurface)
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             }
                         }
@@ -278,6 +300,48 @@ private struct EventTypeStepView: View {
                 }
                 .padding(.horizontal)
             }
+
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Describe what happened")
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrText)
+
+                    Text("No graphic detail needed — focus on the sequence of decisions")
+                        .font(RRFont.caption)
+                        .foregroundStyle(Color.rrTextSecondary)
+                        .italic()
+
+                    TextEditor(text: $viewModel.actingOutDescription)
+                        .frame(minHeight: 120)
+                        .font(RRFont.body)
+                        .scrollContentBackground(.hidden)
+                        .padding(8)
+                        .background(Color.rrBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
+            }
+            .padding(.horizontal)
+
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Duration (optional)")
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrText)
+
+                    HStack {
+                        TextField("Minutes", value: $viewModel.actingOutDurationMinutes, format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.numberPad)
+                        Text("minutes")
+                            .font(RRFont.body)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                }
+            }
+            .padding(.horizontal)
         }
     }
 
@@ -312,9 +376,181 @@ private struct EventTypeStepView: View {
     }
 }
 
-// MARK: - Day Before Section
+// MARK: - Step 2: Throughout the Day
 
-private struct DayBeforeSectionView: View {
+private struct ThroughoutTheDayStepView: View {
+    @Bindable var viewModel: PostMortemViewModel
+    @State private var showAddEntry = false
+    @State private var newEntryTime = Date()
+    @State private var newEntryDescription = ""
+
+    var body: some View {
+        VStack(spacing: 16) {
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Let's Walk Through Your Day")
+                        .font(RRFont.title3)
+                        .foregroundStyle(Color.rrText)
+
+                    Text("Working backwards from what happened...")
+                        .font(RRFont.caption)
+                        .foregroundStyle(Color.rrTextSecondary)
+                        .italic()
+                }
+            }
+            .padding(.horizontal)
+
+            // Timeline view showing time journal and activities
+            if !viewModel.timeBlocksForDay.isEmpty || !viewModel.activitiesForDay.isEmpty {
+                VStack(spacing: 12) {
+                    ForEach(viewModel.timeBlocksForDay.sorted { $0.timestamp > $1.timestamp }, id: \.id) { block in
+                        TimelineEntryCard(
+                            time: block.timestamp,
+                            title: block.activity,
+                            detail: block.need,
+                            icon: "clock.fill",
+                            color: .purple
+                        )
+                        .padding(.horizontal)
+                    }
+
+                    ForEach(viewModel.activitiesForDay.sorted { $0.date > $1.date }, id: \.id) { activity in
+                        TimelineEntryCard(
+                            time: activity.date,
+                            title: activity.activityType,
+                            detail: activity.summary ?? "",
+                            icon: activity.icon ?? "circle.fill",
+                            color: activity.iconColor ?? .rrPrimary
+                        )
+                        .padding(.horizontal)
+                    }
+                }
+            }
+
+            // Free-form entries
+            if !viewModel.freeFormEntries.isEmpty {
+                ForEach(viewModel.freeFormEntries, id: \.id) { entry in
+                    TimelineEntryCard(
+                        time: entry.time,
+                        title: "Custom Entry",
+                        detail: entry.text,
+                        icon: "pencil.circle.fill",
+                        color: .rrSecondary
+                    )
+                    .padding(.horizontal)
+                }
+            }
+
+            RRCard {
+                VStack(spacing: 12) {
+                    Button {
+                        showAddEntry = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Add Timeline Entry")
+                        }
+                        .font(RRFont.body)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(Color.rrPrimary.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    }
+
+                    Text("What happened before that?")
+                        .font(RRFont.caption)
+                        .foregroundStyle(Color.rrTextSecondary)
+                        .italic()
+                }
+            }
+            .padding(.horizontal)
+        }
+        .sheet(isPresented: $showAddEntry) {
+            NavigationStack {
+                Form {
+                    Section("Time") {
+                        DatePicker("When", selection: $newEntryTime, displayedComponents: [.hourAndMinute])
+                    }
+
+                    Section("Description") {
+                        TextEditor(text: $newEntryDescription)
+                            .frame(minHeight: 100)
+                    }
+                }
+                .navigationTitle("Add Entry")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            showAddEntry = false
+                            newEntryDescription = ""
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Add") {
+                            viewModel.addFreeFormEntry(time: newEntryTime, description: newEntryDescription)
+                            showAddEntry = false
+                            newEntryDescription = ""
+                        }
+                        .disabled(newEntryDescription.isEmpty)
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct TimelineEntryCard: View {
+    let time: Any  // Can be Date or String
+    let title: String
+    let detail: String
+    let icon: String
+    let color: Color
+
+    var body: some View {
+        RRCard {
+            HStack(alignment: .top, spacing: 12) {
+                VStack(spacing: 4) {
+                    Image(systemName: icon)
+                        .font(.title3)
+                        .foregroundStyle(color)
+
+                    if let dateTime = time as? Date {
+                        Text(dateTime.formatted(date: .omitted, time: .shortened))
+                            .font(RRFont.caption2)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    } else if let stringTime = time as? String {
+                        Text(stringTime)
+                            .font(RRFont.caption2)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                }
+                .frame(width: 60)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrText)
+
+                    if !detail.isEmpty {
+                        Text(detail)
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                }
+
+                Spacer()
+            }
+        }
+    }
+}
+
+// MARK: - Step 3: Day Before
+
+private struct DayBeforeStepView: View {
     @Bindable var viewModel: PostMortemViewModel
 
     var body: some View {
@@ -325,13 +561,42 @@ private struct DayBeforeSectionView: View {
                         .font(RRFont.title3)
                         .foregroundStyle(Color.rrText)
 
-                    Text("Describe what happened the day before. What was your emotional state? Were there any warning signs?")
+                    Text("What was happening the day before the event?")
                         .font(RRFont.caption)
                         .foregroundStyle(Color.rrTextSecondary)
                         .italic()
+                }
+            }
+            .padding(.horizontal)
+
+            // Activity History
+            if !viewModel.dayBeforeActivities.isEmpty {
+                RRCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Activity History")
+                            .font(RRFont.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.rrText)
+
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                            ForEach(viewModel.dayBeforeActivities, id: \.title) { activity in
+                                ActivityStatusTile(activity: activity)
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("What's missing from this picture?")
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrText)
 
                     TextEditor(text: $viewModel.dayBeforeText)
-                        .frame(minHeight: 120)
+                        .frame(minHeight: 100)
                         .font(RRFont.body)
                         .scrollContentBackground(.hidden)
                         .padding(8)
@@ -349,23 +614,6 @@ private struct DayBeforeSectionView: View {
                         .foregroundStyle(Color.rrText)
 
                     PostMortemMoodRatingView(rating: $viewModel.dayBeforeMoodRating)
-                }
-            }
-            .padding(.horizontal)
-
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Toggle(isOn: $viewModel.dayBeforeRecoveryPracticesKept) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Recovery practices kept")
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                            Text("Did you maintain your routines?")
-                                .font(RRFont.caption)
-                                .foregroundStyle(Color.rrTextSecondary)
-                        }
-                    }
-                    .tint(Color.rrPrimary)
                 }
             }
             .padding(.horizontal)
@@ -391,254 +639,35 @@ private struct DayBeforeSectionView: View {
     }
 }
 
-// MARK: - Morning Section
-
-private struct MorningSectionView: View {
-    @Bindable var viewModel: PostMortemViewModel
+private struct ActivityStatusTile: View {
+    let activity: DayActivityRecord
 
     var body: some View {
-        VStack(spacing: 16) {
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("The Morning")
-                        .font(RRFont.title3)
-                        .foregroundStyle(Color.rrText)
+        VStack(spacing: 8) {
+            Image(systemName: activity.icon)
+                .font(.title2)
+                .foregroundStyle(activity.iconColor)
 
-                    Text("How did your morning start? Did you follow your routine? What was different?")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                        .italic()
+            Text(activity.title)
+                .font(RRFont.caption)
+                .foregroundStyle(Color.rrText)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
 
-                    TextEditor(text: $viewModel.morningText)
-                        .frame(minHeight: 120)
-                        .font(RRFont.body)
-                        .scrollContentBackground(.hidden)
-                        .padding(8)
-                        .background(Color.rrBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                }
-            }
-            .padding(.horizontal)
-
-            RRCard {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Mood Rating")
-                        .font(RRFont.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrText)
-
-                    PostMortemMoodRatingView(rating: $viewModel.morningMoodRating)
-                }
-            }
-            .padding(.horizontal)
-
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Toggle(isOn: $viewModel.morningCommitmentCompleted) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Morning commitment completed")
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                        }
-                    }
-                    .tint(Color.rrPrimary)
-
-                    Divider()
-
-                    Toggle(isOn: $viewModel.morningAffirmationViewed) {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Affirmation viewed")
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                        }
-                    }
-                    .tint(Color.rrPrimary)
-                }
-            }
-            .padding(.horizontal)
+            Image(systemName: activity.wasCompleted ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .font(.caption)
+                .foregroundStyle(activity.wasCompleted ? Color.rrSuccess : Color.rrDestructive)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(activity.wasCompleted ? Color.rrSuccess.opacity(0.08) : Color.rrDestructive.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 }
 
-// MARK: - Throughout the Day
+// MARK: - Step 4: Build-Up
 
-private struct ThroughoutTheDayView: View {
-    @Bindable var viewModel: PostMortemViewModel
-    @State private var showAddTimeBlock = false
-
-    var body: some View {
-        VStack(spacing: 16) {
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Throughout the Day")
-                        .font(RRFont.title3)
-                        .foregroundStyle(Color.rrText)
-
-                    Text("Add time blocks to describe key moments. When did things start to shift?")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                        .italic()
-
-                    Button {
-                        showAddTimeBlock = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Add Time Block")
-                        }
-                        .font(RRFont.body)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.rrPrimary.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
-                }
-            }
-            .padding(.horizontal)
-
-            if !viewModel.timeBlocks.isEmpty {
-                ForEach(Array(viewModel.timeBlocks.enumerated()), id: \.element.id) { index, block in
-                    TimeBlockCard(block: block) {
-                        viewModel.timeBlocks.remove(at: index)
-                    }
-                    .padding(.horizontal)
-                }
-            }
-        }
-        .sheet(isPresented: $showAddTimeBlock) {
-            AddTimeBlockSheet(viewModel: viewModel)
-        }
-    }
-}
-
-private struct TimeBlockCard: View {
-    let block: TimeBlockEntry
-    let onDelete: () -> Void
-
-    var body: some View {
-        RRCard {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Text(block.period.capitalized)
-                        .font(RRFont.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrPrimary)
-
-                    Spacer()
-
-                    Button {
-                        onDelete()
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundStyle(.red)
-                    }
-                }
-
-                if !block.activity.isEmpty {
-                    HStack(alignment: .top) {
-                        Text("Activity:")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                        Text(block.activity)
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrText)
-                    }
-                }
-
-                if !block.location.isEmpty {
-                    HStack(alignment: .top) {
-                        Text("Location:")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                        Text(block.location)
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrText)
-                    }
-                }
-
-                if !block.thoughts.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Thoughts:")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                        Text(block.thoughts)
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrText)
-                    }
-                }
-            }
-        }
-    }
-}
-
-private struct AddTimeBlockSheet: View {
-    @Bindable var viewModel: PostMortemViewModel
-    @Environment(\.dismiss) private var dismiss
-    @State private var period = "morning"
-    @State private var activity = ""
-    @State private var location = ""
-    @State private var company = ""
-    @State private var thoughts = ""
-    @State private var feelings = ""
-
-    let periods = ["morning", "midday", "afternoon", "evening"]
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Time Period") {
-                    Picker("Period", selection: $period) {
-                        ForEach(periods, id: \.self) { period in
-                            Text(period.capitalized).tag(period)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
-
-                Section("Details") {
-                    TextField("Activity", text: $activity)
-                    TextField("Location", text: $location)
-                    TextField("Company", text: $company)
-                }
-
-                Section("Internal State") {
-                    TextField("Thoughts", text: $thoughts, axis: .vertical)
-                        .lineLimit(3...6)
-                    TextField("Feelings", text: $feelings, axis: .vertical)
-                        .lineLimit(3...6)
-                }
-            }
-            .navigationTitle("Add Time Block")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Add") {
-                        let block = TimeBlockEntry(
-                            period: period,
-                            activity: activity,
-                            location: location,
-                            company: company,
-                            thoughts: thoughts,
-                            feelings: feelings
-                        )
-                        viewModel.timeBlocks.append(block)
-                        dismiss()
-                    }
-                    .disabled(activity.isEmpty && thoughts.isEmpty)
-                }
-            }
-        }
-    }
-}
-
-// MARK: - Build-Up Section
-
-private struct BuildUpSectionView: View {
+private struct BuildUpStepView: View {
     @Bindable var viewModel: PostMortemViewModel
 
     var body: some View {
@@ -654,7 +683,7 @@ private struct BuildUpSectionView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.rrText)
 
-                    TextEditor(text: $viewModel.buildUpFirstNoticed)
+                    TextEditor(text: $viewModel.firstNoticed)
                         .frame(minHeight: 100)
                         .font(RRFont.body)
                         .scrollContentBackground(.hidden)
@@ -668,7 +697,7 @@ private struct BuildUpSectionView: View {
             RRCard {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
-                        Text("Triggers")
+                        Text("Trigger Exploration")
                             .font(RRFont.subheadline)
                             .fontWeight(.semibold)
                             .foregroundStyle(Color.rrText)
@@ -676,22 +705,22 @@ private struct BuildUpSectionView: View {
                         Spacer()
 
                         Button {
-                            viewModel.buildUpTriggers.append(TriggerEntry())
+                            viewModel.addBuildUpTrigger()
                         } label: {
                             Image(systemName: "plus.circle.fill")
                                 .foregroundStyle(Color.rrPrimary)
                         }
                     }
 
-                    if viewModel.buildUpTriggers.isEmpty {
-                        Text("Tap + to add triggers")
+                    if viewModel.triggers.isEmpty {
+                        Text("Tap + to add triggers with 3-layer exploration")
                             .font(RRFont.caption)
                             .foregroundStyle(Color.rrTextSecondary)
                             .italic()
                     } else {
-                        ForEach(Array(viewModel.buildUpTriggers.enumerated()), id: \.element.id) { index, trigger in
-                            TriggerEntryView(trigger: binding(for: index)) {
-                                viewModel.buildUpTriggers.remove(at: index)
+                        ForEach(Array(viewModel.triggers.enumerated()), id: \.element.id) { index, _ in
+                            BuildUpTriggerCard(trigger: triggerBinding(for: index)) {
+                                viewModel.removeBuildUpTrigger(at: index)
                             }
                         }
                     }
@@ -701,12 +730,12 @@ private struct BuildUpSectionView: View {
 
             RRCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Response to warnings (optional)")
+                    Text("How did you respond to the warning signs?")
                         .font(RRFont.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.rrText)
 
-                    TextEditor(text: $viewModel.buildUpResponseToWarnings)
+                    TextEditor(text: $viewModel.responseToWarnings)
                         .frame(minHeight: 80)
                         .font(RRFont.body)
                         .scrollContentBackground(.hidden)
@@ -716,18 +745,90 @@ private struct BuildUpSectionView: View {
                 }
             }
             .padding(.horizontal)
+
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Missed Help Opportunities")
+                            .font(RRFont.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.rrText)
+
+                        Spacer()
+
+                        Button {
+                            viewModel.addMissedHelpOpportunity()
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(Color.rrPrimary)
+                        }
+                    }
+
+                    if !viewModel.missedHelpOpportunities.isEmpty {
+                        ForEach(Array(viewModel.missedHelpOpportunities.enumerated()), id: \.element.id) { index, _ in
+                            MissedOpportunityCard(opportunity: opportunityBinding(for: index)) {
+                                viewModel.removeMissedHelpOpportunity(at: index)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
+
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Decision Points")
+                            .font(RRFont.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.rrText)
+
+                        Spacer()
+
+                        Button {
+                            viewModel.addDecisionPoint()
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(Color.rrPrimary)
+                        }
+                    }
+
+                    if !viewModel.decisionPoints.isEmpty {
+                        ForEach(Array(viewModel.decisionPoints.enumerated()), id: \.element.id) { index, _ in
+                            DecisionPointCard(point: decisionPointBinding(for: index)) {
+                                viewModel.removeDecisionPoint(at: index)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
         }
     }
 
-    private func binding(for index: Int) -> Binding<TriggerEntry> {
+    private func triggerBinding(for index: Int) -> Binding<TriggerEntry> {
         Binding(
-            get: { viewModel.buildUpTriggers[index] },
-            set: { viewModel.buildUpTriggers[index] = $0 }
+            get: { viewModel.triggers[index] },
+            set: { viewModel.triggers[index] = $0 }
+        )
+    }
+
+    private func opportunityBinding(for index: Int) -> Binding<MissedHelpEntry> {
+        Binding(
+            get: { viewModel.missedHelpOpportunities[index] },
+            set: { viewModel.missedHelpOpportunities[index] = $0 }
+        )
+    }
+
+    private func decisionPointBinding(for index: Int) -> Binding<DecisionPointEntry> {
+        Binding(
+            get: { viewModel.decisionPoints[index] },
+            set: { viewModel.decisionPoints[index] = $0 }
         )
     }
 }
 
-private struct TriggerEntryView: View {
+private struct BuildUpTriggerCard: View {
     @Binding var trigger: TriggerEntry
     let onDelete: () -> Void
 
@@ -736,8 +837,8 @@ private struct TriggerEntryView: View {
             HStack {
                 Picker("Category", selection: $trigger.category) {
                     Text("Select...").tag("")
-                    ForEach(PostMortemViewModel.triggerCategories, id: \.self) { category in
-                        Text(category.capitalized).tag(category)
+                    ForEach(TriggerCategory.allCases, id: \.rawValue) { category in
+                        Text(category.displayName).tag(category.rawValue)
                     }
                 }
                 .pickerStyle(.menu)
@@ -752,13 +853,46 @@ private struct TriggerEntryView: View {
                 }
             }
 
-            TextField("Surface trigger", text: $trigger.surface)
+            VStack(spacing: 6) {
+                TextField("Surface trigger (what happened)", text: $trigger.surface)
+                    .textFieldStyle(.roundedBorder)
+
+                TextField("Underlying emotion (what you felt)", text: $trigger.underlying)
+                    .textFieldStyle(.roundedBorder)
+
+                TextField("Core wound (deeper root)", text: $trigger.coreWound)
+                    .textFieldStyle(.roundedBorder)
+            }
+        }
+        .padding()
+        .background(Color.rrBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
+private struct MissedOpportunityCard: View {
+    @Binding var opportunity: MissedHelpEntry
+    let onDelete: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Opportunity")
+                    .font(RRFont.caption)
+                    .foregroundStyle(Color.rrTextSecondary)
+                Spacer()
+                Button {
+                    onDelete()
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundStyle(.red)
+                }
+            }
+
+            TextField("What could you have done?", text: $opportunity.description)
                 .textFieldStyle(.roundedBorder)
 
-            TextField("Underlying emotion", text: $trigger.underlying)
-                .textFieldStyle(.roundedBorder)
-
-            TextField("Core wound", text: $trigger.coreWound)
+            TextField("Why didn't you?", text: $opportunity.reason)
                 .textFieldStyle(.roundedBorder)
         }
         .padding()
@@ -767,84 +901,229 @@ private struct TriggerEntryView: View {
     }
 }
 
-// MARK: - Acting Out Section
+private struct DecisionPointCard: View {
+    @Binding var point: DecisionPointEntry
+    let onDelete: () -> Void
 
-private struct ActingOutSectionView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                TextField("Time of day", text: $point.timeOfDay)
+                    .textFieldStyle(.roundedBorder)
+                Spacer()
+                Button {
+                    onDelete()
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundStyle(.red)
+                }
+            }
+
+            TextField("What happened", text: $point.description)
+                .textFieldStyle(.roundedBorder)
+
+            TextField("Could have done instead", text: $point.couldHaveDone)
+                .textFieldStyle(.roundedBorder)
+
+            TextField("What you did instead", text: $point.insteadDid)
+                .textFieldStyle(.roundedBorder)
+        }
+        .padding()
+        .background(Color.rrBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
+// MARK: - Step 5: Triggers
+
+private struct TriggersStepView: View {
     @Bindable var viewModel: PostMortemViewModel
-    let addictions: [RRAddiction]
 
     var body: some View {
         VStack(spacing: 16) {
             RRCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "heart.fill")
-                            .foregroundStyle(Color.rrPrimary)
-                        Text("This is a safe space")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                            .italic()
-                    }
-
-                    Text("The Acting Out")
+                    Text("Identify Your Triggers")
                         .font(RRFont.title3)
                         .foregroundStyle(Color.rrText)
 
-                    Text("Describe what happened without graphic detail. What was the sequence of decisions?")
+                    Text("Select from your trigger library and explore deeper layers")
                         .font(RRFont.caption)
                         .foregroundStyle(Color.rrTextSecondary)
                         .italic()
-
-                    TextEditor(text: $viewModel.actingOutDescription)
-                        .frame(minHeight: 120)
-                        .font(RRFont.body)
-                        .scrollContentBackground(.hidden)
-                        .padding(8)
-                        .background(Color.rrBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                 }
             }
             .padding(.horizontal)
 
+            // Category summary
             RRCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Duration (optional)")
+                    Text("Categories")
                         .font(RRFont.subheadline)
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.rrText)
 
-                    HStack {
-                        TextField("Minutes", value: $viewModel.actingOutDurationMinutes, format: .number)
-                            .textFieldStyle(.roundedBorder)
-                            .keyboardType(.numberPad)
-                        Text("minutes")
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrTextSecondary)
+                    FlowLayout(spacing: 8) {
+                        ForEach(TriggerCategory.allCases) { category in
+                            let isActive = viewModel.userTriggers.contains { $0.category == category.rawValue && $0.isSelected }
+                            HStack(spacing: 4) {
+                                Image(systemName: category.icon)
+                                    .font(.caption2)
+                                Text(category.displayName)
+                                    .font(RRFont.caption)
+                            }
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(isActive ? category.color.opacity(0.15) : Color.rrSurface)
+                            .foregroundStyle(isActive ? category.color : Color.rrTextSecondary)
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule().strokeBorder(category.color.opacity(isActive ? 0.3 : 0.1), lineWidth: 1)
+                            )
+                        }
                     }
                 }
             }
             .padding(.horizontal)
 
-            if let linkedId = viewModel.actingOutLinkedRelapseId {
+            // My Triggers
+            if !viewModel.userTriggers.isEmpty {
                 RRCard {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Linked Relapse")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                        Text(linkedId)
-                            .font(RRFont.body)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("My Triggers")
+                            .font(RRFont.subheadline)
+                            .fontWeight(.semibold)
                             .foregroundStyle(Color.rrText)
+
+                        ForEach(TriggerCategory.allCases) { category in
+                            let triggersInCategory = viewModel.userTriggers.filter { $0.category == category.rawValue }
+                            if !triggersInCategory.isEmpty {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: category.icon)
+                                            .font(.caption2)
+                                        Text(category.displayName)
+                                            .font(RRFont.caption)
+                                            .fontWeight(.semibold)
+                                    }
+                                    .foregroundStyle(category.color)
+
+                                    FlowLayout(spacing: 8) {
+                                        ForEach(triggersInCategory, id: \.label) { trigger in
+                                            Button {
+                                                viewModel.toggleUserTrigger(trigger.id)
+                                            } label: {
+                                                HStack(spacing: 4) {
+                                                    Text(trigger.label)
+                                                        .font(RRFont.caption)
+                                                    if trigger.isSelected {
+                                                        Image(systemName: "checkmark.circle.fill")
+                                                            .font(.caption2)
+                                                    }
+                                                }
+                                                .padding(.horizontal, 10)
+                                                .padding(.vertical, 6)
+                                                .background(trigger.isSelected ? category.color : Color.rrSurface)
+                                                .foregroundStyle(trigger.isSelected ? .white : Color.rrText)
+                                                .clipShape(Capsule())
+                                                .overlay(
+                                                    Capsule().strokeBorder(Color.rrTextSecondary.opacity(0.2), lineWidth: trigger.isSelected ? 0 : 1)
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding(.bottom, 8)
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal)
             }
+
+            // Add custom triggers
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Add Custom Triggers")
+                            .font(RRFont.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.rrText)
+
+                        Spacer()
+
+                        Button {
+                            viewModel.addCustomTrigger()
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(Color.rrPrimary)
+                        }
+                    }
+
+                    if !viewModel.triggerDetails.isEmpty {
+                        ForEach(Array(viewModel.triggerDetails.enumerated()), id: \.element.id) { index, _ in
+                            CustomTriggerCard(trigger: customTriggerBinding(for: index)) {
+                                viewModel.removeCustomTrigger(at: index)
+                            }
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal)
         }
+    }
+
+    private func customTriggerBinding(for index: Int) -> Binding<TriggerEntry> {
+        Binding(
+            get: { viewModel.triggerDetails[index] },
+            set: { viewModel.triggerDetails[index] = $0 }
+        )
     }
 }
 
-// MARK: - Immediately After Section
+private struct CustomTriggerCard: View {
+    @Binding var trigger: TriggerEntry
+    let onDelete: () -> Void
 
-private struct ImmediatelyAfterSectionView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Picker("Category", selection: $trigger.category) {
+                    Text("Select...").tag("")
+                    ForEach(TriggerCategory.allCases, id: \.rawValue) { category in
+                        Text(category.displayName).tag(category.rawValue)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                Spacer()
+
+                Button {
+                    onDelete()
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundStyle(.red)
+                }
+            }
+
+            TextField("Trigger description", text: $trigger.surface)
+                .textFieldStyle(.roundedBorder)
+
+            TextField("Underlying emotion (optional)", text: $trigger.underlying)
+                .textFieldStyle(.roundedBorder)
+
+            TextField("Core wound (optional)", text: $trigger.coreWound)
+                .textFieldStyle(.roundedBorder)
+        }
+        .padding()
+        .background(Color.rrBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
+// MARK: - Step 6: Immediately After
+
+private struct ImmediatelyAfterStepView: View {
     @Bindable var viewModel: PostMortemViewModel
     @State private var newFeeling = ""
 
@@ -862,13 +1141,13 @@ private struct ImmediatelyAfterSectionView: View {
                         .foregroundStyle(Color.rrText)
 
                     FlowLayout(spacing: 8) {
-                        ForEach(viewModel.afterFeelings, id: \.self) { feeling in
+                        ForEach(viewModel.feelings, id: \.self) { feeling in
                             HStack(spacing: 4) {
                                 Text(feeling)
                                     .font(RRFont.caption)
                                     .foregroundStyle(.white)
                                 Button {
-                                    viewModel.afterFeelings.removeAll { $0 == feeling }
+                                    viewModel.removeFeeling(feeling)
                                 } label: {
                                     Image(systemName: "xmark.circle.fill")
                                         .font(.caption)
@@ -913,7 +1192,7 @@ private struct ImmediatelyAfterSectionView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.rrText)
 
-                    TextEditor(text: $viewModel.afterWhatDidNext)
+                    TextEditor(text: $viewModel.whatDidNext)
                         .frame(minHeight: 100)
                         .font(RRFont.body)
                         .scrollContentBackground(.hidden)
@@ -926,7 +1205,7 @@ private struct ImmediatelyAfterSectionView: View {
 
             RRCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Toggle(isOn: $viewModel.afterReachedOut) {
+                    Toggle(isOn: $viewModel.reachedOut) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("I reached out to someone")
                                 .font(RRFont.body)
@@ -937,8 +1216,8 @@ private struct ImmediatelyAfterSectionView: View {
 
                     if viewModel.afterReachedOut {
                         TextField("Who did you reach out to?", text: Binding(
-                            get: { viewModel.afterReachedOutTo ?? "" },
-                            set: { viewModel.afterReachedOutTo = $0.isEmpty ? nil : $0 }
+                            get: { viewModel.reachedOutTo ?? "" },
+                            set: { viewModel.reachedOutTo = $0.isEmpty ? nil : $0 }
                         ))
                         .textFieldStyle(.roundedBorder)
                     }
@@ -953,7 +1232,7 @@ private struct ImmediatelyAfterSectionView: View {
                         .fontWeight(.semibold)
                         .foregroundStyle(Color.rrText)
 
-                    TextEditor(text: $viewModel.afterWishDoneDifferently)
+                    TextEditor(text: $viewModel.wishDoneDifferently)
                         .frame(minHeight: 100)
                         .font(RRFont.body)
                         .scrollContentBackground(.hidden)
@@ -968,191 +1247,164 @@ private struct ImmediatelyAfterSectionView: View {
 
     private func addFeeling() {
         let trimmed = newFeeling.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty, !viewModel.afterFeelings.contains(trimmed) else { return }
-        viewModel.afterFeelings.append(trimmed)
+        guard !trimmed.isEmpty, !viewModel.feelings.contains(trimmed) else { return }
+        viewModel.addFeeling(trimmed)
         newFeeling = ""
     }
 }
 
-// MARK: - Triggers Step
+// MARK: - Step 7: FASTER History
 
-private struct TriggersStepView: View {
+private struct FasterHistoryStepView: View {
     @Bindable var viewModel: PostMortemViewModel
 
     var body: some View {
         VStack(spacing: 16) {
-            RRCard {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Trigger Categories")
-                        .font(RRFont.title3)
-                        .foregroundStyle(Color.rrText)
-
-                    Text("Select all that apply")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-
-                    FlowLayout(spacing: 10) {
-                        ForEach(PostMortemViewModel.triggerCategories, id: \.self) { category in
-                            Button {
-                                viewModel.toggleTriggerCategory(category)
-                            } label: {
-                                Text(category.capitalized)
-                                    .font(RRFont.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundStyle(viewModel.triggerSummary.contains(category) ? .white : Color.rrText)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 10)
-                                    .background(viewModel.triggerSummary.contains(category) ? Color.rrPrimary : Color.rrSurface)
-                                    .clipShape(Capsule())
-                                    .overlay(
-                                        Capsule().strokeBorder(Color.rrTextSecondary.opacity(0.2), lineWidth: viewModel.triggerSummary.contains(category) ? 0 : 1)
-                                    )
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal)
-
             RRCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Detailed Triggers (optional)")
-                            .font(RRFont.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(Color.rrText)
-
-                        Spacer()
-
-                        Button {
-                            viewModel.addTrigger()
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundStyle(Color.rrPrimary)
-                        }
-                    }
-
-                    if viewModel.triggerDetails.isEmpty {
-                        Text("Add detailed trigger analysis")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                            .italic()
-                    } else {
-                        ForEach(Array(viewModel.triggerDetails.enumerated()), id: \.element.id) { index, _ in
-                            TriggerEntryView(trigger: triggerBinding(for: index)) {
-                                viewModel.removeTrigger(at: IndexSet(integer: index))
-                            }
-                        }
-                    }
-                }
-            }
-            .padding(.horizontal)
-        }
-    }
-
-    private func triggerBinding(for index: Int) -> Binding<TriggerEntry> {
-        Binding(
-            get: { viewModel.triggerDetails[index] },
-            set: { viewModel.triggerDetails[index] = $0 }
-        )
-    }
-}
-
-// MARK: - FASTER Mapping Step
-
-private struct FasterMappingStepView: View {
-    @Bindable var viewModel: PostMortemViewModel
-
-    var body: some View {
-        VStack(spacing: 16) {
-            RRCard {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("FASTER Scale Mapping")
+                    Text("FASTER Scale History")
                         .font(RRFont.title3)
                         .foregroundStyle(Color.rrText)
 
-                    Text("Map your journey through the FASTER stages (optional)")
+                    Text("Visualize your journey through the FASTER stages over the past 4 weeks")
                         .font(RRFont.caption)
                         .foregroundStyle(Color.rrTextSecondary)
                         .italic()
-
-                    Button {
-                        viewModel.addFasterMappingEntry()
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Add Mapping Point")
-                        }
-                        .font(RRFont.body)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.rrPrimary.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
                 }
             }
             .padding(.horizontal)
 
-            if !viewModel.fasterMapping.isEmpty {
-                ForEach(Array(viewModel.fasterMapping.enumerated()), id: \.element.id) { index, entry in
-                    FasterMappingCard(entry: fasterBinding(for: index)) {
-                        viewModel.removeFasterMappingEntry(at: IndexSet(integer: index))
+            if !viewModel.hasFasterData {
+                RRCard {
+                    VStack(spacing: 16) {
+                        Image(systemName: "chart.line.uptrend.xyaxis")
+                            .font(.system(size: 48))
+                            .foregroundStyle(Color.rrTextSecondary)
+
+                        Text("No FASTER Scale data available")
+                            .font(RRFont.body)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.rrText)
+
+                        Text("You can skip this step or start using the FASTER Scale check-in to build your history.")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .padding()
+                }
+                .padding(.horizontal)
+            } else {
+                FASTERHistoryChart(entries: viewModel.fasterHistory)
+                    .frame(height: 300)
+                    .padding(.horizontal)
+
+                if let selectedEntry = viewModel.selectedFasterEntry {
+                    RRCard {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text(selectedEntry.date.formatted(date: .abbreviated, time: .shortened))
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                Spacer()
+                                if let moodScore = selectedEntry.moodScore {
+                                    Text("Mood: \(moodScore)/10")
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrTextSecondary)
+                                }
+                            }
+
+                            HStack(spacing: 8) {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(selectedEntry.stageColor)
+                                    .frame(width: 4)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(selectedEntry.stageName)
+                                        .font(RRFont.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundStyle(Color.rrText)
+                                }
+                            }
+                        }
                     }
                     .padding(.horizontal)
                 }
             }
         }
     }
-
-    private func fasterBinding(for index: Int) -> Binding<FasterMappingEntry> {
-        Binding(
-            get: { viewModel.fasterMapping[index] },
-            set: { viewModel.fasterMapping[index] = $0 }
-        )
-    }
 }
 
-private struct FasterMappingCard: View {
-    @Binding var entry: FasterMappingEntry
-    let onDelete: () -> Void
+private struct FASTERHistoryChart: View {
+    let entries: [FASTERHistoryEntry]
 
     var body: some View {
-        RRCard {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Mapping Point")
-                        .font(RRFont.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrText)
+        GeometryReader { geometry in
+            let chartWidth = geometry.size.width - 60
+            let chartHeight = geometry.size.height - 40
+            let stages = FASTERStage.allCases
+            let stageCount = CGFloat(stages.count)
 
-                    Spacer()
+            ZStack(alignment: .topLeading) {
+                // Y-axis labels
+                VStack(spacing: 0) {
+                    ForEach(stages.reversed(), id: \.rawValue) { stage in
+                        HStack(spacing: 4) {
+                            Text(stage.letter)
+                                .font(.system(size: 10, weight: .bold, design: .rounded))
+                                .foregroundStyle(stage.color)
+                                .frame(width: 30, alignment: .trailing)
 
-                    Button {
-                        onDelete()
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundStyle(.red)
+                            Rectangle()
+                                .fill(Color.rrTextSecondary.opacity(0.1))
+                                .frame(height: 1)
+                        }
+                        .frame(height: chartHeight / stageCount)
                     }
                 }
+                .offset(y: 20)
 
-                TextField("Time of day", text: $entry.timeOfDay)
-                    .textFieldStyle(.roundedBorder)
+                // Data points
+                ForEach(entries, id: \.date) { entry in
+                    let xPosition = xPositionFor(entry: entry, in: chartWidth, entries: entries)
+                    let yPosition = yPositionFor(stage: entry.stage, in: chartHeight, stageCount: stageCount)
 
-                Picker("FASTER Stage", selection: $entry.stage) {
-                    Text("Select...").tag("")
-                    ForEach(PostMortemViewModel.fasterStages, id: \.self) { stage in
-                        Text(stage.capitalized).tag(stage)
-                    }
+                    Circle()
+                        .fill(entry.stageColor)
+                        .frame(width: 8, height: 8)
+                        .offset(x: xPosition + 35, y: yPosition + 20)
                 }
-                .pickerStyle(.menu)
             }
         }
+        .background(Color.rrSurface)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private func xPositionFor(entry: FASTERHistoryEntry, in width: CGFloat, entries: [FASTERHistoryEntry]) -> CGFloat {
+        guard let oldestDate = entries.map({ $0.date }).min(),
+              let newestDate = entries.map({ $0.date }).max() else {
+            return 0
+        }
+
+        let totalTimeSpan = newestDate.timeIntervalSince(oldestDate)
+        guard totalTimeSpan > 0 else { return 0 }
+
+        let entryTimeOffset = entry.date.timeIntervalSince(oldestDate)
+        let normalizedPosition = entryTimeOffset / totalTimeSpan
+
+        return CGFloat(normalizedPosition) * width
+    }
+
+    private func yPositionFor(stage: Int, in height: CGFloat, stageCount: CGFloat) -> CGFloat {
+        let stages = FASTERStage.allCases.reversed()
+        guard let fasterStage = FASTERStage(rawValue: stage),
+              let index = stages.firstIndex(of: fasterStage) else { return 0 }
+
+        let slotHeight = height / stageCount
+        return CGFloat(index) * slotHeight + (slotHeight / 2) - 4
     }
 }
 
-// MARK: - Action Plan Step
+// MARK: - Step 8: Action Plan
 
 private struct ActionPlanStepView: View {
     @Bindable var viewModel: PostMortemViewModel
@@ -1160,160 +1412,147 @@ private struct ActionPlanStepView: View {
     var body: some View {
         VStack(spacing: 16) {
             RRCard {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Action Plan")
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Your Action Plan")
                         .font(RRFont.title3)
                         .foregroundStyle(Color.rrText)
 
-                    Text("Create 1-10 action items to prevent this from happening again")
+                    Text("Build your recovery plan based on insights from this analysis")
                         .font(RRFont.caption)
                         .foregroundStyle(Color.rrTextSecondary)
                         .italic()
+                }
+            }
+            .padding(.horizontal)
 
-                    HStack {
-                        Text("\(viewModel.actionItems.count) / 10")
+            // Missed Activities
+            if !viewModel.missedActivities.isEmpty {
+                RRCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(Color.rrDestructive)
+                            Text("Missed Recovery Activities")
+                                .font(RRFont.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(Color.rrText)
+                        }
+
+                        Text("These activities were missed on the day of the event")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                            ForEach(viewModel.missedActivities, id: \.title) { activity in
+                                VStack(spacing: 6) {
+                                    Image(systemName: activity.icon)
+                                        .font(.title2)
+                                        .foregroundStyle(Color.rrDestructive)
+
+                                    Text(activity.title)
+                                        .font(RRFont.caption)
+                                        .foregroundStyle(Color.rrText)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.center)
+
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(Color.rrDestructive)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.rrDestructive.opacity(0.08))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+
+            // Recommended Activities
+            if !viewModel.recommendedActivities.isEmpty {
+                RRCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Recommended Activities")
                             .font(RRFont.subheadline)
-                            .foregroundStyle(viewModel.actionItemCountValid ? Color.rrSuccess : Color.rrDestructive)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.rrText)
+
+                        Text("Consider adding these to your recovery plan")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+
+                        ForEach(viewModel.recommendedActivities, id: \.activityType) { activity in
+                            Button {
+                                viewModel.toggleRecommendation(activity.activityType)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: activity.icon)
+                                        .font(.title3)
+                                        .foregroundStyle(activity.iconColor)
+                                        .frame(width: 40)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(activity.title)
+                                            .font(RRFont.subheadline)
+                                            .fontWeight(.medium)
+                                            .foregroundStyle(Color.rrText)
+
+                                        Text(activity.reason)
+                                            .font(RRFont.caption)
+                                            .foregroundStyle(Color.rrTextSecondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: viewModel.selectedRecommendations.contains(activity.activityType) ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(viewModel.selectedRecommendations.contains(activity.activityType) ? Color.rrSuccess : Color.rrTextSecondary)
+                                }
+                                .padding()
+                                .background(viewModel.selectedRecommendations.contains(activity.activityType) ? Color.rrSuccess.opacity(0.08) : Color.rrBackground)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal)
+            }
+
+            // Custom Action Items
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Custom Action Items")
+                            .font(RRFont.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(Color.rrText)
 
                         Spacer()
 
                         Button {
                             viewModel.addActionItem()
                         } label: {
-                            HStack {
+                            HStack(spacing: 4) {
                                 Image(systemName: "plus.circle.fill")
-                                Text("Add Action")
+                                Text("Add")
                             }
-                            .font(RRFont.body)
-                            .fontWeight(.semibold)
+                            .font(RRFont.caption)
                             .foregroundStyle(Color.rrPrimary)
                         }
-                        .disabled(viewModel.actionItems.count >= 10)
                     }
-                }
-            }
-            .padding(.horizontal)
 
-            if viewModel.actionItems.isEmpty {
-                RRCard {
-                    Text("Add at least one action item to continue")
-                        .font(RRFont.body)
-                        .foregroundStyle(Color.rrTextSecondary)
-                        .italic()
-                }
-                .padding(.horizontal)
-            } else {
-                ForEach(Array(viewModel.actionItems.enumerated()), id: \.element.id) { index, item in
-                    ActionItemCard(item: actionBinding(for: index)) {
-                        viewModel.removeActionItem(at: IndexSet(integer: index))
-                    }
-                    .padding(.horizontal)
-                }
-            }
-        }
-    }
-
-    private func actionBinding(for index: Int) -> Binding<ActionItemEntry> {
-        Binding(
-            get: { viewModel.actionItems[index] },
-            set: { viewModel.actionItems[index] = $0 }
-        )
-    }
-}
-
-private struct ActionItemCard: View {
-    @Binding var item: ActionItemEntry
-    let onDelete: () -> Void
-
-    var body: some View {
-        RRCard {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Action \(item.timelinePoint)")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-
-                    Spacer()
-
-                    Button {
-                        onDelete()
-                    } label: {
-                        Image(systemName: "trash")
-                            .foregroundStyle(.red)
-                    }
-                }
-
-                TextField("Timeline point (e.g., morning, before bed)", text: $item.timelinePoint)
-                    .textFieldStyle(.roundedBorder)
-
-                TextField("Action to take", text: $item.action, axis: .vertical)
-                    .textFieldStyle(.roundedBorder)
-                    .lineLimit(2...4)
-
-                Picker("Category", selection: $item.category) {
-                    Text("Select...").tag("")
-                    ForEach(PostMortemViewModel.actionCategories, id: \.self) { category in
-                        Text(category.capitalized).tag(category)
-                    }
-                }
-                .pickerStyle(.menu)
-            }
-        }
-    }
-}
-
-// MARK: - Review Step
-
-private struct ReviewStepView: View {
-    @Bindable var viewModel: PostMortemViewModel
-    let modelContext: ModelContext
-
-    var body: some View {
-        VStack(spacing: 16) {
-            RRCard {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Review & Complete")
-                        .font(RRFont.title3)
-                        .foregroundStyle(Color.rrText)
-
-                    Text("Review your post-mortem analysis before completing")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                        .italic()
-                }
-            }
-            .padding(.horizontal)
-
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Section Completion")
-                        .font(RRFont.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrText)
-
-                    ForEach(PostMortemViewModel.allSectionNames, id: \.self) { section in
-                        HStack {
-                            Image(systemName: viewModel.isSectionComplete(section) ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(viewModel.isSectionComplete(section) ? Color.rrSuccess : Color.rrTextSecondary)
-                            Text(sectionDisplayName(section))
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                            Spacer()
+                    if viewModel.actionItems.isEmpty {
+                        Text("Add specific actions to prevent this from happening again")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                            .italic()
+                    } else {
+                        ForEach(Array(viewModel.actionItems.enumerated()), id: \.element.id) { index, _ in
+                            CustomActionItemCard(item: actionItemBinding(for: index)) {
+                                viewModel.removeActionItemAt(at: index)
+                            }
                         }
-                    }
-                }
-            }
-            .padding(.horizontal)
-
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Image(systemName: viewModel.actionItemCountValid ? "checkmark.circle.fill" : "xmark.circle.fill")
-                            .foregroundStyle(viewModel.actionItemCountValid ? Color.rrSuccess : Color.rrDestructive)
-                        Text("Action Items: \(viewModel.actionItems.count)")
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrText)
-                        Spacer()
                     }
                 }
             }
@@ -1321,33 +1560,12 @@ private struct ReviewStepView: View {
 
             if !viewModel.canComplete {
                 RRCard {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Validation Errors")
-                            .font(RRFont.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(Color.rrDestructive)
-
-                        ForEach(viewModel.validateForCompletion(), id: \.self) { error in
-                            HStack(alignment: .top, spacing: 8) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(Color.rrDestructive)
-                                Text(error)
-                                    .font(RRFont.caption)
-                                    .foregroundStyle(Color.rrText)
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            } else {
-                RRCard {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(Color.rrSuccess)
-                        Text("Ready to complete")
-                            .font(RRFont.body)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(Color.rrSuccess)
+                    HStack(spacing: 8) {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundStyle(Color.rrSecondary)
+                        Text("Add at least one action item to complete")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
                     }
                 }
                 .padding(.horizontal)
@@ -1355,16 +1573,49 @@ private struct ReviewStepView: View {
         }
     }
 
-    private func sectionDisplayName(_ section: String) -> String {
-        switch section {
-        case "dayBefore": return "The Day Before"
-        case "morning": return "Morning"
-        case "throughoutTheDay": return "Throughout the Day"
-        case "buildUp": return "The Build-Up"
-        case "actingOut": return "The Acting Out"
-        case "immediatelyAfter": return "Immediately After"
-        default: return section
+    private func actionItemBinding(for index: Int) -> Binding<ActionItemEntry> {
+        Binding(
+            get: { viewModel.actionItems[index] },
+            set: { viewModel.actionItems[index] = $0 }
+        )
+    }
+}
+
+private struct CustomActionItemCard: View {
+    @Binding var item: ActionItemEntry
+    let onDelete: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Picker("Category", selection: $item.category) {
+                    Text("Select...").tag("")
+                    Text("Recovery Practice").tag("recovery")
+                    Text("Connection").tag("connection")
+                    Text("Self-Care").tag("self-care")
+                    Text("Boundaries").tag("boundaries")
+                    Text("Accountability").tag("accountability")
+                }
+                .pickerStyle(.menu)
+                .font(RRFont.caption)
+
+                Spacer()
+
+                Button {
+                    onDelete()
+                } label: {
+                    Image(systemName: "trash")
+                        .foregroundStyle(.red)
+                }
+            }
+
+            TextField("Action to take", text: $item.action, axis: .vertical)
+                .textFieldStyle(.roundedBorder)
+                .lineLimit(2...4)
         }
+        .padding()
+        .background(Color.rrBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
 
