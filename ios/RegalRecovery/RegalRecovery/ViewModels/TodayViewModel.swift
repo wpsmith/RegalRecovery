@@ -77,6 +77,11 @@ class TodayViewModel {
         computeScore()
         loadRecoveryWorkCards(context: context)
         loadTodayActivityLog(context: context)
+
+        // Backfill PCI missed days
+        if let userId = (try? context.fetch(FetchDescriptor<RRUser>()))?.first?.id {
+            PCIMissedDayService.backfillMissedDays(context: context, userId: userId)
+        }
     }
 
     // MARK: - Actions
@@ -393,6 +398,24 @@ class TodayViewModel {
             }
         }
 
+        // PCI / Life Balance
+        let pciDesc = FetchDescriptor<RRPCIDailyEntry>(
+            predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }
+        )
+        if let results = try? context.fetch(pciDesc) {
+            for p in results {
+                let scoreText = "\(p.totalScore)/7"
+                let detail = p.isMissedDay ? "Missed - Auto-scored 7" : scoreText
+                all.append((p.createdAt, RecentActivity(
+                    title: "Life Balance",
+                    detail: detail,
+                    time: fmt.localizedString(for: p.createdAt, relativeTo: now),
+                    icon: "checklist",
+                    iconColor: .orange
+                )))
+            }
+        }
+
         // Journal
         let journalDesc = FetchDescriptor<RRJournalEntry>(
             predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow },
@@ -533,6 +556,9 @@ class TodayViewModel {
         if activityType == ActivityType.fasterScale.rawValue {
             return fetchDates(RRFASTEREntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
+        if activityType == "lbi" {
+            return fetchDates(RRPCIDailyEntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.createdAt, context: context)
+        }
         if activityType == ActivityType.urgeLog.rawValue {
             return fetchDates(RRUrgeLog.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
@@ -647,6 +673,14 @@ class TodayViewModel {
             )
         }
 
+        if activityType == "lbi" {
+            return hasRecord(
+                RRPCIDailyEntry.self,
+                predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow && $0.isMissedDay == false },
+                context: context
+            )
+        }
+
         if activityType == ActivityType.phoneCalls.rawValue {
             return hasRecord(
                 RRPhoneCallLog.self,
@@ -752,7 +786,7 @@ class TodayViewModel {
         switch activityType {
         case "devotional": return .rrPrimary
         case "memoryVerseReview": return .rrPrimary
-        case "pci": return .orange
+        case "lbi": return .orange
         case "nutrition": return .green
         case "actingInBehaviors": return .blue
         case "voiceJournal": return .purple

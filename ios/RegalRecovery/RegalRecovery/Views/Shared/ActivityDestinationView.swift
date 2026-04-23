@@ -36,10 +36,8 @@ struct ActivityDestinationView: View {
             FANOSCheckInView()
         case ActivityType.fitnap.rawValue:
             FITNAPCheckInView()
-        case "pci":
-            Text("PCI - Coming Soon")
-                .font(RRFont.title3)
-                .foregroundStyle(Color.rrTextSecondary)
+        case "lbi":
+            PCIEntryPointView()
         case ActivityType.weeklyGoals.rawValue:
             WeeklyGoalsView()
         case ActivityType.stepWork.rawValue:

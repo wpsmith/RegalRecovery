@@ -263,10 +263,8 @@ struct RecoveryWorkView: View {
             RecoveryProgressView()
         case "contentResources":
             ContentTabView()
-        case "pci":
-            Text("PCI - Coming Soon")
-                .font(RRFont.title3)
-                .foregroundStyle(Color.rrTextSecondary)
+        case "lbi":
+            PCIEntryPointView()
         case "integrityInventory":
             EveningReviewView()
         case "memoryVerseReview":

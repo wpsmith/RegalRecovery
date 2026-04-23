@@ -38,7 +38,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.phone-calls", label: "Phone Calls", enabled: true),
         FeatureFlag(key: "activity.prayer", label: "Prayer", enabled: true),
         FeatureFlag(key: "activity.integrity-inventory", label: "Integrity Inventory", enabled: false),
-        FeatureFlag(key: "activity.pci", label: "PCI", enabled: false),
+        FeatureFlag(key: "activity.lbi", label: "Life Balance", enabled: false),
     ]
 
     @State private var assessments: [FeatureFlag] = [
@@ -267,7 +267,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.phone-calls", label: "Phone Calls", enabled: true),
         FeatureFlag(key: "activity.prayer", label: "Prayer", enabled: true),
         FeatureFlag(key: "activity.integrity-inventory", label: "Integrity Inventory", enabled: false),
-        FeatureFlag(key: "activity.pci", label: "PCI", enabled: false),
+        FeatureFlag(key: "activity.lbi", label: "Life Balance", enabled: false),
     ]
 
     private static let defaultAssessments: [FeatureFlag] = [

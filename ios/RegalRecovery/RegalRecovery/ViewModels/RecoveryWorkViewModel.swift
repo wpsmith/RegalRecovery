@@ -130,6 +130,16 @@ class RecoveryWorkViewModel {
                 implemented: true,
                 activityTypeKey: "recoveryPlan"
             ),
+            WorkTileItem(
+                id: "foundation.lbi",
+                title: String(localized: "Life Balance"),
+                icon: "checklist",
+                iconColor: .orange,
+                category: .foundationTools,
+                featureFlagKey: "activity.lbi",
+                implemented: true,
+                activityTypeKey: "lbi"
+            ),
         ])
 
         // ── Activities ──
@@ -353,16 +363,6 @@ class RecoveryWorkViewModel {
                 featureFlagKey: "activity.memory-verse",
                 implemented: true,
                 activityTypeKey: "memoryVerseReview"
-            ),
-            WorkTileItem(
-                id: "activity.pci",
-                title: String(localized: "PCI"),
-                icon: "checklist",
-                iconColor: .rrDestructive,
-                category: .activities,
-                featureFlagKey: nil,
-                implemented: false,
-                activityTypeKey: nil
             ),
             WorkTileItem(
                 id: "activity.nutrition",

@@ -1120,9 +1120,9 @@ struct DailyEligibleActivity {
             section: .sobrietyCommitment
         ),
         DailyEligibleActivity(
-            activityType: "pci",
-            displayNameKey: "PCI",
-            shortNameKey: "PCI",
+            activityType: "lbi",
+            displayNameKey: "Life Balance",
+            shortNameKey: "LBI",
             icon: "checklist",
             multiplePerDay: false,
             maxPerDay: 1,
@@ -1130,7 +1130,7 @@ struct DailyEligibleActivity {
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",
-            featureFlagKey: "activity.pci",
+            featureFlagKey: "activity.lbi",
             section: .sobrietyCommitment
         ),
         DailyEligibleActivity(

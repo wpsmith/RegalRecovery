@@ -119,7 +119,7 @@ final class FeatureFlagService {
         flags["activity.phone-calls"] = true
         flags["activity.prayer"] = true
         flags["activity.integrity-inventory"] = false
-        flags["activity.pci"] = false
+        flags["activity.lbi"] = false
 
         // App Architecture
         flags["feature.today-view"] = false
