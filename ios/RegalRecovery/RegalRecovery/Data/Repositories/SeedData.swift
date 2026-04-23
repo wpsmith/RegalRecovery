@@ -677,7 +677,8 @@ enum SeedData {
             ("activity.phone-calls", true, "Phone calls"),
             ("activity.prayer", true, "Prayer"),
             ("activity.integrity-inventory", false, "Integrity inventory"),
-            ("activity.lbi", false, "Life Balance"),
+            ("activity.lbi", true, "Life Balance"),
+            ("feature.lbi", true, "Life Balance (Foundation)"),
             // App Architecture
             ("feature.today-view", false, "Today view replaces Home dashboard"),
             ("feature.work-tab", true, "Work tab replaces Activities catalog"),

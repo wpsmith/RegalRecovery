@@ -1,9 +1,9 @@
-// Views/Activities/PCI/PCISetupConfirmationView.swift
+// Views/Activities/LBI/LBISetupConfirmationView.swift
 
 import SwiftUI
 
-struct PCISetupConfirmationView: View {
-    @Bindable var viewModel: PCISetupViewModel
+struct LBISetupConfirmationView: View {
+    @Bindable var viewModel: LBISetupViewModel
     let onComplete: () -> Void
 
     var body: some View {
@@ -137,13 +137,13 @@ struct PCISetupConfirmationView: View {
     }
 
     // Get final critical items sorted by dimension sortOrder
-    private var criticalItems: [PCICriticalItem] {
+    private var criticalItems: [LBICriticalItem] {
         viewModel.buildCriticalItems().sorted { $0.dimensionType.sortOrder < $1.dimensionType.sortOrder }
     }
 }
 
 #Preview {
-    @Previewable @State var viewModel = PCISetupViewModel()
+    @Previewable @State var viewModel = LBISetupViewModel()
 
     // Mock data for preview
     viewModel.dimensionIndicators = [
@@ -153,16 +153,16 @@ struct PCISetupConfirmationView: View {
         .recoveryPractice: ["Missed meeting", "Skipped journaling"]
     ]
     viewModel.allBuiltIndicators = [
-        (.physicalHealth, PCIIndicator(text: "Skipping meals", isPositive: false)),
-        (.physicalHealth, PCIIndicator(text: "Not exercising", isPositive: false)),
-        (.interests, PCIIndicator(text: "Reading", isPositive: true)),
-        (.work, PCIIndicator(text: "Unreturned emails", isPositive: false)),
-        (.work, PCIIndicator(text: "Late to meetings", isPositive: false)),
-        (.recoveryPractice, PCIIndicator(text: "Missed meeting", isPositive: false)),
-        (.recoveryPractice, PCIIndicator(text: "Skipped journaling", isPositive: false))
+        (.physicalHealth, LBIIndicator(text: "Skipping meals", isPositive: false)),
+        (.physicalHealth, LBIIndicator(text: "Not exercising", isPositive: false)),
+        (.interests, LBIIndicator(text: "Reading", isPositive: true)),
+        (.work, LBIIndicator(text: "Unreturned emails", isPositive: false)),
+        (.work, LBIIndicator(text: "Late to meetings", isPositive: false)),
+        (.recoveryPractice, LBIIndicator(text: "Missed meeting", isPositive: false)),
+        (.recoveryPractice, LBIIndicator(text: "Skipped journaling", isPositive: false))
     ]
     viewModel.selectedCriticalIds = Set(viewModel.allBuiltIndicators.map { $0.indicator.id })
     viewModel.currentStep = .confirmation
 
-    return PCISetupConfirmationView(viewModel: viewModel, onComplete: {})
+    return LBISetupConfirmationView(viewModel: viewModel, onComplete: {})
 }

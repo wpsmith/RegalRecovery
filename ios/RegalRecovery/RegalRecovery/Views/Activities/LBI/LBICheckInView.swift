@@ -1,14 +1,14 @@
-// Views/Activities/PCI/PCICheckInView.swift
+// Views/Activities/LBI/LBICheckInView.swift
 
 import SwiftUI
 import SwiftData
 import UIKit
 
-struct PCICheckInView: View {
+struct LBICheckInView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
-    @State private var viewModel = PCICheckInViewModel()
+    @State private var viewModel = LBICheckInViewModel()
 
     var body: some View {
         NavigationStack {
@@ -103,7 +103,7 @@ struct PCICheckInView: View {
     // MARK: - Toggle Row
 
     @ViewBuilder
-    private func toggleRow(for item: PCICriticalItem) -> some View {
+    private func toggleRow(for item: LBICriticalItem) -> some View {
         let isToggled = viewModel.isItemToggled(item.id)
 
         Button {
@@ -171,7 +171,7 @@ struct PCICheckInView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            NavigationLink(destination: PCISetupFlowView()) {
+            NavigationLink(destination: LBISetupFlowView()) {
                 Text(String(localized: "Start Setup"))
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
@@ -204,7 +204,7 @@ struct PCICheckInView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
-            NavigationLink(destination: PCISetupFlowView()) {
+            NavigationLink(destination: LBISetupFlowView()) {
                 Text(String(localized: "Complete Setup"))
                     .fontWeight(.semibold)
                     .frame(maxWidth: .infinity)
@@ -278,6 +278,6 @@ struct PCICheckInView: View {
 }
 
 #Preview {
-    PCICheckInView()
+    LBICheckInView()
         .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
 }

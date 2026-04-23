@@ -1,14 +1,14 @@
-// Views/Activities/PCI/PCIProfileEditView.swift
+// Views/Activities/LBI/LBIProfileEditView.swift
 
 import SwiftUI
 import SwiftData
 
-struct PCIProfileEditView: View {
+struct LBIProfileEditView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
-    @State private var viewModel = PCIProfileEditViewModel()
-    @State private var newIndicatorTexts: [PCIDimensionType: String] = [:]
+    @State private var viewModel = LBIProfileEditViewModel()
+    @State private var newIndicatorTexts: [LBIDimensionType: String] = [:]
     @State private var editingIndicatorId: UUID?
     @FocusState private var focusedField: UUID?
 
@@ -51,7 +51,7 @@ struct PCIProfileEditView: View {
     // MARK: - Dimension Section
 
     @ViewBuilder
-    private func dimensionSection(dimension: PCIDimension) -> some View {
+    private func dimensionSection(dimension: LBIDimension) -> some View {
         Section {
             // Existing indicators (editable)
             ForEach(dimension.indicators) { indicator in
@@ -93,7 +93,7 @@ struct PCIProfileEditView: View {
     // MARK: - Indicator Row
 
     @ViewBuilder
-    private func indicatorRow(dimensionType: PCIDimensionType, indicator: PCIIndicator) -> some View {
+    private func indicatorRow(dimensionType: LBIDimensionType, indicator: LBIIndicator) -> some View {
         HStack(spacing: 12) {
             TextField(
                 String(localized: "Indicator"),
@@ -126,7 +126,7 @@ struct PCIProfileEditView: View {
     // MARK: - Add Indicator Row
 
     @ViewBuilder
-    private func addIndicatorRow(dimensionType: PCIDimensionType) -> some View {
+    private func addIndicatorRow(dimensionType: LBIDimensionType) -> some View {
         HStack(spacing: 12) {
             TextField(
                 String(localized: "Add new indicator"),
@@ -155,7 +155,7 @@ struct PCIProfileEditView: View {
 
     // MARK: - Computed Properties
 
-    private var sortedDimensions: [PCIDimension] {
+    private var sortedDimensions: [LBIDimension] {
         viewModel.dimensions.sorted { $0.dimensionType.sortOrder < $1.dimensionType.sortOrder }
     }
 
@@ -166,7 +166,7 @@ struct PCIProfileEditView: View {
         viewModel.load(context: modelContext, userId: userId)
     }
 
-    private func addNewIndicator(to dimensionType: PCIDimensionType) {
+    private func addNewIndicator(to dimensionType: LBIDimensionType) {
         guard let text = newIndicatorTexts[dimensionType]?.trimmingCharacters(in: .whitespacesAndNewlines),
               !text.isEmpty else {
             return
@@ -176,7 +176,7 @@ struct PCIProfileEditView: View {
         newIndicatorTexts[dimensionType] = ""
     }
 
-    private func deleteIndicators(at indexSet: IndexSet, from dimension: PCIDimension) {
+    private func deleteIndicators(at indexSet: IndexSet, from dimension: LBIDimension) {
         for index in indexSet {
             let indicator = dimension.indicators[index]
             viewModel.removeIndicator(id: indicator.id, from: dimension.dimensionType)
@@ -191,6 +191,6 @@ struct PCIProfileEditView: View {
 }
 
 #Preview {
-    PCIProfileEditView()
+    LBIProfileEditView()
         .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
 }

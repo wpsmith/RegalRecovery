@@ -1,9 +1,9 @@
-// ViewModels/PCIScoringService.swift
+// ViewModels/LBIScoringService.swift
 
 import Foundation
 import SwiftData
 
-struct PCIScoringService {
+struct LBIScoringService {
 
     /// Get the Monday start of the ISO week containing the given date.
     static func weekStart(for date: Date) -> Date {
@@ -15,7 +15,7 @@ struct PCIScoringService {
 
     /// Compute weekly score for a given week start (Monday).
     /// Returns sum of daily totalScore values in that Mon-Sun range.
-    static func weeklyScore(for weekStart: Date, entries: [RRPCIDailyEntry]) -> Int {
+    static func weeklyScore(for weekStart: Date, entries: [RRLBIDailyEntry]) -> Int {
         let calendar = Calendar.current
         let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart)!
         return entries
@@ -28,16 +28,16 @@ struct PCIScoringService {
     static func weeklyScores(
         weeks: Int,
         from date: Date = Date(),
-        entries: [RRPCIDailyEntry]
-    ) -> [(weekStart: Date, score: Int, riskLevel: PCIRiskLevel)] {
-        var results: [(Date, Int, PCIRiskLevel)] = []
+        entries: [RRLBIDailyEntry]
+    ) -> [(weekStart: Date, score: Int, riskLevel: LBIRiskLevel)] {
+        var results: [(Date, Int, LBIRiskLevel)] = []
         let calendar = Calendar.current
         let currentWeekStart = weekStart(for: date)
 
         for i in (0..<weeks).reversed() {
             guard let ws = calendar.date(byAdding: .weekOfYear, value: -i, to: currentWeekStart) else { continue }
             let score = weeklyScore(for: ws, entries: entries)
-            results.append((ws, score, PCIRiskLevel.from(weeklyScore: score)))
+            results.append((ws, score, LBIRiskLevel.from(weeklyScore: score)))
         }
         return results
     }
@@ -45,7 +45,7 @@ struct PCIScoringService {
     /// Week-over-week delta. Returns nil if no previous week data exists.
     static func weeklyDelta(
         currentWeekStart: Date,
-        entries: [RRPCIDailyEntry]
+        entries: [RRLBIDailyEntry]
     ) -> Int? {
         let calendar = Calendar.current
         guard let previousWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: currentWeekStart) else { return nil }
@@ -61,7 +61,7 @@ struct PCIScoringService {
     /// Partial week info (how many days checked in so far this week, running score).
     static func partialWeekInfo(
         weekStart: Date,
-        entries: [RRPCIDailyEntry]
+        entries: [RRLBIDailyEntry]
     ) -> (daysCompleted: Int, runningScore: Int) {
         let calendar = Calendar.current
         let weekEnd = calendar.date(byAdding: .day, value: 7, to: weekStart)!
@@ -73,7 +73,7 @@ struct PCIScoringService {
     static func currentWeekScore(context: ModelContext, userId: UUID) -> Int {
         let ws = weekStart(for: Date())
         let weekEnd = Calendar.current.date(byAdding: .day, value: 7, to: ws)!
-        let descriptor = FetchDescriptor<RRPCIDailyEntry>(
+        let descriptor = FetchDescriptor<RRLBIDailyEntry>(
             predicate: #Predicate { $0.userId == userId && $0.date >= ws && $0.date < weekEnd }
         )
         let entries = (try? context.fetch(descriptor)) ?? []

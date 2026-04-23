@@ -118,6 +118,7 @@ final class FeatureFlagStore {
         "activity.prayer": true,
         "activity.integrity-inventory": true,
         "activity.lbi": true,
+        "feature.lbi": true,
         "activity.memory-verse": false,
         "activity.acting-in-behaviors": false,
         "activity.voice-journal": false,

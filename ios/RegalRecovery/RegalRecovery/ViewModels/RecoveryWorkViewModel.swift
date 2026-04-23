@@ -136,9 +136,9 @@ class RecoveryWorkViewModel {
                 icon: "checklist",
                 iconColor: .orange,
                 category: .foundationTools,
-                featureFlagKey: "activity.lbi",
+                featureFlagKey: "feature.lbi",
                 implemented: true,
-                activityTypeKey: "lbi"
+                activityTypeKey: "lbiFoundation"
             ),
         ])
 
@@ -243,6 +243,16 @@ class RecoveryWorkViewModel {
                 featureFlagKey: "activity.fitnap",
                 implemented: true,
                 activityTypeKey: "fitnap"
+            ),
+            WorkTileItem(
+                id: "activity.lbi",
+                title: String(localized: "Life Balance Check-In"),
+                icon: "checklist.checked",
+                iconColor: .orange,
+                category: .activities,
+                featureFlagKey: "feature.lbi",
+                implemented: true,
+                activityTypeKey: "lbi"
             ),
             WorkTileItem(
                 id: "activity.meetings",

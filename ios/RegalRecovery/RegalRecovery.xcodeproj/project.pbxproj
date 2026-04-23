@@ -148,17 +148,18 @@
 		10000511 /* TimeJournalHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000511 /* TimeJournalHeaderView.swift */; };
 		10000512 /* TimeJournalTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000512 /* TimeJournalTimelineView.swift */; };
 		10000513 /* TimeJournalSlotRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000513 /* TimeJournalSlotRow.swift */; };
-		10000514 /* PCITypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000514 /* PCITypes.swift */; };
-		10000515 /* PCIScoringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000515 /* PCIScoringService.swift */; };
-		10000517 /* PCIMissedDayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000517 /* PCIMissedDayService.swift */; };
-		10000520 /* PCICheckInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000520 /* PCICheckInViewModel.swift */; };
-		10000521 /* PCIPsychoeducationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000521 /* PCIPsychoeducationView.swift */; };
-		10000522 /* PCICriticalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000522 /* PCICriticalSelectionView.swift */; };
-		10000523 /* PCIWeeklySummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000523 /* PCIWeeklySummaryCard.swift */; };
-		10000524 /* PCIEntryPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000524 /* PCIEntryPointView.swift */; };
-		9994c967a07f4b07a50d4b1d /* PCITrendChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = b4e434c5fd174c8fa98e9ed4 /* PCITrendChartView.swift */; };
-		e79bd80173024319aa463702d16506e7 /* PCICheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7dae1353664946c8be82c982d7920395 /* PCICheckInView.swift */; };
-		6dc03e4de30547c88f276e7241e58de3 /* PCICorrelationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A73E82CAD846C9A09A757C /* PCICorrelationView.swift */; };
+		10000514 /* LBITypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000514 /* LBITypes.swift */; };
+		10000515 /* LBIScoringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000515 /* LBIScoringService.swift */; };
+		10000517 /* LBIMissedDayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000517 /* LBIMissedDayService.swift */; };
+		10000520 /* LBICheckInViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000520 /* LBICheckInViewModel.swift */; };
+		10000521 /* LBIPsychoeducationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000521 /* LBIPsychoeducationView.swift */; };
+		10000522 /* LBICriticalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000522 /* LBICriticalSelectionView.swift */; };
+		10000523 /* LBIWeeklySummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000523 /* LBIWeeklySummaryCard.swift */; };
+		10000524 /* LBIEntryPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000524 /* LBIEntryPointView.swift */; };
+		10000525 /* LBIFoundationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000525 /* LBIFoundationView.swift */; };
+		9994c967a07f4b07a50d4b1d /* LBITrendChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = b4e434c5fd174c8fa98e9ed4 /* LBITrendChartView.swift */; };
+		e79bd80173024319aa463702d16506e7 /* LBICheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7dae1353664946c8be82c982d7920395 /* LBICheckInView.swift */; };
+		6dc03e4de30547c88f276e7241e58de3 /* LBICorrelationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A73E82CAD846C9A09A757C /* LBICorrelationView.swift */; };
 		10000600 /* TimeJournalEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000600 /* TimeJournalEntryViewModel.swift */; };
 		10000601 /* LocationField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000601 /* LocationField.swift */; };
 		10000602 /* ActivityField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000602 /* ActivityField.swift */; };
@@ -260,27 +261,27 @@
 		10006002 /* ActivityDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006002 /* ActivityDestinationView.swift */; };
 		10006003 /* QuickActionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006003 /* QuickActionsViewModel.swift */; };
 		10006004 /* QuickActionsCustomizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006004 /* QuickActionsCustomizeView.swift */; };
-		9103A401908DED56E83772C7 /* PCIDimensionEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8EDBD8EF9557997DD08D3 /* PCIDimensionEntryView.swift */; };
-		91B02E045195FF9B6D69BD3E /* PCISetupConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C6E48DCD91F04F58511767 /* PCISetupConfirmationView.swift */; };
+		9103A401908DED56E83772C7 /* LBIDimensionEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8EDBD8EF9557997DD08D3 /* LBIDimensionEntryView.swift */; };
+		91B02E045195FF9B6D69BD3E /* LBISetupConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C6E48DCD91F04F58511767 /* LBISetupConfirmationView.swift */; };
 		B0A1B2C3D4E5F002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F001 /* Localizable.xcstrings */; };
 		B0A1B2C3D4E5F004 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */; };
-		B1D80FD3EE117EFA1430602F /* PCISetupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD9987DFCC6D5A757E5C1F1 /* PCISetupFlowView.swift */; };
-		ddf8aca8 /* PCISetupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02e976c6 /* PCISetupViewModel.swift */; };
-		fd51683e95044ec58be820d5 /* PCIDimensionContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4c4d445bc9364c2fa97b153d /* PCIDimensionContent.swift */; };
-		10001000 /* PCIProfileEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* PCIProfileEditViewModel.swift */; };
-		10001001 /* PCIProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* PCIProfileEditView.swift */; };
-		10001002 /* PCICriticalItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001002 /* PCICriticalItemEditView.swift */; };
+		B1D80FD3EE117EFA1430602F /* LBISetupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFD9987DFCC6D5A757E5C1F1 /* LBISetupFlowView.swift */; };
+		ddf8aca8 /* LBISetupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02e976c6 /* LBISetupViewModel.swift */; };
+		fd51683e95044ec58be820d5 /* LBIDimensionContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4c4d445bc9364c2fa97b153d /* LBIDimensionContent.swift */; };
+		10001000 /* LBIProfileEditViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* LBIProfileEditViewModel.swift */; };
+		10001001 /* LBIProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* LBIProfileEditView.swift */; };
+		10001002 /* LBICriticalItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001002 /* LBICriticalItemEditView.swift */; };
 		10009000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009000 /* ThreeCirclesTypes.swift */; };
 		10009001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009001 /* ThreeCirclesAPIClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		02e976c6 /* PCISetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCISetupViewModel.swift; sourceTree = "<group>"; };
-		1CE8EDBD8EF9557997DD08D3 /* PCIDimensionEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIDimensionEntryView.swift; sourceTree = "<group>"; };
+		02e976c6 /* LBISetupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBISetupViewModel.swift; sourceTree = "<group>"; };
+		1CE8EDBD8EF9557997DD08D3 /* LBIDimensionEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIDimensionEntryView.swift; sourceTree = "<group>"; };
 		20000001 /* RegalRecoveryApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegalRecoveryApp.swift; sourceTree = "<group>"; };
-		20001000 /* PCIProfileEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIProfileEditViewModel.swift; sourceTree = "<group>"; };
-		20001001 /* PCIProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIProfileEditView.swift; sourceTree = "<group>"; };
-		20001002 /* PCICriticalItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICriticalItemEditView.swift; sourceTree = "<group>"; };
+		20001000 /* LBIProfileEditViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIProfileEditViewModel.swift; sourceTree = "<group>"; };
+		20001001 /* LBIProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIProfileEditView.swift; sourceTree = "<group>"; };
+		20001002 /* LBICriticalItemEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBICriticalItemEditView.swift; sourceTree = "<group>"; };
 		20009000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
 		20009001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
 		20000002 /* Color+RR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+RR.swift"; sourceTree = "<group>"; };
@@ -429,17 +430,18 @@
 		20000511 /* TimeJournalHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalHeaderView.swift; sourceTree = "<group>"; };
 		20000512 /* TimeJournalTimelineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalTimelineView.swift; sourceTree = "<group>"; };
 		20000513 /* TimeJournalSlotRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalSlotRow.swift; sourceTree = "<group>"; };
-		20000514 /* PCITypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCITypes.swift; sourceTree = "<group>"; };
-		20000515 /* PCIScoringService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIScoringService.swift; sourceTree = "<group>"; };
-		20000517 /* PCIMissedDayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIMissedDayService.swift; sourceTree = "<group>"; };
-		20000520 /* PCICheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICheckInViewModel.swift; sourceTree = "<group>"; };
-		20000521 /* PCIPsychoeducationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIPsychoeducationView.swift; sourceTree = "<group>"; };
-		20000522 /* PCICriticalSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICriticalSelectionView.swift; sourceTree = "<group>"; };
-		20000523 /* PCIWeeklySummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIWeeklySummaryCard.swift; sourceTree = "<group>"; };
-		20000524 /* PCIEntryPointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIEntryPointView.swift; sourceTree = "<group>"; };
-		b4e434c5fd174c8fa98e9ed4 /* PCITrendChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCITrendChartView.swift; sourceTree = "<group>"; };
-		7dae1353664946c8be82c982d7920395 /* PCICheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICheckInView.swift; sourceTree = "<group>"; };
-		B5A73E82CAD846C9A09A757C /* PCICorrelationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICorrelationView.swift; sourceTree = "<group>"; };
+		20000514 /* LBITypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBITypes.swift; sourceTree = "<group>"; };
+		20000515 /* LBIScoringService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIScoringService.swift; sourceTree = "<group>"; };
+		20000517 /* LBIMissedDayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIMissedDayService.swift; sourceTree = "<group>"; };
+		20000520 /* LBICheckInViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBICheckInViewModel.swift; sourceTree = "<group>"; };
+		20000521 /* LBIPsychoeducationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIPsychoeducationView.swift; sourceTree = "<group>"; };
+		20000522 /* LBICriticalSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBICriticalSelectionView.swift; sourceTree = "<group>"; };
+		20000523 /* LBIWeeklySummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIWeeklySummaryCard.swift; sourceTree = "<group>"; };
+		20000524 /* LBIEntryPointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIEntryPointView.swift; sourceTree = "<group>"; };
+		20000525 /* LBIFoundationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIFoundationView.swift; sourceTree = "<group>"; };
+		b4e434c5fd174c8fa98e9ed4 /* LBITrendChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBITrendChartView.swift; sourceTree = "<group>"; };
+		7dae1353664946c8be82c982d7920395 /* LBICheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBICheckInView.swift; sourceTree = "<group>"; };
+		B5A73E82CAD846C9A09A757C /* LBICorrelationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBICorrelationView.swift; sourceTree = "<group>"; };
 		20000600 /* TimeJournalEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalEntryViewModel.swift; sourceTree = "<group>"; };
 		20000601 /* LocationField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationField.swift; sourceTree = "<group>"; };
 		20000602 /* ActivityField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityField.swift; sourceTree = "<group>"; };
@@ -543,11 +545,11 @@
 		20006003 /* QuickActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsViewModel.swift; sourceTree = "<group>"; };
 		20006004 /* QuickActionsCustomizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsCustomizeView.swift; sourceTree = "<group>"; };
 		30000001 /* RegalRecovery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegalRecovery.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4c4d445bc9364c2fa97b153d /* PCIDimensionContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIDimensionContent.swift; sourceTree = "<group>"; };
+		4c4d445bc9364c2fa97b153d /* LBIDimensionContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBIDimensionContent.swift; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
-		BFD9987DFCC6D5A757E5C1F1 /* PCISetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCISetupFlowView.swift; sourceTree = "<group>"; };
-		F7C6E48DCD91F04F58511767 /* PCISetupConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCISetupConfirmationView.swift; sourceTree = "<group>"; };
+		BFD9987DFCC6D5A757E5C1F1 /* LBISetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBISetupFlowView.swift; sourceTree = "<group>"; };
+		F7C6E48DCD91F04F58511767 /* LBISetupConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBISetupConfirmationView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -626,8 +628,8 @@
 				20009000 /* ThreeCirclesTypes.swift */,
 				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
-				20000514 /* PCITypes.swift */,
-				4c4d445bc9364c2fa97b153d /* PCIDimensionContent.swift */,
+				20000514 /* LBITypes.swift */,
+				4c4d445bc9364c2fa97b153d /* LBIDimensionContent.swift */,
 				20003000 /* BookData.swift */,
 				20003001 /* BookCatalog.swift */,
 				20003100 /* SensaEmoji.swift */,
@@ -686,7 +688,7 @@
 				20001205 /* LocationService.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
 				20009001 /* ThreeCirclesAPIClient.swift */,
-				20000517 /* PCIMissedDayService.swift */,
+				20000517 /* LBIMissedDayService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -755,15 +757,15 @@
 				20000207 /* RecoveryPlanViewModel.swift */,
 				20000210 /* RecoveryWorkViewModel.swift */,
 				20000403 /* FASTERCheckInViewModel.swift */,
-				02e976c6 /* PCISetupViewModel.swift */,
-				20000520 /* PCICheckInViewModel.swift */,
-				20001000 /* PCIProfileEditViewModel.swift */,
+				02e976c6 /* LBISetupViewModel.swift */,
+				20000520 /* LBICheckInViewModel.swift */,
+				20001000 /* LBIProfileEditViewModel.swift */,
 				20000901 /* GratitudeEntryViewModel.swift */,
 				20000902 /* GratitudeHistoryViewModel.swift */,
 				20000903 /* GratitudeTrendsViewModel.swift */,
 				20000306 /* TodayViewModel.swift */,
 				20000307 /* DailyScoreCalculator.swift */,
-				20000515 /* PCIScoringService.swift */,
+				20000515 /* LBIScoringService.swift */,
 				20000600 /* TimeJournalEntryViewModel.swift */,
 				50001000 /* ThreeCircles */,
 				20005002 /* VisionWizardViewModel.swift */,
@@ -798,7 +800,7 @@
 				20000056 /* EveningReviewView.swift */,
 				20000057 /* ExerciseLogView.swift */,
 				50000301 /* FASTER */,
-				50000303 /* PCI */,
+				50000303 /* LBI */,
 				20000058 /* FASTERScaleView.swift */,
 				20000059 /* GratitudeListView.swift */,
 				20000905 /* GratitudeDetailView.swift */,
@@ -1031,23 +1033,24 @@
 			path = TimeJournal;
 			sourceTree = "<group>";
 		};
-		50000303 /* PCI */ = {
+		50000303 /* LBI */ = {
 			isa = PBXGroup;
 			children = (
-				20000521 /* PCIPsychoeducationView.swift */,
-				20000522 /* PCICriticalSelectionView.swift */,
-				20000523 /* PCIWeeklySummaryCard.swift */,
-				b4e434c5fd174c8fa98e9ed4 /* PCITrendChartView.swift */,
-				20000524 /* PCIEntryPointView.swift */,
-				7dae1353664946c8be82c982d7920395 /* PCICheckInView.swift */,
-				B5A73E82CAD846C9A09A757C /* PCICorrelationView.swift */,
-				BFD9987DFCC6D5A757E5C1F1 /* PCISetupFlowView.swift */,
-				1CE8EDBD8EF9557997DD08D3 /* PCIDimensionEntryView.swift */,
-				F7C6E48DCD91F04F58511767 /* PCISetupConfirmationView.swift */,
-				20001001 /* PCIProfileEditView.swift */,
-				20001002 /* PCICriticalItemEditView.swift */,
+				20000521 /* LBIPsychoeducationView.swift */,
+				20000522 /* LBICriticalSelectionView.swift */,
+				20000523 /* LBIWeeklySummaryCard.swift */,
+				b4e434c5fd174c8fa98e9ed4 /* LBITrendChartView.swift */,
+				20000524 /* LBIEntryPointView.swift */,
+				20000525 /* LBIFoundationView.swift */,
+				7dae1353664946c8be82c982d7920395 /* LBICheckInView.swift */,
+				B5A73E82CAD846C9A09A757C /* LBICorrelationView.swift */,
+				BFD9987DFCC6D5A757E5C1F1 /* LBISetupFlowView.swift */,
+				1CE8EDBD8EF9557997DD08D3 /* LBIDimensionEntryView.swift */,
+				F7C6E48DCD91F04F58511767 /* LBISetupConfirmationView.swift */,
+				20001001 /* LBIProfileEditView.swift */,
+				20001002 /* LBICriticalItemEditView.swift */,
 			);
-			path = PCI;
+			path = LBI;
 			sourceTree = "<group>";
 		};
 		50001000 /* ThreeCircles */ = {
@@ -1227,22 +1230,23 @@
 				10000401 /* FASTERIndicatorSelectionView.swift in Sources */,
 				10000402 /* FASTERThermometerView.swift in Sources */,
 				10000403 /* FASTERCheckInViewModel.swift in Sources */,
-				ddf8aca8 /* PCISetupViewModel.swift in Sources */,
-				10000520 /* PCICheckInViewModel.swift in Sources */,
-				10001000 /* PCIProfileEditViewModel.swift in Sources */,
-				10000521 /* PCIPsychoeducationView.swift in Sources */,
-				10000522 /* PCICriticalSelectionView.swift in Sources */,
-				10001001 /* PCIProfileEditView.swift in Sources */,
-				10001002 /* PCICriticalItemEditView.swift in Sources */,
-				10000523 /* PCIWeeklySummaryCard.swift in Sources */,
-				9994c967a07f4b07a50d4b1d /* PCITrendChartView.swift in Sources */,
-				10000524 /* PCIEntryPointView.swift in Sources */,
-				e79bd80173024319aa463702d16506e7 /* PCICheckInView.swift in Sources */,
-				6dc03e4de30547c88f276e7241e58de3 /* PCICorrelationView.swift in Sources */,
+				ddf8aca8 /* LBISetupViewModel.swift in Sources */,
+				10000520 /* LBICheckInViewModel.swift in Sources */,
+				10001000 /* LBIProfileEditViewModel.swift in Sources */,
+				10000521 /* LBIPsychoeducationView.swift in Sources */,
+				10000522 /* LBICriticalSelectionView.swift in Sources */,
+				10001001 /* LBIProfileEditView.swift in Sources */,
+				10001002 /* LBICriticalItemEditView.swift in Sources */,
+				10000523 /* LBIWeeklySummaryCard.swift in Sources */,
+				9994c967a07f4b07a50d4b1d /* LBITrendChartView.swift in Sources */,
+				10000524 /* LBIEntryPointView.swift in Sources */,
+				10000525 /* LBIFoundationView.swift in Sources */,
+				e79bd80173024319aa463702d16506e7 /* LBICheckInView.swift in Sources */,
+				6dc03e4de30547c88f276e7241e58de3 /* LBICorrelationView.swift in Sources */,
 				10000404 /* FASTERResultsView.swift in Sources */,
 				10000007 /* Types.swift in Sources */,
-				10000514 /* PCITypes.swift in Sources */,
-				fd51683e95044ec58be820d5 /* PCIDimensionContent.swift in Sources */,
+				10000514 /* LBITypes.swift in Sources */,
+				fd51683e95044ec58be820d5 /* LBIDimensionContent.swift in Sources */,
 				10000500 /* TimeJournalTypes.swift in Sources */,
 				10000008 /* RRModels.swift in Sources */,
 				10000501 /* RRTimeJournalEntry.swift in Sources */,
@@ -1288,8 +1292,8 @@
 				10000308 /* SobrietyModuleView.swift in Sources */,
 				10000306 /* TodayViewModel.swift in Sources */,
 				10000307 /* DailyScoreCalculator.swift in Sources */,
-				10000515 /* PCIScoringService.swift in Sources */,
-				10000517 /* PCIMissedDayService.swift in Sources */,
+				10000515 /* LBIScoringService.swift in Sources */,
+				10000517 /* LBIMissedDayService.swift in Sources */,
 				10000022 /* ServiceContainer.swift in Sources */,
 				10000023 /* FeatureFlagService.swift in Sources */,
 				10000213 /* FeatureFlagStore.swift in Sources */,
@@ -1466,9 +1470,9 @@
 				10006002 /* ActivityDestinationView.swift in Sources */,
 				10006003 /* QuickActionsViewModel.swift in Sources */,
 				10006004 /* QuickActionsCustomizeView.swift in Sources */,
-				B1D80FD3EE117EFA1430602F /* PCISetupFlowView.swift in Sources */,
-				9103A401908DED56E83772C7 /* PCIDimensionEntryView.swift in Sources */,
-				91B02E045195FF9B6D69BD3E /* PCISetupConfirmationView.swift in Sources */,
+				B1D80FD3EE117EFA1430602F /* LBISetupFlowView.swift in Sources */,
+				9103A401908DED56E83772C7 /* LBIDimensionEntryView.swift in Sources */,
+				91B02E045195FF9B6D69BD3E /* LBISetupConfirmationView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

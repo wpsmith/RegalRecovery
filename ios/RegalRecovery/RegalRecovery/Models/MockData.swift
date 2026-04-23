@@ -414,7 +414,7 @@ enum MockData {
         GlossaryTerm(term: "FANOS", definition: "Couples check-in framework: Feelings, Affirmations, Needs, Ownership, Sobriety."),
         GlossaryTerm(term: "FITNAP", definition: "Alternative couples check-in: Feelings, Intimacy, Triggers, Needs, Affirmations, Prayer."),
         GlossaryTerm(term: "3 Circles", definition: "Boundary tool with three rings: Red (acting out), Yellow (warning behaviors), Green (healthy behaviors)."),
-        GlossaryTerm(term: "PCI", definition: "Personal Craziness Index — Patrick Carnes self-assessment measuring life manageability through personal warning behaviors."),
+        GlossaryTerm(term: "LBI", definition: "Personal Craziness Index — Patrick Carnes self-assessment measuring life manageability through personal warning behaviors."),
         GlossaryTerm(term: "SAST-R", definition: "Sexual Addiction Screening Test Revised — validated clinical screening instrument."),
         GlossaryTerm(term: "SA", definition: "Sexaholics Anonymous — defines sobriety as no sex with self and no sex with anyone other than spouse."),
         GlossaryTerm(term: "Celebrate Recovery", definition: "Christ-centered 12-step program addressing hurts, habits, and hang-ups."),

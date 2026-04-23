@@ -1,22 +1,22 @@
-// Views/Activities/PCI/PCITrendChartView.swift
+// Views/Activities/LBI/LBITrendChartView.swift
 
 import SwiftUI
 import Charts
 import SwiftData
 
-struct PCITrendChartView: View {
-    let entries: [RRPCIDailyEntry]
+struct LBITrendChartView: View {
+    let entries: [RRLBIDailyEntry]
 
-    private var weeklyData: [(weekStart: Date, score: Int, riskLevel: PCIRiskLevel)] {
-        PCIScoringService.weeklyScores(weeks: 12, entries: entries)
+    private var weeklyData: [(weekStart: Date, score: Int, riskLevel: LBIRiskLevel)] {
+        LBIScoringService.weeklyScores(weeks: 12, entries: entries)
     }
 
-    private var currentWeekData: (weekStart: Date, score: Int, riskLevel: PCIRiskLevel, delta: Int?, daysCompleted: Int, isPartial: Bool) {
-        let currentWeekStart = PCIScoringService.weekStart(for: Date())
-        let score = PCIScoringService.weeklyScore(for: currentWeekStart, entries: entries)
-        let riskLevel = PCIRiskLevel.from(weeklyScore: score)
-        let delta = PCIScoringService.weeklyDelta(currentWeekStart: currentWeekStart, entries: entries)
-        let partialInfo = PCIScoringService.partialWeekInfo(weekStart: currentWeekStart, entries: entries)
+    private var currentWeekData: (weekStart: Date, score: Int, riskLevel: LBIRiskLevel, delta: Int?, daysCompleted: Int, isPartial: Bool) {
+        let currentWeekStart = LBIScoringService.weekStart(for: Date())
+        let score = LBIScoringService.weeklyScore(for: currentWeekStart, entries: entries)
+        let riskLevel = LBIRiskLevel.from(weeklyScore: score)
+        let delta = LBIScoringService.weeklyDelta(currentWeekStart: currentWeekStart, entries: entries)
+        let partialInfo = LBIScoringService.partialWeekInfo(weekStart: currentWeekStart, entries: entries)
 
         return (currentWeekStart, score, riskLevel, delta, partialInfo.daysCompleted, partialInfo.daysCompleted < 7)
     }
@@ -24,7 +24,7 @@ struct PCITrendChartView: View {
     var body: some View {
         VStack(spacing: 16) {
             // Current week summary card
-            PCIWeeklySummaryCard(
+            LBIWeeklySummaryCard(
                 weeklyScore: currentWeekData.score,
                 riskLevel: currentWeekData.riskLevel,
                 delta: currentWeekData.delta,
@@ -158,7 +158,7 @@ struct PCITrendChartView: View {
                 GridItem(.flexible(), spacing: 8),
                 GridItem(.flexible(), spacing: 8)
             ], spacing: 8) {
-                ForEach(PCIRiskLevel.allCases, id: \.self) { level in
+                ForEach(LBIRiskLevel.allCases, id: \.self) { level in
                     HStack(spacing: 6) {
                         Circle()
                             .fill(level.color)
@@ -184,13 +184,13 @@ struct PCITrendChartView: View {
     // MARK: - Helpers
 
     private struct RiskBand {
-        let level: PCIRiskLevel
+        let level: LBIRiskLevel
         let range: ClosedRange<Int>
         let color: Color
     }
 
     private var riskLevelBands: [RiskBand] {
-        PCIRiskLevel.allCases.map { level in
+        LBIRiskLevel.allCases.map { level in
             RiskBand(level: level, range: level.scoreRange, color: level.color)
         }
     }
@@ -209,7 +209,7 @@ struct PCITrendChartView: View {
     let userId = UUID()
 
     // Generate 12 weeks of sample data
-    var entries: [RRPCIDailyEntry] = []
+    var entries: [RRLBIDailyEntry] = []
     let calendar = Calendar.current
     let today = Date()
 
@@ -224,7 +224,7 @@ struct PCITrendChartView: View {
 
             // Vary scores to show different risk levels
             let baseScore = Int.random(in: 0...7)
-            let entry = RRPCIDailyEntry(
+            let entry = RRLBIDailyEntry(
                 userId: userId,
                 date: date,
                 profileVersionId: UUID(),
@@ -236,7 +236,7 @@ struct PCITrendChartView: View {
     }
 
     return ScrollView {
-        PCITrendChartView(entries: entries)
+        LBITrendChartView(entries: entries)
             .padding()
     }
     .modelContainer(container)
@@ -249,11 +249,11 @@ struct PCITrendChartView: View {
     // Only 1 week of data
     let calendar = Calendar.current
     let today = Date()
-    var entries: [RRPCIDailyEntry] = []
+    var entries: [RRLBIDailyEntry] = []
 
     for dayOffset in 0..<5 {
         guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
-        let entry = RRPCIDailyEntry(
+        let entry = RRLBIDailyEntry(
             userId: userId,
             date: date,
             profileVersionId: UUID(),
@@ -264,7 +264,7 @@ struct PCITrendChartView: View {
     }
 
     return ScrollView {
-        PCITrendChartView(entries: entries)
+        LBITrendChartView(entries: entries)
             .padding()
     }
     .modelContainer(container)
@@ -275,7 +275,7 @@ struct PCITrendChartView: View {
     let userId = UUID()
 
     // Generate 12 weeks with increasing scores (worsening trend)
-    var entries: [RRPCIDailyEntry] = []
+    var entries: [RRLBIDailyEntry] = []
     let calendar = Calendar.current
     let today = Date()
 
@@ -288,7 +288,7 @@ struct PCITrendChartView: View {
 
         for dayOffset in 0..<daysToGenerate {
             guard let date = calendar.date(byAdding: .day, value: dayOffset, to: weekStart) else { continue }
-            let entry = RRPCIDailyEntry(
+            let entry = RRLBIDailyEntry(
                 userId: userId,
                 date: date,
                 profileVersionId: UUID(),
@@ -300,7 +300,7 @@ struct PCITrendChartView: View {
     }
 
     return ScrollView {
-        PCITrendChartView(entries: entries)
+        LBITrendChartView(entries: entries)
             .padding()
     }
     .modelContainer(container)

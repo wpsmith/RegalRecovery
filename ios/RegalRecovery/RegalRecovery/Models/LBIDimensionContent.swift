@@ -1,8 +1,8 @@
 import Foundation
 
-struct PCIDimensionContent: Identifiable {
-    var id: PCIDimensionType { dimensionType }
-    let dimensionType: PCIDimensionType
+struct LBIDimensionContent: Identifiable {
+    var id: LBIDimensionType { dimensionType }
+    let dimensionType: LBIDimensionType
     let title: String
     let description: String
     let promptQuestion: String
@@ -11,10 +11,10 @@ struct PCIDimensionContent: Identifiable {
     let positiveNote: String?
 }
 
-extension PCIDimensionContent {
-    static let all: [PCIDimensionContent] = [
+extension LBIDimensionContent {
+    static let all: [LBIDimensionContent] = [
         // 1. Physical Health
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .physicalHealth,
             title: String(localized: "Physical Health"),
             description: String(localized: "The ultimate insanity is to not take care of our body. When our physical health deteriorates, we have nothing. Yet we seem to have little time for physical conditioning."),
@@ -32,7 +32,7 @@ extension PCIDimensionContent {
         ),
 
         // 2. Environment
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .environment,
             title: String(localized: "Environment"),
             description: String(localized: "To not have time to do your personal chores is a comment on the order of your life. How you maintain your living space and handle daily logistics reflects your overall state of manageability."),
@@ -51,7 +51,7 @@ extension PCIDimensionContent {
         ),
 
         // 3. Work
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .work,
             title: String(localized: "Work"),
             description: String(localized: "Chaos at work is risky for recovery. When professional responsibilities start slipping, it often signals that your overall life management is eroding."),
@@ -68,7 +68,7 @@ extension PCIDimensionContent {
         ),
 
         // 4. Interests (POSITIVE category)
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .interests,
             title: String(localized: "Interests"),
             description: String(localized: "What are some positive interests, besides work, that give you perspective on the world? These are the activities that nourish your soul and keep you grounded."),
@@ -89,7 +89,7 @@ extension PCIDimensionContent {
         ),
 
         // 5. Social Life
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .socialLife,
             title: String(localized: "Social Life"),
             description: String(localized: "Think of friends in your social network — beyond a significant other and family members — who provide significant support for you. Isolation is one of the earliest signs of lifestyle erosion."),
@@ -106,7 +106,7 @@ extension PCIDimensionContent {
         ),
 
         // 6. Family, Relationships & Significant Others
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .familyAndSignificantOthers,
             title: String(localized: "Family, Relationships & Significant Others"),
             description: String(localized: "Examples of craziness in this area include staying silent, becoming overtly hostile, or engaging in passive-aggressive behaviors. How you treat those closest to you reveals your inner state."),
@@ -125,7 +125,7 @@ extension PCIDimensionContent {
         ),
 
         // 7. Finances
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .finances,
             title: String(localized: "Finances"),
             description: String(localized: "We handle our financial resources much like our personal resources. Signs of financial overextension often parallel various forms of emotional overextension."),
@@ -142,7 +142,7 @@ extension PCIDimensionContent {
         ),
 
         // 8. Spiritual Life & Personal Reflection
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .spiritualLife,
             title: String(localized: "Spiritual Life & Personal Reflection"),
             description: String(localized: "Spirituality can include prayer, meditation, Bible reading, devotionals, and church attendance. Personal reflection includes journaling, daily readings, and therapy."),
@@ -160,7 +160,7 @@ extension PCIDimensionContent {
         ),
 
         // 9. Other Compulsive/Symptomatic Behaviors
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .compulsiveBehaviors,
             title: String(localized: "Other Compulsive/Symptomatic Behaviors"),
             description: String(localized: "Compulsive behaviors with negative consequences indicate something about your general well-being and state of overall recovery. Symptomatic behaviors like forgetfulness, slips of the tongue, or jealousy are further evidence of overextension."),
@@ -180,7 +180,7 @@ extension PCIDimensionContent {
         ),
 
         // 10. Recovery Practice & Therapeutic Self-Care
-        PCIDimensionContent(
+        LBIDimensionContent(
             dimensionType: .recoveryPractice,
             title: String(localized: "Recovery Practice & Therapeutic Self-Care"),
             description: String(localized: "Living a recovery-focused life involves many practices. Group attendance, step work, sponsorship, service, and recovery phone calls become the foundation of good recovery."),
@@ -197,7 +197,7 @@ extension PCIDimensionContent {
         )
     ]
 
-    static func content(for type: PCIDimensionType) -> PCIDimensionContent {
+    static func content(for type: LBIDimensionType) -> LBIDimensionContent {
         all.first { $0.dimensionType == type }!
     }
 }

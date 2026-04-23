@@ -36,8 +36,10 @@ struct ActivityDestinationView: View {
             FANOSCheckInView()
         case ActivityType.fitnap.rawValue:
             FITNAPCheckInView()
+        case "lbiFoundation":
+            LBIFoundationView()
         case "lbi":
-            PCIEntryPointView()
+            LBIEntryPointView()
         case ActivityType.weeklyGoals.rawValue:
             WeeklyGoalsView()
         case ActivityType.stepWork.rawValue:

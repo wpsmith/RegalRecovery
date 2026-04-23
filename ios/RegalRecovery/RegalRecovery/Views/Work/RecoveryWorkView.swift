@@ -263,8 +263,10 @@ struct RecoveryWorkView: View {
             RecoveryProgressView()
         case "contentResources":
             ContentTabView()
+        case "lbiFoundation":
+            LBIFoundationView()
         case "lbi":
-            PCIEntryPointView()
+            LBIEntryPointView()
         case "integrityInventory":
             EveningReviewView()
         case "memoryVerseReview":

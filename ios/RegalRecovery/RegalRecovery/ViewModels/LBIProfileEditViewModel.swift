@@ -1,16 +1,16 @@
-// ViewModels/PCIProfileEditViewModel.swift
+// ViewModels/LBIProfileEditViewModel.swift
 
 import Foundation
 import SwiftUI
 import SwiftData
 
 @Observable
-class PCIProfileEditViewModel {
+class LBIProfileEditViewModel {
 
     // MARK: - State
 
-    var dimensions: [PCIDimension] = []
-    var criticalItems: [PCICriticalItem] = []
+    var dimensions: [LBIDimension] = []
+    var criticalItems: [LBICriticalItem] = []
     var selectedCriticalIds: Set<UUID> = []
     var currentVersionNumber: Int = 0
     var profileId: UUID?
@@ -31,8 +31,8 @@ class PCIProfileEditViewModel {
     }
 
     /// Flat list of all indicators across all dimensions for critical selection.
-    var allIndicators: [(dimensionType: PCIDimensionType, indicator: PCIIndicator)] {
-        var result: [(PCIDimensionType, PCIIndicator)] = []
+    var allIndicators: [(dimensionType: LBIDimensionType, indicator: LBIIndicator)] {
+        var result: [(LBIDimensionType, LBIIndicator)] = []
         for dimension in dimensions {
             for indicator in dimension.indicators {
                 result.append((dimension.dimensionType, indicator))
@@ -50,7 +50,7 @@ class PCIProfileEditViewModel {
 
         // Fetch active profile
         let uid = userId
-        let profileDescriptor = FetchDescriptor<RRPCIProfile>(
+        let profileDescriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == uid && $0.isActive == true }
         )
         guard let profile = try? context.fetch(profileDescriptor).first else {
@@ -61,7 +61,7 @@ class PCIProfileEditViewModel {
         let pid = profile.id
 
         // Fetch latest completed version (versionNumber > 0)
-        let versionDescriptor = FetchDescriptor<RRPCIProfileVersion>(
+        let versionDescriptor = FetchDescriptor<RRLBIProfileVersion>(
             predicate: #Predicate { $0.profileId == pid && $0.versionNumber > 0 },
             sortBy: [SortDescriptor(\.versionNumber, order: .reverse)]
         )
@@ -94,7 +94,7 @@ class PCIProfileEditViewModel {
         let criticalItemsJSON = criticalItemsData.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
 
         // Create new version
-        let newVersion = RRPCIProfileVersion(
+        let newVersion = RRLBIProfileVersion(
             profileId: profileId,
             versionNumber: newVersionNumber,
             dimensionsJSON: dimensionsJSON,
@@ -131,7 +131,7 @@ class PCIProfileEditViewModel {
         let criticalItemsJSON = criticalItemsData.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
 
         // Create new version
-        let newVersion = RRPCIProfileVersion(
+        let newVersion = RRLBIProfileVersion(
             profileId: profileId,
             versionNumber: newVersionNumber,
             dimensionsJSON: dimensionsJSON,
@@ -152,25 +152,25 @@ class PCIProfileEditViewModel {
     // MARK: - Indicator Management
 
     /// Add a new indicator to the specified dimension (max 5 per dimension).
-    func addIndicator(to dimensionType: PCIDimensionType, text: String) {
+    func addIndicator(to dimensionType: LBIDimensionType, text: String) {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
         // Find or create dimension
         if let index = dimensions.firstIndex(where: { $0.dimensionType == dimensionType }) {
             guard dimensions[index].indicators.count < 5 else { return }
 
-            let newIndicator = PCIIndicator(
+            let newIndicator = LBIIndicator(
                 text: text.trimmingCharacters(in: .whitespacesAndNewlines),
                 isPositive: dimensionType.isPositiveCategory
             )
             dimensions[index].indicators.append(newIndicator)
         } else {
             // Create new dimension if it doesn't exist
-            let newIndicator = PCIIndicator(
+            let newIndicator = LBIIndicator(
                 text: text.trimmingCharacters(in: .whitespacesAndNewlines),
                 isPositive: dimensionType.isPositiveCategory
             )
-            let newDimension = PCIDimension(
+            let newDimension = LBIDimension(
                 dimensionType: dimensionType,
                 indicators: [newIndicator]
             )
@@ -179,7 +179,7 @@ class PCIProfileEditViewModel {
     }
 
     /// Remove an indicator from the specified dimension.
-    func removeIndicator(id: UUID, from dimensionType: PCIDimensionType) {
+    func removeIndicator(id: UUID, from dimensionType: LBIDimensionType) {
         guard let dimensionIndex = dimensions.firstIndex(where: { $0.dimensionType == dimensionType }) else {
             return
         }
@@ -192,7 +192,7 @@ class PCIProfileEditViewModel {
     }
 
     /// Update the text of an existing indicator.
-    func updateIndicator(id: UUID, in dimensionType: PCIDimensionType, newText: String) {
+    func updateIndicator(id: UUID, in dimensionType: LBIDimensionType, newText: String) {
         guard let dimensionIndex = dimensions.firstIndex(where: { $0.dimensionType == dimensionType }),
               let indicatorIndex = dimensions[dimensionIndex].indicators.firstIndex(where: { $0.id == id }) else {
             return
@@ -226,8 +226,8 @@ class PCIProfileEditViewModel {
     // MARK: - Private Helpers
 
     /// Build critical items from current selection.
-    private func buildCriticalItemsFromSelection() -> [PCICriticalItem] {
-        var items: [PCICriticalItem] = []
+    private func buildCriticalItemsFromSelection() -> [LBICriticalItem] {
+        var items: [LBICriticalItem] = []
 
         for (index, item) in allIndicators.enumerated() {
             guard selectedCriticalIds.contains(item.indicator.id) else { continue }
@@ -244,7 +244,7 @@ class PCIProfileEditViewModel {
                 displayText = originalText
             }
 
-            let criticalItem = PCICriticalItem(
+            let criticalItem = LBICriticalItem(
                 id: indicator.id,
                 dimensionType: dimensionType,
                 displayText: displayText,

@@ -1488,10 +1488,10 @@ final class RRQuickActionItem {
     }
 }
 
-// MARK: - PCI Profile
+// MARK: - LBI Profile
 
 @Model
-final class RRPCIProfile {
+final class RRLBIProfile {
 
     @Attribute(.unique) var id: UUID
     var userId: UUID
@@ -1499,8 +1499,8 @@ final class RRPCIProfile {
     var createdAt: Date
     var modifiedAt: Date
 
-    @Relationship(deleteRule: .cascade, inverse: \RRPCIProfileVersion.profile)
-    var versions: [RRPCIProfileVersion] = []
+    @Relationship(deleteRule: .cascade, inverse: \RRLBIProfileVersion.profile)
+    var versions: [RRLBIProfileVersion] = []
 
     init(
         id: UUID = UUID(),
@@ -1517,10 +1517,10 @@ final class RRPCIProfile {
     }
 }
 
-// MARK: - PCI Profile Version
+// MARK: - LBI Profile Version
 
 @Model
-final class RRPCIProfileVersion {
+final class RRLBIProfileVersion {
 
     @Attribute(.unique) var id: UUID
     var profileId: UUID
@@ -1530,13 +1530,13 @@ final class RRPCIProfileVersion {
     var criticalItemsJSON: String
     var createdAt: Date
 
-    var profile: RRPCIProfile?
+    var profile: RRLBIProfile?
 
     /// Decoded dimensions from JSON storage.
-    var dimensions: [PCIDimension] {
+    var dimensions: [LBIDimension] {
         get {
             guard let data = dimensionsJSON.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode([PCIDimension].self, from: data) else {
+                  let decoded = try? JSONDecoder().decode([LBIDimension].self, from: data) else {
                 return []
             }
             return decoded
@@ -1550,10 +1550,10 @@ final class RRPCIProfileVersion {
     }
 
     /// Decoded critical items from JSON storage.
-    var criticalItems: [PCICriticalItem] {
+    var criticalItems: [LBICriticalItem] {
         get {
             guard let data = criticalItemsJSON.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode([PCICriticalItem].self, from: data) else {
+                  let decoded = try? JSONDecoder().decode([LBICriticalItem].self, from: data) else {
                 return []
             }
             return decoded
@@ -1585,10 +1585,10 @@ final class RRPCIProfileVersion {
     }
 }
 
-// MARK: - PCI Daily Entry
+// MARK: - LBI Daily Entry
 
 @Model
-final class RRPCIDailyEntry {
+final class RRLBIDailyEntry {
 
     @Attribute(.unique) var id: UUID
     var userId: UUID
@@ -1677,9 +1677,9 @@ enum RRModelConfiguration {
         RRDailyScore.self,
         RRVisionStatement.self,
         RRQuickActionItem.self,
-        RRPCIProfile.self,
-        RRPCIProfileVersion.self,
-        RRPCIDailyEntry.self,
+        RRLBIProfile.self,
+        RRLBIProfileVersion.self,
+        RRLBIDailyEntry.self,
     ]
 
     static var schema: Schema {
