@@ -435,7 +435,78 @@ enum ContentData {
         NotificationSetting(title: "Meeting Reminders", time: "1 hr before", isEnabled: true),
     ]
 
-    // MARK: - Sobriety Reset Encouragement Messages
+    // MARK: - Sobriety Reset Pre-Reset Encouragement (shown when choosing which addiction to reset)
+
+    struct ResetEncouragement {
+        let message: String
+        let verse: String
+        let reference: String
+    }
+
+    static let preResetEncouragements: [ResetEncouragement] = [
+        ResetEncouragement(
+            message: "This takes real courage. Honesty is the foundation of recovery.",
+            verse: "The Lord is close to the brokenhearted and saves those who are crushed in spirit.",
+            reference: "Psalm 34:18"
+        ),
+        ResetEncouragement(
+            message: "A setback is not a defeat. You are still in the fight.",
+            verse: "The righteous may fall seven times but still get up.",
+            reference: "Proverbs 24:16"
+        ),
+        ResetEncouragement(
+            message: "God's love for you has not changed. Not today, not ever.",
+            verse: "There is therefore now no condemnation for those who are in Christ Jesus.",
+            reference: "Romans 8:1"
+        ),
+        ResetEncouragement(
+            message: "You are choosing honesty over hiding. That is recovery in action.",
+            verse: "If we confess our sins, he is faithful and just and will forgive us our sins and purify us from all unrighteousness.",
+            reference: "1 John 1:9"
+        ),
+        ResetEncouragement(
+            message: "His mercies are new every morning — and so is your chance to begin again.",
+            verse: "Because of the Lord's great love we are not consumed, for his compassions never fail. They are new every morning.",
+            reference: "Lamentations 3:22-23"
+        ),
+        ResetEncouragement(
+            message: "You are not starting over from nothing. You carry every lesson forward.",
+            verse: "He who began a good work in you will carry it on to completion until the day of Christ Jesus.",
+            reference: "Philippians 1:6"
+        ),
+        ResetEncouragement(
+            message: "Grace is not earned by perfection. It meets you right where you are.",
+            verse: "My grace is sufficient for you, for my power is made perfect in weakness.",
+            reference: "2 Corinthians 12:9"
+        ),
+        ResetEncouragement(
+            message: "Jesus didn't come for the people who had it together. He came for you, right now.",
+            verse: "Come to me, all you who are weary and burdened, and I will give you rest.",
+            reference: "Matthew 11:28"
+        ),
+        ResetEncouragement(
+            message: "This moment does not define you. The One who loves you does.",
+            verse: "Neither height nor depth, nor anything else in all creation, will be able to separate us from the love of God.",
+            reference: "Romans 8:39"
+        ),
+        ResetEncouragement(
+            message: "Weeping is for a season. Joy is coming.",
+            verse: "Weeping may stay for the night, but rejoicing comes in the morning.",
+            reference: "Psalm 30:5"
+        ),
+        ResetEncouragement(
+            message: "You are seen, you are known, and you are deeply loved.",
+            verse: "He heals the brokenhearted and binds up their wounds.",
+            reference: "Psalm 147:3"
+        ),
+        ResetEncouragement(
+            message: "God is not surprised by today. He is not disappointed. He is with you.",
+            verse: "The Lord your God is with you, the Mighty Warrior who saves. He will take great delight in you.",
+            reference: "Zephaniah 3:17"
+        ),
+    ]
+
+    // MARK: - Sobriety Reset Post-Reset Encouragement Messages (shown after reset is confirmed)
 
     static let sobrietyResetMessages: [String] = [
         "His mercies are new this morning — and so are you. \"Because of the Lord's great love we are not consumed, for his compassions never fail. They are new every morning.\" (Lamentations 3:22-23)",

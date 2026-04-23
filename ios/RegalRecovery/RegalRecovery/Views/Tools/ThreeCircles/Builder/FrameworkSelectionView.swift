@@ -9,16 +9,16 @@ struct FrameworkSelectionView: View {
 
     /// Framework display data with descriptions.
     private let frameworkInfo: [(framework: FrameworkPreference, description: String)] = [
+        (.AA, "Alcoholics Anonymous"),
+        (.CoDA, "Co-Dependents Anonymous"),
+        (.DA, "Debtors Anonymous"),
+        (.GA, "Gamblers Anonymous"),
+        (.ITAA, "Internet and Technology Addicts Anonymous"),
+        (.NA, "Narcotics Anonymous"),
+        (.OA, "Overeaters Anonymous"),
         (.SA, "Sexaholics Anonymous"),
         (.SLAA, "Sex and Love Addicts Anonymous"),
-        (.AA, "Alcoholics Anonymous"),
-        (.NA, "Narcotics Anonymous"),
         (.SMART, "SMART Recovery (secular, science-based)"),
-        (.OA, "Overeaters Anonymous"),
-        (.GA, "Gamblers Anonymous"),
-        (.DA, "Debtors Anonymous"),
-        (.CoDA, "Co-Dependents Anonymous"),
-        (.ITAA, "Internet and Technology Addicts Anonymous"),
         (.WA, "Workaholics Anonymous"),
         (.other, "Another framework not listed here"),
         (.none, "No framework preference"),

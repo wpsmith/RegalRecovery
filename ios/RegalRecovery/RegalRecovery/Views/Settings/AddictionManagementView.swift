@@ -1,6 +1,22 @@
 import SwiftData
 import SwiftUI
 
+extension RRAddiction {
+    var displayColor: Color {
+        let hex = colorHex ?? Self.defaultColors[sortOrder % Self.defaultColors.count]
+        return Self.colorFromHex(hex)
+    }
+
+    static func colorFromHex(_ hex: String) -> Color {
+        let h = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
+        guard h.count == 6, let int = UInt64(h, radix: 16) else { return .blue }
+        let r = Double((int >> 16) & 0xFF) / 255
+        let g = Double((int >> 8) & 0xFF) / 255
+        let b = Double(int & 0xFF) / 255
+        return Color(red: r, green: g, blue: b)
+    }
+}
+
 struct AddictionManagementView: View {
     @Query(sort: \RRAddiction.name) private var addictions: [RRAddiction]
     @Query private var streaks: [RRStreak]
@@ -111,11 +127,42 @@ struct AddictionManagementView: View {
             }
             .moveDisabled(true)
             .deleteDisabled(true)
+
+            // Color picker
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Color")
+                    .foregroundStyle(Color.rrText)
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 10) {
+                    ForEach(RRAddiction.defaultColors, id: \.self) { hex in
+                        let color = RRAddiction.colorFromHex(hex)
+                        let isSelected = addiction.colorHex == hex ||
+                            (addiction.colorHex == nil && hex == RRAddiction.defaultColors[addiction.sortOrder % RRAddiction.defaultColors.count])
+                        Circle()
+                            .fill(color)
+                            .frame(width: 32, height: 32)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white, lineWidth: isSelected ? 3 : 0)
+                            )
+                            .overlay(
+                                Circle()
+                                    .stroke(color.opacity(0.6), lineWidth: isSelected ? 1 : 0)
+                                    .padding(-1)
+                            )
+                            .onTapGesture {
+                                addiction.colorHex = hex
+                                addiction.modifiedAt = Date()
+                            }
+                    }
+                }
+            }
+            .moveDisabled(true)
+            .deleteDisabled(true)
         } label: {
             HStack {
-                Image(systemName: "circle.fill")
-                    .font(.system(size: 6))
-                    .foregroundStyle(Color.rrPrimary)
+                Circle()
+                    .fill(addiction.displayColor)
+                    .frame(width: 10, height: 10)
                 Text(addiction.name)
                     .font(RRFont.headline)
                     .foregroundStyle(Color.rrText)

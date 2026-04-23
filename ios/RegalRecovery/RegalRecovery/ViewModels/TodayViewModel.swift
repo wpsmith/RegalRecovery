@@ -38,6 +38,7 @@ struct SobrietyAddictionData: Identifiable {
     let id: UUID
     let name: String
     let sobrietyDate: Date
+    let color: Color?
 }
 
 // MARK: - Today View Model
@@ -136,7 +137,8 @@ class TodayViewModel {
             SobrietyAddictionData(
                 id: addiction.id,
                 name: addiction.name,
-                sobrietyDate: addiction.sobrietyDate
+                sobrietyDate: addiction.sobrietyDate,
+                color: addiction.displayColor
             )
         }
     }

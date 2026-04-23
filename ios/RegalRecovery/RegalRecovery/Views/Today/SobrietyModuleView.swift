@@ -1,13 +1,5 @@
 import SwiftUI
 
-// MARK: - Addiction Color Palette
-
-private let addictionColors: [Color] = [.blue, .purple, .orange, .pink, .teal, .mint]
-
-private func colorForAddiction(at index: Int) -> Color {
-    addictionColors[index % addictionColors.count]
-}
-
 // MARK: - SobrietyModuleView
 
 struct SobrietyModuleView: View {
@@ -53,7 +45,8 @@ struct SobrietyModuleView: View {
         return SobrietyAddictionData(
             id: UUID(),
             name: "All",
-            sobrietyDate: mostRecent.sobrietyDate
+            sobrietyDate: mostRecent.sobrietyDate,
+            color: nil
         )
     }
 
@@ -170,20 +163,23 @@ struct SobrietyModuleView: View {
         .onDisappear {
             stopTimer()
         }
-        // Addiction picker (when "All" is selected and user taps reset)
-        .confirmationDialog(
-            "Which addiction do you want to reset?",
-            isPresented: $showAddictionPicker,
-            titleVisibility: .visible
-        ) {
-            ForEach(addictions) { addiction in
-                Button(addiction.name) {
+        // Addiction picker with encouragement
+        .sheet(isPresented: $showAddictionPicker) {
+            ResetAddictionPickerSheet(
+                addictions: addictions,
+                onSelect: { addiction in
+                    showAddictionPicker = false
                     resetTargetAddiction = addiction
                     resetSelectedDate = Date()
-                    showResetSheet = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showResetSheet = true
+                    }
+                },
+                onCancel: {
+                    showAddictionPicker = false
                 }
-            }
-            Button("Cancel", role: .cancel) { }
+            )
+            .presentationDetents([.medium])
         }
         // Reset date picker full-screen sheet
         .fullScreenCover(isPresented: $showResetSheet) {
@@ -229,6 +225,9 @@ struct SobrietyModuleView: View {
                         .font(RRFont.title)
                         .foregroundStyle(Color.rrText)
                 }
+
+                ResetEncouragementBanner()
+                    .padding(.horizontal)
 
                 DatePicker(
                     "New sobriety date",
@@ -317,10 +316,10 @@ struct SobrietyModuleView: View {
                     selectedAddictionID = nil
                     calendarDisplayedMonth = Date()
                 }
-                ForEach(Array(addictions.enumerated()), id: \.element.id) { index, addiction in
+                ForEach(addictions) { addiction in
                     pillButton(
                         label: addiction.name,
-                        color: colorForAddiction(at: index),
+                        color: addiction.color,
                         isSelected: selectedAddictionID == addiction.id
                     ) {
                         selectedAddictionID = addiction.id
@@ -564,7 +563,7 @@ struct SobrietyModuleView: View {
                 .frame(maxWidth: .infinity, minHeight: 28)
         } else if selectedAddictionID == nil && addictions.count > 1 {
             // "All" mode — show multi-color indicators per addiction
-            let soberAddictions = addictions.enumerated().filter { _, addiction in
+            let soberAddictions = addictions.filter { addiction in
                 let sobrietyStart = cal.startOfDay(for: addiction.sobrietyDate)
                 return dayStart >= sobrietyStart && dayStart <= today
             }
@@ -581,10 +580,9 @@ struct SobrietyModuleView: View {
                                     .fill(Color.rrPrimary)
                             } else if soberAddictions.count == 1 {
                                 RoundedRectangle(cornerRadius: 6)
-                                    .fill(colorForAddiction(at: soberAddictions[0].offset))
+                                    .fill(soberAddictions[0].color ?? .blue)
                             } else {
-                                // Multiple addictions sober on this day — gradient
-                                let colors = soberAddictions.map { colorForAddiction(at: $0.offset) }
+                                let colors = soberAddictions.map { $0.color ?? .blue }
                                 RoundedRectangle(cornerRadius: 6)
                                     .fill(
                                         LinearGradient(
@@ -615,9 +613,9 @@ struct SobrietyModuleView: View {
                     Group {
                         if isSoberDay {
                             if let selectedID = selectedAddictionID,
-                               let idx = addictions.firstIndex(where: { $0.id == selectedID }) {
+                               let selected = addictions.first(where: { $0.id == selectedID }) {
                                 RoundedRectangle(cornerRadius: 6)
-                                    .fill(isToday ? Color.rrPrimary : colorForAddiction(at: idx))
+                                    .fill(isToday ? Color.rrPrimary : (selected.color ?? .rrSuccess))
                             } else {
                                 RoundedRectangle(cornerRadius: 6)
                                     .fill(isToday ? Color.rrPrimary : Color.rrSuccess)
@@ -636,6 +634,113 @@ struct SobrietyModuleView: View {
                 Circle()
                     .fill(index == viewMode ? Color.rrPrimary : Color.rrTextSecondary.opacity(0.3))
                     .frame(width: 6, height: 6)
+            }
+        }
+    }
+}
+
+// MARK: - Encouragement Banner (shown on the date picker sheet)
+
+private struct ResetEncouragementBanner: View {
+    private let encouragement = ContentData.preResetEncouragements.randomElement()!
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(encouragement.message)
+                .font(RRFont.body)
+                .foregroundStyle(Color.rrText)
+                .multilineTextAlignment(.center)
+
+            Text("\"\(encouragement.verse)\"")
+                .font(RRFont.body)
+                .italic()
+                .foregroundStyle(Color.rrPrimary)
+                .multilineTextAlignment(.center)
+
+            Text("— \(encouragement.reference)")
+                .font(RRFont.caption)
+                .foregroundStyle(Color.rrTextSecondary)
+        }
+        .padding()
+        .background(Color.rrPrimary.opacity(0.06))
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+// MARK: - Addiction Picker Sheet with Encouragement (shown when multiple addictions exist)
+
+private struct ResetAddictionPickerSheet: View {
+    let addictions: [SobrietyAddictionData]
+    let onSelect: (SobrietyAddictionData) -> Void
+    let onCancel: () -> Void
+
+    private let encouragement = ContentData.preResetEncouragements.randomElement()!
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                // Encouragement
+                VStack(spacing: 8) {
+                    Image(systemName: "hands.and.sparkles.fill")
+                        .font(.system(size: 36))
+                        .foregroundStyle(Color.rrPrimary)
+
+                    Text(encouragement.message)
+                        .font(RRFont.body)
+                        .foregroundStyle(Color.rrText)
+                        .multilineTextAlignment(.center)
+
+                    Text("\"\(encouragement.verse)\"")
+                        .font(RRFont.body)
+                        .italic()
+                        .foregroundStyle(Color.rrPrimary)
+                        .multilineTextAlignment(.center)
+
+                    Text("— \(encouragement.reference)")
+                        .font(RRFont.caption)
+                        .foregroundStyle(Color.rrTextSecondary)
+                }
+                .padding(.horizontal)
+
+                Divider()
+                    .padding(.horizontal)
+
+                // Addiction selection
+                Text("Which addiction do you want to reset?")
+                    .font(RRFont.subheadline)
+                    .foregroundStyle(Color.rrTextSecondary)
+
+                VStack(spacing: 10) {
+                    ForEach(addictions) { addiction in
+                        Button {
+                            onSelect(addiction)
+                        } label: {
+                            Text(addiction.name)
+                                .font(RRFont.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                                .foregroundStyle(Color.rrText)
+                                .background(Color.rrSurface)
+                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .stroke(Color.rrPrimary.opacity(0.3), lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.horizontal)
+
+                Spacer()
+            }
+            .padding(.top)
+            .navigationTitle("Reset Sobriety")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { onCancel() }
+                }
             }
         }
     }

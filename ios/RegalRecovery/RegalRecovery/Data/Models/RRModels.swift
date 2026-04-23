@@ -146,6 +146,7 @@ final class RRAddiction {
     var sobrietyDate: Date
     var userId: UUID
     var sortOrder: Int = 0
+    var colorHex: String?
     var createdAt: Date
     var modifiedAt: Date
 
@@ -160,12 +161,18 @@ final class RRAddiction {
     @Relationship(deleteRule: .cascade, inverse: \RRRelapse.addiction)
     var relapses: [RRRelapse] = []
 
+    static let defaultColors: [String] = [
+        "#3B82F6", "#8B5CF6", "#F97316", "#EC4899", "#14B8A6", "#34D399",
+        "#EF4444", "#F59E0B", "#6366F1", "#10B981", "#06B6D4", "#A855F7",
+    ]
+
     init(
         id: UUID = UUID(),
         name: String,
         sobrietyDate: Date,
         userId: UUID,
         sortOrder: Int = 0,
+        colorHex: String? = nil,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
@@ -174,6 +181,7 @@ final class RRAddiction {
         self.sobrietyDate = sobrietyDate
         self.userId = userId
         self.sortOrder = sortOrder
+        self.colorHex = colorHex
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }
@@ -1907,6 +1915,96 @@ final class RRPPPEntry {
     }
 }
 
+// MARK: - Post-Mortem Analysis
+
+@Model
+final class RRPostMortem {
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var analysisId: String
+    var timestamp: Date
+    var modifiedAt: Date
+    var createdAt: Date
+
+    var status: String
+    var eventType: String
+    var relapseId: String?
+    var addictionId: String?
+
+    var triggerSummary: [String]
+    var sectionsCompleted: [String]
+    var sectionsRemaining: [String]
+    var actionItemCount: Int
+
+    var completedAt: Date?
+    var synced: Bool
+
+    // JSON-encoded complex types
+    var sectionsData: Data?
+    var triggerDetailsData: Data?
+    var actionPlanData: Data?
+    var sharingData: Data?
+    var linkedEntitiesData: Data?
+
+    var sections: PostMortemSectionsPayload? {
+        get {
+            guard let data = sectionsData else { return nil }
+            return try? JSONDecoder().decode(PostMortemSectionsPayload.self, from: data)
+        }
+        set {
+            sectionsData = try? JSONEncoder().encode(newValue)
+        }
+    }
+
+    var triggerDetails: [TriggerDetailPayload] {
+        get {
+            guard let data = triggerDetailsData else { return [] }
+            return (try? JSONDecoder().decode([TriggerDetailPayload].self, from: data)) ?? []
+        }
+        set {
+            triggerDetailsData = try? JSONEncoder().encode(newValue)
+        }
+    }
+
+    var actionPlan: [ActionPlanItemPayload] {
+        get {
+            guard let data = actionPlanData else { return [] }
+            return (try? JSONDecoder().decode([ActionPlanItemPayload].self, from: data)) ?? []
+        }
+        set {
+            actionPlanData = try? JSONEncoder().encode(newValue)
+        }
+    }
+
+    init(
+        id: UUID = UUID(),
+        userId: UUID,
+        analysisId: String,
+        timestamp: Date,
+        eventType: String,
+        relapseId: String? = nil,
+        addictionId: String? = nil,
+        status: String = "draft",
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.userId = userId
+        self.analysisId = analysisId
+        self.timestamp = timestamp
+        self.eventType = eventType
+        self.relapseId = relapseId
+        self.addictionId = addictionId
+        self.status = status
+        self.triggerSummary = []
+        self.sectionsCompleted = []
+        self.sectionsRemaining = []
+        self.actionItemCount = 0
+        self.synced = false
+        self.createdAt = createdAt
+        self.modifiedAt = createdAt
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1957,6 +2055,7 @@ enum RRModelConfiguration {
         RRPPPEntry.self,
         RRTriggerDefinition.self,
         RRTriggerLogEntry.self,
+        RRPostMortem.self,
     ]
 
     static var schema: Schema {
@@ -1973,14 +2072,15 @@ enum RRModelConfiguration {
         do {
             return try ModelContainer(for: schema, configurations: [config])
         } catch {
-            // Schema migration failed (e.g., GratitudeEntry items type changed).
-            // Delete the store and recreate — old data is lost but app doesn't crash.
+            // Schema migration failed — delete the store and recreate.
             if !inMemory {
                 let fm = FileManager.default
                 let storePath = config.url.path()
                 for suffix in ["", "-wal", "-shm"] {
                     try? fm.removeItem(atPath: storePath + suffix)
                 }
+                UserDefaults.standard.removeObject(forKey: SeedData.seedKey)
+                UserDefaults.standard.removeObject(forKey: "com.regalrecovery.flagsSeeded")
             }
             return try ModelContainer(for: schema, configurations: [config])
         }

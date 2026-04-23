@@ -532,10 +532,8 @@ final class ThreeCirclesBuilderViewModel {
             committedAt: status == .active ? now : nil
         )
 
-        // Persist locally
-        var saved = Self.loadSavedSets()
-        saved.append(circleSet)
-        if let data = try? JSONEncoder.regalRecovery.encode(saved) {
+        // Persist locally (single set — replace any existing)
+        if let data = try? JSONEncoder.regalRecovery.encode([circleSet]) {
             UserDefaults.standard.set(data, forKey: Self.savedSetsKey)
         }
     }
