@@ -1,0 +1,21 @@
+<svg viewBox="0 0 200 200" width="180" height="180" xmlns="http://www.w3.org/2000/svg">
+<defs>
+    <linearGradient id="goldAdj" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#EFC05F"></stop>
+    <stop offset="100%" stop-color="#C4882A"></stop>
+    </linearGradient>
+    <linearGradient id="tealAdj" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#1B6B6C"></stop>
+    <stop offset="100%" stop-color="#124B4C"></stop>
+    </linearGradient>
+</defs>
+<rect x="6" y="6" width="188" height="188" rx="42" fill="url(#tealAdj)"></rect>
+<text x="32" y="148" font-family="Georgia, 'Times New Roman', serif" font-size="100" font-weight="bold" fill="url(#goldAdj)" letter-spacing="-5">R</text>
+<text x="98" y="148" font-family="Georgia, 'Times New Roman', serif" font-size="100" font-weight="bold" fill="url(#goldAdj)" letter-spacing="-5">R</text>
+<!-- Crown moved down 12px -->
+<path d="M65 50 L72 30 L84 42 L100 20 L116 42 L128 30 L135 50 Z" fill="url(#goldAdj)"></path>
+<rect x="65" y="48" width="70" height="7" rx="2" fill="url(#goldAdj)"></rect>
+<circle cx="100" cy="25" r="3" fill="white" opacity="0.85"></circle>
+<circle cx="72" cy="34" r="2" fill="white" opacity="0.7"></circle>
+<circle cx="128" cy="34" r="2" fill="white" opacity="0.7"></circle>
+</svg>

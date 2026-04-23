@@ -249,6 +249,26 @@
 		10003450 /* SchoolOfPrayer in Resources */ = {isa = PBXBuildFile; fileRef = 20003450 /* SchoolOfPrayer */; };
 		10003550 /* WaitingOnGod in Resources */ = {isa = PBXBuildFile; fileRef = 20003550 /* WaitingOnGod */; };
 		10005001 /* VisionTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005001 /* VisionTypes.swift */; };
+		10006000 /* BowtieTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006000 /* BowtieTypes.swift */; };
+		10006001 /* RolesManagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006001 /* RolesManagerViewModel.swift */; };
+		10006002 /* RolesManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006002 /* RolesManagerView.swift */; };
+		10006010 /* BowtieSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006010 /* BowtieSessionViewModel.swift */; };
+		10006011 /* BowtieMarkerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006011 /* BowtieMarkerViewModel.swift */; };
+		10006012 /* BowtieSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006012 /* BowtieSessionView.swift */; };
+		10006013 /* BowtieListEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006013 /* BowtieListEntryView.swift */; };
+		10006014 /* BowtieMarkerFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006014 /* BowtieMarkerFormView.swift */; };
+		10006015 /* BowtieTalliesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006015 /* BowtieTalliesCard.swift */; };
+		10006016 /* BowtieCompletionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006016 /* BowtieCompletionOverlay.swift */; };
+		10006019 /* BowtieDiagramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006019 /* BowtieDiagramView.swift */; };
+		10006030 /* BowtieOnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006030 /* BowtieOnboardingViewModel.swift */; };
+		10006040 /* BackboneProcessingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006040 /* BackboneProcessingViewModel.swift */; };
+		10006041 /* BackboneFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006041 /* BackboneFlowView.swift */; };
+		10006050 /* BowtieHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006050 /* BowtieHistoryViewModel.swift */; };
+		10006051 /* BowtieHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006051 /* BowtieHistoryView.swift */; };
+		10006052 /* BowtieInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006052 /* BowtieInsightsView.swift */; };
+		10006031 /* BowtieOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006031 /* BowtieOnboardingView.swift */; };
+		10006020 /* PPPEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006020 /* PPPEntryViewModel.swift */; };
+		10006021 /* PPPFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006021 /* PPPFormView.swift */; };
 		10005002 /* VisionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005002 /* VisionWizardViewModel.swift */; };
 		10005003 /* VisionWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005003 /* VisionWizardView.swift */; };
 		10005004 /* VisionPromptsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005004 /* VisionPromptsStepView.swift */; };
@@ -259,9 +279,9 @@
 		10005009 /* VisionHubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005009 /* VisionHubView.swift */; };
 		10005010 /* VisionHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005010 /* VisionHistoryView.swift */; };
 		10005011 /* VisionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005011 /* VisionCard.swift */; };
-		10006001 /* QuickActionDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006001 /* QuickActionDefinition.swift */; };
-		10006002 /* ActivityDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006002 /* ActivityDestinationView.swift */; };
-		10006003 /* QuickActionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006003 /* QuickActionsViewModel.swift */; };
+		10007001 /* QuickActionDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20007001 /* QuickActionDefinition.swift */; };
+		10007002 /* ActivityDestinationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20007002 /* ActivityDestinationView.swift */; };
+		10007003 /* QuickActionsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20007003 /* QuickActionsViewModel.swift */; };
 		10006004 /* QuickActionsCustomizeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006004 /* QuickActionsCustomizeView.swift */; };
 		9103A401908DED56E83772C7 /* PCIDimensionEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8EDBD8EF9557997DD08D3 /* PCIDimensionEntryView.swift */; };
 		91B02E045195FF9B6D69BD3E /* PCISetupConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7C6E48DCD91F04F58511767 /* PCISetupConfirmationView.swift */; };
@@ -533,6 +553,33 @@
 		20003450 /* SchoolOfPrayer */ = {isa = PBXFileReference; lastKnownFileType = folder; path = SchoolOfPrayer; sourceTree = "<group>"; };
 		20003550 /* WaitingOnGod */ = {isa = PBXFileReference; lastKnownFileType = folder; path = WaitingOnGod; sourceTree = "<group>"; };
 		20005001 /* VisionTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionTypes.swift; sourceTree = "<group>"; };
+		20006000 /* BowtieTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieTypes.swift; sourceTree = "<group>"; };
+		20006001 /* RolesManagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerViewModel.swift; sourceTree = "<group>"; };
+		20006002 /* RolesManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerView.swift; sourceTree = "<group>"; };
+		20006003 /* RolesManagerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerViewModelTests.swift; sourceTree = "<group>"; };
+		20006010 /* BowtieSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionViewModel.swift; sourceTree = "<group>"; };
+		20006011 /* BowtieMarkerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerViewModel.swift; sourceTree = "<group>"; };
+		20006012 /* BowtieSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionView.swift; sourceTree = "<group>"; };
+		20006013 /* BowtieListEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieListEntryView.swift; sourceTree = "<group>"; };
+		20006014 /* BowtieMarkerFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerFormView.swift; sourceTree = "<group>"; };
+		20006015 /* BowtieTalliesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieTalliesCard.swift; sourceTree = "<group>"; };
+		20006016 /* BowtieCompletionOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieCompletionOverlay.swift; sourceTree = "<group>"; };
+		20006019 /* BowtieDiagramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieDiagramView.swift; sourceTree = "<group>"; };
+		20006017 /* BowtieSessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionViewModelTests.swift; sourceTree = "<group>"; };
+		20006018 /* BowtieMarkerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerViewModelTests.swift; sourceTree = "<group>"; };
+		20006020 /* PPPEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPEntryViewModel.swift; sourceTree = "<group>"; };
+		20006021 /* PPPFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPFormView.swift; sourceTree = "<group>"; };
+		20006022 /* PPPEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPEntryViewModelTests.swift; sourceTree = "<group>"; };
+		20006030 /* BowtieOnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModel.swift; sourceTree = "<group>"; };
+		20006031 /* BowtieOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingView.swift; sourceTree = "<group>"; };
+		20006040 /* BackboneProcessingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneProcessingViewModel.swift; sourceTree = "<group>"; };
+		20006041 /* BackboneFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneFlowView.swift; sourceTree = "<group>"; };
+		20006042 /* BackboneProcessingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneProcessingViewModelTests.swift; sourceTree = "<group>"; };
+		20006050 /* BowtieHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryViewModel.swift; sourceTree = "<group>"; };
+		20006051 /* BowtieHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryView.swift; sourceTree = "<group>"; };
+		20006052 /* BowtieInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieInsightsView.swift; sourceTree = "<group>"; };
+		20006053 /* BowtieHistoryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryViewModelTests.swift; sourceTree = "<group>"; };
+		20006032 /* BowtieOnboardingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModelTests.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
 		20005003 /* VisionWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardView.swift; sourceTree = "<group>"; };
 		20005004 /* VisionPromptsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPromptsStepView.swift; sourceTree = "<group>"; };
@@ -543,9 +590,9 @@
 		20005009 /* VisionHubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionHubView.swift; sourceTree = "<group>"; };
 		20005010 /* VisionHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionHistoryView.swift; sourceTree = "<group>"; };
 		20005011 /* VisionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionCard.swift; sourceTree = "<group>"; };
-		20006001 /* QuickActionDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDefinition.swift; sourceTree = "<group>"; };
-		20006002 /* ActivityDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDestinationView.swift; sourceTree = "<group>"; };
-		20006003 /* QuickActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsViewModel.swift; sourceTree = "<group>"; };
+		20007001 /* QuickActionDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionDefinition.swift; sourceTree = "<group>"; };
+		20007002 /* ActivityDestinationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityDestinationView.swift; sourceTree = "<group>"; };
+		20007003 /* QuickActionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsViewModel.swift; sourceTree = "<group>"; };
 		20006004 /* QuickActionsCustomizeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickActionsCustomizeView.swift; sourceTree = "<group>"; };
 		30000001 /* RegalRecovery.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RegalRecovery.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4c4d445bc9364c2fa97b153d /* PCIDimensionContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIDimensionContent.swift; sourceTree = "<group>"; };
@@ -637,7 +684,8 @@
 				20003001 /* BookCatalog.swift */,
 				20003100 /* SensaEmoji.swift */,
 				20005001 /* VisionTypes.swift */,
-				20006001 /* QuickActionDefinition.swift */,
+				20007001 /* QuickActionDefinition.swift */,
+				20006000 /* BowtieTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -772,9 +820,57 @@
 				20000600 /* TimeJournalEntryViewModel.swift */,
 				50001000 /* ThreeCircles */,
 				20005002 /* VisionWizardViewModel.swift */,
-				20006003 /* QuickActionsViewModel.swift */,
+				20007003 /* QuickActionsViewModel.swift */,
+				50006001 /* Bowtie */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		50006001 /* Bowtie */ = {
+			isa = PBXGroup;
+			children = (
+				20006001 /* RolesManagerViewModel.swift */,
+				20006010 /* BowtieSessionViewModel.swift */,
+				20006011 /* BowtieMarkerViewModel.swift */,
+				20006020 /* PPPEntryViewModel.swift */,
+				20006030 /* BowtieOnboardingViewModel.swift */,
+				20006040 /* BackboneProcessingViewModel.swift */,
+				20006050 /* BowtieHistoryViewModel.swift */,
+			);
+			path = Bowtie;
+			sourceTree = "<group>";
+		};
+		50006002 /* Bowtie */ = {
+			isa = PBXGroup;
+			children = (
+				20006002 /* RolesManagerView.swift */,
+				20006012 /* BowtieSessionView.swift */,
+				20006013 /* BowtieListEntryView.swift */,
+				20006014 /* BowtieMarkerFormView.swift */,
+				20006015 /* BowtieTalliesCard.swift */,
+				20006016 /* BowtieCompletionOverlay.swift */,
+				20006019 /* BowtieDiagramView.swift */,
+				20006021 /* PPPFormView.swift */,
+				20006031 /* BowtieOnboardingView.swift */,
+				20006041 /* BackboneFlowView.swift */,
+				20006051 /* BowtieHistoryView.swift */,
+				20006052 /* BowtieInsightsView.swift */,
+			);
+			path = Bowtie;
+			sourceTree = "<group>";
+		};
+		50006003 /* Bowtie */ = {
+			isa = PBXGroup;
+			children = (
+				20006003 /* RolesManagerViewModelTests.swift */,
+				20006017 /* BowtieSessionViewModelTests.swift */,
+				20006018 /* BowtieMarkerViewModelTests.swift */,
+				20006022 /* PPPEntryViewModelTests.swift */,
+				20006032 /* BowtieOnboardingViewModelTests.swift */,
+				20006042 /* BackboneProcessingViewModelTests.swift */,
+				20006053 /* BowtieHistoryViewModelTests.swift */,
+			);
+			path = Bowtie;
 			sourceTree = "<group>";
 		};
 		50000040 /* Views */ = {
@@ -785,7 +881,7 @@
 				50000043 /* Emergency */,
 				50000044 /* Home */,
 				50000045 /* Onboarding */,
-				50006001 /* Shared */,
+				50007001 /* Shared */,
 				50000046 /* Settings */,
 				50000047 /* Tools */,
 				50000300 /* Today */,
@@ -798,6 +894,7 @@
 			isa = PBXGroup;
 			children = (
 				50001100 /* Affirmations */,
+				50006002 /* Bowtie */,
 				20000053 /* ActivitiesListView.swift */,
 				20000055 /* EmotionalJournalView.swift */,
 				20000056 /* EveningReviewView.swift */,
@@ -950,6 +1047,7 @@
 				20000113 /* ProfileViewModelTests.swift */,
 				20000114 /* StreakViewModelTests.swift */,
 				20000115 /* UrgeLogViewModelTests.swift */,
+				50006003 /* Bowtie */,
 			);
 			path = Unit;
 			sourceTree = "<group>";
@@ -1142,10 +1240,10 @@
 			path = Vision;
 			sourceTree = "<group>";
 		};
-		50006001 /* Shared */ = {
+		50007001 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				20006002 /* ActivityDestinationView.swift */,
+				20007002 /* ActivityDestinationView.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -1459,6 +1557,26 @@
 				10001204 /* TextToSpeechService.swift in Sources */,
 				10001205 /* LocationService.swift in Sources */,
 				10005001 /* VisionTypes.swift in Sources */,
+				10006000 /* BowtieTypes.swift in Sources */,
+				10006001 /* RolesManagerViewModel.swift in Sources */,
+				10006002 /* RolesManagerView.swift in Sources */,
+				10006010 /* BowtieSessionViewModel.swift in Sources */,
+				10006011 /* BowtieMarkerViewModel.swift in Sources */,
+				10006012 /* BowtieSessionView.swift in Sources */,
+				10006013 /* BowtieListEntryView.swift in Sources */,
+				10006014 /* BowtieMarkerFormView.swift in Sources */,
+				10006015 /* BowtieTalliesCard.swift in Sources */,
+				10006016 /* BowtieCompletionOverlay.swift in Sources */,
+				10006019 /* BowtieDiagramView.swift in Sources */,
+				10006020 /* PPPEntryViewModel.swift in Sources */,
+				10006021 /* PPPFormView.swift in Sources */,
+				10006030 /* BowtieOnboardingViewModel.swift in Sources */,
+				10006031 /* BowtieOnboardingView.swift in Sources */,
+				10006040 /* BackboneProcessingViewModel.swift in Sources */,
+				10006041 /* BackboneFlowView.swift in Sources */,
+				10006050 /* BowtieHistoryViewModel.swift in Sources */,
+				10006051 /* BowtieHistoryView.swift in Sources */,
+				10006052 /* BowtieInsightsView.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,
 				10005004 /* VisionPromptsStepView.swift in Sources */,
@@ -1469,9 +1587,9 @@
 				10005009 /* VisionHubView.swift in Sources */,
 				10005010 /* VisionHistoryView.swift in Sources */,
 				10005011 /* VisionCard.swift in Sources */,
-				10006001 /* QuickActionDefinition.swift in Sources */,
-				10006002 /* ActivityDestinationView.swift in Sources */,
-				10006003 /* QuickActionsViewModel.swift in Sources */,
+				10007001 /* QuickActionDefinition.swift in Sources */,
+				10007002 /* ActivityDestinationView.swift in Sources */,
+				10007003 /* QuickActionsViewModel.swift in Sources */,
 				10006004 /* QuickActionsCustomizeView.swift in Sources */,
 				B1D80FD3EE117EFA1430602F /* PCISetupFlowView.swift in Sources */,
 				9103A401908DED56E83772C7 /* PCIDimensionEntryView.swift in Sources */,

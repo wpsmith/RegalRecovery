@@ -1640,6 +1640,327 @@ final class RRPCIDailyEntry {
     }
 }
 
+// MARK: - Bowtie: User Role
+
+@Model
+final class RRUserRole {
+    @Attribute(.unique) var id: UUID
+    var label: String
+    var sortOrder: Int
+    var isArchived: Bool
+    var parentRoleId: UUID?
+    var createdAt: Date
+
+    init(id: UUID = UUID(), label: String, sortOrder: Int = 0, isArchived: Bool = false, parentRoleId: UUID? = nil, createdAt: Date = Date()) {
+        self.id = id
+        self.label = label
+        self.sortOrder = sortOrder
+        self.isArchived = isArchived
+        self.parentRoleId = parentRoleId
+        self.createdAt = createdAt
+    }
+}
+
+// MARK: - Bowtie: Known Emotional Trigger
+
+@Model
+final class RRKnownEmotionalTrigger {
+    @Attribute(.unique) var id: UUID
+    var label: String
+    var mappedIType: String?
+    var createdAt: Date
+
+    init(id: UUID = UUID(), label: String, mappedIType: ThreeIType? = nil, createdAt: Date = Date()) {
+        self.id = id
+        self.label = label
+        self.mappedIType = mappedIType?.rawValue
+        self.createdAt = createdAt
+    }
+
+    var mappedI: ThreeIType? {
+        get { mappedIType.flatMap { ThreeIType(rawValue: $0) } }
+        set { mappedIType = newValue?.rawValue }
+    }
+}
+
+// MARK: - Bowtie: Session
+
+@Model
+final class RRBowtieSession {
+    @Attribute(.unique) var id: UUID
+    var status: String
+    var referenceTimestamp: Date
+    var createdAt: Date
+    var completedAt: Date?
+    var modifiedAt: Date
+    var selectedRoleIdsJSON: String
+    var emotionVocabulary: String
+    var entryPath: String
+    var sessionMode: String
+    var pastInsignificanceTotal: Int
+    var pastIncompetenceTotal: Int
+    var pastImpotenceTotal: Int
+    var futureInsignificanceTotal: Int
+    var futureIncompetenceTotal: Int
+    var futureImpotenceTotal: Int
+
+    @Relationship(deleteRule: .cascade, inverse: \RRBowtieMarker.session)
+    var markers: [RRBowtieMarker] = []
+
+    init(
+        id: UUID = UUID(),
+        status: BowtieStatus = .draft,
+        referenceTimestamp: Date = Date(),
+        createdAt: Date = Date(),
+        completedAt: Date? = nil,
+        modifiedAt: Date = Date(),
+        selectedRoleIds: [UUID] = [],
+        emotionVocabulary: EmotionVocabulary = .threeIs,
+        entryPath: BowtieEntryPath = .activities,
+        sessionMode: BowtieSessionMode = .guided
+    ) {
+        self.id = id
+        self.status = status.rawValue
+        self.referenceTimestamp = referenceTimestamp
+        self.createdAt = createdAt
+        self.completedAt = completedAt
+        self.modifiedAt = modifiedAt
+        self.selectedRoleIdsJSON = (try? JSONEncoder().encode(selectedRoleIds)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        self.emotionVocabulary = emotionVocabulary.rawValue
+        self.entryPath = entryPath.rawValue
+        self.sessionMode = sessionMode.rawValue
+        self.pastInsignificanceTotal = 0
+        self.pastIncompetenceTotal = 0
+        self.pastImpotenceTotal = 0
+        self.futureInsignificanceTotal = 0
+        self.futureIncompetenceTotal = 0
+        self.futureImpotenceTotal = 0
+    }
+
+    // Computed accessors for type-safe enum access
+    var bowtieStatus: BowtieStatus {
+        get { BowtieStatus(rawValue: status) ?? .draft }
+        set { status = newValue.rawValue }
+    }
+    var vocabulary: EmotionVocabulary {
+        get { EmotionVocabulary(rawValue: emotionVocabulary) ?? .threeIs }
+        set { emotionVocabulary = newValue.rawValue }
+    }
+    var entry: BowtieEntryPath {
+        get { BowtieEntryPath(rawValue: entryPath) ?? .activities }
+        set { entryPath = newValue.rawValue }
+    }
+    var mode: BowtieSessionMode {
+        get { BowtieSessionMode(rawValue: sessionMode) ?? .guided }
+        set { sessionMode = newValue.rawValue }
+    }
+    var selectedRoleIds: [UUID] {
+        get {
+            guard let data = selectedRoleIdsJSON.data(using: .utf8) else { return [] }
+            return (try? JSONDecoder().decode([UUID].self, from: data)) ?? []
+        }
+        set {
+            selectedRoleIdsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        }
+    }
+    var pastMarkers: [RRBowtieMarker] { markers.filter { $0.side == BowtieSide.past.rawValue } }
+    var futureMarkers: [RRBowtieMarker] { markers.filter { $0.side == BowtieSide.future.rawValue } }
+    var processedMarkerCount: Int { markers.filter(\.isProcessed).count }
+}
+
+// MARK: - Bowtie: Marker
+
+@Model
+final class RRBowtieMarker {
+    @Attribute(.unique) var id: UUID
+    var side: String
+    var timeIntervalHours: Int
+    var roleId: UUID
+    var iActivationsJSON: String
+    var bigTicketEmotionsJSON: String?
+    var customEmotionsJSON: String?
+    var knownTriggerIdsJSON: String?
+    var briefDescription: String?
+    var isProcessed: Bool
+    var createdAt: Date
+
+    var session: RRBowtieSession?
+
+    @Relationship(deleteRule: .cascade, inverse: \RRBackboneProcessing.marker)
+    var backboneProcessing: RRBackboneProcessing?
+
+    @Relationship(deleteRule: .cascade, inverse: \RRPPPEntry.marker)
+    var pppEntry: RRPPPEntry?
+
+    init(
+        id: UUID = UUID(),
+        side: BowtieSide,
+        timeIntervalHours: Int,
+        roleId: UUID,
+        iActivations: [IActivation] = [],
+        bigTicketEmotions: [BigTicketActivation]? = nil,
+        customEmotions: [String]? = nil,
+        knownTriggerIds: [UUID]? = nil,
+        briefDescription: String? = nil,
+        isProcessed: Bool = false,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.side = side.rawValue
+        self.timeIntervalHours = timeIntervalHours
+        self.roleId = roleId
+        self.iActivationsJSON = Self.encode(iActivations)
+        self.bigTicketEmotionsJSON = bigTicketEmotions.map { Self.encode($0) }
+        self.customEmotionsJSON = customEmotions.map { Self.encode($0) }
+        self.knownTriggerIdsJSON = knownTriggerIds.map { Self.encode($0) }
+        self.briefDescription = briefDescription
+        self.isProcessed = isProcessed
+        self.createdAt = createdAt
+    }
+
+    private static func encode<T: Encodable>(_ value: T) -> String {
+        (try? JSONEncoder().encode(value)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+    }
+    private static func decode<T: Decodable>(_ json: String?, as type: T.Type) -> T? {
+        guard let data = json?.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
+    }
+
+    var iActivations: [IActivation] {
+        get { Self.decode(iActivationsJSON, as: [IActivation].self) ?? [] }
+        set { iActivationsJSON = Self.encode(newValue) }
+    }
+    var bigTicketEmotions: [BigTicketActivation]? {
+        get { Self.decode(bigTicketEmotionsJSON, as: [BigTicketActivation].self) }
+        set { bigTicketEmotionsJSON = newValue.map { Self.encode($0) } }
+    }
+    var customEmotions: [String]? {
+        get { Self.decode(customEmotionsJSON, as: [String].self) }
+        set { customEmotionsJSON = newValue.map { Self.encode($0) } }
+    }
+    var knownTriggerIds: [UUID]? {
+        get { Self.decode(knownTriggerIdsJSON, as: [UUID].self) }
+        set { knownTriggerIdsJSON = newValue.map { Self.encode($0) } }
+    }
+    var bowtieSide: BowtieSide {
+        get { BowtieSide(rawValue: side) ?? .past }
+        set { side = newValue.rawValue }
+    }
+    var totalIntensity: Int {
+        iActivations.reduce(0) { $0 + $1.intensity }
+    }
+}
+
+// MARK: - Bowtie: Backbone Processing
+
+@Model
+final class RRBackboneProcessing {
+    @Attribute(.unique) var id: UUID
+    var lifeSituation: String
+    var emotionsJSON: String
+    var threeIsJSON: String
+    var emotionalNeedsJSON: String
+    var intimacyActionsJSON: String
+    var spiritualReflection: String?
+    var createdAt: Date
+
+    var marker: RRBowtieMarker?
+
+    init(
+        id: UUID = UUID(),
+        lifeSituation: String,
+        emotions: [String] = [],
+        threeIs: [IActivation] = [],
+        emotionalNeeds: [String] = [],
+        intimacyActions: [IntimacyAction] = [],
+        spiritualReflection: String? = nil,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.lifeSituation = lifeSituation
+        self.emotionsJSON = (try? JSONEncoder().encode(emotions)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        self.threeIsJSON = (try? JSONEncoder().encode(threeIs)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        self.emotionalNeedsJSON = (try? JSONEncoder().encode(emotionalNeeds)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        self.intimacyActionsJSON = (try? JSONEncoder().encode(intimacyActions)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+        self.spiritualReflection = spiritualReflection
+        self.createdAt = createdAt
+    }
+
+    // Computed accessors (same decode pattern as RRBowtieMarker)
+    private static func decode<T: Decodable>(_ json: String, as type: T.Type) -> T? {
+        guard let data = json.data(using: .utf8) else { return nil }
+        return try? JSONDecoder().decode(type, from: data)
+    }
+    var emotions: [String] {
+        get { Self.decode(emotionsJSON, as: [String].self) ?? [] }
+        set { emotionsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
+    }
+    var threeIs: [IActivation] {
+        get { Self.decode(threeIsJSON, as: [IActivation].self) ?? [] }
+        set { threeIsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
+    }
+    var emotionalNeeds: [String] {
+        get { Self.decode(emotionalNeedsJSON, as: [String].self) ?? [] }
+        set { emotionalNeedsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
+    }
+    var intimacyActions: [IntimacyAction] {
+        get { Self.decode(intimacyActionsJSON, as: [IntimacyAction].self) ?? [] }
+        set { intimacyActionsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
+    }
+}
+
+// MARK: - Bowtie: PPP Entry
+
+@Model
+final class RRPPPEntry {
+    @Attribute(.unique) var id: UUID
+    var prayer: String?
+    var peopleContactIdsJSON: String?
+    var planBefore: String?
+    var planDuring: String?
+    var planAfter: String?
+    var reminderTime: Date?
+    var followUpOutcome: String?
+    var followUpReflection: String?
+    var createdAt: Date
+
+    var marker: RRBowtieMarker?
+
+    init(
+        id: UUID = UUID(),
+        prayer: String? = nil,
+        peopleContactIds: [UUID]? = nil,
+        planBefore: String? = nil,
+        planDuring: String? = nil,
+        planAfter: String? = nil,
+        reminderTime: Date? = nil,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.prayer = prayer
+        self.peopleContactIdsJSON = peopleContactIds.map { (try? JSONEncoder().encode($0)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
+        self.planBefore = planBefore
+        self.planDuring = planDuring
+        self.planAfter = planAfter
+        self.reminderTime = reminderTime
+        self.createdAt = createdAt
+    }
+
+    var outcome: PPPOutcome? {
+        get { followUpOutcome.flatMap { PPPOutcome(rawValue: $0) } }
+        set { followUpOutcome = newValue?.rawValue }
+    }
+    var peopleContactIds: [UUID]? {
+        get {
+            guard let data = peopleContactIdsJSON?.data(using: .utf8) else { return nil }
+            return try? JSONDecoder().decode([UUID].self, from: data)
+        }
+        set {
+            peopleContactIdsJSON = newValue.map { (try? JSONEncoder().encode($0)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
+        }
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1680,6 +2001,12 @@ enum RRModelConfiguration {
         RRPCIProfile.self,
         RRPCIProfileVersion.self,
         RRPCIDailyEntry.self,
+        RRUserRole.self,
+        RRKnownEmotionalTrigger.self,
+        RRBowtieSession.self,
+        RRBowtieMarker.self,
+        RRBackboneProcessing.self,
+        RRPPPEntry.self,
     ]
 
     static var schema: Schema {

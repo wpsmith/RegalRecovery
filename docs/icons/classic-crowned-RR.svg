@@ -1,0 +1,24 @@
+<svg viewBox="0 0 200 200" width="180" height="180" xmlns="http://www.w3.org/2000/svg">
+<defs>
+    <linearGradient id="goldA" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#EFC05F"></stop>
+    <stop offset="100%" stop-color="#C4882A"></stop>
+    </linearGradient>
+    <linearGradient id="tealA" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#1B6B6C"></stop>
+    <stop offset="100%" stop-color="#124B4C"></stop>
+    </linearGradient>
+</defs>
+<!-- iOS rounded square -->
+<rect x="6" y="6" width="188" height="188" rx="42" fill="url(#tealA)"></rect>
+<!-- Overlapping Rs with shared vertical stroke -->
+<text x="32" y="142" font-family="Georgia, 'Times New Roman', serif" font-size="100" font-weight="bold" fill="url(#goldA)" letter-spacing="-5">R</text>
+<text x="98" y="142" font-family="Georgia, 'Times New Roman', serif" font-size="100" font-weight="bold" fill="url(#goldA)" letter-spacing="-5">R</text>
+<!-- Elegant crown above, centered -->
+<path d="M65 38 L72 18 L84 30 L100 8 L116 30 L128 18 L135 38 Z" fill="url(#goldA)"></path>
+<rect x="65" y="36" width="70" height="7" rx="2" fill="url(#goldA)"></rect>
+<!-- Three jewel dots -->
+<circle cx="100" cy="13" r="3" fill="white" opacity="0.85"></circle>
+<circle cx="72" cy="22" r="2" fill="white" opacity="0.7"></circle>
+<circle cx="128" cy="22" r="2" fill="white" opacity="0.7"></circle>
+</svg>

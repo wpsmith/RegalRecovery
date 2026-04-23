@@ -120,6 +120,7 @@ final class FeatureFlagStore {
         "activity.lbi": true,
         "activity.memory-verse": false,
         "activity.acting-in-behaviors": false,
+        "activity.bowtie": false,
         "activity.voice-journal": false,
 
         // App Architecture
