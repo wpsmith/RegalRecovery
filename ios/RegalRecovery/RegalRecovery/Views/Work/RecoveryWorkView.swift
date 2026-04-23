@@ -267,6 +267,8 @@ struct RecoveryWorkView: View {
             LBIFoundationView()
         case "lbi":
             LBIEntryPointView()
+        case "bowtie":
+            BowtieSessionView()
         case "integrityInventory":
             EveningReviewView()
         case "memoryVerseReview":
