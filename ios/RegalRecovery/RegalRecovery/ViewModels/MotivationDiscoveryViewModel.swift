@@ -1,4 +1,3 @@
-// ViewModels/MotivationDiscoveryViewModel.swift
 import Foundation
 import Observation
 
@@ -11,7 +10,6 @@ final class MotivationDiscoveryViewModel {
 
     // MARK: - Data
 
-    var miracleResponse: String = ""
     var selectedValues: [MotivationCategory] = []
     var concreteResponses: [MotivationCategory: String] = [:]
     var concreteScriptures: [MotivationCategory: String] = [:]
@@ -26,8 +24,6 @@ final class MotivationDiscoveryViewModel {
     var canProceed: Bool {
         switch currentStep {
         case .intro:
-            return true
-        case .miracleQuestion:
             return true
         case .valuesSelection:
             return !selectedValues.isEmpty
@@ -45,8 +41,6 @@ final class MotivationDiscoveryViewModel {
     func goToNextStep() {
         switch currentStep {
         case .intro:
-            currentStep = .miracleQuestion
-        case .miracleQuestion:
             currentStep = .valuesSelection
         case .valuesSelection:
             currentConcretePromptIndex = 0
@@ -66,10 +60,8 @@ final class MotivationDiscoveryViewModel {
         switch currentStep {
         case .intro:
             break
-        case .miracleQuestion:
-            currentStep = .intro
         case .valuesSelection:
-            currentStep = .miracleQuestion
+            currentStep = .intro
         case .concretePrompts:
             if currentConcretePromptIndex > 0 {
                 currentConcretePromptIndex -= 1
@@ -162,7 +154,6 @@ final class MotivationDiscoveryViewModel {
     func saveDraft() {
         let draft: [String: Any] = [
             "step": currentStep.rawValue,
-            "miracleResponse": miracleResponse,
             "selectedValues": selectedValues.map(\.rawValue),
             "concreteResponses": concreteResponses.reduce(into: [String: String]()) { $0[$1.key.rawValue] = $1.value },
             "concreteScriptures": concreteScriptures.reduce(into: [String: String]()) { $0[$1.key.rawValue] = $1.value },
@@ -176,7 +167,6 @@ final class MotivationDiscoveryViewModel {
            let step = MotivationDiscoveryStep(rawValue: stepRaw) {
             currentStep = step
         }
-        miracleResponse = draft["miracleResponse"] as? String ?? ""
         if let valuesRaw = draft["selectedValues"] as? [String] {
             selectedValues = valuesRaw.compactMap { MotivationCategory(rawValue: $0) }
         }

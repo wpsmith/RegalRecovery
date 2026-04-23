@@ -113,7 +113,6 @@ enum MotivationImportance {
 
 enum MotivationDiscoveryStep: Int, CaseIterable {
     case intro = 0
-    case miracleQuestion
     case valuesSelection
     case concretePrompts
     case summary
@@ -121,14 +120,13 @@ enum MotivationDiscoveryStep: Int, CaseIterable {
     var title: String {
         switch self {
         case .intro: return String(localized: "Welcome")
-        case .miracleQuestion: return String(localized: "Imagine")
         case .valuesSelection: return String(localized: "Values")
         case .concretePrompts: return String(localized: "Your Why")
         case .summary: return String(localized: "Review")
         }
     }
 
-    static let totalSteps = 5
+    static let totalSteps = 4
 
     var progressFraction: Double {
         Double(rawValue + 1) / Double(Self.totalSteps)
