@@ -1640,6 +1640,273 @@ final class RRLBIDailyEntry {
     }
 }
 
+// MARK: - Bowtie: User Roles
+
+@Model
+final class RRUserRole {
+    @Attribute(.unique) var id: UUID
+    var label: String
+    var sortOrder: Int
+    var isArchived: Bool
+    var parentRoleId: UUID?
+    var createdAt: Date
+
+    init(
+        id: UUID = UUID(),
+        label: String,
+        sortOrder: Int,
+        parentRoleId: UUID? = nil,
+        isArchived: Bool = false,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.label = label
+        self.sortOrder = sortOrder
+        self.parentRoleId = parentRoleId
+        self.isArchived = isArchived
+        self.createdAt = createdAt
+    }
+}
+
+// MARK: - Bowtie: Known Emotional Trigger
+
+@Model
+final class RRKnownEmotionalTrigger {
+    @Attribute(.unique) var id: UUID
+    var label: String
+    var mappedITypeRaw: String?
+    var createdAt: Date
+
+    var mappedIType: ThreeIType? {
+        get { mappedITypeRaw.flatMap { ThreeIType(rawValue: $0) } }
+        set { mappedITypeRaw = newValue?.rawValue }
+    }
+
+    init(
+        id: UUID = UUID(),
+        label: String,
+        mappedIType: ThreeIType? = nil,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.label = label
+        self.mappedITypeRaw = mappedIType?.rawValue
+        self.createdAt = createdAt
+    }
+}
+
+// MARK: - Bowtie: Session
+
+@Model
+final class RRBowtieSession {
+    @Attribute(.unique) var id: UUID
+    var status: String
+    var selectedRoleIds: [UUID]
+    var emotionVocabularyRaw: String
+    var entryPathRaw: String
+    var sessionModeRaw: String
+    var referenceTimestamp: Date
+    var createdAt: Date
+    var modifiedAt: Date
+    var completedAt: Date?
+
+    // Tallies
+    var pastInsignificanceTotal: Int
+    var pastIncompetenceTotal: Int
+    var pastImpotenceTotal: Int
+    var futureInsignificanceTotal: Int
+    var futureIncompetenceTotal: Int
+    var futureImpotenceTotal: Int
+
+    @Relationship(deleteRule: .cascade, inverse: \RRBowtieMarker.session)
+    var markers: [RRBowtieMarker] = []
+
+    var vocabulary: EmotionVocabulary {
+        get { EmotionVocabulary(rawValue: emotionVocabularyRaw) ?? .threeIs }
+        set { emotionVocabularyRaw = newValue.rawValue }
+    }
+
+    var mode: BowtieSessionMode {
+        get { BowtieSessionMode(rawValue: sessionModeRaw) ?? .guided }
+        set { sessionModeRaw = newValue.rawValue }
+    }
+
+    var bowtieStatus: BowtieStatus {
+        get { BowtieStatus(rawValue: status) ?? .draft }
+        set { status = newValue.rawValue }
+    }
+
+    var pastMarkers: [RRBowtieMarker] {
+        markers.filter { $0.side == BowtieSide.past.rawValue }
+            .sorted { $0.timeIntervalHours > $1.timeIntervalHours }
+    }
+
+    var futureMarkers: [RRBowtieMarker] {
+        markers.filter { $0.side == BowtieSide.future.rawValue }
+            .sorted { $0.timeIntervalHours < $1.timeIntervalHours }
+    }
+
+    var processedMarkerCount: Int {
+        markers.filter(\.isProcessed).count
+    }
+
+    init(
+        id: UUID = UUID(),
+        selectedRoleIds: [UUID] = [],
+        emotionVocabulary: EmotionVocabulary = .threeIs,
+        entryPath: BowtieEntryPath = .activities,
+        sessionMode: BowtieSessionMode = .guided,
+        referenceTimestamp: Date = Date(),
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.status = BowtieStatus.draft.rawValue
+        self.selectedRoleIds = selectedRoleIds
+        self.emotionVocabularyRaw = emotionVocabulary.rawValue
+        self.entryPathRaw = entryPath.rawValue
+        self.sessionModeRaw = sessionMode.rawValue
+        self.referenceTimestamp = referenceTimestamp
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+        self.pastInsignificanceTotal = 0
+        self.pastIncompetenceTotal = 0
+        self.pastImpotenceTotal = 0
+        self.futureInsignificanceTotal = 0
+        self.futureIncompetenceTotal = 0
+        self.futureImpotenceTotal = 0
+    }
+}
+
+// MARK: - Bowtie: Marker
+
+@Model
+final class RRBowtieMarker {
+    @Attribute(.unique) var id: UUID
+    var side: String
+    var timeIntervalHours: Int
+    var roleId: UUID
+    var iActivations: [IActivation]
+    var bigTicketEmotions: [BigTicketActivation]?
+    var customEmotions: [String]?
+    var knownTriggerIds: [UUID]?
+    var briefDescription: String?
+    var isProcessed: Bool
+    var createdAt: Date
+
+    var session: RRBowtieSession?
+
+    var bowtieSide: BowtieSide {
+        get { BowtieSide(rawValue: side) ?? .past }
+        set { side = newValue.rawValue }
+    }
+
+    var totalIntensity: Int {
+        iActivations.reduce(0) { $0 + $1.intensity } +
+        (bigTicketEmotions ?? []).reduce(0) { $0 + $1.intensity }
+    }
+
+    init(
+        id: UUID = UUID(),
+        side: BowtieSide,
+        timeIntervalHours: Int,
+        roleId: UUID,
+        iActivations: [IActivation] = [],
+        bigTicketEmotions: [BigTicketActivation]? = nil,
+        customEmotions: [String]? = nil,
+        knownTriggerIds: [UUID]? = nil,
+        briefDescription: String? = nil,
+        isProcessed: Bool = false,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.side = side.rawValue
+        self.timeIntervalHours = timeIntervalHours
+        self.roleId = roleId
+        self.iActivations = iActivations
+        self.bigTicketEmotions = bigTicketEmotions
+        self.customEmotions = customEmotions
+        self.knownTriggerIds = knownTriggerIds
+        self.briefDescription = briefDescription
+        self.isProcessed = isProcessed
+        self.createdAt = createdAt
+    }
+}
+
+// MARK: - Bowtie: Backbone Processing
+
+@Model
+final class RRBackboneProcessing {
+    @Attribute(.unique) var id: UUID
+    var lifeSituation: String
+    var emotions: [String]
+    var threeIs: [IActivation]
+    var emotionalNeeds: [String]
+    var intimacyActions: [IntimacyAction]
+    var spiritualReflection: String?
+    var createdAt: Date
+
+    var marker: RRBowtieMarker?
+
+    init(
+        id: UUID = UUID(),
+        lifeSituation: String,
+        emotions: [String] = [],
+        threeIs: [IActivation] = [],
+        emotionalNeeds: [String] = [],
+        intimacyActions: [IntimacyAction] = [],
+        spiritualReflection: String? = nil,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.lifeSituation = lifeSituation
+        self.emotions = emotions
+        self.threeIs = threeIs
+        self.emotionalNeeds = emotionalNeeds
+        self.intimacyActions = intimacyActions
+        self.spiritualReflection = spiritualReflection
+        self.createdAt = createdAt
+    }
+}
+
+// MARK: - Bowtie: PPP Entry
+
+@Model
+final class RRPPPEntry {
+    @Attribute(.unique) var id: UUID
+    var prayer: String?
+    var peopleContactIds: [UUID]?
+    var planBefore: String?
+    var planDuring: String?
+    var planAfter: String?
+    var reminderTime: Date?
+    var outcome: PPPOutcome?
+    var followUpReflection: String?
+    var createdAt: Date
+
+    var marker: RRBowtieMarker?
+
+    init(
+        id: UUID = UUID(),
+        prayer: String? = nil,
+        peopleContactIds: [UUID]? = nil,
+        planBefore: String? = nil,
+        planDuring: String? = nil,
+        planAfter: String? = nil,
+        reminderTime: Date? = nil,
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.prayer = prayer
+        self.peopleContactIds = peopleContactIds
+        self.planBefore = planBefore
+        self.planDuring = planDuring
+        self.planAfter = planAfter
+        self.reminderTime = reminderTime
+        self.createdAt = createdAt
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1682,6 +1949,14 @@ enum RRModelConfiguration {
         RRLBIDailyEntry.self,
         RRMotivation.self,
         RRMotivationHistory.self,
+        RRUserRole.self,
+        RRKnownEmotionalTrigger.self,
+        RRBowtieSession.self,
+        RRBowtieMarker.self,
+        RRBackboneProcessing.self,
+        RRPPPEntry.self,
+        RRTriggerDefinition.self,
+        RRTriggerLogEntry.self,
     ]
 
     static var schema: Schema {

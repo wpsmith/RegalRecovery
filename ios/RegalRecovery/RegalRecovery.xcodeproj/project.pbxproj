@@ -273,6 +273,61 @@
 		10001002 /* LBICriticalItemEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001002 /* LBICriticalItemEditView.swift */; };
 		10009000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009000 /* ThreeCirclesTypes.swift */; };
 		10009001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009001 /* ThreeCirclesAPIClient.swift */; };
+			A9000001 /* BowtieTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000001 /* BowtieTypes.swift */; };
+			A9000002 /* BowtieSessionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000002 /* BowtieSessionViewModel.swift */; };
+			A9000003 /* BowtieMarkerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000003 /* BowtieMarkerViewModel.swift */; };
+			A9000004 /* BackboneProcessingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000004 /* BackboneProcessingViewModel.swift */; };
+			A9000005 /* PPPEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000005 /* PPPEntryViewModel.swift */; };
+			A9000006 /* BowtieHistoryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000006 /* BowtieHistoryViewModel.swift */; };
+			A9000007 /* BowtieOnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000007 /* BowtieOnboardingViewModel.swift */; };
+			A9000008 /* RolesManagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000008 /* RolesManagerViewModel.swift */; };
+			A9000009 /* BowtieSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000009 /* BowtieSessionView.swift */; };
+			A9000010 /* BowtieListEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000010 /* BowtieListEntryView.swift */; };
+			A9000011 /* BowtieMarkerFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000011 /* BowtieMarkerFormView.swift */; };
+			A9000012 /* BowtieDiagramView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000012 /* BowtieDiagramView.swift */; };
+			A9000013 /* BackboneFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000013 /* BackboneFlowView.swift */; };
+			A9000014 /* PPPFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000014 /* PPPFormView.swift */; };
+			A9000015 /* BowtieOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000015 /* BowtieOnboardingView.swift */; };
+			A9000016 /* BowtieHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000016 /* BowtieHistoryView.swift */; };
+			A9000017 /* BowtieInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000017 /* BowtieInsightsView.swift */; };
+			A9000018 /* RolesManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000018 /* RolesManagerView.swift */; };
+			A9000019 /* BowtieCompletionOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000019 /* BowtieCompletionOverlay.swift */; };
+			A9000020 /* BowtieTalliesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8000020 /* BowtieTalliesCard.swift */; };
+			B9000001 /* TriggerInsightsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000001 /* TriggerInsightsViewModel.swift */; };
+			B9000002 /* TriggerLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000002 /* TriggerLibraryViewModel.swift */; };
+			B9000003 /* TriggerLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000003 /* TriggerLogViewModel.swift */; };
+			B9000004 /* TriggerInsightsDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000004 /* TriggerInsightsDashboardView.swift */; };
+			B9000005 /* TriggerLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000005 /* TriggerLibraryView.swift */; };
+			B9000006 /* TriggerLogDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000006 /* TriggerLogDetailView.swift */; };
+			B9000007 /* TriggerLogHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000007 /* TriggerLogHistoryView.swift */; };
+			B9000008 /* TriggerLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000008 /* TriggerLogView.swift */; };
+			B9000009 /* TriggerOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000009 /* TriggerOnboardingView.swift */; };
+			B9000010 /* CopingToolkitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000010 /* CopingToolkitView.swift */; };
+			B9000011 /* IntensitySliderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000011 /* IntensitySliderView.swift */; };
+			B9000012 /* TriggerChipView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000012 /* TriggerChipView.swift */; };
+			B9000013 /* TriggerHeatMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000013 /* TriggerHeatMapView.swift */; };
+			B9000014 /* TriggerSeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000014 /* TriggerSeedData.swift */; };
+			B9000015 /* RRTriggerDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000015 /* RRTriggerDefinition.swift */; };
+			B9000016 /* RRTriggerLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000016 /* RRTriggerLogEntry.swift */; };
+			B9000017 /* TriggerTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000017 /* TriggerTypes.swift */; };
+			B9000018 /* MotivationLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000018 /* MotivationLibraryViewModel.swift */; };
+			B9000019 /* PostMortemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000019 /* PostMortemViewModel.swift */; };
+			B9000020 /* MotivationDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000020 /* MotivationDiscoveryViewModel.swift */; };
+			B9000021 /* MotivationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000021 /* MotivationTypes.swift */; };
+			B9000022 /* MotivationSurfacingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000022 /* MotivationSurfacingService.swift */; };
+			B9000023 /* MotivationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000023 /* MotivationRepository.swift */; };
+			B9000024 /* SwiftDataMotivationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000024 /* SwiftDataMotivationRepository.swift */; };
+			B9000025 /* RRCopingStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000025 /* RRCopingStrategy.swift */; };
+			B9000026 /* RRMotivationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000026 /* RRMotivationModels.swift */; };
+			B9000027 /* UrgeSurfingConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000027 /* UrgeSurfingConfigView.swift */; };
+			B9000028 /* MotivationLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000028 /* MotivationLibraryView.swift */; };
+			B9000029 /* MotivationReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000029 /* MotivationReviewView.swift */; };
+			B9000030 /* MotivationCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000030 /* MotivationCaptureSheet.swift */; };
+			B9000031 /* MotivationDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000031 /* MotivationDiscoveryView.swift */; };
+			B9000032 /* MotivationSurfacingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000032 /* MotivationSurfacingCard.swift */; };
+			B9000033 /* MotivationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000033 /* MotivationDetailView.swift */; };
+			B9000034 /* FASTERStageCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000034 /* FASTERStageCardView.swift */; };
+			B9000035 /* FASTERIndicatorChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000035 /* FASTERIndicatorChip.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -550,6 +605,77 @@
 		B0A1B2C3D4E5F003 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		BFD9987DFCC6D5A757E5C1F1 /* LBISetupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBISetupFlowView.swift; sourceTree = "<group>"; };
 		F7C6E48DCD91F04F58511767 /* LBISetupConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LBISetupConfirmationView.swift; sourceTree = "<group>"; };
+			A8000001 /* BowtieTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieTypes.swift; sourceTree = "<group>"; };
+			A8000002 /* BowtieSessionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionViewModel.swift; sourceTree = "<group>"; };
+			A8000003 /* BowtieMarkerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerViewModel.swift; sourceTree = "<group>"; };
+			A8000004 /* BackboneProcessingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneProcessingViewModel.swift; sourceTree = "<group>"; };
+			A8000005 /* PPPEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPEntryViewModel.swift; sourceTree = "<group>"; };
+			A8000006 /* BowtieHistoryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryViewModel.swift; sourceTree = "<group>"; };
+			A8000007 /* BowtieOnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModel.swift; sourceTree = "<group>"; };
+			A8000008 /* RolesManagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerViewModel.swift; sourceTree = "<group>"; };
+			A8000009 /* BowtieSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionView.swift; sourceTree = "<group>"; };
+			A8000010 /* BowtieListEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieListEntryView.swift; sourceTree = "<group>"; };
+			A8000011 /* BowtieMarkerFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerFormView.swift; sourceTree = "<group>"; };
+			A8000012 /* BowtieDiagramView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieDiagramView.swift; sourceTree = "<group>"; };
+			A8000013 /* BackboneFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneFlowView.swift; sourceTree = "<group>"; };
+			A8000014 /* PPPFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPFormView.swift; sourceTree = "<group>"; };
+			A8000015 /* BowtieOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingView.swift; sourceTree = "<group>"; };
+			A8000016 /* BowtieHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryView.swift; sourceTree = "<group>"; };
+			A8000017 /* BowtieInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieInsightsView.swift; sourceTree = "<group>"; };
+			A8000018 /* RolesManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerView.swift; sourceTree = "<group>"; };
+			A8000019 /* BowtieCompletionOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieCompletionOverlay.swift; sourceTree = "<group>"; };
+			A8000020 /* BowtieTalliesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieTalliesCard.swift; sourceTree = "<group>"; };
+			A8000021 /* BowtieSessionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieSessionViewModelTests.swift; sourceTree = "<group>"; };
+			A8000022 /* BowtieMarkerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieMarkerViewModelTests.swift; sourceTree = "<group>"; };
+			A8000023 /* BackboneProcessingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackboneProcessingViewModelTests.swift; sourceTree = "<group>"; };
+			A8000024 /* PPPEntryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PPPEntryViewModelTests.swift; sourceTree = "<group>"; };
+			A8000025 /* BowtieHistoryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryViewModelTests.swift; sourceTree = "<group>"; };
+			A8000026 /* RolesManagerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RolesManagerViewModelTests.swift; sourceTree = "<group>"; };
+			A8000027 /* BowtieOnboardingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModelTests.swift; sourceTree = "<group>"; };
+			B8000001 /* TriggerInsightsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerInsightsViewModel.swift; sourceTree = "<group>"; };
+			B8000002 /* TriggerLibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLibraryViewModel.swift; sourceTree = "<group>"; };
+			B8000003 /* TriggerLogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogViewModel.swift; sourceTree = "<group>"; };
+			B8000004 /* TriggerInsightsDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerInsightsDashboardView.swift; sourceTree = "<group>"; };
+			B8000005 /* TriggerLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLibraryView.swift; sourceTree = "<group>"; };
+			B8000006 /* TriggerLogDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogDetailView.swift; sourceTree = "<group>"; };
+			B8000007 /* TriggerLogHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogHistoryView.swift; sourceTree = "<group>"; };
+			B8000008 /* TriggerLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogView.swift; sourceTree = "<group>"; };
+			B8000009 /* TriggerOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerOnboardingView.swift; sourceTree = "<group>"; };
+			B8000010 /* CopingToolkitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopingToolkitView.swift; sourceTree = "<group>"; };
+			B8000011 /* IntensitySliderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntensitySliderView.swift; sourceTree = "<group>"; };
+			B8000012 /* TriggerChipView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerChipView.swift; sourceTree = "<group>"; };
+			B8000013 /* TriggerHeatMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerHeatMapView.swift; sourceTree = "<group>"; };
+			B8000014 /* TriggerSeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerSeedData.swift; sourceTree = "<group>"; };
+			B8000015 /* RRTriggerDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTriggerDefinition.swift; sourceTree = "<group>"; };
+			B8000016 /* RRTriggerLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRTriggerLogEntry.swift; sourceTree = "<group>"; };
+			B8000017 /* TriggerTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerTypes.swift; sourceTree = "<group>"; };
+			B8000018 /* MotivationLibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryViewModel.swift; sourceTree = "<group>"; };
+			B8000019 /* PostMortemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemViewModel.swift; sourceTree = "<group>"; };
+			B8000020 /* MotivationDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryViewModel.swift; sourceTree = "<group>"; };
+			B8000021 /* MotivationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationTypes.swift; sourceTree = "<group>"; };
+			B8000022 /* MotivationSurfacingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingService.swift; sourceTree = "<group>"; };
+			B8000023 /* MotivationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationRepository.swift; sourceTree = "<group>"; };
+			B8000024 /* SwiftDataMotivationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataMotivationRepository.swift; sourceTree = "<group>"; };
+			B8000025 /* RRCopingStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRCopingStrategy.swift; sourceTree = "<group>"; };
+			B8000026 /* RRMotivationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRMotivationModels.swift; sourceTree = "<group>"; };
+			B8000027 /* UrgeSurfingConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeSurfingConfigView.swift; sourceTree = "<group>"; };
+			B8000028 /* MotivationLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryView.swift; sourceTree = "<group>"; };
+			B8000029 /* MotivationReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationReviewView.swift; sourceTree = "<group>"; };
+			B8000030 /* MotivationCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationCaptureSheet.swift; sourceTree = "<group>"; };
+			B8000031 /* MotivationDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryView.swift; sourceTree = "<group>"; };
+			B8000032 /* MotivationSurfacingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingCard.swift; sourceTree = "<group>"; };
+			B8000033 /* MotivationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDetailView.swift; sourceTree = "<group>"; };
+			B8000034 /* FASTERStageCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERStageCardView.swift; sourceTree = "<group>"; };
+			B8000035 /* FASTERIndicatorChip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERIndicatorChip.swift; sourceTree = "<group>"; };
+			B8000040 /* TriggerInsightsViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerInsightsViewModelTests.swift; sourceTree = "<group>"; };
+			B8000041 /* TriggerLogViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLogViewModelTests.swift; sourceTree = "<group>"; };
+			B8000042 /* TriggerLibraryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerLibraryViewModelTests.swift; sourceTree = "<group>"; };
+			B8000043 /* TriggerSeedDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerSeedDataTests.swift; sourceTree = "<group>"; };
+			B8000044 /* TriggerTypesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TriggerTypesTests.swift; sourceTree = "<group>"; };
+			B8000045 /* MotivationSurfacingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingServiceTests.swift; sourceTree = "<group>"; };
+			B8000046 /* MotivationDiscoveryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryViewModelTests.swift; sourceTree = "<group>"; };
+			B8000047 /* PostMortemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemTests.swift; sourceTree = "<group>"; };
+			B8000048 /* MotivationLibraryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryViewModelTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -635,6 +761,8 @@
 				20003100 /* SensaEmoji.swift */,
 				20005001 /* VisionTypes.swift */,
 				20006001 /* QuickActionDefinition.swift */,
+				B8000021 /* MotivationTypes.swift */,
+				A8000001 /* BowtieTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -653,6 +781,12 @@
 			children = (
 				20000008 /* RRModels.swift */,
 				20000501 /* RRTimeJournalEntry.swift */,
+				B8000014 /* TriggerSeedData.swift */,
+				B8000015 /* RRTriggerDefinition.swift */,
+				B8000016 /* RRTriggerLogEntry.swift */,
+				B8000017 /* TriggerTypes.swift */,
+				B8000025 /* RRCopingStrategy.swift */,
+				B8000026 /* RRMotivationModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -665,6 +799,8 @@
 				20000990 /* SeedPersonas.swift */,
 				20000991 /* SeedPersonaData.swift */,
 				20000011 /* SwiftDataRepositories.swift */,
+				B8000023 /* MotivationRepository.swift */,
+				B8000024 /* SwiftDataMotivationRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -689,6 +825,7 @@
 				20000951 /* AffirmationsAPIClient.swift */,
 				20009001 /* ThreeCirclesAPIClient.swift */,
 				20000517 /* LBIMissedDayService.swift */,
+				B8000022 /* MotivationSurfacingService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -768,8 +905,13 @@
 				20000515 /* LBIScoringService.swift */,
 				20000600 /* TimeJournalEntryViewModel.swift */,
 				50001000 /* ThreeCircles */,
+				B8000090 /* Triggers */,
+				A7000001 /* Bowtie */,
 				20005002 /* VisionWizardViewModel.swift */,
 				20006003 /* QuickActionsViewModel.swift */,
+				B8000018 /* MotivationLibraryViewModel.swift */,
+				B8000019 /* PostMortemViewModel.swift */,
+				B8000020 /* MotivationDiscoveryViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -787,6 +929,7 @@
 				50000047 /* Tools */,
 				50000300 /* Today */,
 				50000100 /* Work */,
+				B8000091 /* Triggers */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -830,6 +973,7 @@
 				20000073 /* WeeklyGoalsView.swift */,
 				20001201 /* AffirmationPackPickerView.swift */,
 				20001202 /* AffirmationSettingsView.swift */,
+				A7000002 /* Bowtie */,
 			);
 			path = Activities;
 			sourceTree = "<group>";
@@ -858,6 +1002,7 @@
 				20000082 /* EmergencyFABButton.swift */,
 				20000083 /* EmergencyOverlayView.swift */,
 				20000202 /* UrgeSurfingTimerView.swift */,
+				B8000027 /* UrgeSurfingConfigView.swift */,
 			);
 			path = Emergency;
 			sourceTree = "<group>";
@@ -925,6 +1070,7 @@
 				50005001 /* Vision */,
 				20000108 /* ThreeCirclesView.swift */,
 				20000109 /* ToolsView.swift */,
+				B8000093 /* Motivations */,
 			);
 			path = Tools;
 			sourceTree = "<group>";
@@ -946,6 +1092,16 @@
 				20000113 /* ProfileViewModelTests.swift */,
 				20000114 /* StreakViewModelTests.swift */,
 				20000115 /* UrgeLogViewModelTests.swift */,
+				B8000040 /* TriggerInsightsViewModelTests.swift */,
+				B8000041 /* TriggerLogViewModelTests.swift */,
+				B8000042 /* TriggerLibraryViewModelTests.swift */,
+				B8000043 /* TriggerSeedDataTests.swift */,
+				B8000044 /* TriggerTypesTests.swift */,
+				B8000045 /* MotivationSurfacingServiceTests.swift */,
+				B8000046 /* MotivationDiscoveryViewModelTests.swift */,
+				B8000047 /* PostMortemTests.swift */,
+				B8000048 /* MotivationLibraryViewModelTests.swift */,
+				A7000003 /* Bowtie */,
 			);
 			path = Unit;
 			sourceTree = "<group>";
@@ -1011,6 +1167,8 @@
 				20000118 /* FASTERMoodPromptView.swift */,
 				20000119 /* FASTERResultsView.swift */,
 				20000402 /* FASTERThermometerView.swift */,
+				B8000034 /* FASTERStageCardView.swift */,
+				B8000035 /* FASTERIndicatorChip.swift */,
 			);
 			path = FASTER;
 			sourceTree = "<group>";
@@ -1147,6 +1305,102 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+
+			A7000001 /* Bowtie */ = {
+				isa = PBXGroup;
+				children = (
+					A8000002 /* BowtieSessionViewModel.swift */,
+					A8000003 /* BowtieMarkerViewModel.swift */,
+					A8000004 /* BackboneProcessingViewModel.swift */,
+					A8000005 /* PPPEntryViewModel.swift */,
+					A8000006 /* BowtieHistoryViewModel.swift */,
+					A8000007 /* BowtieOnboardingViewModel.swift */,
+					A8000008 /* RolesManagerViewModel.swift */,
+				);
+				path = Bowtie;
+				sourceTree = "<group>";
+			};
+			A7000002 /* Bowtie */ = {
+				isa = PBXGroup;
+				children = (
+					A8000009 /* BowtieSessionView.swift */,
+					A8000010 /* BowtieListEntryView.swift */,
+					A8000011 /* BowtieMarkerFormView.swift */,
+					A8000012 /* BowtieDiagramView.swift */,
+					A8000013 /* BackboneFlowView.swift */,
+					A8000014 /* PPPFormView.swift */,
+					A8000015 /* BowtieOnboardingView.swift */,
+					A8000016 /* BowtieHistoryView.swift */,
+					A8000017 /* BowtieInsightsView.swift */,
+					A8000018 /* RolesManagerView.swift */,
+					A8000019 /* BowtieCompletionOverlay.swift */,
+					A8000020 /* BowtieTalliesCard.swift */,
+				);
+				path = Bowtie;
+				sourceTree = "<group>";
+			};
+			A7000003 /* Bowtie */ = {
+				isa = PBXGroup;
+				children = (
+					A8000021 /* BowtieSessionViewModelTests.swift */,
+					A8000022 /* BowtieMarkerViewModelTests.swift */,
+					A8000023 /* BackboneProcessingViewModelTests.swift */,
+					A8000024 /* PPPEntryViewModelTests.swift */,
+					A8000025 /* BowtieHistoryViewModelTests.swift */,
+					A8000026 /* RolesManagerViewModelTests.swift */,
+					A8000027 /* BowtieOnboardingViewModelTests.swift */,
+				);
+				path = Bowtie;
+				sourceTree = "<group>";
+			};
+			B8000090 /* Triggers */ = {
+				isa = PBXGroup;
+				children = (
+					B8000001 /* TriggerInsightsViewModel.swift */,
+					B8000002 /* TriggerLibraryViewModel.swift */,
+					B8000003 /* TriggerLogViewModel.swift */,
+				);
+				path = Triggers;
+				sourceTree = "<group>";
+			};
+			B8000091 /* Triggers */ = {
+				isa = PBXGroup;
+				children = (
+					B8000092 /* Components */,
+					B8000004 /* TriggerInsightsDashboardView.swift */,
+					B8000005 /* TriggerLibraryView.swift */,
+					B8000006 /* TriggerLogDetailView.swift */,
+					B8000007 /* TriggerLogHistoryView.swift */,
+					B8000008 /* TriggerLogView.swift */,
+					B8000009 /* TriggerOnboardingView.swift */,
+				);
+				path = Triggers;
+				sourceTree = "<group>";
+			};
+			B8000092 /* Components */ = {
+				isa = PBXGroup;
+				children = (
+					B8000010 /* CopingToolkitView.swift */,
+					B8000011 /* IntensitySliderView.swift */,
+					B8000012 /* TriggerChipView.swift */,
+					B8000013 /* TriggerHeatMapView.swift */,
+				);
+				path = Components;
+				sourceTree = "<group>";
+			};
+			B8000093 /* Motivations */ = {
+				isa = PBXGroup;
+				children = (
+					B8000028 /* MotivationLibraryView.swift */,
+					B8000029 /* MotivationReviewView.swift */,
+					B8000030 /* MotivationCaptureSheet.swift */,
+					B8000031 /* MotivationDiscoveryView.swift */,
+					B8000032 /* MotivationSurfacingCard.swift */,
+					B8000033 /* MotivationDetailView.swift */,
+				);
+				path = Motivations;
+				sourceTree = "<group>";
+			};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1473,6 +1727,61 @@
 				B1D80FD3EE117EFA1430602F /* LBISetupFlowView.swift in Sources */,
 				9103A401908DED56E83772C7 /* LBIDimensionEntryView.swift in Sources */,
 				91B02E045195FF9B6D69BD3E /* LBISetupConfirmationView.swift in Sources */,
+				B9000001 /* TriggerInsightsViewModel.swift in Sources */,
+				B9000002 /* TriggerLibraryViewModel.swift in Sources */,
+				B9000003 /* TriggerLogViewModel.swift in Sources */,
+				B9000004 /* TriggerInsightsDashboardView.swift in Sources */,
+				B9000005 /* TriggerLibraryView.swift in Sources */,
+				B9000006 /* TriggerLogDetailView.swift in Sources */,
+				B9000007 /* TriggerLogHistoryView.swift in Sources */,
+				B9000008 /* TriggerLogView.swift in Sources */,
+				B9000009 /* TriggerOnboardingView.swift in Sources */,
+				B9000010 /* CopingToolkitView.swift in Sources */,
+				B9000011 /* IntensitySliderView.swift in Sources */,
+				B9000012 /* TriggerChipView.swift in Sources */,
+				B9000013 /* TriggerHeatMapView.swift in Sources */,
+				B9000014 /* TriggerSeedData.swift in Sources */,
+				B9000015 /* RRTriggerDefinition.swift in Sources */,
+				B9000016 /* RRTriggerLogEntry.swift in Sources */,
+				B9000017 /* TriggerTypes.swift in Sources */,
+				B9000018 /* MotivationLibraryViewModel.swift in Sources */,
+				B9000019 /* PostMortemViewModel.swift in Sources */,
+				B9000020 /* MotivationDiscoveryViewModel.swift in Sources */,
+				B9000021 /* MotivationTypes.swift in Sources */,
+				B9000022 /* MotivationSurfacingService.swift in Sources */,
+				B9000023 /* MotivationRepository.swift in Sources */,
+				B9000024 /* SwiftDataMotivationRepository.swift in Sources */,
+				B9000025 /* RRCopingStrategy.swift in Sources */,
+				B9000026 /* RRMotivationModels.swift in Sources */,
+				B9000027 /* UrgeSurfingConfigView.swift in Sources */,
+				B9000028 /* MotivationLibraryView.swift in Sources */,
+				B9000029 /* MotivationReviewView.swift in Sources */,
+				B9000030 /* MotivationCaptureSheet.swift in Sources */,
+				B9000031 /* MotivationDiscoveryView.swift in Sources */,
+				B9000032 /* MotivationSurfacingCard.swift in Sources */,
+				B9000033 /* MotivationDetailView.swift in Sources */,
+				B9000034 /* FASTERStageCardView.swift in Sources */,
+				B9000035 /* FASTERIndicatorChip.swift in Sources */,
+				A9000001 /* BowtieTypes.swift in Sources */,
+				A9000002 /* BowtieSessionViewModel.swift in Sources */,
+				A9000003 /* BowtieMarkerViewModel.swift in Sources */,
+				A9000004 /* BackboneProcessingViewModel.swift in Sources */,
+				A9000005 /* PPPEntryViewModel.swift in Sources */,
+				A9000006 /* BowtieHistoryViewModel.swift in Sources */,
+				A9000007 /* BowtieOnboardingViewModel.swift in Sources */,
+				A9000008 /* RolesManagerViewModel.swift in Sources */,
+				A9000009 /* BowtieSessionView.swift in Sources */,
+				A9000010 /* BowtieListEntryView.swift in Sources */,
+				A9000011 /* BowtieMarkerFormView.swift in Sources */,
+				A9000012 /* BowtieDiagramView.swift in Sources */,
+				A9000013 /* BackboneFlowView.swift in Sources */,
+				A9000014 /* PPPFormView.swift in Sources */,
+				A9000015 /* BowtieOnboardingView.swift in Sources */,
+				A9000016 /* BowtieHistoryView.swift in Sources */,
+				A9000017 /* BowtieInsightsView.swift in Sources */,
+				A9000018 /* RolesManagerView.swift in Sources */,
+				A9000019 /* BowtieCompletionOverlay.swift in Sources */,
+				A9000020 /* BowtieTalliesCard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
