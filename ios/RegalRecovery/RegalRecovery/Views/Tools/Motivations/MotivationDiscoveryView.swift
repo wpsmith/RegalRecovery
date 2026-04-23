@@ -116,7 +116,7 @@ struct MotivationDiscoveryView: View {
 
     private var valuesStep: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("What matters most to you in life? Choose up to \(MotivationLimits.maxValuesSelection).")
+            Text("What matters most to you in life? Choose all that resonate.")
                 .font(RRFont.headline)
                 .foregroundStyle(Color.rrText)
 
@@ -150,7 +150,7 @@ struct MotivationDiscoveryView: View {
                 }
             }
 
-            Text("\(viewModel.selectedValues.count)/\(MotivationLimits.maxValuesSelection) selected")
+            Text("\(viewModel.selectedValues.count) selected")
                 .font(RRFont.caption)
                 .foregroundStyle(Color.rrTextSecondary)
         }

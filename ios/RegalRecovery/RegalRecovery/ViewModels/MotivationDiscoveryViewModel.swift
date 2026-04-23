@@ -89,7 +89,7 @@ final class MotivationDiscoveryViewModel {
             selectedValues.remove(at: index)
             concreteResponses.removeValue(forKey: category)
             concreteScriptures.removeValue(forKey: category)
-        } else if selectedValues.count < MotivationLimits.maxValuesSelection {
+        } else {
             selectedValues.append(category)
         }
     }
@@ -117,6 +117,24 @@ final class MotivationDiscoveryViewModel {
             return String(localized: "You chose Personal Growth. What kind of person are you becoming through recovery?")
         case .financial:
             return String(localized: "You chose Financial. What about your finances motivates your recovery?")
+        case .community:
+            return String(localized: "You chose Community. What about your community or fellowship motivates your recovery?")
+        case .parenting:
+            return String(localized: "You chose Parenting. What about being a parent motivates your recovery?")
+        case .identity:
+            return String(localized: "You chose Identity. Who are you becoming through recovery?")
+        case .freedom:
+            return String(localized: "You chose Freedom. What does freedom from addiction mean to you?")
+        case .legacy:
+            return String(localized: "You chose Legacy. What legacy do you want to leave?")
+        case .education:
+            return String(localized: "You chose Education. How does recovery connect to your learning and growth?")
+        case .service:
+            return String(localized: "You chose Service. How does recovery enable you to serve others?")
+        case .sexuality:
+            return String(localized: "You chose Sexuality. What does healthy intimacy and sexuality look like for you?")
+        case .creativity:
+            return String(localized: "You chose Creativity. What creative expression has recovery freed in you?")
         }
     }
 
