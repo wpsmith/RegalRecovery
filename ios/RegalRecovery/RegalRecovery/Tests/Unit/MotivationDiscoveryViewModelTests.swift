@@ -53,17 +53,13 @@ struct MotivationDiscoveryViewModelTests {
         #expect(!vm.selectedValues.contains(.spiritual))
     }
 
-    @Test("toggleValue caps at 5")
-    func testMaxValues() {
+    @Test("toggleValue allows selecting all categories")
+    func testSelectAll() {
         let vm = MotivationDiscoveryViewModel()
-        vm.toggleValue(.spiritual)
-        vm.toggleValue(.relational)
-        vm.toggleValue(.health)
-        vm.toggleValue(.professional)
-        vm.toggleValue(.personalGrowth)
-        vm.toggleValue(.financial)
-        #expect(vm.selectedValues.count == 5)
-        #expect(!vm.selectedValues.contains(.financial))
+        for category in MotivationCategory.allCases {
+            vm.toggleValue(category)
+        }
+        #expect(vm.selectedValues.count == MotivationCategory.allCases.count)
     }
 
     @Test("canProceed is false on valuesSelection with no values selected")

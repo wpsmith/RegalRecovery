@@ -10,6 +10,15 @@ enum MotivationCategory: String, Codable, CaseIterable, Identifiable, Sendable {
     case professional = "Professional"
     case personalGrowth = "Personal Growth"
     case financial = "Financial"
+    case community = "Community"
+    case parenting = "Parenting"
+    case identity = "Identity"
+    case freedom = "Freedom"
+    case legacy = "Legacy"
+    case education = "Education"
+    case service = "Service"
+    case sexuality = "Sexuality"
+    case creativity = "Creativity"
 
     var id: String { rawValue }
 
@@ -21,6 +30,15 @@ enum MotivationCategory: String, Codable, CaseIterable, Identifiable, Sendable {
         case .professional: return String(localized: "Professional")
         case .personalGrowth: return String(localized: "Personal Growth")
         case .financial: return String(localized: "Financial")
+        case .community: return String(localized: "Community")
+        case .parenting: return String(localized: "Parenting")
+        case .identity: return String(localized: "Identity")
+        case .freedom: return String(localized: "Freedom")
+        case .legacy: return String(localized: "Legacy")
+        case .education: return String(localized: "Education")
+        case .service: return String(localized: "Service")
+        case .sexuality: return String(localized: "Sexuality")
+        case .creativity: return String(localized: "Creativity")
         }
     }
 
@@ -32,6 +50,15 @@ enum MotivationCategory: String, Codable, CaseIterable, Identifiable, Sendable {
         case .professional: return "briefcase.fill"
         case .personalGrowth: return "leaf.fill"
         case .financial: return "banknote.fill"
+        case .community: return "person.3.fill"
+        case .parenting: return "figure.and.child.holdinghands"
+        case .identity: return "person.fill"
+        case .freedom: return "bird.fill"
+        case .legacy: return "tree.fill"
+        case .education: return "book.fill"
+        case .service: return "hand.raised.fill"
+        case .sexuality: return "heart.circle.fill"
+        case .creativity: return "paintbrush.fill"
         }
     }
 
@@ -43,6 +70,15 @@ enum MotivationCategory: String, Codable, CaseIterable, Identifiable, Sendable {
         case .professional: return .blue
         case .personalGrowth: return .purple
         case .financial: return .green
+        case .community: return .teal
+        case .parenting: return .pink
+        case .identity: return .indigo
+        case .freedom: return .cyan
+        case .legacy: return .brown
+        case .education: return .mint
+        case .service: return .yellow
+        case .sexuality: return Color(red: 0.831, green: 0.220, blue: 0.353)
+        case .creativity: return Color(red: 0.976, green: 0.733, blue: 0.176)
         }
     }
 }
@@ -114,11 +150,11 @@ enum SurfacingContext: String, Codable, Sendable {
 
     var prioritizedCategories: [MotivationCategory] {
         switch self {
-        case .urgeLog, .sosFlow: return [.relational, .spiritual]
-        case .moodCheckIn: return [.spiritual, .health]
-        case .fasterScale: return [.personalGrowth, .spiritual]
+        case .urgeLog, .sosFlow: return [.relational, .spiritual, .parenting, .freedom]
+        case .moodCheckIn: return [.spiritual, .health, .identity]
+        case .fasterScale: return [.personalGrowth, .spiritual, .identity, .freedom]
         case .milestone: return []
-        case .sobrietyReset: return [.spiritual, .relational]
+        case .sobrietyReset: return [.spiritual, .relational, .freedom]
         case .morningCommitment, .eveningReview, .postMortem: return []
         }
     }
@@ -142,7 +178,6 @@ enum MotivationChangeType: String, Codable, Sendable {
 enum MotivationLimits {
     static let maxTextLength = 500
     static let maxScriptureLength = 200
-    static let maxValuesSelection = 5
     static let surfacingCooldownHours = 24
     static let freeLibraryLimit = 10
 }

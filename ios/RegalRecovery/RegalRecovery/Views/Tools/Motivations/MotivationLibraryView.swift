@@ -9,6 +9,10 @@ struct MotivationLibraryView: View {
     @State private var showCaptureSheet = false
     @State private var showDiscovery = false
 
+    private func syncMotivations() {
+        libraryViewModel.motivations = allMotivations
+    }
+
     var body: some View {
         NavigationStack {
             Group {
@@ -32,10 +36,10 @@ struct MotivationLibraryView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showCaptureSheet) {
+            .sheet(isPresented: $showCaptureSheet, onDismiss: syncMotivations) {
                 MotivationCaptureSheet(libraryViewModel: libraryViewModel)
             }
-            .fullScreenCover(isPresented: $showDiscovery) {
+            .fullScreenCover(isPresented: $showDiscovery, onDismiss: syncMotivations) {
                 MotivationDiscoveryView(libraryViewModel: libraryViewModel)
             }
             .onAppear {
