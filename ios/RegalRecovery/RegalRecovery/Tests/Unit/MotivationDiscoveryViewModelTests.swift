@@ -1,4 +1,3 @@
-// Tests/Unit/MotivationDiscoveryViewModelTests.swift
 import Testing
 @testable import RegalRecovery
 import Foundation
@@ -12,17 +11,9 @@ struct MotivationDiscoveryViewModelTests {
         #expect(vm.currentStep == .intro)
     }
 
-    @Test("goToNextStep advances from intro to miracleQuestion")
+    @Test("goToNextStep advances from intro to valuesSelection")
     func testAdvanceFromIntro() {
         let vm = MotivationDiscoveryViewModel()
-        vm.goToNextStep()
-        #expect(vm.currentStep == .miracleQuestion)
-    }
-
-    @Test("goToNextStep advances from miracleQuestion to valuesSelection")
-    func testAdvanceToValues() {
-        let vm = MotivationDiscoveryViewModel()
-        vm.currentStep = .miracleQuestion
         vm.goToNextStep()
         #expect(vm.currentStep == .valuesSelection)
     }
@@ -36,10 +27,10 @@ struct MotivationDiscoveryViewModelTests {
         #expect(vm.currentStep == .concretePrompts)
     }
 
-    @Test("goToPreviousStep goes back from miracleQuestion to intro")
+    @Test("goToPreviousStep goes back from valuesSelection to intro")
     func testGoBack() {
         let vm = MotivationDiscoveryViewModel()
-        vm.currentStep = .miracleQuestion
+        vm.currentStep = .valuesSelection
         vm.goToPreviousStep()
         #expect(vm.currentStep == .intro)
     }

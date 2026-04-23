@@ -9,6 +9,11 @@ struct MotivationDiscoveryView: View {
     var onComplete: (([RRMotivation]) -> Void)?
 
     @State private var showResumeAlert = false
+    @State private var showCancelConfirmation = false
+
+    private var hasChanges: Bool {
+        !viewModel.selectedValues.isEmpty || !viewModel.concreteResponses.isEmpty
+    }
 
     var body: some View {
         NavigationStack {
@@ -34,10 +39,29 @@ struct MotivationDiscoveryView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        viewModel.saveDraft()
-                        dismiss()
+                        if hasChanges {
+                            showCancelConfirmation = true
+                        } else {
+                            viewModel.clearDraft()
+                            dismiss()
+                        }
                     }
                 }
+            }
+            .confirmationDialog(
+                "You have unsaved changes",
+                isPresented: $showCancelConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Save & Exit") {
+                    viewModel.saveDraft()
+                    dismiss()
+                }
+                Button("Cancel & Exit", role: .destructive) {
+                    viewModel.clearDraft()
+                    dismiss()
+                }
+                Button("Keep Editing", role: .cancel) {}
             }
             .onAppear {
                 if viewModel.loadDraft() && viewModel.currentStep != .intro {
@@ -76,8 +100,6 @@ struct MotivationDiscoveryView: View {
         switch viewModel.currentStep {
         case .intro:
             introStep
-        case .miracleQuestion:
-            miracleStep
         case .valuesSelection:
             valuesStep
         case .concretePrompts:
@@ -99,19 +121,6 @@ struct MotivationDiscoveryView: View {
                 .multilineTextAlignment(.center)
         }
         .padding(.top, 40)
-    }
-
-    private var miracleStep: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("If a miracle happened overnight and your addiction was gone, what would be different when you woke up?")
-                .font(RRFont.headline)
-                .foregroundStyle(Color.rrText)
-
-            TextField("Write freely — this is for you...", text: $viewModel.miracleResponse, axis: .vertical)
-                .lineLimit(4...12)
-                .textFieldStyle(.roundedBorder)
-                .accessibilityLabel("Miracle question response")
-        }
     }
 
     private var valuesStep: some View {
