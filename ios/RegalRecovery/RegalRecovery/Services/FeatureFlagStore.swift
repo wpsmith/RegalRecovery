@@ -38,12 +38,16 @@ final class FeatureFlagStore {
         let currentVersion = defaults.integer(forKey: migrationKey)
 
         if currentVersion < 1 {
-            // Enable 3circles and vision for existing installs
             defaults.set(true, forKey: "ff.feature.3circles")
             defaults.set(true, forKey: "ff.feature.vision")
         }
 
-        defaults.set(1, forKey: migrationKey)
+        if currentVersion < 2 {
+            defaults.set(true, forKey: "ff.feature.motivations")
+            defaults.set(true, forKey: "ff.activity.motivations")
+        }
+
+        defaults.set(2, forKey: migrationKey)
     }
 
     // MARK: - Default Seeding
