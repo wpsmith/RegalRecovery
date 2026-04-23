@@ -14,6 +14,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
         FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: true),
         FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: true),
+        FeatureFlag(key: "feature.motivations", label: "Motivations", enabled: true),
     ]
 
     @State private var activities: [FeatureFlag] = [
@@ -245,6 +246,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
         FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: true),
         FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: true),
+        FeatureFlag(key: "feature.motivations", label: "Motivations", enabled: true),
     ]
 
     private static let defaultActivities: [FeatureFlag] = [
