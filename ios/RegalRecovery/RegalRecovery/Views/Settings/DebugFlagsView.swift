@@ -41,7 +41,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.prayer", label: "Prayer", enabled: true),
         FeatureFlag(key: "activity.integrity-inventory", label: "Integrity Inventory", enabled: false),
         FeatureFlag(key: "feature.lbi", label: "Life Balance", enabled: false),
-        FeatureFlag(key: "activity.triggers", label: "Trigger Logging", enabled: false),
+        FeatureFlag(key: "activity.triggers", label: "Trigger Logging", enabled: true),
     ]
 
     @State private var assessments: [FeatureFlag] = [
@@ -273,7 +273,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.prayer", label: "Prayer", enabled: true),
         FeatureFlag(key: "activity.integrity-inventory", label: "Integrity Inventory", enabled: false),
         FeatureFlag(key: "feature.lbi", label: "Life Balance", enabled: false),
-        FeatureFlag(key: "activity.triggers", label: "Trigger Logging", enabled: false),
+        FeatureFlag(key: "activity.triggers", label: "Trigger Logging", enabled: true),
     ]
 
     private static let defaultAssessments: [FeatureFlag] = [

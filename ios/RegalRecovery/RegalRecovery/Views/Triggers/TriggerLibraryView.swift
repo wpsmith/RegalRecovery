@@ -9,48 +9,56 @@ struct TriggerLibraryView: View {
     @State private var validationMessage: String?
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Segmented Picker
-                Picker("Tab", selection: $selectedTab) {
-                    Text("My Triggers").tag(0)
-                    Text("All Triggers").tag(1)
-                    Text("Custom").tag(2)
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 16)
-                .padding(.top, 16)
-                .padding(.bottom, 8)
-
-                // Search Bar
-                searchBar
-
-                // Tab Content
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        if selectedTab == 0 {
-                            myTriggersTab
-                        } else if selectedTab == 1 {
-                            allTriggersTab
-                        } else {
-                            customTriggersTab
-                        }
-                    }
-                    .padding(16)
-                }
+        VStack(spacing: 0) {
+            Picker("Tab", selection: $selectedTab) {
+                Text("My Triggers").tag(0)
+                Text("All Triggers").tag(1)
+                Text("Custom").tag(2)
             }
-            .navigationTitle("Trigger Library")
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showAddCustom = true
-                    } label: {
-                        Image(systemName: "plus")
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .padding(.top, 16)
+            .padding(.bottom, 8)
+
+            searchBar
+
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    if selectedTab == 0 {
+                        myTriggersTab
+                    } else if selectedTab == 1 {
+                        allTriggersTab
+                    } else {
+                        customTriggersTab
                     }
                 }
+                .padding(16)
             }
-            .sheet(isPresented: $showAddCustom) {
-                addCustomTriggerSheet
+        }
+        .navigationTitle("Trigger Library")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showAddCustom = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showAddCustom) {
+            addCustomTriggerSheet
+        }
+        .task {
+            if viewModel.allTriggers.isEmpty {
+                viewModel.allTriggers = TriggerSeedData.allTriggers.map { seed in
+                    TriggerLibraryViewModel.LibraryItem(
+                        id: UUID(),
+                        label: seed.label,
+                        category: seed.category,
+                        isCustom: false,
+                        useCount: 0
+                    )
+                }
             }
         }
     }
