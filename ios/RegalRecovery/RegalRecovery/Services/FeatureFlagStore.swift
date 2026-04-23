@@ -47,7 +47,12 @@ final class FeatureFlagStore {
             defaults.set(true, forKey: "ff.activity.bowtie")
         }
 
-        defaults.set(2, forKey: migrationKey)
+        if currentVersion < 3 {
+            defaults.set(true, forKey: "ff.feature.triggers")
+            defaults.set(true, forKey: "ff.activity.triggers")
+        }
+
+        defaults.set(3, forKey: migrationKey)
     }
 
     // MARK: - Default Seeding
@@ -125,6 +130,7 @@ final class FeatureFlagStore {
         "activity.memory-verse": false,
         "activity.acting-in-behaviors": false,
         "activity.bowtie": true,
+        "activity.triggers": true,
         "activity.voice-journal": false,
 
         // App Architecture
@@ -135,6 +141,7 @@ final class FeatureFlagStore {
 
         // Recovery Work & Tools
         "feature.3circles": true,
+        "feature.triggers": true,
         "feature.vision": true,
         "feature.partners.redemptiveliving.backbone": false,
         "feature.relapse-prevention-plan": false,
