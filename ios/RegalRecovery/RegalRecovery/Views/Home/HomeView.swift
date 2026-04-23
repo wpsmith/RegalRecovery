@@ -20,6 +20,9 @@ struct HomeView: View {
     private var affirmationSessions: [RRActivity]
     @Query(filter: #Predicate<RRVisionStatement> { $0.isCurrent == true })
     private var currentVisions: [RRVisionStatement]
+    @Query(filter: #Predicate<RRBowtieSession> { $0.status == "complete" },
+           sort: \RRBowtieSession.modifiedAt, order: .reverse)
+    private var completedBowties: [RRBowtieSession]
 
     private var user: RRUser? { users.first }
 
@@ -118,6 +121,12 @@ struct HomeView: View {
             }()
             let detail = "\(cardsViewed)/\(totalCards) cards, \(formatDuration(durationSeconds))"
             all.append((a.date, RecentActivity(title: String(localized: "Affirmations"), detail: detail, time: fmt.localizedString(for: a.date, relativeTo: Date()), icon: ActivityType.affirmationLog.icon, iconColor: ActivityType.affirmationLog.iconColor)))
+        }
+        for b in completedBowties.prefix(3) {
+            let completedDate = b.completedAt ?? b.modifiedAt
+            let markerCount = b.markers.count
+            let detail = String(localized: "\(markerCount) markers, \(b.selectedRoleIds.count) roles")
+            all.append((completedDate, RecentActivity(title: String(localized: "Bowtie Diagram"), detail: detail, time: fmt.localizedString(for: completedDate, relativeTo: Date()), icon: "suit.diamond.fill", iconColor: .rrPrimary)))
         }
 
         return all.sorted { $0.date > $1.date }.prefix(10).map(\.item)

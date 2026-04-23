@@ -77,6 +77,8 @@ struct ActivityDetailView: View {
             spouseCheckInDetail(id: id)
         case .triggerLog:
             triggerLogDetail(id: id)
+        case .bowtie:
+            bowtieDetail(id: id)
         }
     }
 
@@ -683,6 +685,28 @@ struct ActivityDetailView: View {
         }
     }
 
+    // MARK: - Bowtie
+
+    private func bowtieDetail(id: UUID) -> some View {
+        let item = fetchModel(RRBowtieSession.self, id: id)
+        return Group {
+            if let session = item {
+                RRCard {
+                    VStack(alignment: .leading, spacing: 12) {
+                        detailRow("Status", value: session.bowtieStatus.displayName)
+                        detailRow("Roles", value: "\(session.selectedRoleIds.count)")
+                        detailRow("Markers", value: "\(session.markers.count)")
+                        if let completedAt = session.completedAt {
+                            detailRow("Completed", value: completedAt.formatted(date: .long, time: .shortened))
+                        }
+                    }
+                }
+            } else {
+                notFoundView
+            }
+        }
+    }
+
     private func fetchModel<T: PersistentModel>(_ type: T.Type, id: UUID) -> T? {
         let descriptor = FetchDescriptor<T>(predicate: #Predicate { _ in true })
         guard let results = try? modelContext.fetch(descriptor) else { return nil }
@@ -709,6 +733,7 @@ extension RRPhoneCallLog: HasUUID {}
 extension RRMeetingLog: HasUUID {}
 extension RRSpouseCheckIn: HasUUID {}
 extension RRTriggerLogEntry: HasUUID {}
+extension RRBowtieSession: HasUUID {}
 
 #Preview {
     NavigationStack {

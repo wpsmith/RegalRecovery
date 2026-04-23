@@ -5,8 +5,13 @@ struct BowtieOnboardingView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Query(sort: \RRTriggerDefinition.label) private var myTriggers: [RRTriggerDefinition]
     @State private var viewModel = BowtieOnboardingViewModel()
     @State private var swipeDirection: SwipeDirection = .forward
+
+    private var myEmotionalTriggers: [RRTriggerDefinition] {
+        myTriggers.filter { $0.categoryRaw == TriggerCategory.emotional.rawValue }
+    }
 
     private enum SwipeDirection {
         case forward, backward
@@ -302,6 +307,11 @@ struct BowtieOnboardingView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 16)
+            }
+        }
+        .onAppear {
+            for trigger in myEmotionalTriggers {
+                viewModel.selectedSuggestionTriggers.insert(trigger.label)
             }
         }
     }

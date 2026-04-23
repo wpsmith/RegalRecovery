@@ -303,9 +303,8 @@ enum RoleSuggestions {
         "Husband", "Wife", "Partner",
         "Father", "Mother", "Parent",
         "Son", "Daughter",
-        "Brother", "Sister", "Sibling",
+        "Brother", "Sister",
         "Friend",
-        "Man in Recovery", "Woman in Recovery",
         "Coworker", "Employee",
         "Neighbor",
         "Coach", "Mentor",
@@ -318,10 +317,43 @@ enum RoleSuggestions {
 
 enum KnownTriggerSuggestions {
     static let defaults: [String] = [
-        "Rejection", "Failure", "Embarrassment",
-        "Feeling Bullied", "Overwhelm", "Loneliness",
-        "Being Controlled", "Feeling Stupid",
-        "Being Overlooked", "Abandonment",
-        "Conflict", "Criticism", "Disappointment",
+        "Stress", "Anxiety", "Loneliness", "Boredom",
+        "Anger", "Shame", "Rejection", "Sadness",
+        "Excitement", "Frustration", "Overwhelm", "Fear",
+        "Guilt", "Resentment", "Hopelessness", "Jealousy",
+        "Self-pity", "Entitlement", "Grief", "Inadequacy",
+        "Embarrassment", "Numbness", "Restlessness", "Disappointment",
     ]
+}
+
+// MARK: - Bowtie Icon
+
+struct BowtieIconShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let midX = rect.midX
+        let midY = rect.midY
+        // Left triangle
+        path.move(to: CGPoint(x: rect.minX, y: rect.minY))
+        path.addLine(to: CGPoint(x: midX, y: midY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.closeSubpath()
+        // Right triangle
+        path.move(to: CGPoint(x: rect.maxX, y: rect.minY))
+        path.addLine(to: CGPoint(x: midX, y: midY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+struct BowtieIcon: View {
+    var size: CGFloat = 20
+    var color: Color = .rrPrimary
+
+    var body: some View {
+        BowtieIconShape()
+            .fill(color)
+            .frame(width: size, height: size)
+    }
 }

@@ -710,6 +710,7 @@ enum HistoryItemType: String {
     case fanos
     case fitnap
     case triggerLog
+    case bowtie
 }
 
 struct RecentActivity: Identifiable {
@@ -1253,6 +1254,20 @@ struct DailyEligibleActivity {
             typicalBlock: "Anytime",
             featureFlagKey: "activity.triggers",
             section: .selfCare
+        ),
+        DailyEligibleActivity(
+            activityType: "bowtie",
+            displayNameKey: "Bowtie Diagram",
+            shortNameKey: "Bowtie",
+            icon: "suit.diamond.fill",
+            multiplePerDay: false,
+            maxPerDay: 1,
+            defaultEnabled: false,
+            typicalHour: 19,
+            typicalMinute: 0,
+            typicalBlock: "Evening",
+            featureFlagKey: "activity.bowtie",
+            section: .growth
         ),
     ]
 }

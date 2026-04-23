@@ -5,6 +5,8 @@ struct BowtieMarkerFormView: View {
     let availableRoles: [RRUserRole]
     let availableTriggers: [RRKnownEmotionalTrigger]
     let existingMarker: RRBowtieMarker?
+    let preselectedSide: BowtieSide?
+    let preselectedTimeInterval: Int?
     let onSave: (RRBowtieMarker) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -15,12 +17,16 @@ struct BowtieMarkerFormView: View {
         availableRoles: [RRUserRole],
         availableTriggers: [RRKnownEmotionalTrigger],
         existingMarker: RRBowtieMarker? = nil,
+        preselectedSide: BowtieSide? = nil,
+        preselectedTimeInterval: Int? = nil,
         onSave: @escaping (RRBowtieMarker) -> Void
     ) {
         self.vocabulary = vocabulary
         self.availableRoles = availableRoles
         self.availableTriggers = availableTriggers
         self.existingMarker = existingMarker
+        self.preselectedSide = preselectedSide
+        self.preselectedTimeInterval = preselectedTimeInterval
         self.onSave = onSave
     }
 
@@ -59,8 +65,16 @@ struct BowtieMarkerFormView: View {
             .onAppear {
                 if let existing = existingMarker {
                     viewModel.loadFromMarker(existing)
-                } else if let firstRole = availableRoles.first {
-                    viewModel.selectedRoleId = firstRole.id
+                } else {
+                    if let firstRole = availableRoles.first {
+                        viewModel.selectedRoleId = firstRole.id
+                    }
+                    if let side = preselectedSide {
+                        viewModel.selectedSide = side
+                    }
+                    if let interval = preselectedTimeInterval {
+                        viewModel.selectedTimeInterval = interval
+                    }
                 }
             }
         }

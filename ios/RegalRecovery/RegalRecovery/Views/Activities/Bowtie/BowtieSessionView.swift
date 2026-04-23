@@ -15,8 +15,11 @@ struct BowtieSessionView: View {
     @State private var showMarkerForm = false
     @State private var editingMarker: RRBowtieMarker?
     @State private var pendingMarkerSide: BowtieSide = .past
+    @State private var pendingMarkerInterval: Int?
     @State private var showDeleteConfirmation = false
     @State private var showOnboarding = !BowtieOnboardingViewModel.isOnboardingCompleted
+    @State private var showVocabularyInfo = false
+    @State private var showModeInfo = false
 
     var body: some View {
         NavigationStack {
@@ -74,13 +77,16 @@ struct BowtieSessionView: View {
                     vocabulary: viewModel.selectedVocabulary,
                     availableRoles: selectedRolesFromAvailable,
                     availableTriggers: triggers,
-                    existingMarker: editingMarker
+                    existingMarker: editingMarker,
+                    preselectedSide: editingMarker == nil ? pendingMarkerSide : nil,
+                    preselectedTimeInterval: editingMarker == nil ? pendingMarkerInterval : nil
                 ) { marker in
                     if let editing = editingMarker {
                         viewModel.removeMarker(editing, context: modelContext)
                     }
                     viewModel.addMarker(marker, context: modelContext)
                     editingMarker = nil
+                    pendingMarkerInterval = nil
                 }
             }
             .confirmationDialog(
@@ -145,9 +151,19 @@ struct BowtieSessionView: View {
                 // Vocabulary Picker
                 RRCard {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(String(localized: "Emotion Vocabulary"))
-                            .font(.headline)
-                            .foregroundStyle(Color.rrText)
+                        HStack {
+                            Text(String(localized: "Emotion Vocabulary"))
+                                .font(.headline)
+                                .foregroundStyle(Color.rrText)
+                            Spacer()
+                            Button {
+                                showVocabularyInfo = true
+                            } label: {
+                                Image(systemName: "info.circle")
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                            .accessibilityLabel(String(localized: "Emotion vocabulary info"))
+                        }
 
                         Picker(String(localized: "Vocabulary"), selection: $viewModel.selectedVocabulary) {
                             ForEach(EmotionVocabulary.allCases, id: \.rawValue) { vocab in
@@ -157,13 +173,28 @@ struct BowtieSessionView: View {
                         .pickerStyle(.segmented)
                     }
                 }
+                .alert(String(localized: "Emotion Vocabulary"), isPresented: $showVocabularyInfo) {
+                    Button(String(localized: "OK"), role: .cancel) {}
+                } message: {
+                    Text(String(localized: "Three I's: Insignificance, Incompetence, and Impotence \u{2014} the three core emotional wounds that drive addictive cycles.\n\nBig Ticket Emotions: Five common emotions that lead to acting out: Abandonment, Loneliness, Rejection, Sorrow, and Neglect.\n\nCombined: Use both the Three I's and Big Ticket Emotions together for deeper analysis."))
+                }
 
                 // Mode Toggle
                 RRCard {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text(String(localized: "Session Mode"))
-                            .font(.headline)
-                            .foregroundStyle(Color.rrText)
+                        HStack {
+                            Text(String(localized: "Session Mode"))
+                                .font(.headline)
+                                .foregroundStyle(Color.rrText)
+                            Spacer()
+                            Button {
+                                showModeInfo = true
+                            } label: {
+                                Image(systemName: "info.circle")
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                            .accessibilityLabel(String(localized: "Session mode info"))
+                        }
 
                         Picker(String(localized: "Mode"), selection: $viewModel.selectedMode) {
                             ForEach(BowtieSessionMode.allCases, id: \.rawValue) { mode in
@@ -172,6 +203,11 @@ struct BowtieSessionView: View {
                         }
                         .pickerStyle(.segmented)
                     }
+                }
+                .alert(String(localized: "Session Mode"), isPresented: $showModeInfo) {
+                    Button(String(localized: "OK"), role: .cancel) {}
+                } message: {
+                    Text(String(localized: "Guided: Walks you through each role one at a time, asking what has stirred in the last 48 hours and what's coming. Best for learning the tool.\n\nFreeform: Opens the full Bowtie for self-directed use. Best once you're familiar with the process."))
                 }
 
                 // Start Button
@@ -236,6 +272,7 @@ struct BowtieSessionView: View {
                         onTapInterval: { side, interval in
                             editingMarker = nil
                             pendingMarkerSide = side
+                            pendingMarkerInterval = interval
                             showMarkerForm = true
                         },
                         onTapMarker: { marker in
@@ -286,6 +323,7 @@ struct BowtieSessionView: View {
             onAddMarker: { timeInterval in
                 editingMarker = nil
                 pendingMarkerSide = side
+                pendingMarkerInterval = timeInterval
                 showMarkerForm = true
             },
             onEditMarker: { marker in
