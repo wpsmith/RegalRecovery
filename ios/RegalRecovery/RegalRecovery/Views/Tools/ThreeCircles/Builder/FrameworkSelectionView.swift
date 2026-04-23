@@ -9,7 +9,7 @@ struct FrameworkSelectionView: View {
 
     /// Framework display data with descriptions.
     private let frameworkInfo: [(framework: FrameworkPreference, description: String)] = [
-        (.SAA, "Sexaholics Anonymous"),
+        (.SA, "Sexaholics Anonymous"),
         (.SLAA, "Sex and Love Addicts Anonymous"),
         (.AA, "Alcoholics Anonymous"),
         (.NA, "Narcotics Anonymous"),

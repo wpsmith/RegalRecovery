@@ -290,8 +290,18 @@ private struct WorkTileView: View {
     var body: some View {
         VStack(spacing: 6) {
             ZStack(alignment: .topTrailing) {
-                Image(systemName: tile.icon)
-                    .font(.title2)
+                Group {
+                    if tile.icon.hasPrefix("asset:") {
+                        Image(String(tile.icon.dropFirst(6)))
+                            .renderingMode(.template)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 22, height: 22)
+                    } else {
+                        Image(systemName: tile.icon)
+                            .font(.title2)
+                    }
+                }
                     .foregroundStyle(tileIconColor)
                     .frame(width: 40, height: 40)
                     .background(tileIconBackground)

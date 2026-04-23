@@ -330,19 +330,24 @@ enum KnownTriggerSuggestions {
 
 struct BowtieIconShape: Shape {
     func path(in rect: CGRect) -> Path {
+        let w = rect.width
+        let h = rect.height
+        let pinch: CGFloat = w * 0.06
+
         var path = Path()
-        let midX = rect.midX
-        let midY = rect.midY
-        // Left triangle
+        // Left half: fans out left, pinches at center
         path.move(to: CGPoint(x: rect.minX, y: rect.minY))
-        path.addLine(to: CGPoint(x: midX, y: midY))
+        path.addLine(to: CGPoint(x: rect.midX + pinch, y: rect.midY - pinch))
+        path.addLine(to: CGPoint(x: rect.midX + pinch, y: rect.midY + pinch))
         path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
         path.closeSubpath()
-        // Right triangle
+        // Right half: fans out right, pinches at center
         path.move(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.addLine(to: CGPoint(x: midX, y: midY))
+        path.addLine(to: CGPoint(x: rect.midX - pinch, y: rect.midY - pinch))
+        path.addLine(to: CGPoint(x: rect.midX - pinch, y: rect.midY + pinch))
         path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
         path.closeSubpath()
+        _ = w; _ = h
         return path
     }
 }
@@ -354,6 +359,6 @@ struct BowtieIcon: View {
     var body: some View {
         BowtieIconShape()
             .fill(color)
-            .frame(width: size, height: size)
+            .frame(width: size * 1.4, height: size)
     }
 }

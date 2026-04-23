@@ -77,7 +77,7 @@ enum RecoveryArea: String, Codable, Sendable, CaseIterable {
 
 /// Recovery fellowship or framework (affects terminology).
 enum FrameworkPreference: String, Codable, Sendable, CaseIterable {
-    case SAA
+    case SA
     case SLAA
     case AA
     case NA
@@ -93,7 +93,7 @@ enum FrameworkPreference: String, Codable, Sendable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .SAA: return String(localized: "SAA")
+        case .SA: return String(localized: "SA")
         case .SLAA: return String(localized: "SLAA")
         case .AA: return String(localized: "AA")
         case .NA: return String(localized: "NA")
