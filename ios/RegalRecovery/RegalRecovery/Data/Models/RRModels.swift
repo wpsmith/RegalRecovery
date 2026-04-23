@@ -1488,6 +1488,158 @@ final class RRQuickActionItem {
     }
 }
 
+// MARK: - PCI Profile
+
+@Model
+final class RRPCIProfile {
+
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var isActive: Bool
+    var createdAt: Date
+    var modifiedAt: Date
+
+    @Relationship(deleteRule: .cascade, inverse: \RRPCIProfileVersion.profile)
+    var versions: [RRPCIProfileVersion] = []
+
+    init(
+        id: UUID = UUID(),
+        userId: UUID,
+        isActive: Bool = true,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.userId = userId
+        self.isActive = isActive
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
+// MARK: - PCI Profile Version
+
+@Model
+final class RRPCIProfileVersion {
+
+    @Attribute(.unique) var id: UUID
+    var profileId: UUID
+    var versionNumber: Int
+    var effectiveFrom: Date
+    var dimensionsJSON: String
+    var criticalItemsJSON: String
+    var createdAt: Date
+
+    var profile: RRPCIProfile?
+
+    /// Decoded dimensions from JSON storage.
+    var dimensions: [PCIDimension] {
+        get {
+            guard let data = dimensionsJSON.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([PCIDimension].self, from: data) else {
+                return []
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                dimensionsJSON = json
+            }
+        }
+    }
+
+    /// Decoded critical items from JSON storage.
+    var criticalItems: [PCICriticalItem] {
+        get {
+            guard let data = criticalItemsJSON.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([PCICriticalItem].self, from: data) else {
+                return []
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                criticalItemsJSON = json
+            }
+        }
+    }
+
+    init(
+        id: UUID = UUID(),
+        profileId: UUID,
+        versionNumber: Int,
+        dimensionsJSON: String = "[]",
+        criticalItemsJSON: String = "[]",
+        effectiveFrom: Date = Date(),
+        createdAt: Date = Date()
+    ) {
+        self.id = id
+        self.profileId = profileId
+        self.versionNumber = versionNumber
+        self.dimensionsJSON = dimensionsJSON
+        self.criticalItemsJSON = criticalItemsJSON
+        self.effectiveFrom = effectiveFrom
+        self.createdAt = createdAt
+    }
+}
+
+// MARK: - PCI Daily Entry
+
+@Model
+final class RRPCIDailyEntry {
+
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var date: Date
+    var profileVersionId: UUID
+    var scoresJSON: String
+    var totalScore: Int
+    var isMissedDay: Bool
+    var createdAt: Date
+    var modifiedAt: Date
+
+    /// Decoded scores from JSON storage. Maps indicator ID to Bool (pass/fail).
+    var scores: [String: Bool] {
+        get {
+            guard let data = scoresJSON.data(using: .utf8),
+                  let decoded = try? JSONDecoder().decode([String: Bool].self, from: data) else {
+                return [:]
+            }
+            return decoded
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue),
+               let json = String(data: data, encoding: .utf8) {
+                scoresJSON = json
+            }
+        }
+    }
+
+    init(
+        id: UUID = UUID(),
+        userId: UUID,
+        date: Date,
+        profileVersionId: UUID,
+        scoresJSON: String = "{}",
+        totalScore: Int = 0,
+        isMissedDay: Bool = false,
+        createdAt: Date = Date(),
+        modifiedAt: Date = Date()
+    ) {
+        self.id = id
+        self.userId = userId
+        self.date = Calendar.current.startOfDay(for: date)
+        self.profileVersionId = profileVersionId
+        self.scoresJSON = scoresJSON
+        self.totalScore = totalScore
+        self.isMissedDay = isMissedDay
+        self.createdAt = createdAt
+        self.modifiedAt = modifiedAt
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -1525,6 +1677,9 @@ enum RRModelConfiguration {
         RRDailyScore.self,
         RRVisionStatement.self,
         RRQuickActionItem.self,
+        RRPCIProfile.self,
+        RRPCIProfileVersion.self,
+        RRPCIDailyEntry.self,
     ]
 
     static var schema: Schema {

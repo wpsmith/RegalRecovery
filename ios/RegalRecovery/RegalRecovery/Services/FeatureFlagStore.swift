@@ -117,7 +117,7 @@ final class FeatureFlagStore {
         "activity.phone-calls": true,
         "activity.prayer": true,
         "activity.integrity-inventory": true,
-        "activity.pci": true,
+        "activity.lbi": true,
         "activity.memory-verse": false,
         "activity.acting-in-behaviors": false,
         "activity.voice-journal": false,

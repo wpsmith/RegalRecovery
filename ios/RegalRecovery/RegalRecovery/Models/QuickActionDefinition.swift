@@ -31,7 +31,7 @@ struct QuickActionDefinition: Identifiable, Equatable {
         ActivityType.fanos.rawValue: "FANOS",
         ActivityType.fitnap.rawValue: "FITNAP",
         ActivityType.fasterScale.rawValue: "FASTER",
-        "pci": "PCI",
+        "lbi": "Life Balance",
         ActivityType.weeklyGoals.rawValue: "Goals",
         "nutrition": "Nutrition",
         ActivityType.timeJournal.rawValue: "T30/60",
