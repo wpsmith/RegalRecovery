@@ -227,17 +227,15 @@ class LBISetupViewModel {
     // MARK: - Build Final Data
 
     /// Build final dimensions array for profile version.
+    /// Reuses indicators from allBuiltIndicators so IDs match the critical items.
     func buildDimensions() -> [LBIDimension] {
         let sortedTypes = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
 
         return sortedTypes.compactMap { dimensionType in
-            let texts = dimensionIndicators[dimensionType] ?? []
-            guard !texts.isEmpty else { return nil }
-
-            let indicators = texts.map { text in
-                LBIIndicator(text: text, isPositive: dimensionType.isPositiveCategory)
-            }
-
+            let indicators = allBuiltIndicators
+                .filter { $0.dimensionType == dimensionType }
+                .map { $0.indicator }
+            guard !indicators.isEmpty else { return nil }
             return LBIDimension(dimensionType: dimensionType, indicators: indicators)
         }
     }

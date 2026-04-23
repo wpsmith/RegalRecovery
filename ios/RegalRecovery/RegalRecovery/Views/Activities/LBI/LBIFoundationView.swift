@@ -1,5 +1,3 @@
-// Views/Activities/LBI/LBIFoundationView.swift
-
 import SwiftUI
 import SwiftData
 
@@ -12,6 +10,9 @@ struct LBIFoundationView: View {
     @State private var selectedTab = 0
     @State private var hasCompletedSetup = false
     @State private var didCheck = false
+    @State private var viewModel = LBIProfileEditViewModel()
+    @State private var showEditIndicators = false
+    @State private var showEditCritical = false
 
     var body: some View {
         Group {
@@ -22,7 +23,6 @@ struct LBIFoundationView: View {
                 LBISetupFlowView()
             } else {
                 VStack(spacing: 0) {
-                    // Segmented picker
                     Picker("", selection: $selectedTab) {
                         Text("Indicators").tag(0)
                         Text("Trends").tag(1)
@@ -32,26 +32,158 @@ struct LBIFoundationView: View {
                     .padding(.top, 8)
 
                     TabView(selection: $selectedTab) {
-                        // Tab 0: Indicators (profile edit)
-                        LBIProfileEditView()
+                        indicatorsTab
                             .tag(0)
 
-                        // Tab 1: Trends
-                        ScrollView {
-                            VStack(spacing: 24) {
-                                LBITrendChartView(entries: lbiEntries)
-                                LBICorrelationView(pciEntries: lbiEntries, fasterEntries: fasterEntries)
-                            }
-                            .padding()
-                            .padding(.bottom, 80)
-                        }
-                        .tag(1)
+                        trendsTab
+                            .tag(1)
                     }
                     .tabViewStyle(.page(indexDisplayMode: .never))
                 }
                 .navigationTitle("Life Balance")
+                .toolbar {
+                    if selectedTab == 0 {
+                        ToolbarItem(placement: .primaryAction) {
+                            Menu {
+                                Button {
+                                    showEditIndicators = true
+                                } label: {
+                                    Label("Edit Indicators", systemImage: "pencil")
+                                }
+                                Button {
+                                    showEditCritical = true
+                                } label: {
+                                    Label("Edit Check-In Items", systemImage: "star")
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
+                            }
+                        }
+                    }
+                }
+                .sheet(isPresented: $showEditIndicators) {
+                    LBIProfileEditView()
+                        .onDisappear { reloadProfile() }
+                }
+                .sheet(isPresented: $showEditCritical) {
+                    LBICriticalItemEditView()
+                        .onDisappear { reloadProfile() }
+                }
+                .onAppear { reloadProfile() }
             }
         }
+    }
+
+    // MARK: - Indicators Tab (read-only with stars)
+
+    private var indicatorsTab: some View {
+        List {
+            ForEach(sortedDimensions, id: \.dimensionType) { dimension in
+                Section {
+                    ForEach(dimension.indicators) { indicator in
+                        HStack(spacing: 12) {
+                            if viewModel.selectedCriticalIds.contains(indicator.id) {
+                                Image(systemName: "star.fill")
+                                    .font(.callout)
+                                    .foregroundStyle(.orange)
+                            } else {
+                                Image(systemName: "circle.fill")
+                                    .font(.system(size: 6))
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                    .frame(width: 20)
+                            }
+
+                            Text(indicator.text)
+                                .font(RRFont.body)
+                                .foregroundStyle(Color.rrText)
+                        }
+                    }
+                } header: {
+                    HStack(spacing: 8) {
+                        Image(systemName: dimension.dimensionType.icon)
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrPrimary)
+                        Text(dimension.dimensionType.displayName)
+                    }
+                }
+            }
+
+            if !viewModel.criticalItems.isEmpty {
+                Section {
+                    ForEach(viewModel.criticalItems.sorted(by: { $0.sortOrder < $1.sortOrder })) { item in
+                        HStack(spacing: 12) {
+                            Image(systemName: "star.fill")
+                                .font(.callout)
+                                .foregroundStyle(.orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.displayText)
+                                    .font(RRFont.body)
+                                    .foregroundStyle(Color.rrText)
+                                Text(item.dimensionType.shortName)
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                        }
+                    }
+                } header: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "star.fill")
+                            .font(RRFont.caption)
+                            .foregroundStyle(.orange)
+                        Text("Daily Check-In Items (7)")
+                    }
+                }
+            }
+        }
+        .listStyle(.insetGrouped)
+        .contentMargins(.bottom, 80)
+    }
+
+    // MARK: - Trends Tab
+
+    private var trendsTab: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                LBITrendChartView(entries: Array(lbiEntries), setupDate: profileSetupDate)
+                LBICorrelationView(pciEntries: Array(lbiEntries), fasterEntries: Array(fasterEntries))
+            }
+            .padding()
+            .padding(.bottom, 80)
+        }
+    }
+
+    private var entriesSinceSetup: [RRLBIDailyEntry] {
+        guard let setupDate = profileSetupDate else { return [] }
+        return lbiEntries.filter { $0.date >= setupDate }
+    }
+
+    private var profileSetupDate: Date? {
+        guard let userId = users.first?.id else { return nil }
+        let uid = userId
+        let desc = FetchDescriptor<RRLBIProfile>(
+            predicate: #Predicate { $0.userId == uid && $0.isActive == true }
+        )
+        guard let profile = try? modelContext.fetch(desc).first else { return nil }
+        let pid = profile.id
+        let vDesc = FetchDescriptor<RRLBIProfileVersion>(
+            predicate: #Predicate { $0.profileId == pid && $0.versionNumber > 0 },
+            sortBy: [SortDescriptor(\.versionNumber)]
+        )
+        guard let firstVersion = try? modelContext.fetch(vDesc).first else { return nil }
+        return Calendar.current.startOfDay(for: firstVersion.effectiveFrom)
+    }
+
+    // MARK: - Helpers
+
+    private var sortedDimensions: [LBIDimension] {
+        viewModel.dimensions
+            .filter { !$0.indicators.isEmpty }
+            .sorted { $0.dimensionType.sortOrder < $1.dimensionType.sortOrder }
+    }
+
+    private func reloadProfile() {
+        guard let userId = users.first?.id else { return }
+        viewModel.load(context: modelContext, userId: userId)
     }
 
     private func checkSetupStatus() {
