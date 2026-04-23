@@ -270,6 +270,18 @@
 		10006031 /* BowtieOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006031 /* BowtieOnboardingView.swift */; };
 		10006020 /* PPPEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006020 /* PPPEntryViewModel.swift */; };
 		10006021 /* PPPFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006021 /* PPPFormView.swift */; };
+		10006005 /* MotivationTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006005 /* MotivationTypes.swift */; };
+		10006006 /* RRMotivationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006006 /* RRMotivationModels.swift */; };
+		10006060 /* MotivationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006060 /* MotivationRepository.swift */; };
+		10006061 /* SwiftDataMotivationRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006061 /* SwiftDataMotivationRepository.swift */; };
+		10006062 /* MotivationSurfacingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006062 /* MotivationSurfacingService.swift */; };
+		10006070 /* MotivationLibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006070 /* MotivationLibraryViewModel.swift */; };
+		10006071 /* MotivationDiscoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006071 /* MotivationDiscoveryViewModel.swift */; };
+		10006080 /* MotivationCaptureSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006080 /* MotivationCaptureSheet.swift */; };
+		10006081 /* MotivationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006081 /* MotivationDetailView.swift */; };
+		10006082 /* MotivationDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006082 /* MotivationDiscoveryView.swift */; };
+		10006083 /* MotivationLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006083 /* MotivationLibraryView.swift */; };
+		10006100 /* MotivationSurfacingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006100 /* MotivationSurfacingCard.swift */; };
 		10005002 /* VisionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005002 /* VisionWizardViewModel.swift */; };
 		10005003 /* VisionWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005003 /* VisionWizardView.swift */; };
 		10005004 /* VisionPromptsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005004 /* VisionPromptsStepView.swift */; };
@@ -583,6 +595,18 @@
 		20006052 /* BowtieInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieInsightsView.swift; sourceTree = "<group>"; };
 		20006053 /* BowtieHistoryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieHistoryViewModelTests.swift; sourceTree = "<group>"; };
 		20006032 /* BowtieOnboardingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BowtieOnboardingViewModelTests.swift; sourceTree = "<group>"; };
+		20006005 /* MotivationTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationTypes.swift; sourceTree = "<group>"; };
+		20006006 /* RRMotivationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RRMotivationModels.swift; sourceTree = "<group>"; };
+		20006060 /* MotivationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationRepository.swift; sourceTree = "<group>"; };
+		20006061 /* SwiftDataMotivationRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftDataMotivationRepository.swift; sourceTree = "<group>"; };
+		20006062 /* MotivationSurfacingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingService.swift; sourceTree = "<group>"; };
+		20006070 /* MotivationLibraryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryViewModel.swift; sourceTree = "<group>"; };
+		20006071 /* MotivationDiscoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryViewModel.swift; sourceTree = "<group>"; };
+		20006080 /* MotivationCaptureSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationCaptureSheet.swift; sourceTree = "<group>"; };
+		20006081 /* MotivationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDetailView.swift; sourceTree = "<group>"; };
+		20006082 /* MotivationDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryView.swift; sourceTree = "<group>"; };
+		20006083 /* MotivationLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryView.swift; sourceTree = "<group>"; };
+		20006100 /* MotivationSurfacingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingCard.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
 		20005003 /* VisionWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardView.swift; sourceTree = "<group>"; };
 		20005004 /* VisionPromptsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPromptsStepView.swift; sourceTree = "<group>"; };
@@ -689,6 +713,7 @@
 				20005001 /* VisionTypes.swift */,
 				20007001 /* QuickActionDefinition.swift */,
 				20006000 /* BowtieTypes.swift */,
+				20006005 /* MotivationTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -720,8 +745,8 @@
 				20000990 /* SeedPersonas.swift */,
 				20000991 /* SeedPersonaData.swift */,
 				20000011 /* SwiftDataRepositories.swift */,
-				20006011 /* MotivationRepository.swift */,
-				20006012 /* SwiftDataMotivationRepository.swift */,
+				20006060 /* MotivationRepository.swift */,
+				20006061 /* SwiftDataMotivationRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -746,6 +771,7 @@
 				20000951 /* AffirmationsAPIClient.swift */,
 				20009001 /* ThreeCirclesAPIClient.swift */,
 				20000517 /* PCIMissedDayService.swift */,
+				20006062 /* MotivationSurfacingService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -829,6 +855,8 @@
 				20005002 /* VisionWizardViewModel.swift */,
 				20007003 /* QuickActionsViewModel.swift */,
 				50006001 /* Bowtie */,
+				20006070 /* MotivationLibraryViewModel.swift */,
+				20006071 /* MotivationDiscoveryViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -983,6 +1011,7 @@
 				20000090 /* StreakHeroCard.swift */,
 				20005011 /* VisionCard.swift */,
 				20006004 /* QuickActionsCustomizeView.swift */,
+				20006100 /* MotivationSurfacingCard.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -1031,6 +1060,7 @@
 				20000107 /* PanicButtonView.swift */,
 				50001001 /* ThreeCircles */,
 				50005001 /* Vision */,
+				50006004 /* Motivations */,
 				20000108 /* ThreeCirclesView.swift */,
 				20000109 /* ToolsView.swift */,
 			);
@@ -1275,6 +1305,18 @@
 			path = Vision;
 			sourceTree = "<group>";
 		};
+		50006004 /* Motivations */ = {
+			isa = PBXGroup;
+			children = (
+				20006080 /* MotivationCaptureSheet.swift */,
+				20006081 /* MotivationDetailView.swift */,
+				20006082 /* MotivationDiscoveryView.swift */,
+				20006083 /* MotivationLibraryView.swift */,
+				20006100 /* MotivationSurfacingCard.swift */,
+			);
+			path = Motivations;
+			sourceTree = "<group>";
+		};
 		50007001 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -1387,6 +1429,15 @@
 				10000501 /* RRTimeJournalEntry.swift in Sources */,
 				10006005 /* MotivationTypes.swift in Sources */,
 				10006006 /* RRMotivationModels.swift in Sources */,
+				10006060 /* MotivationRepository.swift in Sources */,
+				10006061 /* SwiftDataMotivationRepository.swift in Sources */,
+				10006062 /* MotivationSurfacingService.swift in Sources */,
+				10006070 /* MotivationLibraryViewModel.swift in Sources */,
+				10006071 /* MotivationDiscoveryViewModel.swift in Sources */,
+				10006080 /* MotivationCaptureSheet.swift in Sources */,
+				10006081 /* MotivationDetailView.swift in Sources */,
+				10006082 /* MotivationDiscoveryView.swift in Sources */,
+				10006083 /* MotivationLibraryView.swift in Sources */,
 				10006100 /* MotivationSurfacingCard.swift in Sources */,
 				10000510 /* TimeJournalDailyView.swift in Sources */,
 				10000511 /* TimeJournalHeaderView.swift in Sources */,
