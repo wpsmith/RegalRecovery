@@ -91,6 +91,16 @@ class RecoveryWorkViewModel {
                 activityTypeKey: "threeCircles"
             ),
             WorkTileItem(
+                id: "foundation.triggers",
+                title: String(localized: "Triggers"),
+                icon: "bolt.trianglebadge.exclamationmark.fill",
+                iconColor: Color(red: 0.345, green: 0.337, blue: 0.839),
+                category: .foundationTools,
+                featureFlagKey: "feature.triggers",
+                implemented: true,
+                activityTypeKey: "triggerLibrary"
+            ),
+            WorkTileItem(
                 id: "foundation.relapse-prevention",
                 title: String(localized: "Relapse Prevention"),
                 icon: "doc.text.magnifyingglass",

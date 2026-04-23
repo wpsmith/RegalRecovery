@@ -201,8 +201,8 @@
 		10000997 /* SetupMyPlanCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000997 /* SetupMyPlanCard.swift */; };
 		10000998 /* AddictionSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000998 /* AddictionSetupView.swift */; };
 		10000999 /* MotivationSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000999 /* MotivationSetupView.swift */; };
-		10001000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001000 /* ThreeCirclesTypes.swift */; };
-		10001001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001001 /* ThreeCirclesAPIClient.swift */; };
+		10009000 /* ThreeCirclesTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009000 /* ThreeCirclesTypes.swift */; };
+		10009001 /* ThreeCirclesAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20009001 /* ThreeCirclesAPIClient.swift */; };
 		10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001003 /* ThreeCirclesBuilderViewModel.swift */; };
 		10001004 /* CircleSetDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001004 /* CircleSetDetailViewModel.swift */; };
 		10001005 /* PatternViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001005 /* PatternViewModel.swift */; };
@@ -537,8 +537,8 @@
 		20000997 /* SetupMyPlanCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupMyPlanCard.swift; sourceTree = "<group>"; };
 		20000998 /* AddictionSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddictionSetupView.swift; sourceTree = "<group>"; };
 		20000999 /* MotivationSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSetupView.swift; sourceTree = "<group>"; };
-		20001000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
-		20001001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
+		20009000 /* ThreeCirclesTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesTypes.swift; sourceTree = "<group>"; };
+		20009001 /* ThreeCirclesAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesAPIClient.swift; sourceTree = "<group>"; };
 		20001003 /* ThreeCirclesBuilderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreeCirclesBuilderViewModel.swift; sourceTree = "<group>"; };
 		20001004 /* CircleSetDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircleSetDetailViewModel.swift; sourceTree = "<group>"; };
 		20001005 /* PatternViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternViewModel.swift; sourceTree = "<group>"; };
@@ -750,7 +750,7 @@
 				20000950 /* AffirmationTypes.swift */,
 				20000900 /* GratitudeTypes.swift */,
 				20000006 /* MockData.swift */,
-				20001000 /* ThreeCirclesTypes.swift */,
+				20009000 /* ThreeCirclesTypes.swift */,
 				20000500 /* TimeJournalTypes.swift */,
 				20000007 /* Types.swift */,
 				20000514 /* PCITypes.swift */,
@@ -822,7 +822,7 @@
 				20001204 /* TextToSpeechService.swift */,
 				20001205 /* LocationService.swift */,
 				20000951 /* AffirmationsAPIClient.swift */,
-				20001001 /* ThreeCirclesAPIClient.swift */,
+				20009001 /* ThreeCirclesAPIClient.swift */,
 				20000517 /* PCIMissedDayService.swift */,
 				20006062 /* MotivationSurfacingService.swift */,
 			);
@@ -1702,8 +1702,8 @@
 				10000909 /* GratitudeSharingService.swift in Sources */,
 				10000950 /* AffirmationTypes.swift in Sources */,
 				10000951 /* AffirmationsAPIClient.swift in Sources */,
-				10001000 /* ThreeCirclesTypes.swift in Sources */,
-				10001001 /* ThreeCirclesAPIClient.swift in Sources */,
+				10009000 /* ThreeCirclesTypes.swift in Sources */,
+				10009001 /* ThreeCirclesAPIClient.swift in Sources */,
 				10001003 /* ThreeCirclesBuilderViewModel.swift in Sources */,
 				10001004 /* CircleSetDetailViewModel.swift in Sources */,
 				10001005 /* PatternViewModel.swift in Sources */,

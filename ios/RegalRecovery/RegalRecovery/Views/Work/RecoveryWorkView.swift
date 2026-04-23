@@ -259,6 +259,8 @@ struct RecoveryWorkView: View {
             VisionHubView()
         case "urgeSurfingConfig":
             UrgeSurfingConfigView()
+        case "triggerLibrary":
+            TriggerLibraryView()
         case "threeCircles":
             ThreeCirclesView()
         case "analytics":
