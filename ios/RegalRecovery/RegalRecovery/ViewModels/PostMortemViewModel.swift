@@ -42,6 +42,17 @@ struct FreeFormEntry: Identifiable, Equatable {
     var text = ""
 }
 
+struct HourlySlot: Identifiable, Equatable {
+    let id = UUID()
+    let hour: Int              // 0-23
+    let displayTime: String    // e.g., "6:00 AM", "2:00 PM"
+    var activity: String       // What was happening
+    var details: String        // Additional details
+    var isPreFilled: Bool      // True if populated from Time Journal
+    var hasActivity: Bool      // True if any RRActivity exists at this hour
+    var activityName: String?  // Name of the activity if one exists
+}
+
 struct ShareRecipient: Identifiable, Equatable {
     let id = UUID()
     var contactId = ""
@@ -126,10 +137,8 @@ class PostMortemViewModel {
 
     // MARK: - Step 2: Throughout the Day (work backwards)
 
-    var timeBlocksForDay: [RRTimeBlock] = []  // Loaded from SwiftData
-    var activitiesForDay: [RRActivity] = []   // Loaded from SwiftData
-    var throughoutDayText = ""  // User's "What happened before that?" reflection
-    var freeFormEntries: [FreeFormEntry] = []  // User-added timeline entries
+    var hourlySlots: [HourlySlot] = []
+    var hasTimeJournalData: Bool = false  // Whether any slots were pre-filled
 
     // MARK: - Step 3: Day Before
 
@@ -137,6 +146,7 @@ class PostMortemViewModel {
     var dayBeforeText = ""
     var dayBeforeMoodRating: Int = 5
     var dayBeforeUnresolvedConflicts = ""
+    var dayBeforeScore: RRDailyScore?  // Recovery score for the day before
 
     // MARK: - Step 4: Build-Up
 
@@ -263,7 +273,7 @@ class PostMortemViewModel {
         if !actingOutDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             sections.append("actingOut")
         }
-        if !throughoutDayText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !timeBlocksForDay.isEmpty || !activitiesForDay.isEmpty {
+        if hourlySlots.contains(where: { !$0.activity.isEmpty || !$0.details.isEmpty }) {
             sections.append("throughoutTheDay")
         }
         if !dayBeforeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -335,17 +345,29 @@ class PostMortemViewModel {
 
     @MainActor
     func loadDayContext(context: ModelContext, userId: UUID, date: Date) {
-        let startOfDay = Calendar.current.startOfDay(for: date)
-        let endOfDay = Calendar.current.date(byAdding: .day, value: 1, to: startOfDay)!
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
 
-        // Load time blocks for the day
-        let timeBlockDescriptor = FetchDescriptor<RRTimeBlock>(
-            predicate: #Predicate { block in
-                block.userId == userId && block.date >= startOfDay && block.date < endOfDay
-            },
-            sortBy: [SortDescriptor(\.startHour), SortDescriptor(\.startMinute)]
+        // Calculate the hour of the acting-out timestamp
+        let actingOutHour = calendar.component(.hour, from: timestamp)
+
+        // Load Time Journal entries for the day
+        let journalDescriptor = FetchDescriptor<RRTimeJournalEntry>(
+            predicate: #Predicate { entry in
+                entry.userId == userId && entry.date >= startOfDay && entry.date < endOfDay
+            }
         )
-        timeBlocksForDay = (try? context.fetch(timeBlockDescriptor)) ?? []
+        let journalEntries = (try? context.fetch(journalDescriptor)) ?? []
+
+        // Create a map of hour -> journal entry (assuming T60 mode for hourly slots)
+        var journalByHour: [Int: RRTimeJournalEntry] = [:]
+        for entry in journalEntries {
+            // For T60 mode, slotIndex directly maps to hour
+            if entry.mode == TimeJournalMode.t60.rawValue && entry.slotIndex <= 23 {
+                journalByHour[entry.slotIndex] = entry
+            }
+        }
 
         // Load activities for the day
         let activityDescriptor = FetchDescriptor<RRActivity>(
@@ -354,7 +376,58 @@ class PostMortemViewModel {
             },
             sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
         )
-        activitiesForDay = (try? context.fetch(activityDescriptor)) ?? []
+        let activities = (try? context.fetch(activityDescriptor)) ?? []
+
+        // Create a map of hour -> activities in that hour
+        var activitiesByHour: [Int: [RRActivity]] = [:]
+        for activity in activities {
+            let hour = calendar.component(.hour, from: activity.timestamp)
+            activitiesByHour[hour, default: []].append(activity)
+        }
+
+        // Generate hourly slots from midnight to acting-out hour (inclusive)
+        var slots: [HourlySlot] = []
+        let hourFormatter = DateFormatter()
+        hourFormatter.dateFormat = "h:00 a"
+
+        var anyPreFilled = false
+
+        for hour in 0...actingOutHour {
+            // Create a date for this hour to format the display time
+            var components = calendar.dateComponents([.year, .month, .day], from: date)
+            components.hour = hour
+            components.minute = 0
+            let hourDate = calendar.date(from: components) ?? date
+
+            let displayTime = hourFormatter.string(from: hourDate)
+
+            // Check if we have a Time Journal entry for this hour
+            let journalEntry = journalByHour[hour]
+            let isPreFilled = journalEntry != nil && !journalEntry!.activity.isEmpty
+            if isPreFilled {
+                anyPreFilled = true
+            }
+
+            // Check if we have any activities in this hour
+            let hourActivities = activitiesByHour[hour] ?? []
+            let hasActivity = !hourActivities.isEmpty
+            let activityName = hourActivities.first.flatMap { activity in
+                DailyEligibleActivity.all.first(where: { $0.activityType == activity.activityType })?.displayName
+            }
+
+            slots.append(HourlySlot(
+                hour: hour,
+                displayTime: displayTime,
+                activity: journalEntry?.activity ?? "",
+                details: "",  // User can fill this in
+                isPreFilled: isPreFilled,
+                hasActivity: hasActivity,
+                activityName: activityName
+            ))
+        }
+
+        hourlySlots = slots
+        hasTimeJournalData = anyPreFilled
     }
 
     @MainActor
@@ -406,6 +479,14 @@ class PostMortemViewModel {
         }
 
         dayBeforeActivities = records.sorted { !$0.wasCompleted && $1.wasCompleted }
+
+        // Load daily score for the day before
+        let scoreDescriptor = FetchDescriptor<RRDailyScore>(
+            predicate: #Predicate { score in
+                score.userId == userId && score.date >= startOfDayBefore && score.date < endOfDayBefore
+            }
+        )
+        dayBeforeScore = try? context.fetch(scoreDescriptor).first
     }
 
     @MainActor
@@ -616,12 +697,7 @@ class PostMortemViewModel {
     }
 
     // MARK: - Timeline Management
-
-    func addFreeFormEntry(time: Date, description: String) {
-        let timeFormatter = DateFormatter()
-        timeFormatter.timeStyle = .short
-        freeFormEntries.append(FreeFormEntry(time: timeFormatter.string(from: time), text: description))
-    }
+    // Note: Hourly slots are directly bindable; no need for addFreeFormEntry
 
     // MARK: - Action Plan
 
@@ -754,9 +830,7 @@ class PostMortemViewModel {
                 dayBeforeUnresolvedConflicts = dayBefore.unresolvedConflicts ?? ""
             }
 
-            if let throughoutDay = sections.throughoutTheDay {
-                throughoutDayText = throughoutDay.freeFormEntries?.first?.text ?? ""
-            }
+            // Note: hourlySlots are not persisted in sections payload; they're regenerated from loadDayContext
 
             if let buildUp = sections.buildUp {
                 firstNoticed = buildUp.firstNoticed ?? ""
@@ -982,11 +1056,14 @@ class PostMortemViewModel {
                 unresolvedConflicts: dayBeforeUnresolvedConflicts.isEmpty ? nil : dayBeforeUnresolvedConflicts
             ),
             morning: nil,  // Removed: morning section no longer exists
-            throughoutTheDay: throughoutDayText.isEmpty ? nil : ThroughoutTheDaySectionPayload(
+            throughoutTheDay: hourlySlots.isEmpty ? nil : ThroughoutTheDaySectionPayload(
                 timeBlocks: nil,  // Time blocks are loaded from RRTimeBlock, not user-entered
-                freeFormEntries: throughoutDayText.isEmpty ? nil : [
-                    FreeFormEntryPayload(time: nil, text: throughoutDayText)
-                ]
+                freeFormEntries: hourlySlots.compactMap { slot in
+                    guard !slot.activity.isEmpty || !slot.details.isEmpty else { return nil }
+                    let timeText = "\(slot.displayTime): \(slot.activity)"
+                    let fullText = slot.details.isEmpty ? slot.activity : "\(slot.activity) - \(slot.details)"
+                    return FreeFormEntryPayload(time: slot.displayTime, text: fullText)
+                }
             ),
             buildUp: firstNoticed.isEmpty ? nil : BuildUpSectionPayload(
                 firstNoticed: firstNoticed,

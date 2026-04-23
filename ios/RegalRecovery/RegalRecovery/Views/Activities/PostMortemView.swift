@@ -393,171 +393,156 @@ private struct DescribeEventStepView: View {
 
 private struct ThroughoutTheDayStepView: View {
     @Bindable var viewModel: PostMortemViewModel
-    @State private var showAddEntry = false
-    @State private var newEntryTime = Date()
-    @State private var newEntryDescription = ""
 
     var body: some View {
         VStack(spacing: 16) {
             RRCard {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Let's Walk Through Your Day")
+                    Text("Walk Through Your Day")
                         .font(RRFont.title3)
                         .foregroundStyle(Color.rrText)
 
-                    Text("Working backwards from what happened...")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                        .italic()
+                    if viewModel.hasTimeJournalData {
+                        Text("Your Time Journal entries are shown below. Add more details about what was happening.")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                            .italic()
+                    } else {
+                        Text("Fill in each hour leading up to the event. What were you doing? How were you feeling?")
+                            .font(RRFont.caption)
+                            .foregroundStyle(Color.rrTextSecondary)
+                            .italic()
+                    }
                 }
             }
             .padding(.horizontal)
 
-            // Timeline view showing time journal and activities
-            if !viewModel.timeBlocksForDay.isEmpty || !viewModel.activitiesForDay.isEmpty {
-                VStack(spacing: 12) {
-                    ForEach(viewModel.timeBlocksForDay.sorted(by: { $0.date > $1.date }), id: \.id) { block in
-                        TimelineEntryCard(
-                            time: block.date,
-                            title: block.activity,
-                            detail: block.need,
-                            icon: "clock.fill",
-                            color: .purple
-                        )
-                        .padding(.horizontal)
-                    }
+            // Hourly slots in reverse chronological order
+            if !viewModel.hourlySlots.isEmpty {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ForEach(Array(viewModel.hourlySlots.enumerated()), id: \.element.id) { index, _ in
+                            HourlySlotRow(slot: slotBinding(for: index))
 
-                    ForEach(viewModel.activitiesForDay.sorted(by: { $0.date > $1.date }), id: \.id) { activity in
-                        let eligibleActivity = DailyEligibleActivity.all.first(where: { $0.activityType == activity.activityType })
-                        TimelineEntryCard(
-                            time: activity.date,
-                            title: eligibleActivity?.displayName ?? activity.activityType,
-                            detail: "",
-                            icon: eligibleActivity?.icon ?? "circle.fill",
-                            color: eligibleActivity?.section.iconColor ?? .rrPrimary
-                        )
-                        .padding(.horizontal)
+                            // Connecting line between slots (except after last one)
+                            if index < viewModel.hourlySlots.count - 1 {
+                                Rectangle()
+                                    .fill(Color.rrTextSecondary.opacity(0.2))
+                                    .frame(width: 2, height: 12)
+                                    .offset(x: 24)
+                            }
+                        }
                     }
-                }
-            }
-
-            // Free-form entries
-            if !viewModel.freeFormEntries.isEmpty {
-                ForEach(viewModel.freeFormEntries, id: \.id) { entry in
-                    TimelineEntryCard(
-                        time: entry.time,
-                        title: "Custom Entry",
-                        detail: entry.text,
-                        icon: "pencil.circle.fill",
-                        color: .rrSecondary
-                    )
                     .padding(.horizontal)
-                }
-            }
-
-            RRCard {
-                VStack(spacing: 12) {
-                    Button {
-                        showAddEntry = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text("Add Timeline Entry")
-                        }
-                        .font(RRFont.body)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(Color.rrPrimary.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    }
-
-                    Text("What happened before that?")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                        .italic()
-                }
-            }
-            .padding(.horizontal)
-        }
-        .sheet(isPresented: $showAddEntry) {
-            NavigationStack {
-                Form {
-                    Section("Time") {
-                        DatePicker("When", selection: $newEntryTime, displayedComponents: [.hourAndMinute])
-                    }
-
-                    Section("Description") {
-                        TextEditor(text: $newEntryDescription)
-                            .frame(minHeight: 100)
-                    }
-                }
-                .navigationTitle("Add Entry")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
-                            showAddEntry = false
-                            newEntryDescription = ""
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Add") {
-                            viewModel.addFreeFormEntry(time: newEntryTime, description: newEntryDescription)
-                            showAddEntry = false
-                            newEntryDescription = ""
-                        }
-                        .disabled(newEntryDescription.isEmpty)
-                    }
                 }
             }
         }
     }
+
+    private func slotBinding(for index: Int) -> Binding<HourlySlot> {
+        Binding(
+            get: { viewModel.hourlySlots[index] },
+            set: { viewModel.hourlySlots[index] = $0 }
+        )
+    }
 }
 
-private struct TimelineEntryCard: View {
-    let time: Any  // Can be Date or String
-    let title: String
-    let detail: String
-    let icon: String
-    let color: Color
+private struct HourlySlotRow: View {
+    @Binding var slot: HourlySlot
 
     var body: some View {
-        RRCard {
+        VStack(spacing: 0) {
             HStack(alignment: .top, spacing: 12) {
-                VStack(spacing: 4) {
-                    Image(systemName: icon)
-                        .font(.title3)
-                        .foregroundStyle(color)
+                // Timeline dot
+                Circle()
+                    .fill(dotColor)
+                    .frame(width: 8, height: 8)
+                    .padding(.top, 6)
 
-                    if let dateTime = time as? Date {
-                        Text(dateTime.formatted(date: .omitted, time: .shortened))
-                            .font(RRFont.caption2)
-                            .foregroundStyle(Color.rrTextSecondary)
-                    } else if let stringTime = time as? String {
-                        Text(stringTime)
-                            .font(RRFont.caption2)
-                            .foregroundStyle(Color.rrTextSecondary)
+                VStack(alignment: .leading, spacing: 8) {
+                    // Time and badges
+                    HStack(spacing: 8) {
+                        Text(slot.displayTime)
+                            .font(RRFont.body)
+                            .fontWeight(.bold)
+                            .foregroundStyle(Color.rrText)
+
+                        if slot.isPreFilled {
+                            Text("From Time Journal")
+                                .font(RRFont.caption2)
+                                .foregroundStyle(Color.rrSuccess)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(Color.rrSuccess.opacity(0.1))
+                                .clipShape(Capsule())
+                        }
+
+                        Spacer()
+                    }
+
+                    // Activity field (editable even if pre-filled)
+                    if slot.isPreFilled {
+                        TextField("Activity", text: $slot.activity)
+                            .font(RRFont.body)
+                            .padding(8)
+                            .background(Color.rrTextSecondary.opacity(0.1))
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    } else {
+                        TextField("What were you doing?", text: $slot.activity)
+                            .font(RRFont.body)
+                            .padding(8)
+                            .background(Color.rrBackground)
+                            .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    }
+
+                    // Details TextEditor
+                    TextEditor(text: $slot.details)
+                        .font(RRFont.body)
+                        .frame(minHeight: 60)
+                        .scrollContentBackground(.hidden)
+                        .padding(8)
+                        .background(Color.rrBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        .overlay(
+                            Group {
+                                if slot.details.isEmpty {
+                                    Text("What was happening? How were you feeling?")
+                                        .font(RRFont.body)
+                                        .foregroundStyle(Color.rrTextSecondary.opacity(0.6))
+                                        .padding(12)
+                                        .allowsHitTesting(false)
+                                }
+                            },
+                            alignment: .topLeading
+                        )
+
+                    // Recovery activity badge
+                    if slot.hasActivity, let activityName = slot.activityName {
+                        HStack(spacing: 6) {
+                            Image(systemName: "figure.run")
+                                .font(.caption2)
+                            Text(activityName)
+                                .font(RRFont.caption)
+                        }
+                        .foregroundStyle(Color.rrPrimary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.rrPrimary.opacity(0.1))
+                        .clipShape(Capsule())
                     }
                 }
-                .frame(width: 60)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
-                        .font(RRFont.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrText)
-
-                    if !detail.isEmpty {
-                        Text(detail)
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
-                    }
-                }
-
-                Spacer()
             }
+            .padding(.vertical, 8)
+        }
+    }
+
+    private var dotColor: Color {
+        if slot.isPreFilled {
+            return Color.rrSuccess
+        } else if slot.hasActivity {
+            return Color.rrPrimary
+        } else {
+            return Color.rrTextSecondary.opacity(0.4)
         }
     }
 }
@@ -579,6 +564,56 @@ private struct DayBeforeStepView: View {
                         .font(RRFont.caption)
                         .foregroundStyle(Color.rrTextSecondary)
                         .italic()
+                }
+            }
+            .padding(.horizontal)
+
+            // Recovery Score
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Recovery Score")
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrText)
+
+                    if let score = viewModel.dayBeforeScore {
+                        VStack(spacing: 8) {
+                            // Progress bar
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    // Background track
+                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                        .fill(Color.rrTextSecondary.opacity(0.2))
+                                        .frame(height: 12)
+
+                                    // Filled portion
+                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                        .fill(scoreColor(for: score.score))
+                                        .frame(width: geometry.size.width * CGFloat(score.score) / 100.0, height: 12)
+                                }
+                            }
+                            .frame(height: 12)
+
+                            // Score text
+                            HStack(spacing: 4) {
+                                Text("\(score.score)/100")
+                                    .font(RRFont.body)
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(scoreColor(for: score.score))
+
+                                Text("•")
+                                    .foregroundStyle(Color.rrTextSecondary)
+
+                                Text("\(score.totalCompleted) of \(score.totalPlanned) activities completed")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                        }
+                    } else {
+                        Text("No recovery score recorded for the day before.")
+                            .font(RRFont.body)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
                 }
             }
             .padding(.horizontal)
@@ -649,6 +684,19 @@ private struct DayBeforeStepView: View {
                 }
             }
             .padding(.horizontal)
+        }
+    }
+
+    private func scoreColor(for score: Int) -> Color {
+        switch score {
+        case 85...100:
+            return Color.rrSuccess
+        case 70...84:
+            return Color.rrPrimary
+        case 50...69:
+            return .orange
+        default:
+            return Color.rrDestructive
         }
     }
 }
