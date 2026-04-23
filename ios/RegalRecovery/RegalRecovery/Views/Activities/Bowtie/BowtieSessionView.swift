@@ -117,6 +117,11 @@ struct BowtieSessionView: View {
         viewModel.availableRoles.filter { viewModel.selectedRoleIds.contains($0.id) }
     }
 
+    private var unusedSuggestions: [String] {
+        let existingLabels = Set(viewModel.availableRoles.map(\.label))
+        return RoleSuggestions.defaults.filter { !existingLabels.contains($0) }
+    }
+
     // MARK: - Setup View
 
     private var setupView: some View {
@@ -133,37 +138,31 @@ struct BowtieSessionView: View {
                             .font(.subheadline)
                             .foregroundStyle(Color.rrTextSecondary)
 
-                        if viewModel.availableRoles.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(String(localized: "Tap roles to add them:"))
-                                    .font(.subheadline)
-                                    .foregroundStyle(Color.rrTextSecondary)
-                                FlowLayout(spacing: 8) {
-                                    ForEach(RoleSuggestions.defaults, id: \.self) { suggestion in
-                                        Button {
-                                            let role = RRUserRole(label: suggestion, sortOrder: viewModel.availableRoles.count)
-                                            modelContext.insert(role)
-                                            viewModel.loadRoles(context: modelContext)
-                                            viewModel.selectedRoleIds.insert(role.id)
-                                        } label: {
-                                            Text(suggestion)
-                                                .font(.subheadline)
-                                                .padding(.horizontal, 12)
-                                                .padding(.vertical, 6)
-                                                .background(Color.rrSurface)
-                                                .foregroundStyle(Color.rrText)
-                                                .clipShape(Capsule())
-                                                .overlay(Capsule().stroke(Color.gray.opacity(0.3), lineWidth: 1))
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
+                        FlowLayout(spacing: 8) {
+                            ForEach(viewModel.availableRoles, id: \.id) { role in
+                                roleChip(role)
                             }
-                        } else {
-                            FlowLayout(spacing: 8) {
-                                ForEach(viewModel.availableRoles, id: \.id) { role in
-                                    roleChip(role)
+                            ForEach(unusedSuggestions, id: \.self) { suggestion in
+                                Button {
+                                    let role = RRUserRole(label: suggestion, sortOrder: viewModel.availableRoles.count)
+                                    modelContext.insert(role)
+                                    viewModel.loadRoles(context: modelContext)
+                                    viewModel.selectedRoleIds.insert(role.id)
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "plus")
+                                            .font(.caption2)
+                                        Text(suggestion)
+                                            .font(.subheadline)
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.rrSurface)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                                    .clipShape(Capsule())
+                                    .overlay(Capsule().stroke(Color.gray.opacity(0.2), lineWidth: 1))
                                 }
+                                .buttonStyle(.plain)
                             }
                         }
                     }
