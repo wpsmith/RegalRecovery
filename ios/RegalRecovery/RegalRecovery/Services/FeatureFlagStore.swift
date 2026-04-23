@@ -117,7 +117,7 @@ final class FeatureFlagStore {
         "activity.phone-calls": true,
         "activity.prayer": true,
         "activity.integrity-inventory": true,
-        "activity.lbi": true,
+        "feature.lbi": true,
         "activity.memory-verse": false,
         "activity.acting-in-behaviors": false,
         "activity.bowtie": false,
@@ -134,7 +134,7 @@ final class FeatureFlagStore {
         "feature.vision": true,
         "feature.partners.redemptiveliving.backbone": false,
         "feature.relapse-prevention-plan": false,
-        "feature.post-mortem": false,
+        "feature.post-mortem": true,
         "activity.motivations": true,
 
         // Assessments

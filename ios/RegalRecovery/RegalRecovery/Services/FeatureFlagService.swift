@@ -119,7 +119,7 @@ final class FeatureFlagService {
         flags["activity.phone-calls"] = true
         flags["activity.prayer"] = true
         flags["activity.integrity-inventory"] = false
-        flags["activity.lbi"] = false
+        flags["feature.lbi"] = false
         flags["activity.pci"] = false
         flags["activity.triggers"] = false
 
@@ -135,7 +135,7 @@ final class FeatureFlagService {
         flags["feature.vision"] = true
         flags["feature.partners.redemptiveliving.backbone"] = false
         flags["feature.relapse-prevention-plan"] = false
-        flags["feature.post-mortem"] = false
+        flags["feature.post-mortem"] = true
 
         // Assessments
         flags["assessment.sast-r"] = false

@@ -156,7 +156,7 @@ class RecoveryWorkViewModel {
                 icon: "checklist",
                 iconColor: .orange,
                 category: .foundationTools,
-                featureFlagKey: "activity.lbi",
+                featureFlagKey: "feature.lbi",
                 implemented: true,
                 activityTypeKey: "lbi"
             ),
@@ -280,9 +280,9 @@ class RecoveryWorkViewModel {
                 icon: "magnifyingglass.circle",
                 iconColor: .rrDestructive,
                 category: .tools,
-                featureFlagKey: nil,
-                implemented: false,
-                activityTypeKey: nil
+                featureFlagKey: "feature.post-mortem",
+                implemented: true,
+                activityTypeKey: ActivityType.postMortem.rawValue
             ),
             WorkTileItem(
                 id: "activity.step-work",
