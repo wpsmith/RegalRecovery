@@ -102,18 +102,20 @@ struct MotivationCaptureSheet: View {
             source: .manual
         )
 
-        modelContext.insert(motivation)
-        try? modelContext.save()
-
-        libraryViewModel.motivations.insert(motivation, at: 0)
-
         let history = RRMotivationHistory(
             motivationId: motivation.id,
             changeType: .created,
             newValue: motivation.text
         )
+
+        modelContext.insert(motivation)
         modelContext.insert(history)
-        try? modelContext.save()
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("[Motivations] Save failed: \(error)")
+        }
 
         onSaved?(motivation)
         dismiss()

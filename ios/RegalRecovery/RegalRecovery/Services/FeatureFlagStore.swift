@@ -135,6 +135,8 @@ final class FeatureFlagStore {
         "feature.partners.redemptiveliving.backbone": false,
         "feature.relapse-prevention-plan": false,
         "feature.post-mortem": false,
+        "feature.motivations": true,
+        "activity.motivations": true,
 
         // Assessments
         "assessment.sast-r": false,

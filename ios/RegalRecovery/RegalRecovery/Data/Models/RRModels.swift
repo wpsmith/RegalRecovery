@@ -1680,6 +1680,8 @@ enum RRModelConfiguration {
         RRLBIProfile.self,
         RRLBIProfileVersion.self,
         RRLBIDailyEntry.self,
+        RRMotivation.self,
+        RRMotivationHistory.self,
     ]
 
     static var schema: Schema {
