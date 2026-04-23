@@ -267,6 +267,8 @@ struct RecoveryWorkView: View {
             RecoveryProgressView()
         case "contentResources":
             ContentTabView()
+        case "bowtie":
+            BowtieSessionView()
         case "lbi":
             PCIEntryPointView()
         case "integrityInventory":

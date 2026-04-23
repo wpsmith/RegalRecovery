@@ -414,6 +414,16 @@ class RecoveryWorkViewModel {
                 implemented: false,
                 activityTypeKey: nil
             ),
+            WorkTileItem(
+                id: "activity.bowtie",
+                title: String(localized: "Bowtie Diagram"),
+                icon: "diamond.fill",
+                iconColor: .rrPrimary,
+                category: .activities,
+                featureFlagKey: "activity.bowtie",
+                implemented: true,
+                activityTypeKey: "bowtie"
+            ),
         ])
 
         // ── Tools ──
