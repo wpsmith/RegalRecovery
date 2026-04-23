@@ -79,6 +79,8 @@ struct PostMortemView: View {
         switch viewModel.currentStep {
         case .actingOut:
             ActingOutStepView(viewModel: viewModel, addictions: addictions)
+        case .describeEvent:
+            DescribeEventStepView(viewModel: viewModel)
         case .throughoutTheDay:
             ThroughoutTheDayStepView(viewModel: viewModel)
         case .dayBefore:
@@ -302,47 +304,6 @@ private struct ActingOutStepView: View {
                 .padding(.horizontal)
             }
 
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Describe what happened")
-                        .font(RRFont.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrText)
-
-                    Text("No graphic detail needed — focus on the sequence of decisions")
-                        .font(RRFont.caption)
-                        .foregroundStyle(Color.rrTextSecondary)
-                        .italic()
-
-                    TextEditor(text: $viewModel.actingOutDescription)
-                        .frame(minHeight: 120)
-                        .font(RRFont.body)
-                        .scrollContentBackground(.hidden)
-                        .padding(8)
-                        .background(Color.rrBackground)
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                }
-            }
-            .padding(.horizontal)
-
-            RRCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Duration (optional)")
-                        .font(RRFont.subheadline)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(Color.rrText)
-
-                    HStack {
-                        TextField("Minutes", value: $viewModel.actingOutDurationMinutes, format: .number)
-                            .textFieldStyle(.roundedBorder)
-                            .keyboardType(.numberPad)
-                        Text("minutes")
-                            .font(RRFont.body)
-                            .foregroundStyle(Color.rrTextSecondary)
-                    }
-                }
-            }
-            .padding(.horizontal)
         }
     }
 
@@ -377,7 +338,58 @@ private struct ActingOutStepView: View {
     }
 }
 
-// MARK: - Step 2: Throughout the Day
+// MARK: - Step 2: Describe What Happened
+
+private struct DescribeEventStepView: View {
+    @Bindable var viewModel: PostMortemViewModel
+
+    var body: some View {
+        VStack(spacing: 16) {
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Describe What Happened")
+                        .font(RRFont.title3)
+                        .foregroundStyle(Color.rrText)
+
+                    Text("No graphic detail needed — focus on the sequence of decisions")
+                        .font(RRFont.caption)
+                        .foregroundStyle(Color.rrTextSecondary)
+                        .italic()
+
+                    TextEditor(text: $viewModel.actingOutDescription)
+                        .frame(minHeight: 160)
+                        .font(RRFont.body)
+                        .scrollContentBackground(.hidden)
+                        .padding(8)
+                        .background(Color.rrBackground)
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                }
+            }
+            .padding(.horizontal)
+
+            RRCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Duration (optional)")
+                        .font(RRFont.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(Color.rrText)
+
+                    HStack {
+                        TextField("Minutes", value: $viewModel.actingOutDurationMinutes, format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardType(.numberPad)
+                        Text("minutes")
+                            .font(RRFont.body)
+                            .foregroundStyle(Color.rrTextSecondary)
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+}
+
+// MARK: - Step 3: Throughout the Day
 
 private struct ThroughoutTheDayStepView: View {
     @Bindable var viewModel: PostMortemViewModel

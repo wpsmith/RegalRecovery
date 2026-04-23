@@ -92,14 +92,15 @@ class PostMortemViewModel {
     // MARK: - Flow State
 
     enum FlowStep: Int, CaseIterable {
-        case actingOut       // Step 1: What happened (acting out or near-miss)
-        case throughoutTheDay // Step 2: Work backwards 24hrs with Time Journal + activity data
-        case dayBefore       // Step 3: Show activity history (done vs not done), ask what's missing
-        case buildUp         // Step 4: Build-up, decision points, missed help
-        case triggers        // Step 5: Trigger identification, leverage My Triggers
-        case immediatelyAfter // Step 6: Feelings, what did next
-        case fasterHistory   // Step 7: 4-week FASTER graph (if using FASTER)
-        case actionPlan      // Step 8: Missed activities, recommendations, Quick Action-style tiles
+        case actingOut       // Step 1: Event type, when, which addiction
+        case describeEvent   // Step 2: Describe what happened, duration
+        case throughoutTheDay // Step 3: Work backwards 24hrs with Time Journal + activity data
+        case dayBefore       // Step 4: Show activity history (done vs not done), ask what's missing
+        case buildUp         // Step 5: Build-up, decision points, missed help
+        case triggers        // Step 6: Trigger identification, leverage My Triggers
+        case immediatelyAfter // Step 7: Feelings, what did next
+        case fasterHistory   // Step 8: 4-week FASTER graph (if using FASTER)
+        case actionPlan      // Step 9: Missed activities, recommendations, Quick Action-style tiles
     }
 
     var currentStep: FlowStep = .actingOut
@@ -202,6 +203,9 @@ class PostMortemViewModel {
     func canAdvance() -> Bool {
         switch currentStep {
         case .actingOut:
+            return !eventType.isEmpty
+
+        case .describeEvent:
             return !actingOutDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
         case .throughoutTheDay:
