@@ -261,6 +261,8 @@ struct RecoveryWorkView: View {
             MotivationLibraryView()
         case "motivationsReview":
             MotivationReviewView()
+        case "triggerLibrary":
+            TriggerLibraryView()
         case "threeCircles":
             ThreeCirclesView()
         case "analytics":
