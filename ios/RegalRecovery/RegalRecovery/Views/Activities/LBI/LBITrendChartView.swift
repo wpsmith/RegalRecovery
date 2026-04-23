@@ -6,17 +6,23 @@ import SwiftData
 
 struct LBITrendChartView: View {
     let entries: [RRLBIDailyEntry]
+    var setupDate: Date? = nil
+
+    private var filteredEntries: [RRLBIDailyEntry] {
+        guard let setupDate else { return entries }
+        return entries.filter { $0.date >= setupDate }
+    }
 
     private var weeklyData: [(weekStart: Date, score: Int, riskLevel: LBIRiskLevel)] {
-        LBIScoringService.weeklyScores(weeks: 12, entries: entries)
+        LBIScoringService.weeklyScores(weeks: 12, entries: filteredEntries)
     }
 
     private var currentWeekData: (weekStart: Date, score: Int, riskLevel: LBIRiskLevel, delta: Int?, daysCompleted: Int, isPartial: Bool) {
         let currentWeekStart = LBIScoringService.weekStart(for: Date())
-        let score = LBIScoringService.weeklyScore(for: currentWeekStart, entries: entries)
+        let score = LBIScoringService.weeklyScore(for: currentWeekStart, entries: filteredEntries)
         let riskLevel = LBIRiskLevel.from(weeklyScore: score)
-        let delta = LBIScoringService.weeklyDelta(currentWeekStart: currentWeekStart, entries: entries)
-        let partialInfo = LBIScoringService.partialWeekInfo(weekStart: currentWeekStart, entries: entries)
+        let delta = LBIScoringService.weeklyDelta(currentWeekStart: currentWeekStart, entries: filteredEntries)
+        let partialInfo = LBIScoringService.partialWeekInfo(weekStart: currentWeekStart, entries: filteredEntries)
 
         return (currentWeekStart, score, riskLevel, delta, partialInfo.daysCompleted, partialInfo.daysCompleted < 7)
     }
