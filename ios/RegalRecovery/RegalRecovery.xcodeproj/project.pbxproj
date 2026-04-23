@@ -282,6 +282,7 @@
 		10006082 /* MotivationDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006082 /* MotivationDiscoveryView.swift */; };
 		10006083 /* MotivationLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006083 /* MotivationLibraryView.swift */; };
 		10006100 /* MotivationSurfacingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006100 /* MotivationSurfacingCard.swift */; };
+		10006101 /* MotivationReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20006101 /* MotivationReviewView.swift */; };
 		10005002 /* VisionWizardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005002 /* VisionWizardViewModel.swift */; };
 		10005003 /* VisionWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005003 /* VisionWizardView.swift */; };
 		10005004 /* VisionPromptsStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20005004 /* VisionPromptsStepView.swift */; };
@@ -625,6 +626,7 @@
 		20006082 /* MotivationDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryView.swift; sourceTree = "<group>"; };
 		20006083 /* MotivationLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryView.swift; sourceTree = "<group>"; };
 		20006100 /* MotivationSurfacingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationSurfacingCard.swift; sourceTree = "<group>"; };
+		20006101 /* MotivationReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationReviewView.swift; sourceTree = "<group>"; };
 		20005002 /* VisionWizardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardViewModel.swift; sourceTree = "<group>"; };
 		20005003 /* VisionWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionWizardView.swift; sourceTree = "<group>"; };
 		20005004 /* VisionPromptsStepView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionPromptsStepView.swift; sourceTree = "<group>"; };
@@ -1374,6 +1376,7 @@
 				20006081 /* MotivationDetailView.swift */,
 				20006082 /* MotivationDiscoveryView.swift */,
 				20006083 /* MotivationLibraryView.swift */,
+				20006101 /* MotivationReviewView.swift */,
 				20006100 /* MotivationSurfacingCard.swift */,
 			);
 			path = Motivations;
@@ -1532,6 +1535,7 @@
 				10006081 /* MotivationDetailView.swift in Sources */,
 				10006082 /* MotivationDiscoveryView.swift in Sources */,
 				10006083 /* MotivationLibraryView.swift in Sources */,
+				10006101 /* MotivationReviewView.swift in Sources */,
 				10006100 /* MotivationSurfacingCard.swift in Sources */,
 				10D7D990 /* TriggerTypes.swift in Sources */,
 				10D7D991 /* TriggerSeedData.swift in Sources */,

@@ -185,6 +185,16 @@ class RecoveryWorkViewModel {
                 activityTypeKey: nil
             ),
             WorkTileItem(
+                id: "activity.motivations",
+                title: String(localized: "Motivations"),
+                icon: "flame.fill",
+                iconColor: .orange,
+                category: .activities,
+                featureFlagKey: "feature.motivations",
+                implemented: true,
+                activityTypeKey: "motivationsReview"
+            ),
+            WorkTileItem(
                 id: "activity.sobriety-commitment",
                 title: String(localized: "Sobriety Commitment"),
                 icon: "sun.max.fill",
