@@ -1,0 +1,28 @@
+<svg viewBox="0 0 1024 1024" width="1024" height="1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#EFC05F"/>
+      <stop offset="100%" stop-color="#C4882A"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1B6B6C"/>
+      <stop offset="100%" stop-color="#124B4C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed teal background -->
+  <rect width="1024" height="1024" fill="url(#teal)"/>
+
+  <!-- RR letters -->
+  <text x="164" y="756" font-family="Georgia, 'Times New Roman', serif" font-size="512" font-weight="bold" fill="url(#gold)" letter-spacing="-26">R</text>
+  <text x="502" y="756" font-family="Georgia, 'Times New Roman', serif" font-size="512" font-weight="bold" fill="url(#gold)" letter-spacing="-26">R</text>
+
+  <!-- Crown -->
+  <path d="M332 256 L368 154 L430 214 L512 102 L594 214 L656 154 L692 256 Z" fill="url(#gold)"/>
+  <rect x="332" y="246" width="360" height="36" rx="10" fill="url(#gold)"/>
+
+  <!-- Jewel dots -->
+  <circle cx="512" cy="128" r="16" fill="white" opacity="0.85"/>
+  <circle cx="368" cy="172" r="11" fill="white" opacity="0.7"/>
+  <circle cx="656" cy="172" r="11" fill="white" opacity="0.7"/>
+</svg>
