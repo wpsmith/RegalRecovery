@@ -1,10 +1,10 @@
-// Views/Activities/PCI/PCICriticalSelectionView.swift
+// Views/Activities/LBI/LBICriticalSelectionView.swift
 
 import SwiftUI
 import UIKit
 
-struct PCICriticalSelectionView: View {
-    @Bindable var viewModel: PCISetupViewModel
+struct LBICriticalSelectionView: View {
+    @Bindable var viewModel: LBISetupViewModel
 
     var body: some View {
         VStack(spacing: 0) {
@@ -78,7 +78,7 @@ struct PCICriticalSelectionView: View {
     }
 
     @ViewBuilder
-    private func indicatorRow(dimensionType: PCIDimensionType, indicator: PCIIndicator) -> some View {
+    private func indicatorRow(dimensionType: LBIDimensionType, indicator: LBIIndicator) -> some View {
         let isSelected = viewModel.selectedCriticalIds.contains(indicator.id)
         let isDisabled = !isSelected && !viewModel.canSelectMore
 
@@ -131,14 +131,14 @@ struct PCICriticalSelectionView: View {
 
     private var groupedIndicators: [GroupedIndicators] {
         // Group indicators by dimension type
-        var groups: [PCIDimensionType: [(dimensionType: PCIDimensionType, indicator: PCIIndicator)]] = [:]
+        var groups: [LBIDimensionType: [(dimensionType: LBIDimensionType, indicator: LBIIndicator)]] = [:]
 
         for item in viewModel.allBuiltIndicators {
             groups[item.dimensionType, default: []].append(item)
         }
 
         // Sort by dimension type sort order
-        let sortedTypes = PCIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
+        let sortedTypes = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
 
         return sortedTypes.compactMap { dimensionType in
             guard let indicators = groups[dimensionType], !indicators.isEmpty else {
@@ -152,12 +152,12 @@ struct PCICriticalSelectionView: View {
 // MARK: - Supporting Types
 
 private struct GroupedIndicators {
-    let dimensionType: PCIDimensionType
-    let indicators: [(dimensionType: PCIDimensionType, indicator: PCIIndicator)]
+    let dimensionType: LBIDimensionType
+    let indicators: [(dimensionType: LBIDimensionType, indicator: LBIIndicator)]
 }
 
 #Preview {
-    @Previewable @State var viewModel = PCISetupViewModel()
+    @Previewable @State var viewModel = LBISetupViewModel()
 
     // Set up preview data
     viewModel.dimensionIndicators = [
@@ -166,13 +166,13 @@ private struct GroupedIndicators {
         .recoveryPractice: ["Missed meeting", "Skipped meditation"]
     ]
     viewModel.allBuiltIndicators = [
-        (.physicalHealth, PCIIndicator(text: "Skipped breakfast", isPositive: false)),
-        (.physicalHealth, PCIIndicator(text: "Less than 6 hours sleep", isPositive: false)),
-        (.interests, PCIIndicator(text: "Playing guitar", isPositive: true)),
-        (.interests, PCIIndicator(text: "Reading", isPositive: true)),
-        (.recoveryPractice, PCIIndicator(text: "Missed meeting", isPositive: false)),
-        (.recoveryPractice, PCIIndicator(text: "Skipped meditation", isPositive: false))
+        (.physicalHealth, LBIIndicator(text: "Skipped breakfast", isPositive: false)),
+        (.physicalHealth, LBIIndicator(text: "Less than 6 hours sleep", isPositive: false)),
+        (.interests, LBIIndicator(text: "Playing guitar", isPositive: true)),
+        (.interests, LBIIndicator(text: "Reading", isPositive: true)),
+        (.recoveryPractice, LBIIndicator(text: "Missed meeting", isPositive: false)),
+        (.recoveryPractice, LBIIndicator(text: "Skipped meditation", isPositive: false))
     ]
 
-    return PCICriticalSelectionView(viewModel: viewModel)
+    return LBICriticalSelectionView(viewModel: viewModel)
 }

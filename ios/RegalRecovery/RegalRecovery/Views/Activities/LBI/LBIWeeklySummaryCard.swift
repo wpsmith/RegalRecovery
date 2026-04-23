@@ -1,9 +1,9 @@
-// Views/Activities/PCI/PCIWeeklySummaryCard.swift
+// Views/Activities/LBI/LBIWeeklySummaryCard.swift
 import SwiftUI
 
-struct PCIWeeklySummaryCard: View {
+struct LBIWeeklySummaryCard: View {
     let weeklyScore: Int
-    let riskLevel: PCIRiskLevel
+    let riskLevel: LBIRiskLevel
     let delta: Int?           // Week-over-week change, nil if no previous data
     let daysCompleted: Int    // 0-7, for partial week display
     let isPartialWeek: Bool
@@ -94,7 +94,7 @@ struct PCIWeeklySummaryCard: View {
 // MARK: - Preview
 
 #Preview("Optimal Health - Improving") {
-    PCIWeeklySummaryCard(
+    LBIWeeklySummaryCard(
         weeklyScore: 7,
         riskLevel: .optimalHealth,
         delta: -3,
@@ -105,7 +105,7 @@ struct PCIWeeklySummaryCard: View {
 }
 
 #Preview("Stable Solidity - No Change") {
-    PCIWeeklySummaryCard(
+    LBIWeeklySummaryCard(
         weeklyScore: 15,
         riskLevel: .stableSolidity,
         delta: 0,
@@ -116,7 +116,7 @@ struct PCIWeeklySummaryCard: View {
 }
 
 #Preview("Medium Risk - Worsening") {
-    PCIWeeklySummaryCard(
+    LBIWeeklySummaryCard(
         weeklyScore: 24,
         riskLevel: .mediumRisk,
         delta: 5,
@@ -127,7 +127,7 @@ struct PCIWeeklySummaryCard: View {
 }
 
 #Preview("High Risk - Partial Week") {
-    PCIWeeklySummaryCard(
+    LBIWeeklySummaryCard(
         weeklyScore: 32,
         riskLevel: .highRisk,
         delta: nil,
@@ -138,7 +138,7 @@ struct PCIWeeklySummaryCard: View {
 }
 
 #Preview("Very High Risk") {
-    PCIWeeklySummaryCard(
+    LBIWeeklySummaryCard(
         weeklyScore: 43,
         riskLevel: .veryHighRisk,
         delta: 2,

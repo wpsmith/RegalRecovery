@@ -12,6 +12,7 @@ struct RecoveryProgressView: View {
     @Query(sort: \RRMoodEntry.date, order: .reverse) private var moodEntries: [RRMoodEntry]
     @Query(sort: \RRDevotionalProgress.day) private var devotionalProgress: [RRDevotionalProgress]
     @Query(sort: \RRGratitudeEntry.date, order: .reverse) private var gratitudeEntries: [RRGratitudeEntry]
+    @Query(sort: \RRLBIDailyEntry.date, order: .reverse) private var lbiEntries: [RRLBIDailyEntry]
 
     private var primaryStreak: RRStreak? { streaks.first }
 
@@ -98,6 +99,9 @@ struct RecoveryProgressView: View {
                         devotionalSection
                     }
                     weeklySummarySection
+                    if isFlagEnabled("activity.lbi") && !lbiEntries.isEmpty {
+                        lbiSection
+                    }
                     if isFlagEnabled("activity.gratitude") && !gratitudeEntries.isEmpty {
                         gratitudeSection
                     }
@@ -391,6 +395,15 @@ struct RecoveryProgressView: View {
             }
         }
     }
+    // MARK: - Life Balance
+
+    private var lbiSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            RRSectionHeader(title: "Life Balance")
+            LBITrendChartView(entries: Array(lbiEntries))
+        }
+    }
+
     // MARK: - Gratitude Trends
 
     private var gratitudeStreak: Int {

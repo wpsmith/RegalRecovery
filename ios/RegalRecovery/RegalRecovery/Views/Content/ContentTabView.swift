@@ -291,7 +291,7 @@ struct ContentTabView: View {
             .buttonStyle(.plain)
             Divider().padding(.leading, 52)
             NavigationLink(destination: GlossaryView()) {
-                resourceRow(icon: "book.closed.fill", iconColor: .rrPrimary, title: "Glossary", subtitle: "FASTER, FANOS, FITNAP, PCI, and more")
+                resourceRow(icon: "book.closed.fill", iconColor: .rrPrimary, title: "Glossary", subtitle: "FASTER, FANOS, FITNAP, LBI, and more")
             }
             .buttonStyle(.plain)
             Divider().padding(.leading, 52)

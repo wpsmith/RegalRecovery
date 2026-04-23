@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-struct PCIEntryPointView: View {
+struct LBIEntryPointView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
     @State private var hasCompletedSetup = false
@@ -14,9 +14,23 @@ struct PCIEntryPointView: View {
                 ProgressView()
                     .onAppear { checkSetupStatus() }
             } else if hasCompletedSetup {
-                PCICheckInView()
+                LBICheckInView()
             } else {
-                PCISetupFlowView()
+                // Tell user to set up via Foundation Tools
+                VStack(spacing: 20) {
+                    Image(systemName: "checklist")
+                        .font(.system(size: 48))
+                        .foregroundStyle(Color.rrTextSecondary)
+                    Text("Set Up Life Balance First")
+                        .font(RRFont.title3)
+                        .foregroundStyle(Color.rrText)
+                    Text("Go to Work → Foundation Tools → Life Balance to define your personal indicators before you can do daily check-ins.")
+                        .font(RRFont.body)
+                        .foregroundStyle(Color.rrTextSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
     }
@@ -27,7 +41,7 @@ struct PCIEntryPointView: View {
             return
         }
         let uid = userId
-        let descriptor = FetchDescriptor<RRPCIProfile>(
+        let descriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == uid && $0.isActive == true }
         )
         guard let profile = try? modelContext.fetch(descriptor).first else {
@@ -35,7 +49,7 @@ struct PCIEntryPointView: View {
             return
         }
         let profileId = profile.id
-        let versionDescriptor = FetchDescriptor<RRPCIProfileVersion>(
+        let versionDescriptor = FetchDescriptor<RRLBIProfileVersion>(
             predicate: #Predicate { $0.profileId == profileId }
         )
         let versions = (try? modelContext.fetch(versionDescriptor)) ?? []

@@ -257,24 +257,16 @@ struct RecoveryWorkView: View {
             RecoveryPlanSetupView()
         case "visionStatement":
             VisionHubView()
-        case "urgeSurfingConfig":
-            UrgeSurfingConfigView()
-        case "triggerLibrary":
-            TriggerLibraryView()
-        case "motivations":
-            MotivationLibraryView()
-        case "motivationsReview":
-            MotivationReviewView()
         case "threeCircles":
             ThreeCirclesView()
         case "analytics":
             RecoveryProgressView()
         case "contentResources":
             ContentTabView()
-        case "bowtie":
-            BowtieSessionView()
+        case "lbiFoundation":
+            LBIFoundationView()
         case "lbi":
-            PCIEntryPointView()
+            LBIEntryPointView()
         case "integrityInventory":
             EveningReviewView()
         case "memoryVerseReview":

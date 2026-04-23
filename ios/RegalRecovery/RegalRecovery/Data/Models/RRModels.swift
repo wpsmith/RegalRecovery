@@ -1488,10 +1488,10 @@ final class RRQuickActionItem {
     }
 }
 
-// MARK: - PCI Profile
+// MARK: - LBI Profile
 
 @Model
-final class RRPCIProfile {
+final class RRLBIProfile {
 
     @Attribute(.unique) var id: UUID
     var userId: UUID
@@ -1499,8 +1499,8 @@ final class RRPCIProfile {
     var createdAt: Date
     var modifiedAt: Date
 
-    @Relationship(deleteRule: .cascade, inverse: \RRPCIProfileVersion.profile)
-    var versions: [RRPCIProfileVersion] = []
+    @Relationship(deleteRule: .cascade, inverse: \RRLBIProfileVersion.profile)
+    var versions: [RRLBIProfileVersion] = []
 
     init(
         id: UUID = UUID(),
@@ -1517,10 +1517,10 @@ final class RRPCIProfile {
     }
 }
 
-// MARK: - PCI Profile Version
+// MARK: - LBI Profile Version
 
 @Model
-final class RRPCIProfileVersion {
+final class RRLBIProfileVersion {
 
     @Attribute(.unique) var id: UUID
     var profileId: UUID
@@ -1530,13 +1530,13 @@ final class RRPCIProfileVersion {
     var criticalItemsJSON: String
     var createdAt: Date
 
-    var profile: RRPCIProfile?
+    var profile: RRLBIProfile?
 
     /// Decoded dimensions from JSON storage.
-    var dimensions: [PCIDimension] {
+    var dimensions: [LBIDimension] {
         get {
             guard let data = dimensionsJSON.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode([PCIDimension].self, from: data) else {
+                  let decoded = try? JSONDecoder().decode([LBIDimension].self, from: data) else {
                 return []
             }
             return decoded
@@ -1550,10 +1550,10 @@ final class RRPCIProfileVersion {
     }
 
     /// Decoded critical items from JSON storage.
-    var criticalItems: [PCICriticalItem] {
+    var criticalItems: [LBICriticalItem] {
         get {
             guard let data = criticalItemsJSON.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode([PCICriticalItem].self, from: data) else {
+                  let decoded = try? JSONDecoder().decode([LBICriticalItem].self, from: data) else {
                 return []
             }
             return decoded
@@ -1585,10 +1585,10 @@ final class RRPCIProfileVersion {
     }
 }
 
-// MARK: - PCI Daily Entry
+// MARK: - LBI Daily Entry
 
 @Model
-final class RRPCIDailyEntry {
+final class RRLBIDailyEntry {
 
     @Attribute(.unique) var id: UUID
     var userId: UUID
@@ -1640,534 +1640,6 @@ final class RRPCIDailyEntry {
     }
 }
 
-// MARK: - Bowtie: User Role
-
-@Model
-final class RRUserRole {
-    @Attribute(.unique) var id: UUID
-    var label: String
-    var sortOrder: Int
-    var isArchived: Bool
-    var parentRoleId: UUID?
-    var createdAt: Date
-
-    init(id: UUID = UUID(), label: String, sortOrder: Int = 0, isArchived: Bool = false, parentRoleId: UUID? = nil, createdAt: Date = Date()) {
-        self.id = id
-        self.label = label
-        self.sortOrder = sortOrder
-        self.isArchived = isArchived
-        self.parentRoleId = parentRoleId
-        self.createdAt = createdAt
-    }
-}
-
-// MARK: - Bowtie: Known Emotional Trigger
-
-@Model
-final class RRKnownEmotionalTrigger {
-    @Attribute(.unique) var id: UUID
-    var label: String
-    var mappedIType: String?
-    var createdAt: Date
-
-    init(id: UUID = UUID(), label: String, mappedIType: ThreeIType? = nil, createdAt: Date = Date()) {
-        self.id = id
-        self.label = label
-        self.mappedIType = mappedIType?.rawValue
-        self.createdAt = createdAt
-    }
-
-    var mappedI: ThreeIType? {
-        get { mappedIType.flatMap { ThreeIType(rawValue: $0) } }
-        set { mappedIType = newValue?.rawValue }
-    }
-}
-
-// MARK: - Bowtie: Session
-
-@Model
-final class RRBowtieSession {
-    @Attribute(.unique) var id: UUID
-    var status: String
-    var referenceTimestamp: Date
-    var createdAt: Date
-    var completedAt: Date?
-    var modifiedAt: Date
-    var selectedRoleIdsJSON: String
-    var emotionVocabulary: String
-    var entryPath: String
-    var sessionMode: String
-    var pastInsignificanceTotal: Int
-    var pastIncompetenceTotal: Int
-    var pastImpotenceTotal: Int
-    var futureInsignificanceTotal: Int
-    var futureIncompetenceTotal: Int
-    var futureImpotenceTotal: Int
-
-    @Relationship(deleteRule: .cascade, inverse: \RRBowtieMarker.session)
-    var markers: [RRBowtieMarker] = []
-
-    init(
-        id: UUID = UUID(),
-        status: BowtieStatus = .draft,
-        referenceTimestamp: Date = Date(),
-        createdAt: Date = Date(),
-        completedAt: Date? = nil,
-        modifiedAt: Date = Date(),
-        selectedRoleIds: [UUID] = [],
-        emotionVocabulary: EmotionVocabulary = .threeIs,
-        entryPath: BowtieEntryPath = .activities,
-        sessionMode: BowtieSessionMode = .guided
-    ) {
-        self.id = id
-        self.status = status.rawValue
-        self.referenceTimestamp = referenceTimestamp
-        self.createdAt = createdAt
-        self.completedAt = completedAt
-        self.modifiedAt = modifiedAt
-        self.selectedRoleIdsJSON = (try? JSONEncoder().encode(selectedRoleIds)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        self.emotionVocabulary = emotionVocabulary.rawValue
-        self.entryPath = entryPath.rawValue
-        self.sessionMode = sessionMode.rawValue
-        self.pastInsignificanceTotal = 0
-        self.pastIncompetenceTotal = 0
-        self.pastImpotenceTotal = 0
-        self.futureInsignificanceTotal = 0
-        self.futureIncompetenceTotal = 0
-        self.futureImpotenceTotal = 0
-    }
-
-    // Computed accessors for type-safe enum access
-    var bowtieStatus: BowtieStatus {
-        get { BowtieStatus(rawValue: status) ?? .draft }
-        set { status = newValue.rawValue }
-    }
-    var vocabulary: EmotionVocabulary {
-        get { EmotionVocabulary(rawValue: emotionVocabulary) ?? .threeIs }
-        set { emotionVocabulary = newValue.rawValue }
-    }
-    var entry: BowtieEntryPath {
-        get { BowtieEntryPath(rawValue: entryPath) ?? .activities }
-        set { entryPath = newValue.rawValue }
-    }
-    var mode: BowtieSessionMode {
-        get { BowtieSessionMode(rawValue: sessionMode) ?? .guided }
-        set { sessionMode = newValue.rawValue }
-    }
-    var selectedRoleIds: [UUID] {
-        get {
-            guard let data = selectedRoleIdsJSON.data(using: .utf8) else { return [] }
-            return (try? JSONDecoder().decode([UUID].self, from: data)) ?? []
-        }
-        set {
-            selectedRoleIdsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        }
-    }
-    var pastMarkers: [RRBowtieMarker] { markers.filter { $0.side == BowtieSide.past.rawValue } }
-    var futureMarkers: [RRBowtieMarker] { markers.filter { $0.side == BowtieSide.future.rawValue } }
-    var processedMarkerCount: Int { markers.filter(\.isProcessed).count }
-}
-
-// MARK: - Bowtie: Marker
-
-@Model
-final class RRBowtieMarker {
-    @Attribute(.unique) var id: UUID
-    var side: String
-    var timeIntervalHours: Int
-    var roleId: UUID
-    var iActivationsJSON: String
-    var bigTicketEmotionsJSON: String?
-    var customEmotionsJSON: String?
-    var knownTriggerIdsJSON: String?
-    var briefDescription: String?
-    var isProcessed: Bool
-    var createdAt: Date
-
-    var session: RRBowtieSession?
-
-    @Relationship(deleteRule: .cascade, inverse: \RRBackboneProcessing.marker)
-    var backboneProcessing: RRBackboneProcessing?
-
-    @Relationship(deleteRule: .cascade, inverse: \RRPPPEntry.marker)
-    var pppEntry: RRPPPEntry?
-
-    init(
-        id: UUID = UUID(),
-        side: BowtieSide,
-        timeIntervalHours: Int,
-        roleId: UUID,
-        iActivations: [IActivation] = [],
-        bigTicketEmotions: [BigTicketActivation]? = nil,
-        customEmotions: [String]? = nil,
-        knownTriggerIds: [UUID]? = nil,
-        briefDescription: String? = nil,
-        isProcessed: Bool = false,
-        createdAt: Date = Date()
-    ) {
-        self.id = id
-        self.side = side.rawValue
-        self.timeIntervalHours = timeIntervalHours
-        self.roleId = roleId
-        self.iActivationsJSON = Self.encode(iActivations)
-        self.bigTicketEmotionsJSON = bigTicketEmotions.map { Self.encode($0) }
-        self.customEmotionsJSON = customEmotions.map { Self.encode($0) }
-        self.knownTriggerIdsJSON = knownTriggerIds.map { Self.encode($0) }
-        self.briefDescription = briefDescription
-        self.isProcessed = isProcessed
-        self.createdAt = createdAt
-    }
-
-    private static func encode<T: Encodable>(_ value: T) -> String {
-        (try? JSONEncoder().encode(value)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-    }
-    private static func decode<T: Decodable>(_ json: String?, as type: T.Type) -> T? {
-        guard let data = json?.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode(type, from: data)
-    }
-
-    var iActivations: [IActivation] {
-        get { Self.decode(iActivationsJSON, as: [IActivation].self) ?? [] }
-        set { iActivationsJSON = Self.encode(newValue) }
-    }
-    var bigTicketEmotions: [BigTicketActivation]? {
-        get { Self.decode(bigTicketEmotionsJSON, as: [BigTicketActivation].self) }
-        set { bigTicketEmotionsJSON = newValue.map { Self.encode($0) } }
-    }
-    var customEmotions: [String]? {
-        get { Self.decode(customEmotionsJSON, as: [String].self) }
-        set { customEmotionsJSON = newValue.map { Self.encode($0) } }
-    }
-    var knownTriggerIds: [UUID]? {
-        get { Self.decode(knownTriggerIdsJSON, as: [UUID].self) }
-        set { knownTriggerIdsJSON = newValue.map { Self.encode($0) } }
-    }
-    var bowtieSide: BowtieSide {
-        get { BowtieSide(rawValue: side) ?? .past }
-        set { side = newValue.rawValue }
-    }
-    var totalIntensity: Int {
-        iActivations.reduce(0) { $0 + $1.intensity }
-    }
-}
-
-// MARK: - Bowtie: Backbone Processing
-
-@Model
-final class RRBackboneProcessing {
-    @Attribute(.unique) var id: UUID
-    var lifeSituation: String
-    var emotionsJSON: String
-    var threeIsJSON: String
-    var emotionalNeedsJSON: String
-    var intimacyActionsJSON: String
-    var spiritualReflection: String?
-    var createdAt: Date
-
-    var marker: RRBowtieMarker?
-
-    init(
-        id: UUID = UUID(),
-        lifeSituation: String,
-        emotions: [String] = [],
-        threeIs: [IActivation] = [],
-        emotionalNeeds: [String] = [],
-        intimacyActions: [IntimacyAction] = [],
-        spiritualReflection: String? = nil,
-        createdAt: Date = Date()
-    ) {
-        self.id = id
-        self.lifeSituation = lifeSituation
-        self.emotionsJSON = (try? JSONEncoder().encode(emotions)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        self.threeIsJSON = (try? JSONEncoder().encode(threeIs)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        self.emotionalNeedsJSON = (try? JSONEncoder().encode(emotionalNeeds)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        self.intimacyActionsJSON = (try? JSONEncoder().encode(intimacyActions)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        self.spiritualReflection = spiritualReflection
-        self.createdAt = createdAt
-    }
-
-    // Computed accessors (same decode pattern as RRBowtieMarker)
-    private static func decode<T: Decodable>(_ json: String, as type: T.Type) -> T? {
-        guard let data = json.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode(type, from: data)
-    }
-    var emotions: [String] {
-        get { Self.decode(emotionsJSON, as: [String].self) ?? [] }
-        set { emotionsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
-    }
-    var threeIs: [IActivation] {
-        get { Self.decode(threeIsJSON, as: [IActivation].self) ?? [] }
-        set { threeIsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
-    }
-    var emotionalNeeds: [String] {
-        get { Self.decode(emotionalNeedsJSON, as: [String].self) ?? [] }
-        set { emotionalNeedsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
-    }
-    var intimacyActions: [IntimacyAction] {
-        get { Self.decode(intimacyActionsJSON, as: [IntimacyAction].self) ?? [] }
-        set { intimacyActionsJSON = (try? JSONEncoder().encode(newValue)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
-    }
-}
-
-// MARK: - Bowtie: PPP Entry
-
-@Model
-final class RRPPPEntry {
-    @Attribute(.unique) var id: UUID
-    var prayer: String?
-    var peopleContactIdsJSON: String?
-    var planBefore: String?
-    var planDuring: String?
-    var planAfter: String?
-    var reminderTime: Date?
-    var followUpOutcome: String?
-    var followUpReflection: String?
-    var createdAt: Date
-
-    var marker: RRBowtieMarker?
-
-    init(
-        id: UUID = UUID(),
-        prayer: String? = nil,
-        peopleContactIds: [UUID]? = nil,
-        planBefore: String? = nil,
-        planDuring: String? = nil,
-        planAfter: String? = nil,
-        reminderTime: Date? = nil,
-        createdAt: Date = Date()
-    ) {
-        self.id = id
-        self.prayer = prayer
-        self.peopleContactIdsJSON = peopleContactIds.map { (try? JSONEncoder().encode($0)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
-        self.planBefore = planBefore
-        self.planDuring = planDuring
-        self.planAfter = planAfter
-        self.reminderTime = reminderTime
-        self.createdAt = createdAt
-    }
-
-    var outcome: PPPOutcome? {
-        get { followUpOutcome.flatMap { PPPOutcome(rawValue: $0) } }
-        set { followUpOutcome = newValue?.rawValue }
-    }
-    var peopleContactIds: [UUID]? {
-        get {
-            guard let data = peopleContactIdsJSON?.data(using: .utf8) else { return nil }
-            return try? JSONDecoder().decode([UUID].self, from: data)
-        }
-        set {
-            peopleContactIdsJSON = newValue.map { (try? JSONEncoder().encode($0)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]" }
-        }
-    }
-}
-
-// MARK: - Post-Mortem
-
-@Model
-final class RRPostMortem {
-
-    @Attribute(.unique) var id: UUID
-    var userId: UUID
-    var analysisId: String       // Server-assigned "pm_xxxxx" ID
-    var timestamp: Date          // Event timestamp (immutable)
-    var status: String           // "draft" or "complete"
-    var eventType: String        // "relapse", "near-miss", "combined"
-    var relapseId: String?       // Link to relapse record
-    var addictionId: String?     // Associated addiction
-
-    // Sections stored as JSON strings (complex nested data)
-    var sectionsJSON: String?           // JSON-encoded PostMortemSectionsPayload
-    var sectionsCompleted: [String]     // e.g. ["dayBefore", "morning"]
-    var sectionsRemaining: [String]     // e.g. ["throughoutTheDay", "buildUp", ...]
-
-    // Trigger data
-    var triggerSummary: [String]        // ["emotional", "digital", ...]
-    var triggerDetailsJSON: String?     // JSON-encoded [TriggerDetailPayload]
-
-    // FASTER mapping
-    var fasterMappingJSON: String?      // JSON-encoded [FasterMappingEntryPayload]
-
-    // Action plan
-    var actionPlanJSON: String?         // JSON-encoded [ActionPlanItemPayload]
-    var actionItemCount: Int
-
-    // Sharing
-    var sharingJSON: String?            // JSON-encoded SharingStatusPayload
-
-    // Linked entities
-    var linkedEntitiesJSON: String?     // JSON-encoded LinkedEntitiesPayload
-
-    // Timestamps
-    var completedAt: Date?
-    var message: String?                // Compassionate message from server
-    var synced: Bool
-    var createdAt: Date
-    var modifiedAt: Date
-
-    init(
-        id: UUID = UUID(),
-        userId: UUID,
-        analysisId: String = "",
-        timestamp: Date,
-        status: String = "draft",
-        eventType: String,
-        relapseId: String? = nil,
-        addictionId: String? = nil,
-        sectionsJSON: String? = nil,
-        sectionsCompleted: [String] = [],
-        sectionsRemaining: [String] = ["dayBefore", "morning", "throughoutTheDay", "buildUp", "actingOut", "immediatelyAfter"],
-        triggerSummary: [String] = [],
-        triggerDetailsJSON: String? = nil,
-        fasterMappingJSON: String? = nil,
-        actionPlanJSON: String? = nil,
-        actionItemCount: Int = 0,
-        sharingJSON: String? = nil,
-        linkedEntitiesJSON: String? = nil,
-        completedAt: Date? = nil,
-        message: String? = nil,
-        synced: Bool = false,
-        createdAt: Date = Date(),
-        modifiedAt: Date = Date()
-    ) {
-        self.id = id
-        self.userId = userId
-        self.analysisId = analysisId
-        self.timestamp = timestamp
-        self.status = status
-        self.eventType = eventType
-        self.relapseId = relapseId
-        self.addictionId = addictionId
-        self.sectionsJSON = sectionsJSON
-        self.sectionsCompleted = sectionsCompleted
-        self.sectionsRemaining = sectionsRemaining
-        self.triggerSummary = triggerSummary
-        self.triggerDetailsJSON = triggerDetailsJSON
-        self.fasterMappingJSON = fasterMappingJSON
-        self.actionPlanJSON = actionPlanJSON
-        self.actionItemCount = actionItemCount
-        self.sharingJSON = sharingJSON
-        self.linkedEntitiesJSON = linkedEntitiesJSON
-        self.completedAt = completedAt
-        self.message = message
-        self.synced = synced
-        self.createdAt = createdAt
-        self.modifiedAt = modifiedAt
-    }
-}
-
-extension RRPostMortem {
-    var sections: PostMortemSectionsPayload? {
-        get {
-            guard let json = sectionsJSON,
-                  let data = json.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode(PostMortemSectionsPayload.self, from: data) else {
-                return nil
-            }
-            return decoded
-        }
-        set {
-            if let encoded = newValue,
-               let data = try? JSONEncoder().encode(encoded),
-               let json = String(data: data, encoding: .utf8) {
-                sectionsJSON = json
-            } else {
-                sectionsJSON = nil
-            }
-        }
-    }
-
-    var triggerDetails: [TriggerDetailPayload] {
-        get {
-            guard let json = triggerDetailsJSON,
-                  let data = json.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode([TriggerDetailPayload].self, from: data) else {
-                return []
-            }
-            return decoded
-        }
-        set {
-            if let data = try? JSONEncoder().encode(newValue),
-               let json = String(data: data, encoding: .utf8) {
-                triggerDetailsJSON = json
-            }
-        }
-    }
-
-    var fasterMapping: [FasterMappingEntryPayload] {
-        get {
-            guard let json = fasterMappingJSON,
-                  let data = json.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode([FasterMappingEntryPayload].self, from: data) else {
-                return []
-            }
-            return decoded
-        }
-        set {
-            if let data = try? JSONEncoder().encode(newValue),
-               let json = String(data: data, encoding: .utf8) {
-                fasterMappingJSON = json
-            }
-        }
-    }
-
-    var actionPlan: [ActionPlanItemPayload] {
-        get {
-            guard let json = actionPlanJSON,
-                  let data = json.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode([ActionPlanItemPayload].self, from: data) else {
-                return []
-            }
-            return decoded
-        }
-        set {
-            if let data = try? JSONEncoder().encode(newValue),
-               let json = String(data: data, encoding: .utf8) {
-                actionPlanJSON = json
-            }
-        }
-    }
-
-    var sharing: SharingStatusPayload? {
-        get {
-            guard let json = sharingJSON,
-                  let data = json.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode(SharingStatusPayload.self, from: data) else {
-                return nil
-            }
-            return decoded
-        }
-        set {
-            if let encoded = newValue,
-               let data = try? JSONEncoder().encode(encoded),
-               let json = String(data: data, encoding: .utf8) {
-                sharingJSON = json
-            } else {
-                sharingJSON = nil
-            }
-        }
-    }
-
-    var linkedEntities: LinkedEntitiesPayload? {
-        get {
-            guard let json = linkedEntitiesJSON,
-                  let data = json.data(using: .utf8),
-                  let decoded = try? JSONDecoder().decode(LinkedEntitiesPayload.self, from: data) else {
-                return nil
-            }
-            return decoded
-        }
-        set {
-            if let encoded = newValue,
-               let data = try? JSONEncoder().encode(encoded),
-               let json = String(data: data, encoding: .utf8) {
-                linkedEntitiesJSON = json
-            } else {
-                linkedEntitiesJSON = nil
-            }
-        }
-    }
-}
-
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -2205,19 +1677,9 @@ enum RRModelConfiguration {
         RRDailyScore.self,
         RRVisionStatement.self,
         RRQuickActionItem.self,
-        RRPCIProfile.self,
-        RRPCIProfileVersion.self,
-        RRPCIDailyEntry.self,
-        RRUserRole.self,
-        RRKnownEmotionalTrigger.self,
-        RRBowtieSession.self,
-        RRBowtieMarker.self,
-        RRBackboneProcessing.self,
-        RRPPPEntry.self,
-        RRPostMortem.self,
-        RRTriggerDefinition.self,
-        RRTriggerLogEntry.self,
-        RRCopingStrategy.self,
+        RRLBIProfile.self,
+        RRLBIProfileVersion.self,
+        RRLBIDailyEntry.self,
     ]
 
     static var schema: Schema {

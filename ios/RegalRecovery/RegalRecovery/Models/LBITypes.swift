@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - PCI Dimension Type
+// MARK: - LBI Dimension Type
 
-enum PCIDimensionType: String, Codable, CaseIterable, Identifiable {
+enum LBIDimensionType: String, Codable, CaseIterable, Identifiable {
     case physicalHealth = "physical_health"
     case environment = "environment"
     case work = "work"
@@ -79,16 +79,16 @@ enum PCIDimensionType: String, Codable, CaseIterable, Identifiable {
     var isPositiveCategory: Bool { self == .interests }
 }
 
-// MARK: - PCI Risk Level
+// MARK: - LBI Risk Level
 
-enum PCIRiskLevel: String, Codable, CaseIterable {
+enum LBIRiskLevel: String, Codable, CaseIterable {
     case optimalHealth = "optimal_health"
     case stableSolidity = "stable_solidity"
     case mediumRisk = "medium_risk"
     case highRisk = "high_risk"
     case veryHighRisk = "very_high_risk"
 
-    static func from(weeklyScore: Int) -> PCIRiskLevel {
+    static func from(weeklyScore: Int) -> LBIRiskLevel {
         switch weeklyScore {
         case 0...9: return .optimalHealth
         case 10...19: return .stableSolidity
@@ -139,21 +139,21 @@ enum PCIRiskLevel: String, Codable, CaseIterable {
     }
 }
 
-// MARK: - PCI Codable Types (stored as JSON in profile versions)
+// MARK: - LBI Codable Types (stored as JSON in profile versions)
 
-struct PCIDimension: Codable, Identifiable {
+struct LBIDimension: Codable, Identifiable {
     var id: UUID
-    var dimensionType: PCIDimensionType
-    var indicators: [PCIIndicator]
+    var dimensionType: LBIDimensionType
+    var indicators: [LBIIndicator]
 
-    init(id: UUID = UUID(), dimensionType: PCIDimensionType, indicators: [PCIIndicator] = []) {
+    init(id: UUID = UUID(), dimensionType: LBIDimensionType, indicators: [LBIIndicator] = []) {
         self.id = id
         self.dimensionType = dimensionType
         self.indicators = indicators
     }
 }
 
-struct PCIIndicator: Codable, Identifiable {
+struct LBIIndicator: Codable, Identifiable {
     var id: UUID
     var text: String
     var isPositive: Bool
@@ -165,14 +165,14 @@ struct PCIIndicator: Codable, Identifiable {
     }
 }
 
-struct PCICriticalItem: Codable, Identifiable {
+struct LBICriticalItem: Codable, Identifiable {
     var id: UUID
-    var dimensionType: PCIDimensionType
+    var dimensionType: LBIDimensionType
     var displayText: String
     var originalText: String
     var sortOrder: Int
 
-    init(id: UUID = UUID(), dimensionType: PCIDimensionType, displayText: String, originalText: String, sortOrder: Int = 0) {
+    init(id: UUID = UUID(), dimensionType: LBIDimensionType, displayText: String, originalText: String, sortOrder: Int = 0) {
         self.id = id
         self.dimensionType = dimensionType
         self.displayText = displayText

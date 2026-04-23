@@ -1,8 +1,8 @@
-// Views/Activities/PCI/PCIPsychoeducationView.swift
+// Views/Activities/LBI/LBIPsychoeducationView.swift
 
 import SwiftUI
 
-struct PCIPsychoeducationView: View {
+struct LBIPsychoeducationView: View {
     let onGetStarted: () -> Void
 
     var body: some View {
@@ -109,5 +109,5 @@ struct PCIPsychoeducationView: View {
 }
 
 #Preview {
-    PCIPsychoeducationView(onGetStarted: {})
+    LBIPsychoeducationView(onGetStarted: {})
 }

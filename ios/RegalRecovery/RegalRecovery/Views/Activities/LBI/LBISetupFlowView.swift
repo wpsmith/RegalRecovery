@@ -1,28 +1,28 @@
-// Views/Activities/PCI/PCISetupFlowView.swift
+// Views/Activities/LBI/LBISetupFlowView.swift
 
 import SwiftUI
 import SwiftData
 
-struct PCISetupFlowView: View {
+struct LBISetupFlowView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
-    @State private var viewModel = PCISetupViewModel()
+    @State private var viewModel = LBISetupViewModel()
 
     var body: some View {
         NavigationStack {
             Group {
                 switch viewModel.currentStep {
                 case .psychoeducation:
-                    PCIPsychoeducationView(onGetStarted: {
+                    LBIPsychoeducationView(onGetStarted: {
                         viewModel.startSetup()
                     })
                 case .dimension:
-                    PCIDimensionEntryView(viewModel: viewModel)
+                    LBIDimensionEntryView(viewModel: viewModel)
                 case .criticalSelection:
-                    PCICriticalSelectionView(viewModel: viewModel)
+                    LBICriticalSelectionView(viewModel: viewModel)
                 case .confirmation:
-                    PCISetupConfirmationView(viewModel: viewModel, onComplete: {
+                    LBISetupConfirmationView(viewModel: viewModel, onComplete: {
                         saveAndDismiss()
                     })
                 }
@@ -73,6 +73,6 @@ struct PCISetupFlowView: View {
 }
 
 #Preview {
-    PCISetupFlowView()
+    LBISetupFlowView()
         .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
 }

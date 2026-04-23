@@ -1136,7 +1136,7 @@ struct DailyEligibleActivity {
             icon: "checklist",
             multiplePerDay: false,
             maxPerDay: 1,
-            defaultEnabled: false,
+            defaultEnabled: true,
             typicalHour: 21,
             typicalMinute: 0,
             typicalBlock: "Evening",

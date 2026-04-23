@@ -119,9 +119,8 @@ final class FeatureFlagService {
         flags["activity.phone-calls"] = true
         flags["activity.prayer"] = true
         flags["activity.integrity-inventory"] = false
-        flags["feature.lbi"] = false
-        flags["activity.pci"] = false
-        flags["activity.triggers"] = true
+        flags["activity.lbi"] = true
+        flags["feature.lbi"] = true
 
         // App Architecture
         flags["feature.today-view"] = false
@@ -131,11 +130,10 @@ final class FeatureFlagService {
 
         // Recovery Work & Tools
         flags["feature.3circles"] = true
-        flags["feature.triggers"] = true
         flags["feature.vision"] = true
         flags["feature.partners.redemptiveliving.backbone"] = false
         flags["feature.relapse-prevention-plan"] = false
-        flags["feature.post-mortem"] = true
+        flags["feature.post-mortem"] = false
 
         // Assessments
         flags["assessment.sast-r"] = false

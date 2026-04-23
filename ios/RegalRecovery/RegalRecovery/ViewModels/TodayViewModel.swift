@@ -78,9 +78,9 @@ class TodayViewModel {
         loadRecoveryWorkCards(context: context)
         loadTodayActivityLog(context: context)
 
-        // Backfill PCI missed days
+        // Backfill LBI missed days
         if let userId = (try? context.fetch(FetchDescriptor<RRUser>()))?.first?.id {
-            PCIMissedDayService.backfillMissedDays(context: context, userId: userId)
+            LBIMissedDayService.backfillMissedDays(context: context, userId: userId)
         }
     }
 
@@ -398,8 +398,8 @@ class TodayViewModel {
             }
         }
 
-        // PCI / Life Balance
-        let pciDesc = FetchDescriptor<RRPCIDailyEntry>(
+        // LBI / Life Balance
+        let pciDesc = FetchDescriptor<RRLBIDailyEntry>(
             predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }
         )
         if let results = try? context.fetch(pciDesc) {
@@ -557,7 +557,7 @@ class TodayViewModel {
             return fetchDates(RRFASTEREntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
         }
         if activityType == "lbi" {
-            return fetchDates(RRPCIDailyEntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.createdAt, context: context)
+            return fetchDates(RRLBIDailyEntry.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.createdAt, context: context)
         }
         if activityType == ActivityType.urgeLog.rawValue {
             return fetchDates(RRUrgeLog.self, predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow }, dateKeyPath: \.date, context: context)
@@ -675,7 +675,7 @@ class TodayViewModel {
 
         if activityType == "lbi" {
             return hasRecord(
-                RRPCIDailyEntry.self,
+                RRLBIDailyEntry.self,
                 predicate: #Predicate { $0.date >= todayStart && $0.date < tomorrow && $0.isMissedDay == false },
                 context: context
             )

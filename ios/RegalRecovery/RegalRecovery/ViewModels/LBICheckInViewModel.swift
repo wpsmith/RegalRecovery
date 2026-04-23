@@ -3,11 +3,11 @@ import SwiftUI
 import SwiftData
 
 @Observable
-class PCICheckInViewModel {
+class LBICheckInViewModel {
 
     // MARK: - State
 
-    var criticalItems: [PCICriticalItem] = []
+    var criticalItems: [LBICriticalItem] = []
     var toggleStates: [UUID: Bool] = [:]
     var isEditingExisting: Bool = false
     var existingEntryId: UUID?
@@ -32,9 +32,9 @@ class PCICheckInViewModel {
         isLoading = true
         defer { isLoading = false }
 
-        // 1. Fetch active RRPCIProfile for userId
+        // 1. Fetch active RRLBIProfile for userId
         let uid = userId // UUID capture for predicate
-        let profileDescriptor = FetchDescriptor<RRPCIProfile>(
+        let profileDescriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == uid && $0.isActive }
         )
 
@@ -46,10 +46,10 @@ class PCICheckInViewModel {
 
         hasActiveProfile = true
 
-        // 2. Get latest RRPCIProfileVersion (highest versionNumber > 0)
+        // 2. Get latest RRLBIProfileVersion (highest versionNumber > 0)
         let profileId = profile.id
-        let versionDescriptor = FetchDescriptor<RRPCIProfileVersion>(
-            predicate: #Predicate<RRPCIProfileVersion> { version in
+        let versionDescriptor = FetchDescriptor<RRLBIProfileVersion>(
+            predicate: #Predicate<RRLBIProfileVersion> { version in
                 version.profileId == profileId && version.versionNumber > 0
             },
             sortBy: [SortDescriptor(\.versionNumber, order: .reverse)]
@@ -63,13 +63,13 @@ class PCICheckInViewModel {
         setupComplete = true
         activeProfileVersionId = latestVersion.id
 
-        // 3. Decode criticalItemsJSON -> [PCICriticalItem]
+        // 3. Decode criticalItemsJSON -> [LBICriticalItem]
         let items = latestVersion.criticalItems
 
         // 4. Set criticalItems sorted by sortOrder
         criticalItems = items.sorted { $0.sortOrder < $1.sortOrder }
 
-        // 5. Check for existing RRPCIDailyEntry for today
+        // 5. Check for existing RRLBIDailyEntry for today
         let todayStart = Calendar.current.startOfDay(for: Date())
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: todayStart) else {
             // Initialize all toggleStates to false
@@ -79,8 +79,8 @@ class PCICheckInViewModel {
             return
         }
 
-        let entryDescriptor = FetchDescriptor<RRPCIDailyEntry>(
-            predicate: #Predicate<RRPCIDailyEntry> { entry in
+        let entryDescriptor = FetchDescriptor<RRLBIDailyEntry>(
+            predicate: #Predicate<RRLBIDailyEntry> { entry in
                 entry.userId == uid && entry.date >= todayStart && entry.date < tomorrow
             }
         )
@@ -135,7 +135,7 @@ class PCICheckInViewModel {
 
         if isEditingExisting, let entryId = existingEntryId {
             // Update existing entry
-            let entryDescriptor = FetchDescriptor<RRPCIDailyEntry>(
+            let entryDescriptor = FetchDescriptor<RRLBIDailyEntry>(
                 predicate: #Predicate { $0.id == entryId }
             )
 
@@ -146,7 +146,7 @@ class PCICheckInViewModel {
             }
         } else {
             // Create new entry
-            let newEntry = RRPCIDailyEntry(
+            let newEntry = RRLBIDailyEntry(
                 userId: userId,
                 date: todayStart,
                 profileVersionId: versionId,

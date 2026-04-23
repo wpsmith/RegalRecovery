@@ -1,0 +1,31 @@
+--- a/RegalRecovery.xcodeproj/project.pbxproj
++++ b/RegalRecovery.xcodeproj/project.pbxproj
+@@ -156,6 +156,7 @@
+ 		10000522 /* PCICriticalSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000522 /* PCICriticalSelectionView.swift */; };
+ 		10000523 /* PCIWeeklySummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000523 /* PCIWeeklySummaryCard.swift */; };
++		e79bd80173024319aa463702d16506e7 /* PCICheckInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7dae1353664946c8be82c982d7920395 /* PCICheckInView.swift */; };
+ 		10000600 /* TimeJournalEntryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000600 /* TimeJournalEntryViewModel.swift */; };
+ 		10000601 /* LocationField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000601 /* LocationField.swift */; };
+@@ -424,6 +425,7 @@
+ 		20000521 /* PCIPsychoeducationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIPsychoeducationView.swift; sourceTree = "<group>"; };
+ 		20000522 /* PCICriticalSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICriticalSelectionView.swift; sourceTree = "<group>"; };
+ 		20000523 /* PCIWeeklySummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCIWeeklySummaryCard.swift; sourceTree = "<group>"; };
++		7dae1353664946c8be82c982d7920395 /* PCICheckInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCICheckInView.swift; sourceTree = "<group>"; };
+ 		20000600 /* TimeJournalEntryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeJournalEntryViewModel.swift; sourceTree = "<group>"; };
+ 		20000601 /* LocationField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationField.swift; sourceTree = "<group>"; };
+@@ -1024,6 +1026,7 @@
+ 				BFD9987DFCC6D5A757E5C1F1 /* PCISetupFlowView.swift */,
+ 				1CE8EDBD8EF9557997DD08D3 /* PCIDimensionEntryView.swift */,
+ 				F7C6E48DCD91F04F58511767 /* PCISetupConfirmationView.swift */,
++				7dae1353664946c8be82c982d7920395 /* PCICheckInView.swift */,
+ 			);
+ 			path = PCI;
+ 			sourceTree = "<group>";
+@@ -1210,6 +1213,7 @@
+ 				10000521 /* PCIPsychoeducationView.swift in Sources */,
+ 				10000522 /* PCICriticalSelectionView.swift in Sources */,
+ 				10000523 /* PCIWeeklySummaryCard.swift in Sources */,
++				e79bd80173024319aa463702d16506e7 /* PCICheckInView.swift in Sources */,
+ 				10000404 /* FASTERResultsView.swift in Sources */,
+ 				10000007 /* Types.swift in Sources */,
+ 				10000514 /* PCITypes.swift in Sources */,

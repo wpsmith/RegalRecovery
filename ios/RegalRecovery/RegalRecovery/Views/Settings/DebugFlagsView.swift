@@ -14,8 +14,6 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
         FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: true),
         FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: true),
-        FeatureFlag(key: "feature.motivations", label: "Motivations", enabled: true),
-        FeatureFlag(key: "feature.triggers", label: "Triggers", enabled: true),
     ]
 
     @State private var activities: [FeatureFlag] = [
@@ -40,8 +38,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.phone-calls", label: "Phone Calls", enabled: true),
         FeatureFlag(key: "activity.prayer", label: "Prayer", enabled: true),
         FeatureFlag(key: "activity.integrity-inventory", label: "Integrity Inventory", enabled: false),
-        FeatureFlag(key: "feature.lbi", label: "Life Balance", enabled: false),
-        FeatureFlag(key: "activity.triggers", label: "Trigger Logging", enabled: true),
+        FeatureFlag(key: "activity.lbi", label: "Life Balance", enabled: true),
     ]
 
     @State private var assessments: [FeatureFlag] = [
@@ -248,8 +245,6 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "feature.quick-actions", label: "Quick Actions", enabled: true),
         FeatureFlag(key: "feature.3circles", label: "3 Circles", enabled: true),
         FeatureFlag(key: "feature.vision", label: "Vision Statement", enabled: true),
-        FeatureFlag(key: "feature.motivations", label: "Motivations", enabled: true),
-        FeatureFlag(key: "feature.triggers", label: "Triggers", enabled: true),
     ]
 
     private static let defaultActivities: [FeatureFlag] = [
@@ -272,8 +267,7 @@ struct DebugFlagsView: View {
         FeatureFlag(key: "activity.phone-calls", label: "Phone Calls", enabled: true),
         FeatureFlag(key: "activity.prayer", label: "Prayer", enabled: true),
         FeatureFlag(key: "activity.integrity-inventory", label: "Integrity Inventory", enabled: false),
-        FeatureFlag(key: "feature.lbi", label: "Life Balance", enabled: false),
-        FeatureFlag(key: "activity.triggers", label: "Trigger Logging", enabled: true),
+        FeatureFlag(key: "activity.lbi", label: "Life Balance", enabled: true),
     ]
 
     private static let defaultAssessments: [FeatureFlag] = [

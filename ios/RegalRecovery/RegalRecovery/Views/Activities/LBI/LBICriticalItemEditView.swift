@@ -1,14 +1,14 @@
-// Views/Activities/PCI/PCICriticalItemEditView.swift
+// Views/Activities/LBI/LBICriticalItemEditView.swift
 
 import SwiftUI
 import SwiftData
 import UIKit
 
-struct PCICriticalItemEditView: View {
+struct LBICriticalItemEditView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
-    @State private var viewModel = PCIProfileEditViewModel()
+    @State private var viewModel = LBIProfileEditViewModel()
 
     var body: some View {
         NavigationStack {
@@ -107,7 +107,7 @@ struct PCICriticalItemEditView: View {
     // MARK: - Indicator Row
 
     @ViewBuilder
-    private func indicatorRow(dimensionType: PCIDimensionType, indicator: PCIIndicator) -> some View {
+    private func indicatorRow(dimensionType: LBIDimensionType, indicator: LBIIndicator) -> some View {
         let isSelected = viewModel.selectedCriticalIds.contains(indicator.id)
         let isDisabled = !isSelected && !viewModel.canSelectMore
 
@@ -160,14 +160,14 @@ struct PCICriticalItemEditView: View {
 
     private var groupedIndicators: [GroupedIndicators] {
         // Group indicators by dimension type
-        var groups: [PCIDimensionType: [(dimensionType: PCIDimensionType, indicator: PCIIndicator)]] = [:]
+        var groups: [LBIDimensionType: [(dimensionType: LBIDimensionType, indicator: LBIIndicator)]] = [:]
 
         for item in viewModel.allIndicators {
             groups[item.dimensionType, default: []].append(item)
         }
 
         // Sort by dimension type sort order
-        let sortedTypes = PCIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
+        let sortedTypes = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
 
         return sortedTypes.compactMap { dimensionType in
             guard let indicators = groups[dimensionType], !indicators.isEmpty else {
@@ -194,11 +194,11 @@ struct PCICriticalItemEditView: View {
 // MARK: - Supporting Types
 
 private struct GroupedIndicators {
-    let dimensionType: PCIDimensionType
-    let indicators: [(dimensionType: PCIDimensionType, indicator: PCIIndicator)]
+    let dimensionType: LBIDimensionType
+    let indicators: [(dimensionType: LBIDimensionType, indicator: LBIIndicator)]
 }
 
 #Preview {
-    PCICriticalItemEditView()
+    LBICriticalItemEditView()
         .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
 }

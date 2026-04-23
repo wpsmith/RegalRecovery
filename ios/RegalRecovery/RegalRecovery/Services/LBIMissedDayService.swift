@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-struct PCIMissedDayService {
+struct LBIMissedDayService {
 
     /// Check for and backfill any missed days between the last entry and yesterday.
     /// Does NOT create an entry for today.
@@ -9,9 +9,9 @@ struct PCIMissedDayService {
     static func backfillMissedDays(context: ModelContext, userId: UUID) {
         let calendar = Calendar.current
 
-        // 1. Fetch active RRPCIProfile for userId
+        // 1. Fetch active RRLBIProfile for userId
         let uid = userId
-        let profileDescriptor = FetchDescriptor<RRPCIProfile>(
+        let profileDescriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == uid && $0.isActive == true }
         )
 
@@ -32,8 +32,8 @@ struct PCIMissedDayService {
         // 3. Determine earliest date to check: the effectiveFrom of version 1 (first completed setup)
         let setupDate = calendar.startOfDay(for: firstVersion.effectiveFrom)
 
-        // 4. Fetch all existing RRPCIDailyEntry dates for this userId
-        let entriesDescriptor = FetchDescriptor<RRPCIDailyEntry>(
+        // 4. Fetch all existing RRLBIDailyEntry dates for this userId
+        let entriesDescriptor = FetchDescriptor<RRLBIDailyEntry>(
             predicate: #Predicate { $0.userId == uid }
         )
 
@@ -58,7 +58,7 @@ struct PCIMissedDayService {
                 // Find active version for this date
                 if let version = activeVersion(for: currentDate, versions: sortedVersions) {
                     // Create missed-day entry
-                    let entry = RRPCIDailyEntry(
+                    let entry = RRLBIDailyEntry(
                         userId: userId,
                         date: currentDate,
                         profileVersionId: version.id
@@ -93,8 +93,8 @@ struct PCIMissedDayService {
     /// Returns the version with the highest versionNumber whose effectiveFrom <= date.
     static func activeVersion(
         for date: Date,
-        versions: [RRPCIProfileVersion]
-    ) -> RRPCIProfileVersion? {
+        versions: [RRLBIProfileVersion]
+    ) -> RRLBIProfileVersion? {
         let calendar = Calendar.current
         let targetDate = calendar.startOfDay(for: date)
 

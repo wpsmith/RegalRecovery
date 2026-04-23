@@ -4,32 +4,32 @@ import SwiftData
 
 // MARK: - Setup Step
 
-enum PCISetupStep: Equatable {
+enum LBISetupStep: Equatable {
     case psychoeducation
     case dimension(Int)
     case criticalSelection
     case confirmation
 }
 
-// MARK: - PCI Setup ViewModel
+// MARK: - LBI Setup ViewModel
 
 @Observable
-class PCISetupViewModel {
+class LBISetupViewModel {
 
     // MARK: - Flow State
 
-    var currentStep: PCISetupStep = .psychoeducation
+    var currentStep: LBISetupStep = .psychoeducation
 
     // MARK: - Dimension Entry State
 
     /// Working copy of indicator texts entered for each dimension. Maps dimension type to array of indicator texts.
-    var dimensionIndicators: [PCIDimensionType: [String]] = [:]
+    var dimensionIndicators: [LBIDimensionType: [String]] = [:]
 
     /// Current dimension's text field values (1-5 fields). Updated as user types.
     var currentIndicatorTexts: [String] = [""]
 
     /// All built indicators from all dimensions, for display in critical selection.
-    var allBuiltIndicators: [(dimensionType: PCIDimensionType, indicator: PCIIndicator)] = []
+    var allBuiltIndicators: [(dimensionType: LBIDimensionType, indicator: LBIIndicator)] = []
 
     // MARK: - Critical Selection State
 
@@ -47,16 +47,16 @@ class PCISetupViewModel {
     }
 
     /// Current dimension type based on sorted order.
-    var currentDimensionType: PCIDimensionType? {
-        let sorted = PCIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
+    var currentDimensionType: LBIDimensionType? {
+        let sorted = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
         guard currentDimensionIndex < sorted.count else { return nil }
         return sorted[currentDimensionIndex]
     }
 
     /// Current dimension content for display.
-    var currentDimensionContent: PCIDimensionContent? {
+    var currentDimensionContent: LBIDimensionContent? {
         guard let type = currentDimensionType else { return nil }
-        return PCIDimensionContent.content(for: type)
+        return LBIDimensionContent.content(for: type)
     }
 
     /// Progress fraction (0.0 - 1.0) for dimension entry.
@@ -210,12 +210,12 @@ class PCISetupViewModel {
     private func buildAllIndicators() {
         allBuiltIndicators = []
 
-        let sortedTypes = PCIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
+        let sortedTypes = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
 
         for dimensionType in sortedTypes {
             let texts = dimensionIndicators[dimensionType] ?? []
             for text in texts {
-                let indicator = PCIIndicator(
+                let indicator = LBIIndicator(
                     text: text,
                     isPositive: dimensionType.isPositiveCategory
                 )
@@ -227,24 +227,24 @@ class PCISetupViewModel {
     // MARK: - Build Final Data
 
     /// Build final dimensions array for profile version.
-    func buildDimensions() -> [PCIDimension] {
-        let sortedTypes = PCIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
+    func buildDimensions() -> [LBIDimension] {
+        let sortedTypes = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
 
         return sortedTypes.compactMap { dimensionType in
             let texts = dimensionIndicators[dimensionType] ?? []
             guard !texts.isEmpty else { return nil }
 
             let indicators = texts.map { text in
-                PCIIndicator(text: text, isPositive: dimensionType.isPositiveCategory)
+                LBIIndicator(text: text, isPositive: dimensionType.isPositiveCategory)
             }
 
-            return PCIDimension(dimensionType: dimensionType, indicators: indicators)
+            return LBIDimension(dimensionType: dimensionType, indicators: indicators)
         }
     }
 
     /// Build final critical items array from selected indicator IDs.
-    func buildCriticalItems() -> [PCICriticalItem] {
-        var criticalItems: [PCICriticalItem] = []
+    func buildCriticalItems() -> [LBICriticalItem] {
+        var criticalItems: [LBICriticalItem] = []
 
         for (index, selected) in allBuiltIndicators.enumerated() {
             guard selectedCriticalIds.contains(selected.indicator.id) else { continue }
@@ -261,7 +261,7 @@ class PCISetupViewModel {
                 displayText = originalText
             }
 
-            let criticalItem = PCICriticalItem(
+            let criticalItem = LBICriticalItem(
                 id: indicator.id,
                 dimensionType: dimensionType,
                 displayText: displayText,
@@ -284,16 +284,16 @@ class PCISetupViewModel {
         let criticalItems = buildCriticalItems()
 
         // Find or create profile
-        let profileDescriptor = FetchDescriptor<RRPCIProfile>(
+        let profileDescriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == userId }
         )
         let existingProfile = try? context.fetch(profileDescriptor).first
 
-        let profile: RRPCIProfile
+        let profile: RRLBIProfile
         if let existing = existingProfile {
             profile = existing
         } else {
-            profile = RRPCIProfile(userId: userId, isActive: true)
+            profile = RRLBIProfile(userId: userId, isActive: true)
             context.insert(profile)
         }
 
@@ -305,7 +305,7 @@ class PCISetupViewModel {
         let criticalItemsJSON = criticalItemsData.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
 
         // Create version 1 (completed setup)
-        let version = RRPCIProfileVersion(
+        let version = RRLBIProfileVersion(
             profileId: profile.id,
             versionNumber: 1,
             dimensionsJSON: dimensionsJSON,
@@ -317,8 +317,8 @@ class PCISetupViewModel {
 
         // Mark any draft version (version 0) as obsolete by deleting it
         let profileId = profile.id
-        let draftDescriptor = FetchDescriptor<RRPCIProfileVersion>(
-            predicate: #Predicate<RRPCIProfileVersion> { version in
+        let draftDescriptor = FetchDescriptor<RRLBIProfileVersion>(
+            predicate: #Predicate<RRLBIProfileVersion> { version in
                 version.profileId == profileId && version.versionNumber == 0
             }
         )
@@ -334,19 +334,19 @@ class PCISetupViewModel {
     func saveDraftProgress(context: ModelContext, userId: UUID) {
         // Build current progress
         let dimensions = buildDimensions()
-        let criticalItems: [PCICriticalItem] = [] // Draft doesn't include critical items yet
+        let criticalItems: [LBICriticalItem] = [] // Draft doesn't include critical items yet
 
         // Find or create profile
-        let profileDescriptor = FetchDescriptor<RRPCIProfile>(
+        let profileDescriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == userId }
         )
         let existingProfile = try? context.fetch(profileDescriptor).first
 
-        let profile: RRPCIProfile
+        let profile: RRLBIProfile
         if let existing = existingProfile {
             profile = existing
         } else {
-            profile = RRPCIProfile(userId: userId, isActive: true)
+            profile = RRLBIProfile(userId: userId, isActive: true)
             context.insert(profile)
         }
 
@@ -359,8 +359,8 @@ class PCISetupViewModel {
 
         // Find existing draft version or create new
         let profileId = profile.id
-        let draftDescriptor = FetchDescriptor<RRPCIProfileVersion>(
-            predicate: #Predicate<RRPCIProfileVersion> { version in
+        let draftDescriptor = FetchDescriptor<RRLBIProfileVersion>(
+            predicate: #Predicate<RRLBIProfileVersion> { version in
                 version.profileId == profileId && version.versionNumber == 0
             }
         )
@@ -370,7 +370,7 @@ class PCISetupViewModel {
             existingDraft.criticalItemsJSON = criticalItemsJSON
         } else {
             // Create new draft version
-            let draftVersion = RRPCIProfileVersion(
+            let draftVersion = RRLBIProfileVersion(
                 profileId: profile.id,
                 versionNumber: 0,
                 dimensionsJSON: dimensionsJSON,
@@ -389,7 +389,7 @@ class PCISetupViewModel {
     /// Returns true if should continue setup, false if should skip to check-in.
     func loadExistingProgress(context: ModelContext, userId: UUID) -> Bool {
         // Check for existing profile
-        let profileDescriptor = FetchDescriptor<RRPCIProfile>(
+        let profileDescriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == userId }
         )
         guard let profile = try? context.fetch(profileDescriptor).first else {
@@ -398,8 +398,8 @@ class PCISetupViewModel {
 
         // Check for completed version (versionNumber > 0)
         let profileId = profile.id
-        let completedDescriptor = FetchDescriptor<RRPCIProfileVersion>(
-            predicate: #Predicate<RRPCIProfileVersion> { version in
+        let completedDescriptor = FetchDescriptor<RRLBIProfileVersion>(
+            predicate: #Predicate<RRLBIProfileVersion> { version in
                 version.profileId == profileId && version.versionNumber > 0
             }
         )
@@ -409,8 +409,8 @@ class PCISetupViewModel {
         }
 
         // Check for draft version (versionNumber == 0)
-        let draftDescriptor = FetchDescriptor<RRPCIProfileVersion>(
-            predicate: #Predicate<RRPCIProfileVersion> { version in
+        let draftDescriptor = FetchDescriptor<RRLBIProfileVersion>(
+            predicate: #Predicate<RRLBIProfileVersion> { version in
                 version.profileId == profileId && version.versionNumber == 0
             }
         )
@@ -427,7 +427,7 @@ class PCISetupViewModel {
         }
 
         // Find the first incomplete dimension to resume from
-        let sortedTypes = PCIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
+        let sortedTypes = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
         if let firstIncompleteIndex = sortedTypes.firstIndex(where: { dimensionIndicators[$0] == nil || dimensionIndicators[$0]!.isEmpty }) {
             currentStep = .dimension(firstIncompleteIndex)
         } else {
@@ -441,7 +441,7 @@ class PCISetupViewModel {
 
     /// Check if user has completed setup (version > 0 exists).
     func hasCompletedSetup(context: ModelContext, userId: UUID) -> Bool {
-        let profileDescriptor = FetchDescriptor<RRPCIProfile>(
+        let profileDescriptor = FetchDescriptor<RRLBIProfile>(
             predicate: #Predicate { $0.userId == userId }
         )
         guard let profile = try? context.fetch(profileDescriptor).first else {
@@ -449,8 +449,8 @@ class PCISetupViewModel {
         }
 
         let profileId = profile.id
-        let completedDescriptor = FetchDescriptor<RRPCIProfileVersion>(
-            predicate: #Predicate<RRPCIProfileVersion> { version in
+        let completedDescriptor = FetchDescriptor<RRLBIProfileVersion>(
+            predicate: #Predicate<RRLBIProfileVersion> { version in
                 version.profileId == profileId && version.versionNumber > 0
             }
         )

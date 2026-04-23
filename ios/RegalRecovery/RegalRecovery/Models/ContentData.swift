@@ -299,7 +299,7 @@ enum ContentData {
         PromptItem(text: "What time of day am I most vulnerable, and what can I do differently then?", category: "triggers", tags: []),
         PromptItem(text: "Map your last week: what situations moved you from green to yellow circle?", category: "triggers", tags: ["3 Circles"]),
         PromptItem(text: "What is the ritual that leads to my acting out, step by step?", category: "triggers", tags: []),
-        PromptItem(text: "How is my PCI score trending, and what does that tell me?", category: "triggers", tags: ["PCI"]),
+        PromptItem(text: "How is my LBI score trending, and what does that tell me?", category: "triggers", tags: ["LBI"]),
         PromptItem(text: "What HALT state (Hungry, Angry, Lonely, Tired) am I in right now?", category: "triggers", tags: []),
         // Amends & Accountability
         PromptItem(text: "Who do I owe an amend to, and what is holding me back?", category: "amends", tags: ["12-Step"]),
@@ -337,7 +337,7 @@ enum ContentData {
         GlossaryTerm(term: "FANOS", definition: "Couples check-in framework: Feelings, Affirmations, Needs, Ownership, Sobriety."),
         GlossaryTerm(term: "FITNAP", definition: "Alternative couples check-in: Feelings, Intimacy, Triggers, Needs, Affirmations, Prayer."),
         GlossaryTerm(term: "3 Circles", definition: "Boundary tool with three rings: Red (acting out), Yellow (warning behaviors), Green (healthy behaviors)."),
-        GlossaryTerm(term: "PCI", definition: "Personal Craziness Index — Patrick Carnes self-assessment measuring life manageability through personal warning behaviors."),
+        GlossaryTerm(term: "LBI", definition: "Personal Craziness Index — Patrick Carnes self-assessment measuring life manageability through personal warning behaviors."),
         GlossaryTerm(term: "SAST-R", definition: "Sexual Addiction Screening Test Revised — validated clinical screening instrument."),
         GlossaryTerm(term: "SA", definition: "Sexaholics Anonymous — defines sobriety as no sex with self and no sex with anyone other than spouse."),
         GlossaryTerm(term: "Celebrate Recovery", definition: "Christ-centered 12-step program addressing hurts, habits, and hang-ups."),

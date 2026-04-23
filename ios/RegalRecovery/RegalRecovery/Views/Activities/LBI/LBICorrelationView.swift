@@ -1,15 +1,15 @@
-// Views/Activities/PCI/PCICorrelationView.swift
+// Views/Activities/LBI/LBICorrelationView.swift
 
 import SwiftUI
 import Charts
 import SwiftData
 
-struct PCICorrelationView: View {
-    let pciEntries: [RRPCIDailyEntry]
+struct LBICorrelationView: View {
+    let pciEntries: [RRLBIDailyEntry]
     let fasterEntries: [RRFASTEREntry]
 
-    private var weeklyScores: [(weekStart: Date, score: Int, riskLevel: PCIRiskLevel)] {
-        PCIScoringService.weeklyScores(weeks: 12, entries: pciEntries)
+    private var weeklyScores: [(weekStart: Date, score: Int, riskLevel: LBIRiskLevel)] {
+        LBIScoringService.weeklyScores(weeks: 12, entries: pciEntries)
     }
 
     private var dateRange: ClosedRange<Date> {
@@ -123,7 +123,7 @@ struct PCICorrelationView: View {
                 .foregroundStyle(Color.rrTextSecondary)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                ForEach(PCIRiskLevel.allCases, id: \.self) { level in
+                ForEach(LBIRiskLevel.allCases, id: \.self) { level in
                     HStack(spacing: 6) {
                         Circle()
                             .fill(level.color)
@@ -315,10 +315,10 @@ struct PCICorrelationView: View {
     let calendar = Calendar.current
     let now = Date()
 
-    // Generate sample PCI entries
+    // Generate sample LBI entries
     let pciEntries = (0..<84).map { dayOffset in
         let date = calendar.date(byAdding: .day, value: -dayOffset, to: now)!
-        return RRPCIDailyEntry(
+        return RRLBIDailyEntry(
             userId: UUID(),
             date: date,
             profileVersionId: UUID(),
@@ -336,5 +336,5 @@ struct PCICorrelationView: View {
         )
     }
 
-    return PCICorrelationView(pciEntries: pciEntries, fasterEntries: fasterEntries)
+    return LBICorrelationView(pciEntries: pciEntries, fasterEntries: fasterEntries)
 }

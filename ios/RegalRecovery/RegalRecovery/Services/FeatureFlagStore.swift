@@ -43,16 +43,7 @@ final class FeatureFlagStore {
             defaults.set(true, forKey: "ff.feature.vision")
         }
 
-        if currentVersion < 2 {
-            defaults.set(true, forKey: "ff.activity.bowtie")
-        }
-
-        if currentVersion < 3 {
-            defaults.set(true, forKey: "ff.feature.triggers")
-            defaults.set(true, forKey: "ff.activity.triggers")
-        }
-
-        defaults.set(3, forKey: migrationKey)
+        defaults.set(1, forKey: migrationKey)
     }
 
     // MARK: - Default Seeding
@@ -126,11 +117,10 @@ final class FeatureFlagStore {
         "activity.phone-calls": true,
         "activity.prayer": true,
         "activity.integrity-inventory": true,
+        "activity.lbi": true,
         "feature.lbi": true,
         "activity.memory-verse": false,
         "activity.acting-in-behaviors": false,
-        "activity.bowtie": true,
-        "activity.triggers": true,
         "activity.voice-journal": false,
 
         // App Architecture
@@ -141,13 +131,10 @@ final class FeatureFlagStore {
 
         // Recovery Work & Tools
         "feature.3circles": true,
-        "feature.triggers": true,
         "feature.vision": true,
         "feature.partners.redemptiveliving.backbone": false,
         "feature.relapse-prevention-plan": false,
-        "feature.post-mortem": true,
-        "feature.motivations": true,
-        "activity.motivations": true,
+        "feature.post-mortem": false,
 
         // Assessments
         "assessment.sast-r": false,

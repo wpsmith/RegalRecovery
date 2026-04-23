@@ -1,10 +1,10 @@
 import SwiftUI
 import SwiftData
 
-struct PCIDimensionEntryView: View {
+struct LBIDimensionEntryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
-    @Bindable var viewModel: PCISetupViewModel
+    @Bindable var viewModel: LBISetupViewModel
 
     var body: some View {
         ScrollView {
