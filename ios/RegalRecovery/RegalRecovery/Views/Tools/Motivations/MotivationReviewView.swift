@@ -1,15 +1,16 @@
-// Views/Tools/Motivations/MotivationReviewView.swift
-
 import SwiftUI
 import SwiftData
 
 struct MotivationReviewView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @Query(filter: #Predicate<RRMotivation> { !$0.isArchived },
            sort: \RRMotivation.importanceRating, order: .reverse)
     private var motivations: [RRMotivation]
 
     @State private var currentIndex: Int = 0
+    @State private var sessionStart: Date = Date()
+    @State private var viewedIndices: Set<Int> = [0]
 
     var body: some View {
         Group {
@@ -22,6 +23,19 @@ struct MotivationReviewView: View {
         .background(Color.rrBackground)
         .navigationTitle("Remember Your Why")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if !motivations.isEmpty {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        logActivity()
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .onChange(of: currentIndex) { _, newValue in
+            viewedIndices.insert(newValue)
+        }
     }
 
     private var emptyState: some View {
@@ -93,6 +107,36 @@ struct MotivationReviewView: View {
                 }
             }
             .padding(.vertical, 12)
+        }
+    }
+
+    private func logActivity() {
+        let durationSeconds = Int(Date().timeIntervalSince(sessionStart))
+        let reviewed = viewedIndices.count
+        let total = motivations.count
+
+        let activity = RRActivity(
+            userId: UUID(),
+            activityType: ActivityType.motivations.rawValue,
+            date: sessionStart,
+            data: JSONPayload([
+                "motivationsReviewed": .int(reviewed),
+                "motivationsTotal": .int(total),
+                "durationSeconds": .int(durationSeconds),
+            ])
+        )
+        modelContext.insert(activity)
+
+        for index in viewedIndices where index < motivations.count {
+            let motivation = motivations[index]
+            motivation.lastSurfacedAt = Date()
+            motivation.surfaceCount += 1
+        }
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("[Motivations] Activity log failed: \(error)")
         }
     }
 }
