@@ -8,6 +8,7 @@ struct TriggerLibraryView: View {
     @State private var newTriggerCategory: TriggerCategory = .emotional
     @State private var validationMessage: String?
     @State private var showingInfoFor: TriggerLibraryViewModel.LibraryItem?
+    @State private var showThreeIsLimitAlert = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -56,6 +57,11 @@ struct TriggerLibraryView: View {
         }
         .sheet(item: $showingInfoFor) { trigger in
             threeIsInfoSheet(trigger)
+        }
+        .alert("Only 2 of the 3 I's", isPresented: $showThreeIsLimitAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Research shows that most people carry two predominant I-wounds — not all three equally. The two you've selected are your primary drivers. If you want to change, unfavorite one first, then favorite a different one.")
         }
         .task {
             if viewModel.allTriggers.isEmpty {
@@ -131,7 +137,13 @@ struct TriggerLibraryView: View {
                                 }
                                 .swipeActions(edge: .leading, allowsFullSwipe: true) {
                                     Button {
-                                        viewModel.toggleFavorite(trigger.id)
+                                        if viewModel.isFavorite(trigger.id) {
+                                            viewModel.toggleFavorite(trigger.id)
+                                        } else if viewModel.canFavorite(trigger.id) {
+                                            viewModel.toggleFavorite(trigger.id)
+                                        } else {
+                                            showThreeIsLimitAlert = true
+                                        }
                                     } label: {
                                         if viewModel.isFavorite(trigger.id) {
                                             Label("Unfavorite", systemImage: "star.slash")
@@ -140,7 +152,6 @@ struct TriggerLibraryView: View {
                                         }
                                     }
                                     .tint(.yellow)
-                                    .disabled(!viewModel.canFavorite(trigger.id))
                                 }
                         }
                     }
