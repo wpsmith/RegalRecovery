@@ -46,6 +46,7 @@
 		10000040 /* MoodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000040 /* MoodViewModel.swift */; };
 		10000041 /* NotificationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000041 /* NotificationViewModel.swift */; };
 		10000042 /* PhoneCallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000042 /* PhoneCallViewModel.swift */; };
+		10000054 /* PostMortemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000054 /* PostMortemViewModel.swift */; };
 		10000043 /* PrayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000043 /* PrayerViewModel.swift */; };
 		10000044 /* PrivacyViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000044 /* PrivacyViewModel.swift */; };
 		10000045 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000045 /* ProfileViewModel.swift */; };
@@ -344,6 +345,7 @@
 		20000040 /* MoodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoodViewModel.swift; sourceTree = "<group>"; };
 		20000041 /* NotificationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewModel.swift; sourceTree = "<group>"; };
 		20000042 /* PhoneCallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneCallViewModel.swift; sourceTree = "<group>"; };
+		20000054 /* PostMortemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemViewModel.swift; sourceTree = "<group>"; };
 		20000043 /* PrayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrayerViewModel.swift; sourceTree = "<group>"; };
 		20000044 /* PrivacyViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyViewModel.swift; sourceTree = "<group>"; };
 		20000045 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
@@ -414,6 +416,7 @@
 		20000113 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
 		20000114 /* StreakViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreakViewModelTests.swift; sourceTree = "<group>"; };
 		20000115 /* UrgeLogViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UrgeLogViewModelTests.swift; sourceTree = "<group>"; };
+		20000116 /* PostMortemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemTests.swift; sourceTree = "<group>"; };
 		20000117 /* ContentData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentData.swift; sourceTree = "<group>"; };
 		20000118 /* FASTERMoodPromptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERMoodPromptView.swift; sourceTree = "<group>"; };
 		20000119 /* FASTERResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FASTERResultsView.swift; sourceTree = "<group>"; };
@@ -794,6 +797,7 @@
 				20000040 /* MoodViewModel.swift */,
 				20000041 /* NotificationViewModel.swift */,
 				20000042 /* PhoneCallViewModel.swift */,
+				20000054 /* PostMortemViewModel.swift */,
 				20000043 /* PrayerViewModel.swift */,
 				20000044 /* PrivacyViewModel.swift */,
 				20000045 /* ProfileViewModel.swift */,
@@ -1225,6 +1229,34 @@
 			path = Affirmations;
 			sourceTree = "<group>";
 		};
+		50000061 /* Unit */ = {
+			isa = PBXGroup;
+			children = (
+				20000110 /* AffirmationsViewModelTests.swift */,
+				20000112 /* EmotionalJournalViewModelTests.swift */,
+				20000116 /* PostMortemTests.swift */,
+				20000113 /* ProfileViewModelTests.swift */,
+				20000114 /* StreakViewModelTests.swift */,
+				20000115 /* UrgeLogViewModelTests.swift */,
+			);
+			path = Unit;
+			sourceTree = "<group>";
+		};
+		50000070 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				20001111 /* aa-bigbook-2nd-edition.pdf */,
+				20002001 /* BigBook */,
+				20000801 /* gratitude-prompts.json */,
+				20003150 /* Confessions */,
+				20003250 /* Humility */,
+				20003350 /* AbsoluteSurrender */,
+				20003450 /* SchoolOfPrayer */,
+				20003550 /* WaitingOnGod */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		50005001 /* Vision */ = {
 			isa = PBXGroup;
 			children = (
@@ -1413,6 +1445,7 @@
 				10000040 /* MoodViewModel.swift in Sources */,
 				10000041 /* NotificationViewModel.swift in Sources */,
 				10000042 /* PhoneCallViewModel.swift in Sources */,
+				10000054 /* PostMortemViewModel.swift in Sources */,
 				10000043 /* PrayerViewModel.swift in Sources */,
 				10000044 /* PrivacyViewModel.swift in Sources */,
 				10000045 /* ProfileViewModel.swift in Sources */,

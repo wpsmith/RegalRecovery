@@ -916,3 +916,127 @@ actor SwiftDataSyncQueueRepository: SyncQueueRepository {
         return try modelContext.fetchCount(descriptor)
     }
 }
+
+// MARK: - Post-Mortem Repository
+
+final class SwiftDataPostMortemRepository: PostMortemRepository, @unchecked Sendable {
+    private let modelContainer: ModelContainer
+
+    init(modelContainer: ModelContainer) {
+        self.modelContainer = modelContainer
+    }
+
+    @MainActor func save(_ postMortem: RRPostMortem) throws {
+        modelContainer.mainContext.insert(postMortem)
+        try modelContainer.mainContext.save()
+    }
+
+    @MainActor func getById(_ id: UUID) throws -> RRPostMortem? {
+        let descriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.id == id }
+        )
+        return try modelContainer.mainContext.fetch(descriptor).first
+    }
+
+    @MainActor func getByAnalysisId(_ analysisId: String, userId: UUID) throws -> RRPostMortem? {
+        let descriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.analysisId == analysisId && $0.userId == userId }
+        )
+        return try modelContainer.mainContext.fetch(descriptor).first
+    }
+
+    @MainActor func getByRelapseId(_ relapseId: String, userId: UUID) throws -> RRPostMortem? {
+        let descriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.relapseId == relapseId && $0.userId == userId }
+        )
+        return try modelContainer.mainContext.fetch(descriptor).first
+    }
+
+    @MainActor func list(
+        userId: UUID,
+        startDate: Date?,
+        endDate: Date?,
+        addictionId: String?,
+        status: String?,
+        eventType: String?,
+        limit: Int,
+        cursor: Date?
+    ) throws -> [RRPostMortem] {
+        // Use a base predicate for userId, then filter in-memory for optional params
+        // (SwiftData #Predicate has limitations with optional chaining)
+        var descriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.userId == userId },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+
+        var results = try modelContainer.mainContext.fetch(descriptor)
+
+        if let startDate {
+            results = results.filter { $0.timestamp >= startDate }
+        }
+        if let endDate {
+            results = results.filter { $0.timestamp <= endDate }
+        }
+        if let addictionId {
+            results = results.filter { $0.addictionId == addictionId }
+        }
+        if let status {
+            results = results.filter { $0.status == status }
+        }
+        if let eventType {
+            results = results.filter { $0.eventType == eventType }
+        }
+        if let cursor {
+            results = results.filter { $0.timestamp < cursor }
+        }
+
+        return Array(results.prefix(limit))
+    }
+
+    @MainActor func findDrafts(userId: UUID) throws -> [RRPostMortem] {
+        let draftStatus = "draft"
+        let descriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.userId == userId && $0.status == draftStatus },
+            sortBy: [SortDescriptor(\.modifiedAt, order: .reverse)]
+        )
+        return try modelContainer.mainContext.fetch(descriptor)
+    }
+
+    @MainActor func update(_ postMortem: RRPostMortem) throws {
+        postMortem.modifiedAt = Date()
+        try modelContainer.mainContext.save()
+    }
+
+    @MainActor func delete(_ postMortem: RRPostMortem) throws {
+        modelContainer.mainContext.delete(postMortem)
+        try modelContainer.mainContext.save()
+    }
+
+    @MainActor func getCompletedForInsights(userId: UUID, addictionId: String?) throws -> [RRPostMortem] {
+        let completeStatus = "complete"
+        let descriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.userId == userId && $0.status == completeStatus },
+            sortBy: [SortDescriptor(\.timestamp, order: .reverse)]
+        )
+        var results = try modelContainer.mainContext.fetch(descriptor)
+        if let addictionId {
+            results = results.filter { $0.addictionId == addictionId }
+        }
+        return results
+    }
+
+    @MainActor func countByStatus(userId: UUID) throws -> (drafts: Int, complete: Int) {
+        let draftStatus = "draft"
+        let completeStatus = "complete"
+        let draftDescriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.userId == userId && $0.status == draftStatus }
+        )
+        let completeDescriptor = FetchDescriptor<RRPostMortem>(
+            predicate: #Predicate { $0.userId == userId && $0.status == completeStatus }
+        )
+        let draftCount = try modelContainer.mainContext.fetchCount(draftDescriptor)
+        let completeCount = try modelContainer.mainContext.fetchCount(completeDescriptor)
+        return (drafts: draftCount, complete: completeCount)
+    }
+}
