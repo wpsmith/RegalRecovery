@@ -40,6 +40,15 @@ struct ToolsView: View {
                             subtitle: "Your Recovery Why"
                         )
                     }
+                    if FeatureFlagStore.shared.isEnabled("activity.motivations") {
+                        toolCard(
+                            destination: MotivationLibraryView(),
+                            icon: "flame.fill",
+                            iconColor: .orange,
+                            title: "Motivations",
+                            subtitle: "Your Recovery Why"
+                        )
+                    }
                 }
                 .padding()
             }

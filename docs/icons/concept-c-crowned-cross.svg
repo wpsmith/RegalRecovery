@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1B2A4A"/>
+      <stop offset="100%" stop-color="#121E38"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0.3" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#EBD06A"/>
+      <stop offset="50%" stop-color="#D4A845"/>
+      <stop offset="100%" stop-color="#B08C38"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="512" cy="475" r="350" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#D4A845" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#D4A845" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="512" cy="475" r="350" fill="url(#glow)"/>
+
+  <!--
+    CONCEPT C: CROWNED CROSS
+    ========================
+    A unified symbol where the cross vertical shaft rises and branches
+    into three crown tines at its top. The horizontal cross arms have
+    gently flared ends. The crown band ties the tines together.
+
+    Coordinate plan:
+    - Center axis: x = 512
+    - Shaft half-width: 46px (shaft from x=466 to x=558)
+    - Horizontal arms: y=448 to y=542 (94px tall), x=280 to x=744
+    - Shaft bottom: y=856
+    - Crown band: y=322 to y=348
+    - Center tine tip: y=120
+    - Side tine tips: y=188 (angled outward)
+    - Side tines reach to about x=396 and x=628
+  -->
+
+  <!-- Cross: vertical shaft -->
+  <rect x="466" y="348" width="92" height="508" rx="4" fill="url(#gold)"/>
+
+  <!-- Cross: horizontal arms -->
+  <path d="
+    M 466 448
+    L 302 448
+    C 294 448, 288 454, 288 462
+    L 288 528
+    C 288 536, 294 542, 302 542
+    L 466 542
+    L 558 542
+    L 722 542
+    C 730 542, 736 536, 736 528
+    L 736 462
+    C 736 454, 730 448, 722 448
+    L 558 448
+    Z
+  " fill="url(#gold)"/>
+
+  <!-- Flared arm tips — left -->
+  <path d="
+    M 302 448
+    L 284 434
+    C 280 430, 274 432, 274 438
+    L 274 452
+    Z
+  " fill="url(#gold)"/>
+  <path d="
+    M 302 542
+    L 284 556
+    C 280 560, 274 558, 274 552
+    L 274 538
+    Z
+  " fill="url(#gold)"/>
+
+  <!-- Flared arm tips — right -->
+  <path d="
+    M 722 448
+    L 740 434
+    C 744 430, 750 432, 750 438
+    L 750 452
+    Z
+  " fill="url(#gold)"/>
+  <path d="
+    M 722 542
+    L 740 556
+    C 744 560, 750 558, 750 552
+    L 750 538
+    Z
+  " fill="url(#gold)"/>
+
+  <!--
+    Crown: three tines rising from the shaft top.
+    The center tine extends straight up. The two side tines
+    angle outward, creating the crown silhouette. All three
+    grow from the shaft width and flare outward.
+  -->
+
+  <!-- Center tine -->
+  <path d="
+    M 490 348
+    L 490 180
+    L 504 128
+    C 508 116, 516 116, 520 128
+    L 534 180
+    L 534 348
+    Z
+  " fill="url(#gold)"/>
+
+  <!-- Left tine — angles outward to the left -->
+  <path d="
+    M 466 348
+    L 438 240
+    L 410 196
+    C 404 186, 394 186, 392 196
+    L 388 224
+    L 412 292
+    L 440 348
+    Z
+  " fill="url(#gold)"/>
+
+  <!-- Right tine — angles outward to the right -->
+  <path d="
+    M 558 348
+    L 586 240
+    L 614 196
+    C 620 186, 630 186, 632 196
+    L 636 224
+    L 612 292
+    L 584 348
+    Z
+  " fill="url(#gold)"/>
+
+  <!-- Crown band — horizontal bar unifying the tines -->
+  <rect x="396" y="322" width="232" height="30" rx="6" fill="url(#gold)"/>
+
+  <!-- Crown band jewel insets (navy circles for depth) -->
+  <circle cx="512" cy="337" r="10" fill="#1B2A4A"/>
+  <circle cx="448" cy="337" r="6.5" fill="#1B2A4A"/>
+  <circle cx="576" cy="337" r="6.5" fill="#1B2A4A"/>
+
+  <!-- Radiant dots at tine tips -->
+  <circle cx="512" cy="120" r="9" fill="#EBD06A" opacity="0.85"/>
+  <circle cx="392" cy="192" r="7" fill="#EBD06A" opacity="0.7"/>
+  <circle cx="632" cy="192" r="7" fill="#EBD06A" opacity="0.7"/>
+</svg>

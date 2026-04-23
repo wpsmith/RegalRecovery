@@ -707,6 +707,7 @@
 			children = (
 				20000008 /* RRModels.swift */,
 				20000501 /* RRTimeJournalEntry.swift */,
+				20006006 /* RRMotivationModels.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -719,6 +720,8 @@
 				20000990 /* SeedPersonas.swift */,
 				20000991 /* SeedPersonaData.swift */,
 				20000011 /* SwiftDataRepositories.swift */,
+				20006011 /* MotivationRepository.swift */,
+				20006012 /* SwiftDataMotivationRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -1382,6 +1385,9 @@
 				10000500 /* TimeJournalTypes.swift in Sources */,
 				10000008 /* RRModels.swift in Sources */,
 				10000501 /* RRTimeJournalEntry.swift in Sources */,
+				10006005 /* MotivationTypes.swift in Sources */,
+				10006006 /* RRMotivationModels.swift in Sources */,
+				10006100 /* MotivationSurfacingCard.swift in Sources */,
 				10000510 /* TimeJournalDailyView.swift in Sources */,
 				10000511 /* TimeJournalHeaderView.swift in Sources */,
 				10000512 /* TimeJournalTimelineView.swift in Sources */,

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background gradient - deep navy -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1E3158"/>
+      <stop offset="100%" stop-color="#0F1B2E"/>
+    </linearGradient>
+    <!-- Shield gradient - gold/amber -->
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8C35A"/>
+      <stop offset="40%" stop-color="#D4A845"/>
+      <stop offset="100%" stop-color="#B8923A"/>
+    </linearGradient>
+    <!-- Cross gradient - lighter gold -->
+    <linearGradient id="crossGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5DFA0"/>
+      <stop offset="100%" stop-color="#E8C35A"/>
+    </linearGradient>
+    <!-- Subtle inner glow on shield -->
+    <filter id="innerGlow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8" result="blur"/>
+      <feOffset dx="0" dy="2" result="offsetBlur"/>
+      <feComposite in="SourceGraphic" in2="offsetBlur" operator="over"/>
+    </filter>
+    <!-- Soft shadow for shield -->
+    <filter id="shieldShadow" x="-15%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Background fill -->
+  <rect width="1024" height="1024" fill="url(#bgGrad)"/>
+
+  <!-- Shield shape - classic pointed shield, centered -->
+  <g filter="url(#shieldShadow)">
+    <path
+      d="M512 160
+         C512 160 340 180 220 200
+         C220 200 210 460 240 560
+         C270 660 360 740 512 860
+         C664 740 754 660 784 560
+         C814 460 804 200 804 200
+         C684 180 512 160 512 160Z"
+      fill="url(#shieldGrad)"
+      stroke="#B8923A"
+      stroke-width="3"
+    />
+  </g>
+
+  <!-- Shield inner border / highlight -->
+  <path
+    d="M512 200
+       C512 200 360 218 260 234
+       C260 234 252 460 276 546
+       C300 632 378 706 512 812
+       C646 706 724 632 748 546
+       C772 460 764 234 764 234
+       C664 218 512 200 512 200Z"
+    fill="none"
+    stroke="#E8C35A"
+    stroke-width="2"
+    opacity="0.4"
+  />
+
+  <!-- Cross - clean, modern proportions, centered on shield -->
+  <!-- The cross is slightly narrower for a modern feel -->
+  <g>
+    <!-- Vertical bar of cross -->
+    <rect
+      x="478" y="280"
+      width="68" height="420"
+      rx="8" ry="8"
+      fill="url(#crossGrad)"
+    />
+    <!-- Horizontal bar of cross -->
+    <rect
+      x="358" y="380"
+      width="308" height="68"
+      rx="8" ry="8"
+      fill="url(#crossGrad)"
+    />
+  </g>
+
+  <!-- Subtle light accent at top of cross -->
+  <rect
+    x="488" y="290"
+    width="48" height="60"
+    rx="4" ry="4"
+    fill="#FFFBE6"
+    opacity="0.25"
+  />
+</svg>
