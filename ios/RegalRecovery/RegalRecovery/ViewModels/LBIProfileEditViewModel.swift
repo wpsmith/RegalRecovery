@@ -223,6 +223,47 @@ class LBIProfileEditViewModel {
         }
     }
 
+    /// Save both indicator and critical item changes as a single new profile version.
+    func saveAll(context: ModelContext, userId: UUID) {
+        guard let profileId = profileId else { return }
+
+        let newVersionNumber = currentVersionNumber + 1
+        let newCriticalItems = buildCriticalItemsFromSelection()
+
+        let dimensionsData = try? JSONEncoder().encode(dimensions)
+        let dimensionsJSON = dimensionsData.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+
+        let criticalItemsData = try? JSONEncoder().encode(newCriticalItems)
+        let criticalItemsJSON = criticalItemsData.flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+
+        let newVersion = RRLBIProfileVersion(
+            profileId: profileId,
+            versionNumber: newVersionNumber,
+            dimensionsJSON: dimensionsJSON,
+            criticalItemsJSON: criticalItemsJSON,
+            effectiveFrom: Date(),
+            createdAt: Date()
+        )
+        context.insert(newVersion)
+
+        currentVersionNumber = newVersionNumber
+        criticalItems = newCriticalItems
+
+        try? context.save()
+    }
+
+    /// Select an indicator for check-in (star it). Returns false if already at 7.
+    func selectForCheckIn(indicatorId: UUID) -> Bool {
+        guard !selectedCriticalIds.contains(indicatorId), canSelectMore else { return false }
+        selectedCriticalIds.insert(indicatorId)
+        return true
+    }
+
+    /// Deselect an indicator from check-in (unstar it).
+    func deselectFromCheckIn(indicatorId: UUID) {
+        selectedCriticalIds.remove(indicatorId)
+    }
+
     // MARK: - Private Helpers
 
     /// Build critical items from current selection.

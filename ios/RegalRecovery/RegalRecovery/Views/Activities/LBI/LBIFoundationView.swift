@@ -11,8 +11,9 @@ struct LBIFoundationView: View {
     @State private var hasCompletedSetup = false
     @State private var didCheck = false
     @State private var viewModel = LBIProfileEditViewModel()
-    @State private var showEditIndicators = false
-    @State private var showEditCritical = false
+    @State private var hasUnsavedChanges = false
+    @State private var showCannotLeaveAlert = false
+    @State private var newIndicatorTexts: [LBIDimensionType: String] = [:]
 
     var body: some View {
         Group {
@@ -31,6 +32,10 @@ struct LBIFoundationView: View {
                     .padding(.horizontal)
                     .padding(.top, 8)
 
+                    if !viewModel.isSelectionComplete {
+                        selectionBanner
+                    }
+
                     TabView(selection: $selectedTab) {
                         indicatorsTab
                             .tag(0)
@@ -42,61 +47,55 @@ struct LBIFoundationView: View {
                 }
                 .navigationTitle("Life Balance")
                 .toolbar {
-                    if selectedTab == 0 {
-                        ToolbarItem(placement: .primaryAction) {
-                            Menu {
-                                Button {
-                                    showEditIndicators = true
-                                } label: {
-                                    Label("Edit Indicators", systemImage: "pencil")
-                                }
-                                Button {
-                                    showEditCritical = true
-                                } label: {
-                                    Label("Edit Check-In Items", systemImage: "star")
-                                }
-                            } label: {
-                                Image(systemName: "ellipsis.circle")
-                            }
+                    if selectedTab == 0 && hasUnsavedChanges {
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Save") { saveChanges() }
+                                .fontWeight(.semibold)
+                                .disabled(!viewModel.isSelectionComplete)
                         }
                     }
                 }
-                .sheet(isPresented: $showEditIndicators) {
-                    LBIProfileEditView()
-                        .onDisappear { reloadProfile() }
-                }
-                .sheet(isPresented: $showEditCritical) {
-                    LBICriticalItemEditView()
-                        .onDisappear { reloadProfile() }
-                }
+                .interactiveDismissDisabled(!viewModel.isSelectionComplete)
+                .navigationBarBackButtonHidden(!viewModel.isSelectionComplete && hasUnsavedChanges)
                 .onAppear { reloadProfile() }
             }
         }
+        .alert("Select 7 Check-In Items", isPresented: $showCannotLeaveAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("You need exactly 7 starred indicators for your daily check-in. You currently have \(viewModel.selectedCount). Swipe right on an indicator to star it.")
+        }
     }
 
-    // MARK: - Indicators Tab (read-only with stars)
+    // MARK: - Selection Banner
+
+    private var selectionBanner: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .foregroundStyle(.white)
+            Text("\(viewModel.selectedCount) of 7 check-in items selected")
+                .font(RRFont.callout)
+                .fontWeight(.medium)
+                .foregroundStyle(.white)
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 10)
+        .background(viewModel.selectedCount < 7 ? Color.orange : Color.rrSuccess)
+    }
+
+    // MARK: - Indicators Tab (editable with swipe)
 
     private var indicatorsTab: some View {
         List {
             ForEach(sortedDimensions, id: \.dimensionType) { dimension in
                 Section {
                     ForEach(dimension.indicators) { indicator in
-                        HStack(spacing: 12) {
-                            if viewModel.selectedCriticalIds.contains(indicator.id) {
-                                Image(systemName: "star.fill")
-                                    .font(.callout)
-                                    .foregroundStyle(.orange)
-                            } else {
-                                Image(systemName: "circle.fill")
-                                    .font(.system(size: 6))
-                                    .foregroundStyle(Color.rrTextSecondary)
-                                    .frame(width: 20)
-                            }
+                        indicatorRow(dimension: dimension, indicator: indicator)
+                    }
 
-                            Text(indicator.text)
-                                .font(RRFont.body)
-                                .foregroundStyle(Color.rrText)
-                        }
+                    if dimension.indicators.count < 5 {
+                        addIndicatorRow(dimensionType: dimension.dimensionType)
                     }
                 } header: {
                     HStack(spacing: 8) {
@@ -105,38 +104,141 @@ struct LBIFoundationView: View {
                             .foregroundStyle(Color.rrPrimary)
                         Text(dimension.dimensionType.displayName)
                     }
+                } footer: {
+                    let starredInDimension = dimension.indicators.filter { viewModel.selectedCriticalIds.contains($0.id) }.count
+                    if starredInDimension > 0 {
+                        Text("\(starredInDimension) starred for check-in")
+                            .font(RRFont.caption)
+                            .foregroundStyle(.orange)
+                    }
                 }
             }
 
-            if !viewModel.criticalItems.isEmpty {
-                Section {
-                    ForEach(viewModel.criticalItems.sorted(by: { $0.sortOrder < $1.sortOrder })) { item in
-                        HStack(spacing: 12) {
-                            Image(systemName: "star.fill")
-                                .font(.callout)
-                                .foregroundStyle(.orange)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(item.displayText)
-                                    .font(RRFont.body)
-                                    .foregroundStyle(Color.rrText)
-                                Text(item.dimensionType.shortName)
-                                    .font(RRFont.caption)
-                                    .foregroundStyle(Color.rrTextSecondary)
-                            }
+            dimensionsWithNoIndicators
+        }
+        .listStyle(.insetGrouped)
+        .contentMargins(.bottom, 80)
+    }
+
+    // MARK: - Indicator Row
+
+    private func indicatorRow(dimension: LBIDimension, indicator: LBIIndicator) -> some View {
+        let isStarred = viewModel.selectedCriticalIds.contains(indicator.id)
+
+        return HStack(spacing: 12) {
+            Image(systemName: isStarred ? "star.fill" : "circle.fill")
+                .font(isStarred ? .callout : .system(size: 6))
+                .foregroundStyle(isStarred ? .orange : Color.rrTextSecondary)
+                .frame(width: 20)
+
+            TextField("Indicator", text: Binding(
+                get: { indicator.text },
+                set: { newValue in
+                    if newValue.count <= 200 {
+                        viewModel.updateIndicator(
+                            id: indicator.id,
+                            in: dimension.dimensionType,
+                            newText: newValue
+                        )
+                        hasUnsavedChanges = true
+                    }
+                }
+            ))
+            .font(RRFont.body)
+            .foregroundStyle(Color.rrText)
+        }
+        .swipeActions(edge: .leading) {
+            if !isStarred {
+                Button {
+                    withAnimation {
+                        if viewModel.selectForCheckIn(indicatorId: indicator.id) {
+                            hasUnsavedChanges = true
+                        } else {
+                            showCannotLeaveAlert = true
                         }
                     }
+                } label: {
+                    Label("Star", systemImage: "star.fill")
+                }
+                .tint(.orange)
+            }
+        }
+        .swipeActions(edge: .trailing) {
+            if isStarred {
+                Button {
+                    withAnimation {
+                        viewModel.deselectFromCheckIn(indicatorId: indicator.id)
+                        hasUnsavedChanges = true
+                    }
+                } label: {
+                    Label("Unstar", systemImage: "star.slash")
+                }
+                .tint(.gray)
+            } else {
+                Button(role: .destructive) {
+                    withAnimation {
+                        viewModel.removeIndicator(id: indicator.id, from: dimension.dimensionType)
+                        hasUnsavedChanges = true
+                    }
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+        }
+    }
+
+    // MARK: - Add Indicator Row
+
+    private func addIndicatorRow(dimensionType: LBIDimensionType) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "plus.circle")
+                .font(.callout)
+                .foregroundStyle(Color.rrPrimary)
+                .frame(width: 20)
+
+            TextField("Add indicator", text: Binding(
+                get: { newIndicatorTexts[dimensionType] ?? "" },
+                set: { newIndicatorTexts[dimensionType] = $0 }
+            ))
+            .font(RRFont.body)
+            .foregroundStyle(Color.rrText)
+            .onSubmit { addNewIndicator(to: dimensionType) }
+
+            if let text = newIndicatorTexts[dimensionType], !text.isEmpty {
+                Button {
+                    addNewIndicator(to: dimensionType)
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(Color.rrPrimary)
+                }
+            }
+        }
+    }
+
+    // MARK: - Empty Dimensions
+
+    @ViewBuilder
+    private var dimensionsWithNoIndicators: some View {
+        let allTypes = LBIDimensionType.allCases.sorted { $0.sortOrder < $1.sortOrder }
+        let existingTypes = Set(viewModel.dimensions.filter { !$0.indicators.isEmpty }.map { $0.dimensionType })
+        let missingTypes = allTypes.filter { !existingTypes.contains($0) }
+
+        if !missingTypes.isEmpty {
+            ForEach(missingTypes, id: \.self) { dimensionType in
+                Section {
+                    addIndicatorRow(dimensionType: dimensionType)
                 } header: {
                     HStack(spacing: 8) {
-                        Image(systemName: "star.fill")
+                        Image(systemName: dimensionType.icon)
                             .font(RRFont.caption)
-                            .foregroundStyle(.orange)
-                        Text("Daily Check-In Items (7)")
+                            .foregroundStyle(Color.rrTextSecondary)
+                        Text(dimensionType.displayName)
+                            .foregroundStyle(Color.rrTextSecondary)
                     }
                 }
             }
         }
-        .listStyle(.insetGrouped)
-        .contentMargins(.bottom, 80)
     }
 
     // MARK: - Trends Tab
@@ -150,11 +252,6 @@ struct LBIFoundationView: View {
             .padding()
             .padding(.bottom, 80)
         }
-    }
-
-    private var entriesSinceSetup: [RRLBIDailyEntry] {
-        guard let setupDate = profileSetupDate else { return [] }
-        return lbiEntries.filter { $0.date >= setupDate }
     }
 
     private var profileSetupDate: Date? {
@@ -181,9 +278,24 @@ struct LBIFoundationView: View {
             .sorted { $0.dimensionType.sortOrder < $1.dimensionType.sortOrder }
     }
 
+    private func addNewIndicator(to dimensionType: LBIDimensionType) {
+        guard let text = newIndicatorTexts[dimensionType]?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !text.isEmpty else { return }
+        viewModel.addIndicator(to: dimensionType, text: text)
+        newIndicatorTexts[dimensionType] = ""
+        hasUnsavedChanges = true
+    }
+
+    private func saveChanges() {
+        guard let userId = users.first?.id else { return }
+        viewModel.saveAll(context: modelContext, userId: userId)
+        hasUnsavedChanges = false
+    }
+
     private func reloadProfile() {
         guard let userId = users.first?.id else { return }
         viewModel.load(context: modelContext, userId: userId)
+        hasUnsavedChanges = false
     }
 
     private func checkSetupStatus() {
