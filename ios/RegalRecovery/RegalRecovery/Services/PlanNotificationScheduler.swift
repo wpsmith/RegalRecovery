@@ -94,6 +94,29 @@ class PlanNotificationScheduler {
         try? await UNUserNotificationCenter.current().add(request)
     }
 
+    func scheduleQuadrantReminder(hasAssessedThisWeek: Bool) async {
+        let center = UNUserNotificationCenter.current()
+        let id = "quadrant-weekly-reminder"
+
+        center.removePendingNotificationRequests(withIdentifiers: [id])
+
+        guard !hasAssessedThisWeek else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = String(localized: "Weekly Recovery Quadrant")
+        content.body = String(localized: "How are your Body, Mind, Heart, and Spirit this week? Take 3 minutes for your Recovery Quadrant.")
+        content.sound = .default
+
+        var dateComponents = DateComponents()
+        dateComponents.weekday = 1
+        dateComponents.hour = 19
+        dateComponents.minute = 0
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+
+        let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
+        try? await center.add(request)
+    }
+
     // MARK: - Notification Preview
 
     /// Generate a preview string for a batch of plan items at the same time slot.

@@ -295,6 +295,16 @@ class RecoveryWorkViewModel {
                 activityTypeKey: "lbi"
             ),
             WorkTileItem(
+                id: "activity.quadrant",
+                title: String(localized: "Recovery Quadrant"),
+                icon: "square.grid.2x2.fill",
+                iconColor: .purple,
+                category: .activities,
+                featureFlagKey: "feature.quadrant",
+                implemented: true,
+                activityTypeKey: "quadrant"
+            ),
+            WorkTileItem(
                 id: "activity.meetings",
                 title: String(localized: "Meetings"),
                 icon: "person.3.fill",

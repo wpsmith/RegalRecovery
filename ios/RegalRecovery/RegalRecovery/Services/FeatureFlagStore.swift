@@ -52,7 +52,11 @@ final class FeatureFlagStore {
             defaults.set(true, forKey: "ff.activity.triggers")
         }
 
-        defaults.set(3, forKey: migrationKey)
+        if currentVersion < 4 {
+            defaults.set(true, forKey: "ff.feature.quadrant")
+        }
+
+        defaults.set(4, forKey: migrationKey)
     }
 
     // MARK: - Default Seeding
@@ -142,6 +146,7 @@ final class FeatureFlagStore {
         // Recovery Work & Tools
         "feature.3circles": true,
         "feature.triggers": true,
+        "feature.quadrant": false,
         "feature.vision": true,
         "feature.partners.redemptiveliving.backbone": false,
         "feature.relapse-prevention-plan": false,

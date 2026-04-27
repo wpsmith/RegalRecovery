@@ -52,6 +52,8 @@ struct ActivityDestinationView: View {
             UrgeLogView()
         case "emotionalJournal":
             EmotionalJournalView()
+        case "quadrant":
+            QuadrantEntryPointView()
         case ActivityType.triggerLog.rawValue:
             TriggerLogView()
         default:

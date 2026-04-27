@@ -328,6 +328,18 @@
 			B9000033 /* MotivationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000033 /* MotivationDetailView.swift */; };
 			B9000034 /* FASTERStageCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000034 /* FASTERStageCardView.swift */; };
 			B9000035 /* FASTERIndicatorChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8000035 /* FASTERIndicatorChip.swift */; };
+			C2000001 /* QuadrantTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000001 /* QuadrantTypes.swift */; };
+			C2000002 /* QuadrantScoringService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000002 /* QuadrantScoringService.swift */; };
+			C2000003 /* QuadrantAssessmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000004 /* QuadrantAssessmentViewModel.swift */; };
+			C2000004 /* QuadrantDashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1000005 /* QuadrantDashboardViewModel.swift */; };
+			C3000001 /* QuadrantEntryPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000005 /* QuadrantEntryPointView.swift */; };
+			C3000002 /* QuadrantPsychoeducationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000006 /* QuadrantPsychoeducationView.swift */; };
+			C3000003 /* QuadrantAssessmentFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000007 /* QuadrantAssessmentFlowView.swift */; };
+			C3000004 /* QuadrantRatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000008 /* QuadrantRatingView.swift */; };
+			C3000005 /* QuadrantSummaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2000009 /* QuadrantSummaryView.swift */; };
+			C3000006 /* QuadrantRadarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000A /* QuadrantRadarChartView.swift */; };
+			C3000007 /* QuadrantTrendChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000B /* QuadrantTrendChartView.swift */; };
+			C3000008 /* QuadrantDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C200000C /* QuadrantDashboardView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -676,6 +688,21 @@
 			B8000046 /* MotivationDiscoveryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationDiscoveryViewModelTests.swift; sourceTree = "<group>"; };
 			B8000047 /* PostMortemTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostMortemTests.swift; sourceTree = "<group>"; };
 			B8000048 /* MotivationLibraryViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotivationLibraryViewModelTests.swift; sourceTree = "<group>"; };
+			C1000001 /* QuadrantTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantTypes.swift; sourceTree = "<group>"; };
+			C1000002 /* QuadrantScoringService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantScoringService.swift; sourceTree = "<group>"; };
+			C1000003 /* QuadrantScoringServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantScoringServiceTests.swift; sourceTree = "<group>"; };
+			C1000004 /* QuadrantAssessmentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantAssessmentViewModel.swift; sourceTree = "<group>"; };
+			C1000005 /* QuadrantDashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantDashboardViewModel.swift; sourceTree = "<group>"; };
+			C1000006 /* QuadrantAssessmentViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantAssessmentViewModelTests.swift; sourceTree = "<group>"; };
+			C1000007 /* QuadrantDashboardViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantDashboardViewModelTests.swift; sourceTree = "<group>"; };
+			C2000005 /* QuadrantEntryPointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantEntryPointView.swift; sourceTree = "<group>"; };
+			C2000006 /* QuadrantPsychoeducationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantPsychoeducationView.swift; sourceTree = "<group>"; };
+			C2000007 /* QuadrantAssessmentFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantAssessmentFlowView.swift; sourceTree = "<group>"; };
+			C2000008 /* QuadrantRatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantRatingView.swift; sourceTree = "<group>"; };
+			C2000009 /* QuadrantSummaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantSummaryView.swift; sourceTree = "<group>"; };
+			C200000A /* QuadrantRadarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantRadarChartView.swift; sourceTree = "<group>"; };
+			C200000B /* QuadrantTrendChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantTrendChartView.swift; sourceTree = "<group>"; };
+			C200000C /* QuadrantDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuadrantDashboardView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -763,6 +790,7 @@
 				20006001 /* QuickActionDefinition.swift */,
 				B8000021 /* MotivationTypes.swift */,
 				A8000001 /* BowtieTypes.swift */,
+				C1000001 /* QuadrantTypes.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -912,6 +940,9 @@
 				B8000018 /* MotivationLibraryViewModel.swift */,
 				B8000019 /* PostMortemViewModel.swift */,
 				B8000020 /* MotivationDiscoveryViewModel.swift */,
+				C1000002 /* QuadrantScoringService.swift */,
+				C1000004 /* QuadrantAssessmentViewModel.swift */,
+				C1000005 /* QuadrantDashboardViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -974,6 +1005,7 @@
 				20001201 /* AffirmationPackPickerView.swift */,
 				20001202 /* AffirmationSettingsView.swift */,
 				A7000002 /* Bowtie */,
+				C5000001 /* Quadrant */,
 			);
 			path = Activities;
 			sourceTree = "<group>";
@@ -1101,6 +1133,9 @@
 				B8000046 /* MotivationDiscoveryViewModelTests.swift */,
 				B8000047 /* PostMortemTests.swift */,
 				B8000048 /* MotivationLibraryViewModelTests.swift */,
+				C1000003 /* QuadrantScoringServiceTests.swift */,
+				C1000006 /* QuadrantAssessmentViewModelTests.swift */,
+				C1000007 /* QuadrantDashboardViewModelTests.swift */,
 				A7000003 /* Bowtie */,
 			);
 			path = Unit;
@@ -1171,6 +1206,21 @@
 				B8000035 /* FASTERIndicatorChip.swift */,
 			);
 			path = FASTER;
+			sourceTree = "<group>";
+		};
+		C5000001 /* Quadrant */ = {
+			isa = PBXGroup;
+			children = (
+				C2000005 /* QuadrantEntryPointView.swift */,
+				C2000006 /* QuadrantPsychoeducationView.swift */,
+				C2000007 /* QuadrantAssessmentFlowView.swift */,
+				C2000008 /* QuadrantRatingView.swift */,
+				C2000009 /* QuadrantSummaryView.swift */,
+				C200000A /* QuadrantRadarChartView.swift */,
+				C200000B /* QuadrantTrendChartView.swift */,
+				C200000C /* QuadrantDashboardView.swift */,
+			);
+			path = Quadrant;
 			sourceTree = "<group>";
 		};
 		50000302 /* TimeJournal */ = {
@@ -1782,6 +1832,18 @@
 				A9000018 /* RolesManagerView.swift in Sources */,
 				A9000019 /* BowtieCompletionOverlay.swift in Sources */,
 				A9000020 /* BowtieTalliesCard.swift in Sources */,
+				C2000001 /* QuadrantTypes.swift in Sources */,
+				C2000002 /* QuadrantScoringService.swift in Sources */,
+				C2000003 /* QuadrantAssessmentViewModel.swift in Sources */,
+				C2000004 /* QuadrantDashboardViewModel.swift in Sources */,
+				C3000001 /* QuadrantEntryPointView.swift in Sources */,
+				C3000002 /* QuadrantPsychoeducationView.swift in Sources */,
+				C3000003 /* QuadrantAssessmentFlowView.swift in Sources */,
+				C3000004 /* QuadrantRatingView.swift in Sources */,
+				C3000005 /* QuadrantSummaryView.swift in Sources */,
+				C3000006 /* QuadrantRadarChartView.swift in Sources */,
+				C3000007 /* QuadrantTrendChartView.swift in Sources */,
+				C3000008 /* QuadrantDashboardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

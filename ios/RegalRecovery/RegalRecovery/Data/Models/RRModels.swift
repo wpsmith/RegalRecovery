@@ -2005,6 +2005,86 @@ final class RRPostMortem {
     }
 }
 
+// MARK: - Recovery Quadrant Assessment
+
+@Model
+final class RRQuadrantAssessment {
+    @Attribute(.unique) var id: UUID
+    var userId: UUID
+    var weekStartDate: Date
+    var isoWeekNumber: Int
+    var isoYear: Int
+    var bodyScore: Int
+    var mindScore: Int
+    var heartScore: Int
+    var spiritScore: Int
+    var balanceScore: Double
+    var wellnessLevel: String
+    var bodyIndicatorsJSON: String
+    var mindIndicatorsJSON: String
+    var heartIndicatorsJSON: String
+    var spiritIndicatorsJSON: String
+    var bodyReflection: String?
+    var mindReflection: String?
+    var heartReflection: String?
+    var spiritReflection: String?
+    var imbalancedQuadrantsJSON: String
+    var createdAt: Date
+    var modifiedAt: Date
+    var needsSync: Bool
+
+    init(userId: UUID, weekStartDate: Date) {
+        self.id = UUID()
+        self.userId = userId
+        self.weekStartDate = weekStartDate
+        let calendar = Calendar(identifier: .iso8601)
+        let components = calendar.dateComponents([.weekOfYear, .yearForWeekOfYear], from: weekStartDate)
+        self.isoWeekNumber = components.weekOfYear ?? 0
+        self.isoYear = components.yearForWeekOfYear ?? 0
+        self.bodyScore = 5
+        self.mindScore = 5
+        self.heartScore = 5
+        self.spiritScore = 5
+        self.balanceScore = 0
+        self.wellnessLevel = WellnessLevel.growing.rawValue
+        self.bodyIndicatorsJSON = "[]"
+        self.mindIndicatorsJSON = "[]"
+        self.heartIndicatorsJSON = "[]"
+        self.spiritIndicatorsJSON = "[]"
+        self.imbalancedQuadrantsJSON = "[]"
+        self.createdAt = Date()
+        self.modifiedAt = Date()
+        self.needsSync = true
+    }
+
+    var bodyIndicators: [String] {
+        get { (try? JSONDecoder().decode([String].self, from: Data(bodyIndicatorsJSON.utf8))) ?? [] }
+        set { bodyIndicatorsJSON = (try? String(data: JSONEncoder().encode(newValue), encoding: .utf8)) ?? "[]" }
+    }
+    var mindIndicators: [String] {
+        get { (try? JSONDecoder().decode([String].self, from: Data(mindIndicatorsJSON.utf8))) ?? [] }
+        set { mindIndicatorsJSON = (try? String(data: JSONEncoder().encode(newValue), encoding: .utf8)) ?? "[]" }
+    }
+    var heartIndicators: [String] {
+        get { (try? JSONDecoder().decode([String].self, from: Data(heartIndicatorsJSON.utf8))) ?? [] }
+        set { heartIndicatorsJSON = (try? String(data: JSONEncoder().encode(newValue), encoding: .utf8)) ?? "[]" }
+    }
+    var spiritIndicators: [String] {
+        get { (try? JSONDecoder().decode([String].self, from: Data(spiritIndicatorsJSON.utf8))) ?? [] }
+        set { spiritIndicatorsJSON = (try? String(data: JSONEncoder().encode(newValue), encoding: .utf8)) ?? "[]" }
+    }
+    var imbalancedQuadrants: [QuadrantType] {
+        get {
+            let raw = (try? JSONDecoder().decode([String].self, from: Data(imbalancedQuadrantsJSON.utf8))) ?? []
+            return raw.compactMap { QuadrantType(rawValue: $0) }
+        }
+        set { imbalancedQuadrantsJSON = (try? String(data: JSONEncoder().encode(newValue.map(\.rawValue)), encoding: .utf8)) ?? "[]" }
+    }
+    var wellnessLevelEnum: WellnessLevel {
+        WellnessLevel(rawValue: wellnessLevel) ?? .growing
+    }
+}
+
 // MARK: - Model Container Configuration
 
 enum RRModelConfiguration {
@@ -2056,6 +2136,7 @@ enum RRModelConfiguration {
         RRTriggerDefinition.self,
         RRTriggerLogEntry.self,
         RRPostMortem.self,
+        RRQuadrantAssessment.self,
     ]
 
     static var schema: Schema {
