@@ -2,17 +2,17 @@ import Foundation
 import SwiftData
 
 enum AssessmentStep: Equatable {
-    case quadrant(QuadrantType)
+    case quadrant(QuadrantWeeklyReviewType)
     case summary
 }
 
 @Observable
-class QuadrantAssessmentViewModel {
+class QuadrantWeeklyReviewAssessmentViewModel {
 
     var currentStep: AssessmentStep = .quadrant(.body)
-    var scores: [QuadrantType: Int] = Dictionary(uniqueKeysWithValues: QuadrantType.allCases.map { ($0, 5) })
-    var indicators: [QuadrantType: Set<String>] = Dictionary(uniqueKeysWithValues: QuadrantType.allCases.map { ($0, []) })
-    var reflections: [QuadrantType: String] = Dictionary(uniqueKeysWithValues: QuadrantType.allCases.map { ($0, "") })
+    var scores: [QuadrantWeeklyReviewType: Int] = Dictionary(uniqueKeysWithValues: QuadrantWeeklyReviewType.allCases.map { ($0, 5) })
+    var indicators: [QuadrantWeeklyReviewType: Set<String>] = Dictionary(uniqueKeysWithValues: QuadrantWeeklyReviewType.allCases.map { ($0, []) })
+    var reflections: [QuadrantWeeklyReviewType: String] = Dictionary(uniqueKeysWithValues: QuadrantWeeklyReviewType.allCases.map { ($0, "") })
     var isEditingExisting: Bool = false
     var existingAssessmentId: UUID?
     var isSaved: Bool = false
@@ -32,7 +32,7 @@ class QuadrantAssessmentViewModel {
     }
 
     var computedBalanceScore: Double {
-        QuadrantScoringService.balanceScore(
+        QuadrantWeeklyReviewScoringService.balanceScore(
             body: scores[.body] ?? 5,
             mind: scores[.mind] ?? 5,
             heart: scores[.heart] ?? 5,
@@ -41,7 +41,7 @@ class QuadrantAssessmentViewModel {
     }
 
     var computedWellnessLevel: WellnessLevel {
-        QuadrantScoringService.wellnessLevel(
+        QuadrantWeeklyReviewScoringService.wellnessLevel(
             body: scores[.body] ?? 5,
             mind: scores[.mind] ?? 5,
             heart: scores[.heart] ?? 5,
@@ -49,8 +49,8 @@ class QuadrantAssessmentViewModel {
         )
     }
 
-    var computedImbalances: [QuadrantType] {
-        QuadrantScoringService.detectImbalances(
+    var computedImbalances: [QuadrantWeeklyReviewType] {
+        QuadrantWeeklyReviewScoringService.detectImbalances(
             body: scores[.body] ?? 5,
             mind: scores[.mind] ?? 5,
             heart: scores[.heart] ?? 5,
@@ -58,9 +58,9 @@ class QuadrantAssessmentViewModel {
         )
     }
 
-    var recommendations: [(quadrant: QuadrantType, activities: [(key: String, label: String)])] {
+    var recommendations: [(quadrant: QuadrantWeeklyReviewType, activities: [(key: String, label: String)])] {
         let imbalanced = Set(computedImbalances)
-        let lowScoreQuadrants = QuadrantType.allCases.filter { (scores[$0] ?? 5) <= 5 }
+        let lowScoreQuadrants = QuadrantWeeklyReviewType.allCases.filter { (scores[$0] ?? 5) <= 5 }
         let imbalancedFirst = lowScoreQuadrants.filter { imbalanced.contains($0) }
         let otherLow = lowScoreQuadrants.filter { !imbalanced.contains($0) }
         return (imbalancedFirst + otherLow).map { quadrant in
@@ -88,8 +88,8 @@ class QuadrantAssessmentViewModel {
     }
 
     func load(context: ModelContext, userId: UUID) {
-        let weekStart = QuadrantScoringService.weekStartDate(for: Date())
-        let (weekNum, yr) = QuadrantScoringService.isoWeekComponents(for: weekStart)
+        let weekStart = QuadrantWeeklyReviewScoringService.weekStartDate(for: Date())
+        let (weekNum, yr) = QuadrantWeeklyReviewScoringService.isoWeekComponents(for: weekStart)
         let uid = userId
 
         let descriptor = FetchDescriptor<RRQuadrantAssessment>(
@@ -118,14 +118,14 @@ class QuadrantAssessmentViewModel {
     }
 
     func save(context: ModelContext, userId: UUID) {
-        let weekStart = QuadrantScoringService.weekStartDate(for: Date())
+        let weekStart = QuadrantWeeklyReviewScoringService.weekStartDate(for: Date())
         let body = scores[.body] ?? 5
         let mind = scores[.mind] ?? 5
         let heart = scores[.heart] ?? 5
         let spirit = scores[.spirit] ?? 5
-        let balance = QuadrantScoringService.balanceScore(body: body, mind: mind, heart: heart, spirit: spirit)
-        let level = QuadrantScoringService.wellnessLevel(body: body, mind: mind, heart: heart, spirit: spirit)
-        let imbalances = QuadrantScoringService.detectImbalances(body: body, mind: mind, heart: heart, spirit: spirit)
+        let balance = QuadrantWeeklyReviewScoringService.balanceScore(body: body, mind: mind, heart: heart, spirit: spirit)
+        let level = QuadrantWeeklyReviewScoringService.wellnessLevel(body: body, mind: mind, heart: heart, spirit: spirit)
+        let imbalances = QuadrantWeeklyReviewScoringService.detectImbalances(body: body, mind: mind, heart: heart, spirit: spirit)
         let now = Date()
 
         if let existingId = existingAssessmentId {
@@ -155,7 +155,7 @@ class QuadrantAssessmentViewModel {
         body: Int, mind: Int, heart: Int, spirit: Int,
         balance: Double,
         level: WellnessLevel,
-        imbalances: [QuadrantType],
+        imbalances: [QuadrantWeeklyReviewType],
         modifiedAt: Date
     ) {
         assessment.bodyScore = body
@@ -178,9 +178,9 @@ class QuadrantAssessmentViewModel {
     }
 
     private func reset() {
-        scores = Dictionary(uniqueKeysWithValues: QuadrantType.allCases.map { ($0, 5) })
-        indicators = Dictionary(uniqueKeysWithValues: QuadrantType.allCases.map { ($0, []) })
-        reflections = Dictionary(uniqueKeysWithValues: QuadrantType.allCases.map { ($0, "") })
+        scores = Dictionary(uniqueKeysWithValues: QuadrantWeeklyReviewType.allCases.map { ($0, 5) })
+        indicators = Dictionary(uniqueKeysWithValues: QuadrantWeeklyReviewType.allCases.map { ($0, []) })
+        reflections = Dictionary(uniqueKeysWithValues: QuadrantWeeklyReviewType.allCases.map { ($0, "") })
         isEditingExisting = false
         existingAssessmentId = nil
         isSaved = false

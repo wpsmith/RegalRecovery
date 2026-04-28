@@ -101,7 +101,8 @@ final class RRUser {
     var bibleVersion: String
     var motivations: [String]
     var avatarInitial: String
-    var recoveryStage: String
+    var recoveryStage: String?
+    var recoveryStageValue: String { recoveryStage ?? "early" }
     var createdAt: Date
     var modifiedAt: Date
 
@@ -121,7 +122,7 @@ final class RRUser {
         bibleVersion: String,
         motivations: [String] = [],
         avatarInitial: String,
-        recoveryStage: String = "early",
+        recoveryStage: String? = nil,
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
@@ -2076,10 +2077,10 @@ final class RRQuadrantAssessment {
         get { (try? JSONDecoder().decode([String].self, from: Data(spiritIndicatorsJSON.utf8))) ?? [] }
         set { spiritIndicatorsJSON = (try? String(data: JSONEncoder().encode(newValue), encoding: .utf8)) ?? "[]" }
     }
-    var imbalancedQuadrants: [QuadrantType] {
+    var imbalancedQuadrants: [QuadrantWeeklyReviewType] {
         get {
             let raw = (try? JSONDecoder().decode([String].self, from: Data(imbalancedQuadrantsJSON.utf8))) ?? []
-            return raw.compactMap { QuadrantType(rawValue: $0) }
+            return raw.compactMap { QuadrantWeeklyReviewType(rawValue: $0) }
         }
         set { imbalancedQuadrantsJSON = (try? String(data: JSONEncoder().encode(newValue.map(\.rawValue)), encoding: .utf8)) ?? "[]" }
     }

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct QuadrantPsychoeducationView: View {
+struct QuadrantWeeklyReviewPsychoeducationView: View {
     let onBegin: () -> Void
     let onSkip: () -> Void
 
@@ -20,7 +20,7 @@ struct QuadrantPsychoeducationView: View {
                         .foregroundStyle(Color(.systemPurple))
 
                     VStack(spacing: 6) {
-                        Text(String(localized: "Recovery Quadrant"))
+                        Text(String(localized: "Weekly Quadrant Review"))
                             .font(RRFont.largeTitle)
                             .foregroundStyle(Color.rrText)
                             .multilineTextAlignment(.center)
@@ -96,14 +96,14 @@ struct QuadrantPsychoeducationView: View {
             .padding(.horizontal, 16)
         }
         .background(Color.rrBackground)
-        .navigationTitle(String(localized: "Recovery Quadrant"))
+        .navigationTitle(String(localized: "Weekly Quadrant Review"))
         .navigationBarTitleDisplayMode(.inline)
     }
 }
 
 #Preview {
     NavigationStack {
-        QuadrantPsychoeducationView(onBegin: {}, onSkip: {})
+        QuadrantWeeklyReviewPsychoeducationView(onBegin: {}, onSkip: {})
     }
     .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
 }

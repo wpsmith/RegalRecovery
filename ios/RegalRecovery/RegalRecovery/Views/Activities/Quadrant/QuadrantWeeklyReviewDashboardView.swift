@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct QuadrantDashboardView: View {
-    @Bindable var vm: QuadrantDashboardViewModel
+struct QuadrantWeeklyReviewDashboardView: View {
+    @Bindable var vm: QuadrantWeeklyReviewDashboardViewModel
     let onStartAssessment: () -> Void
 
     var body: some View {
@@ -9,7 +9,7 @@ struct QuadrantDashboardView: View {
             VStack(alignment: .leading, spacing: 24) {
                 thisWeekCard
 
-                QuadrantTrendChartView(trendData: vm.trendData)
+                QuadrantWeeklyReviewTrendChartView(trendData: vm.trendData)
 
                 if !vm.recommendations.isEmpty {
                     recommendationsSection
@@ -25,7 +25,7 @@ struct QuadrantDashboardView: View {
             .padding(.top, 16)
         }
         .background(Color.rrBackground)
-        .navigationTitle(String(localized: "Recovery Quadrant"))
+        .navigationTitle(String(localized: "Weekly Quadrant Review"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -47,7 +47,7 @@ struct QuadrantDashboardView: View {
 
                     HStack {
                         Spacer()
-                        QuadrantRadarChartView(
+                        QuadrantWeeklyReviewRadarChartView(
                             bodyScore: assessment.bodyScore,
                             mindScore: assessment.mindScore,
                             heartScore: assessment.heartScore,
@@ -58,7 +58,7 @@ struct QuadrantDashboardView: View {
                     }
 
                     HStack(spacing: 0) {
-                        ForEach(QuadrantType.allCases) { quadrant in
+                        ForEach(QuadrantWeeklyReviewType.allCases) { quadrant in
                             let score: Int = {
                                 switch quadrant {
                                 case .body: return assessment.bodyScore
@@ -182,8 +182,8 @@ struct QuadrantDashboardView: View {
 
 #Preview {
     NavigationStack {
-        QuadrantDashboardView(
-            vm: QuadrantDashboardViewModel(),
+        QuadrantWeeklyReviewDashboardView(
+            vm: QuadrantWeeklyReviewDashboardViewModel(),
             onStartAssessment: {}
         )
     }

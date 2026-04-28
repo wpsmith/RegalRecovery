@@ -1,8 +1,8 @@
 import SwiftUI
 import SwiftData
 
-struct QuadrantAssessmentFlowView: View {
-    @Bindable var vm: QuadrantAssessmentViewModel
+struct QuadrantWeeklyReviewAssessmentFlowView: View {
+    @Bindable var vm: QuadrantWeeklyReviewAssessmentViewModel
     let onDismiss: () -> Void
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
@@ -16,7 +16,7 @@ struct QuadrantAssessmentFlowView: View {
 
                 Group {
                     if vm.isAtSummary {
-                        QuadrantSummaryView(vm: vm) {
+                        QuadrantWeeklyReviewSummaryView(vm: vm) {
                             saveAndDismiss()
                         } onBack: {
                             withAnimation(.easeInOut(duration: 0.25)) {
@@ -24,7 +24,7 @@ struct QuadrantAssessmentFlowView: View {
                             }
                         }
                     } else if case .quadrant(let quadrant) = vm.currentStep {
-                        QuadrantRatingView(
+                        QuadrantWeeklyReviewRatingView(
                             quadrant: quadrant,
                             score: Binding(
                                 get: { vm.scores[quadrant] ?? 5 },
@@ -56,7 +56,7 @@ struct QuadrantAssessmentFlowView: View {
                 .animation(.easeInOut(duration: 0.25), value: vm.currentStep)
             }
             .background(Color.rrBackground)
-            .navigationTitle(String(localized: "Recovery Quadrant"))
+            .navigationTitle(String(localized: "Weekly Quadrant Review"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {

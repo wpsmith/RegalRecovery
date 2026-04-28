@@ -2,25 +2,25 @@ import Testing
 import SwiftData
 @testable import RegalRecovery
 
-@Suite("QuadrantAssessmentViewModel Tests")
-struct QuadrantAssessmentViewModelTests {
+@Suite("QuadrantWeeklyReviewAssessmentViewModel Tests")
+struct QuadrantWeeklyReviewAssessmentViewModelTests {
 
     @Test("initial step is body quadrant")
     func testQuadrant_AC2_1_InitialStepIsBody() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         #expect(vm.currentStep == .quadrant(.body))
     }
 
     @Test("next from body advances to mind")
     func testQuadrant_AC2_2_NextAdvancesToMind() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         vm.next()
         #expect(vm.currentStep == .quadrant(.mind))
     }
 
     @Test("can navigate all four quadrants to summary")
     func testQuadrant_AC2_3_CanNavigateAllFour() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         vm.next()
         vm.next()
         vm.next()
@@ -30,15 +30,15 @@ struct QuadrantAssessmentViewModelTests {
 
     @Test("each score defaults to 5")
     func testQuadrant_AC2_4_ScoreDefaultsTo5() {
-        let vm = QuadrantAssessmentViewModel()
-        for quadrant in QuadrantType.allCases {
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
+        for quadrant in QuadrantWeeklyReviewType.allCases {
             #expect(vm.scores[quadrant] == 5)
         }
     }
 
     @Test("score updates persist after navigation")
     func testQuadrant_AC2_5_ScoreUpdatesPersist() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         vm.scores[.body] = 8
         vm.next()
         vm.previous()
@@ -47,8 +47,8 @@ struct QuadrantAssessmentViewModelTests {
 
     @Test("all indicator sets start empty")
     func testQuadrant_AC2_6_IndicatorsStartEmpty() {
-        let vm = QuadrantAssessmentViewModel()
-        for quadrant in QuadrantType.allCases {
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
+        for quadrant in QuadrantWeeklyReviewType.allCases {
             #expect(vm.indicators[quadrant]?.isEmpty == true)
         }
     }
@@ -58,7 +58,7 @@ struct QuadrantAssessmentViewModelTests {
         let container = try RRModelConfiguration.makeContainer(inMemory: true)
         let context = ModelContext(container)
         let userId = UUID()
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
 
         vm.save(context: context, userId: userId)
 
@@ -67,7 +67,7 @@ struct QuadrantAssessmentViewModelTests {
 
     @Test("isAtSummary is true after four next() calls")
     func testQuadrant_AC2_8_IsAtSummaryAfterAllFour() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         vm.next()
         vm.next()
         vm.next()
@@ -77,7 +77,7 @@ struct QuadrantAssessmentViewModelTests {
 
     @Test("progress values match spec per step")
     func testQuadrant_AC2_9_ProgressValues() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         #expect(vm.progress == 0.25)
         vm.next()
         #expect(vm.progress == 0.5)
@@ -91,7 +91,7 @@ struct QuadrantAssessmentViewModelTests {
 
     @Test("computed imbalances reflect low body score")
     func testQuadrant_AC2_10_ComputedImbalancesReflectScores() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         vm.scores[.body] = 3
         vm.scores[.mind] = 8
         vm.scores[.heart] = 8
@@ -101,7 +101,7 @@ struct QuadrantAssessmentViewModelTests {
 
     @Test("spirit score of 4 appears in recommendations")
     func testQuadrant_AC2_11_RecommendationsForLowScore() {
-        let vm = QuadrantAssessmentViewModel()
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
         vm.scores[.spirit] = 4
         vm.scores[.body] = 7
         vm.scores[.mind] = 7
@@ -112,8 +112,8 @@ struct QuadrantAssessmentViewModelTests {
 
     @Test("all scores above 5 produces no recommendations")
     func testQuadrant_AC2_12_NoRecommendationsWhenAllHigh() {
-        let vm = QuadrantAssessmentViewModel()
-        for quadrant in QuadrantType.allCases {
+        let vm = QuadrantWeeklyReviewAssessmentViewModel()
+        for quadrant in QuadrantWeeklyReviewType.allCases {
             vm.scores[quadrant] = 8
         }
         #expect(vm.recommendations.isEmpty)

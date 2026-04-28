@@ -296,7 +296,7 @@ class RecoveryWorkViewModel {
             ),
             WorkTileItem(
                 id: "activity.quadrant",
-                title: String(localized: "Recovery Quadrant"),
+                title: String(localized: "Weekly Quadrant Review"),
                 icon: "square.grid.2x2.fill",
                 iconColor: .purple,
                 category: .activities,

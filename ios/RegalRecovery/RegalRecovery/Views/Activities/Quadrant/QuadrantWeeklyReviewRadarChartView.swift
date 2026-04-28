@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct QuadrantRadarChartView: View {
+struct QuadrantWeeklyReviewRadarChartView: View {
     let bodyScore: Int
     let mindScore: Int
     let heartScore: Int
@@ -15,7 +15,7 @@ struct QuadrantRadarChartView: View {
     private var radius: CGFloat { (size / 2) - padding }
     private var center: CGPoint { CGPoint(x: size / 2, y: size / 2) }
 
-    private let axes: [(angle: Double, quadrant: QuadrantType)] = [
+    private let axes: [(angle: Double, quadrant: QuadrantWeeklyReviewType)] = [
         (angle: -90, quadrant: .body),
         (angle: 0,   quadrant: .mind),
         (angle: 90,  quadrant: .heart),
@@ -125,7 +125,7 @@ struct QuadrantRadarChartView: View {
         }
         .frame(width: size, height: size)
         .overlay(axisLabelsOverlay)
-        .accessibilityLabel(Text(String(localized: "Recovery Quadrant: Body \(bodyScore), Mind \(mindScore), Heart \(heartScore), Spirit \(spiritScore)")))
+        .accessibilityLabel(Text(String(localized: "Weekly Quadrant Review: Body \(bodyScore), Mind \(mindScore), Heart \(heartScore), Spirit \(spiritScore)")))
     }
 
     private var axisLabelsOverlay: some View {
@@ -149,7 +149,7 @@ struct QuadrantRadarChartView: View {
 
 #Preview {
     VStack(spacing: 24) {
-        QuadrantRadarChartView(
+        QuadrantWeeklyReviewRadarChartView(
             bodyScore: 8,
             mindScore: 6,
             heartScore: 4,
@@ -161,7 +161,7 @@ struct QuadrantRadarChartView: View {
             size: 240
         )
 
-        QuadrantRadarChartView(
+        QuadrantWeeklyReviewRadarChartView(
             bodyScore: 5,
             mindScore: 5,
             heartScore: 5,

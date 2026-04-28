@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct QuadrantSummaryView: View {
-    @Bindable var vm: QuadrantAssessmentViewModel
+struct QuadrantWeeklyReviewSummaryView: View {
+    @Bindable var vm: QuadrantWeeklyReviewAssessmentViewModel
     let onSave: () -> Void
     let onBack: () -> Void
 
@@ -35,7 +35,7 @@ struct QuadrantSummaryView: View {
 
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(String(localized: "Your Recovery Quadrant"))
+            Text(String(localized: "Your Weekly Quadrant Review"))
                 .font(RRFont.largeTitle)
                 .foregroundStyle(Color.rrText)
             Text(String(localized: "Review your scores before saving"))
@@ -47,7 +47,7 @@ struct QuadrantSummaryView: View {
     private var radarSection: some View {
         HStack {
             Spacer()
-            QuadrantRadarChartView(
+            QuadrantWeeklyReviewRadarChartView(
                 bodyScore: vm.scores[.body] ?? 5,
                 mindScore: vm.scores[.mind] ?? 5,
                 heartScore: vm.scores[.heart] ?? 5,
@@ -83,7 +83,7 @@ struct QuadrantSummaryView: View {
                 Divider()
 
                 HStack(spacing: 0) {
-                    ForEach(QuadrantType.allCases) { quadrant in
+                    ForEach(QuadrantWeeklyReviewType.allCases) { quadrant in
                         VStack(spacing: 4) {
                             Image(systemName: quadrant.icon)
                                 .font(.callout)

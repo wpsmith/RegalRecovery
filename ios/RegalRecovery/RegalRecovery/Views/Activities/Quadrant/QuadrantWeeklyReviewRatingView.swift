@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct QuadrantRatingView: View {
-    let quadrant: QuadrantType
+struct QuadrantWeeklyReviewRatingView: View {
+    let quadrant: QuadrantWeeklyReviewType
     @Binding var score: Int
     @Binding var indicators: Set<String>
     @Binding var reflection: String

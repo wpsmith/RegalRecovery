@@ -103,8 +103,8 @@ class PlanNotificationScheduler {
         guard !hasAssessedThisWeek else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "Weekly Recovery Quadrant")
-        content.body = String(localized: "How are your Body, Mind, Heart, and Spirit this week? Take 3 minutes for your Recovery Quadrant.")
+        content.title = String(localized: "Weekly Quadrant Review")
+        content.body = String(localized: "How are your Body, Mind, Heart, and Spirit this week? Take 3 minutes for your Weekly Quadrant Review.")
         content.sound = .default
 
         var dateComponents = DateComponents()

@@ -1,6 +1,6 @@
 import Foundation
 
-struct QuadrantScoringService {
+struct QuadrantWeeklyReviewScoringService {
 
     static func balanceScore(body: Int, mind: Int, heart: Int, spirit: Int) -> Double {
         let mean = (Double(body) + Double(mind) + Double(heart) + Double(spirit)) / 4.0
@@ -36,8 +36,8 @@ struct QuadrantScoringService {
         }
     }
 
-    static func detectImbalances(body: Int, mind: Int, heart: Int, spirit: Int) -> [QuadrantType] {
-        let scores: [(QuadrantType, Int)] = [
+    static func detectImbalances(body: Int, mind: Int, heart: Int, spirit: Int) -> [QuadrantWeeklyReviewType] {
+        let scores: [(QuadrantWeeklyReviewType, Int)] = [
             (.body, body),
             (.mind, mind),
             (.heart, heart),

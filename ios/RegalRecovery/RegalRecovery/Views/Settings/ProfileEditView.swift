@@ -92,7 +92,7 @@ struct ProfileEditView: View {
             birthYear = user.birthYear
             gender = user.gender
             timezone = user.timezone
-            recoveryStage = user.recoveryStage
+            recoveryStage = user.recoveryStageValue
             hasLoaded = true
         }
         .onChange(of: name) { saveProfile() }

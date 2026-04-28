@@ -273,6 +273,8 @@ struct RecoveryWorkView: View {
             LBIFoundationView()
         case "lbi":
             LBIEntryPointView()
+        case "quadrant":
+            QuadrantWeeklyReviewEntryPointView()
         case "bowtie":
             BowtieSessionView()
         case "integrityInventory":

@@ -1,11 +1,11 @@
 import SwiftUI
 import SwiftData
 
-struct QuadrantEntryPointView: View {
+struct QuadrantWeeklyReviewEntryPointView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \RRUser.createdAt) private var users: [RRUser]
-    @State private var vm = QuadrantDashboardViewModel()
-    @State private var assessmentVM = QuadrantAssessmentViewModel()
+    @State private var vm = QuadrantWeeklyReviewDashboardViewModel()
+    @State private var assessmentVM = QuadrantWeeklyReviewAssessmentViewModel()
     @State private var isAssessing = false
     @State private var showPsychoeducation = false
     @State private var didLoad = false
@@ -19,7 +19,7 @@ struct QuadrantEntryPointView: View {
                     .onAppear { loadIfReady() }
             } else if showPsychoeducation && !isAssessing {
                 NavigationStack {
-                    QuadrantPsychoeducationView {
+                    QuadrantWeeklyReviewPsychoeducationView {
                         showPsychoeducation = false
                         isAssessing = true
                     } onSkip: {
@@ -27,14 +27,14 @@ struct QuadrantEntryPointView: View {
                     }
                 }
             } else if isAssessing {
-                QuadrantAssessmentFlowView(vm: assessmentVM) {
+                QuadrantWeeklyReviewAssessmentFlowView(vm: assessmentVM) {
                     isAssessing = false
                     reload()
                 }
             } else {
                 NavigationStack {
-                    QuadrantDashboardView(vm: vm) {
-                        assessmentVM = QuadrantAssessmentViewModel()
+                    QuadrantWeeklyReviewDashboardView(vm: vm) {
+                        assessmentVM = QuadrantWeeklyReviewAssessmentViewModel()
                         if let userId = users.first?.id {
                             assessmentVM.load(context: modelContext, userId: userId)
                         }
@@ -62,6 +62,6 @@ struct QuadrantEntryPointView: View {
 }
 
 #Preview {
-    QuadrantEntryPointView()
+    QuadrantWeeklyReviewEntryPointView()
         .modelContainer(try! RRModelConfiguration.makeContainer(inMemory: true))
 }

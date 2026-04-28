@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum QuadrantType: String, Codable, CaseIterable, Identifiable {
+enum QuadrantWeeklyReviewType: String, Codable, CaseIterable, Identifiable {
     case body = "body"
     case mind = "mind"
     case heart = "heart"

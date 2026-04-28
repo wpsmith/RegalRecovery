@@ -1,7 +1,7 @@
 import Foundation
 import SwiftData
 
-struct QuadrantTrendPoint: Identifiable {
+struct QuadrantWeeklyReviewTrendPoint: Identifiable {
     let id: UUID
     let weekStartDate: Date
     let bodyScore: Int
@@ -13,18 +13,18 @@ struct QuadrantTrendPoint: Identifiable {
 }
 
 @Observable
-class QuadrantDashboardViewModel {
+class QuadrantWeeklyReviewDashboardViewModel {
 
     var currentAssessment: RRQuadrantAssessment?
-    var trendData: [QuadrantTrendPoint] = []
+    var trendData: [QuadrantWeeklyReviewTrendPoint] = []
     var hasAssessedThisWeek: Bool = false
     var hasEverAssessed: Bool = false
-    var recommendations: [(quadrant: QuadrantType, activities: [(key: String, label: String)], isImbalanced: Bool)] = []
+    var recommendations: [(quadrant: QuadrantWeeklyReviewType, activities: [(key: String, label: String)], isImbalanced: Bool)] = []
 
     func load(context: ModelContext, userId: UUID) {
         let uid = userId
-        let weekStart = QuadrantScoringService.weekStartDate(for: Date())
-        let (weekNum, yr) = QuadrantScoringService.isoWeekComponents(for: weekStart)
+        let weekStart = QuadrantWeeklyReviewScoringService.weekStartDate(for: Date())
+        let (weekNum, yr) = QuadrantWeeklyReviewScoringService.isoWeekComponents(for: weekStart)
 
         let thisWeekDescriptor = FetchDescriptor<RRQuadrantAssessment>(
             predicate: #Predicate { $0.userId == uid && $0.isoWeekNumber == weekNum && $0.isoYear == yr }
@@ -41,7 +41,7 @@ class QuadrantDashboardViewModel {
         hasEverAssessed = !recent.isEmpty
 
         trendData = recent.reversed().map { assessment in
-            QuadrantTrendPoint(
+            QuadrantWeeklyReviewTrendPoint(
                 id: assessment.id,
                 weekStartDate: assessment.weekStartDate,
                 bodyScore: assessment.bodyScore,
@@ -58,17 +58,17 @@ class QuadrantDashboardViewModel {
 
     private func buildRecommendations(
         from assessment: RRQuadrantAssessment?
-    ) -> [(quadrant: QuadrantType, activities: [(key: String, label: String)], isImbalanced: Bool)] {
+    ) -> [(quadrant: QuadrantWeeklyReviewType, activities: [(key: String, label: String)], isImbalanced: Bool)] {
         guard let assessment else { return [] }
 
         let imbalanced = Set(assessment.imbalancedQuadrants)
-        let scores: [QuadrantType: Int] = [
+        let scores: [QuadrantWeeklyReviewType: Int] = [
             .body: assessment.bodyScore,
             .mind: assessment.mindScore,
             .heart: assessment.heartScore,
             .spirit: assessment.spiritScore,
         ]
-        let lowScoreQuadrants = QuadrantType.allCases.filter { (scores[$0] ?? 5) <= 5 }
+        let lowScoreQuadrants = QuadrantWeeklyReviewType.allCases.filter { (scores[$0] ?? 5) <= 5 }
         let imbalancedFirst = lowScoreQuadrants.filter { imbalanced.contains($0) }
         let otherLow = lowScoreQuadrants.filter { !imbalanced.contains($0) }
 

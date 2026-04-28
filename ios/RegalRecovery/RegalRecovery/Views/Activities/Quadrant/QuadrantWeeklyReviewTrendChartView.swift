@@ -1,8 +1,8 @@
 import SwiftUI
 import Charts
 
-struct QuadrantTrendChartView: View {
-    let trendData: [QuadrantTrendPoint]
+struct QuadrantWeeklyReviewTrendChartView: View {
+    let trendData: [QuadrantWeeklyReviewTrendPoint]
 
     private var dateLabel: (Date) -> String {
         let formatter = DateFormatter()
@@ -134,7 +134,7 @@ struct QuadrantTrendChartView: View {
 
     private var legendView: some View {
         HStack(spacing: 16) {
-            ForEach(QuadrantType.allCases) { quadrant in
+            ForEach(QuadrantWeeklyReviewType.allCases) { quadrant in
                 HStack(spacing: 4) {
                     Circle()
                         .fill(quadrant.color)
@@ -151,10 +151,10 @@ struct QuadrantTrendChartView: View {
 #Preview {
     let calendar = Calendar.current
     let today = Date()
-    var points: [QuadrantTrendPoint] = []
+    var points: [QuadrantWeeklyReviewTrendPoint] = []
     for i in 0..<8 {
         let date = calendar.date(byAdding: .weekOfYear, value: -(7 - i), to: today)!
-        points.append(QuadrantTrendPoint(
+        points.append(QuadrantWeeklyReviewTrendPoint(
             id: UUID(),
             weekStartDate: date,
             bodyScore: Int.random(in: 4...9),
@@ -166,7 +166,7 @@ struct QuadrantTrendChartView: View {
         ))
     }
     return ScrollView {
-        QuadrantTrendChartView(trendData: points)
+        QuadrantWeeklyReviewTrendChartView(trendData: points)
             .padding()
     }
     .background(Color.rrBackground)

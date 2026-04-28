@@ -2,12 +2,12 @@ import Testing
 import SwiftData
 @testable import RegalRecovery
 
-@Suite("QuadrantDashboardViewModel Tests")
-struct QuadrantDashboardViewModelTests {
+@Suite("QuadrantWeeklyReviewDashboardViewModel Tests")
+struct QuadrantWeeklyReviewDashboardViewModelTests {
 
     private func makeAssessment(userId: UUID, weeksAgo: Int) -> RRQuadrantAssessment {
         let date = Calendar.current.date(byAdding: .weekOfYear, value: -weeksAgo, to: Date())!
-        let weekStart = QuadrantScoringService.weekStartDate(for: date)
+        let weekStart = QuadrantWeeklyReviewScoringService.weekStartDate(for: date)
         let assessment = RRQuadrantAssessment(userId: userId, weekStartDate: weekStart)
         return assessment
     }
@@ -26,7 +26,7 @@ struct QuadrantDashboardViewModelTests {
         context.insert(a2)
         try context.save()
 
-        let vm = QuadrantDashboardViewModel()
+        let vm = QuadrantWeeklyReviewDashboardViewModel()
         vm.load(context: context, userId: userId)
 
         #expect(vm.trendData.count == 3)
@@ -45,7 +45,7 @@ struct QuadrantDashboardViewModelTests {
         }
         try context.save()
 
-        let vm = QuadrantDashboardViewModel()
+        let vm = QuadrantWeeklyReviewDashboardViewModel()
         vm.load(context: context, userId: userId)
 
         #expect(vm.trendData.count <= 8)
@@ -53,13 +53,13 @@ struct QuadrantDashboardViewModelTests {
 
     @Test("hasAssessedThisWeek is false before load")
     func testQuadrant_AC3_3_HasAssessedThisWeekFalseInitially() {
-        let vm = QuadrantDashboardViewModel()
+        let vm = QuadrantWeeklyReviewDashboardViewModel()
         #expect(vm.hasAssessedThisWeek == false)
     }
 
     @Test("hasEverAssessed is false before load")
     func testQuadrant_AC3_4_HasEverAssessedFalseInitially() {
-        let vm = QuadrantDashboardViewModel()
+        let vm = QuadrantWeeklyReviewDashboardViewModel()
         #expect(vm.hasEverAssessed == false)
     }
 
@@ -69,18 +69,18 @@ struct QuadrantDashboardViewModelTests {
         let context = ModelContext(container)
         let userId = UUID()
 
-        let assessment = RRQuadrantAssessment(userId: userId, weekStartDate: QuadrantScoringService.weekStartDate(for: Date()))
+        let assessment = RRQuadrantAssessment(userId: userId, weekStartDate: QuadrantWeeklyReviewScoringService.weekStartDate(for: Date()))
         assessment.spiritScore = 4
         assessment.bodyScore = 7
         assessment.mindScore = 7
         assessment.heartScore = 7
-        assessment.balanceScore = QuadrantScoringService.balanceScore(body: 7, mind: 7, heart: 7, spirit: 4)
-        assessment.wellnessLevel = QuadrantScoringService.wellnessLevel(body: 7, mind: 7, heart: 7, spirit: 4).rawValue
-        assessment.imbalancedQuadrants = QuadrantScoringService.detectImbalances(body: 7, mind: 7, heart: 7, spirit: 4)
+        assessment.balanceScore = QuadrantWeeklyReviewScoringService.balanceScore(body: 7, mind: 7, heart: 7, spirit: 4)
+        assessment.wellnessLevel = QuadrantWeeklyReviewScoringService.wellnessLevel(body: 7, mind: 7, heart: 7, spirit: 4).rawValue
+        assessment.imbalancedQuadrants = QuadrantWeeklyReviewScoringService.detectImbalances(body: 7, mind: 7, heart: 7, spirit: 4)
         context.insert(assessment)
         try context.save()
 
-        let vm = QuadrantDashboardViewModel()
+        let vm = QuadrantWeeklyReviewDashboardViewModel()
         vm.load(context: context, userId: userId)
 
         let quadrants = vm.recommendations.map(\.quadrant)

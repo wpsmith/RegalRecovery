@@ -420,7 +420,7 @@ class TodayViewModel {
 
         // Quadrant Assessment — weekly check-in
         let isoCalendar = Calendar(identifier: .iso8601)
-        let thisWeekStart = QuadrantScoringService.weekStartDate(for: now)
+        let thisWeekStart = QuadrantWeeklyReviewScoringService.weekStartDate(for: now)
         let nextWeekStart = isoCalendar.date(byAdding: .weekOfYear, value: 1, to: thisWeekStart)!
         let quadrantDesc = FetchDescriptor<RRQuadrantAssessment>(
             predicate: #Predicate { $0.weekStartDate >= thisWeekStart && $0.weekStartDate < nextWeekStart }
@@ -429,7 +429,7 @@ class TodayViewModel {
             for q in results {
                 let levelName = WellnessLevel(rawValue: q.wellnessLevel)?.displayName ?? q.wellnessLevel.capitalized
                 all.append((q.createdAt, RecentActivity(
-                    title: String(localized: "Recovery Quadrant"),
+                    title: String(localized: "Weekly Quadrant Review"),
                     detail: levelName,
                     time: fmt.localizedString(for: q.createdAt, relativeTo: now),
                     icon: "square.grid.2x2.fill",

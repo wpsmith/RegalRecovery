@@ -53,7 +53,7 @@ struct ActivityDestinationView: View {
         case "emotionalJournal":
             EmotionalJournalView()
         case "quadrant":
-            QuadrantEntryPointView()
+            QuadrantWeeklyReviewEntryPointView()
         case ActivityType.triggerLog.rawValue:
             TriggerLogView()
         default:
