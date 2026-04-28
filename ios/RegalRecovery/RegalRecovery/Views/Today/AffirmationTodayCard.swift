@@ -90,20 +90,36 @@ struct AffirmationTodayCard: View {
                         }
                     }
 
-                    // Cumulative session count (never streaks)
-                    if totalSessions > 0 {
-                        Text(String(localized: "\(totalSessions) session\(totalSessions == 1 ? "" : "s") total"))
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrTextSecondary)
+                    HStack(spacing: 8) {
+                        if totalSessions > 0 {
+                            Text(String(localized: "\(totalSessions) session\(totalSessions == 1 ? "" : "s") total"))
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrTextSecondary)
+                        }
+
+                        if !favorites.isEmpty {
+                            HStack(spacing: 3) {
+                                Image(systemName: "heart.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(Color.rrDestructive)
+                                Text("\(favorites.count)")
+                                    .font(RRFont.caption)
+                                    .foregroundStyle(Color.rrTextSecondary)
+                            }
+                        }
                     }
 
-                    // Recent affirmation quote
                     if let text = recentAffirmationText {
-                        Text("\"\(text)\"")
-                            .font(RRFont.caption)
-                            .foregroundStyle(Color.rrText)
-                            .lineLimit(1)
-                            .italic()
+                        HStack(spacing: 4) {
+                            Image(systemName: "heart.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Color.rrDestructive)
+                            Text("\"\(text)\"")
+                                .font(RRFont.caption)
+                                .foregroundStyle(Color.rrText)
+                                .lineLimit(1)
+                                .italic()
+                        }
                     }
                 }
 

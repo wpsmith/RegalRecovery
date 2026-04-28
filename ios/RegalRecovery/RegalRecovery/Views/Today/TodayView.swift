@@ -92,22 +92,22 @@ struct TodayView: View {
     // MARK: - Plan Content
 
     private var planContent: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                greetingHeader
-                scoreSummary
-                quickActions
-                timeJournalCard
-                gratitudeWidgetCard
-                affirmationCard
-                recoveryWorkCards
-                activityListHeader
-                activityList
-                sobrietyModule
-                todayActivityLogSection
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 16) {
+                    greetingHeader(scrollProxy: proxy)
+                    scoreSummary
+                    quickActions
+                    recoveryWorkCards
+                    activityListHeader
+                    activityList
+                    sobrietyModule
+                        .id("sobrietyModule")
+                    todayActivityLogSection
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
         }
         .onAppear {
             viewModel.load(context: modelContext)
@@ -117,7 +117,7 @@ struct TodayView: View {
 
     // MARK: - Greeting Header
 
-    private var greetingHeader: some View {
+    private func greetingHeader(scrollProxy: ScrollViewProxy) -> some View {
         HStack {
             Text(viewModel.greeting)
                 .font(RRFont.title)
@@ -126,10 +126,17 @@ struct TodayView: View {
             Spacer()
 
             if viewModel.hasPlan {
-                RRBadge(
-                    text: "Day \(viewModel.streakDays)",
-                    color: .rrPrimary
-                )
+                Button {
+                    withAnimation {
+                        scrollProxy.scrollTo("sobrietyModule", anchor: .top)
+                    }
+                } label: {
+                    RRBadge(
+                        text: "Day \(viewModel.streakDays)",
+                        color: .rrPrimary
+                    )
+                }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -211,47 +218,6 @@ struct TodayView: View {
         .background(Color.rrSurface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.04), radius: 4, x: 0, y: 1)
-    }
-
-    // MARK: - Time Journal Card
-
-    @ViewBuilder
-    private var timeJournalCard: some View {
-        if FeatureFlagStore.shared.isEnabled("activity.time-journal"),
-           viewModel.planActivityTypes.contains(ActivityType.timeJournal.rawValue) {
-            NavigationLink {
-                TimeJournalDailyView()
-            } label: {
-                TimeJournalTodayCard(
-                    filledCount: todayTimeJournalEntries.count,
-                    totalSlots: timeJournalMode.slotsPerDay,
-                    dayStatus: timeJournalDayStatus,
-                    mode: timeJournalMode,
-                    lastUpdated: timeJournalLastUpdated
-                )
-            }
-            .buttonStyle(.plain)
-        }
-    }
-
-    // MARK: - Gratitude Widget Card
-
-    @ViewBuilder
-    private var gratitudeWidgetCard: some View {
-        if FeatureFlagStore.shared.isEnabled("activity.gratitude"),
-           viewModel.planActivityTypes.contains(ActivityType.gratitude.rawValue) {
-            GratitudeWidgetCard()
-        }
-    }
-
-    // MARK: - Affirmation Card
-
-    @ViewBuilder
-    private var affirmationCard: some View {
-        if FeatureFlagStore.shared.isEnabled("activity.affirmations"),
-           viewModel.planActivityTypes.contains(ActivityType.affirmationLog.rawValue) {
-            AffirmationTodayCard()
-        }
     }
 
     // MARK: - Sobriety Module
@@ -370,29 +336,41 @@ struct TodayView: View {
         }
     }
 
-    // MARK: - Activity List (flat chronological)
+    // MARK: - Activity List (card style)
 
     private var activityList: some View {
         let visibleItems = hideCompleted
             ? viewModel.planItems.filter { $0.state != .completed && $0.state != .skipped }
             : viewModel.planItems
 
-        return VStack(spacing: 4) {
+        return VStack(spacing: 8) {
             ForEach(visibleItems) { item in
-                NavigationLink {
-                    destinationView(for: item.activityType)
-                } label: {
-                    TodayActivityRow(
-                        item: item,
-                        onComplete: {
-                            viewModel.completeActivity(item, context: modelContext)
-                        },
-                        onSkip: { reason in
-                            viewModel.skipActivity(item, reason: reason)
-                        }
-                    )
+                if item.activityType == ActivityType.gratitude.rawValue {
+                    GratitudeWidgetCard()
+                } else if item.activityType == ActivityType.affirmationLog.rawValue {
+                    AffirmationTodayCard()
+                } else if item.activityType == ActivityType.timeJournal.rawValue,
+                          FeatureFlagStore.shared.isEnabled("activity.time-journal") {
+                    NavigationLink {
+                        TimeJournalDailyView()
+                    } label: {
+                        TimeJournalTodayCard(
+                            filledCount: todayTimeJournalEntries.count,
+                            totalSlots: timeJournalMode.slotsPerDay,
+                            dayStatus: timeJournalDayStatus,
+                            mode: timeJournalMode,
+                            lastUpdated: timeJournalLastUpdated
+                        )
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    NavigationLink {
+                        destinationView(for: item.activityType)
+                    } label: {
+                        TodayActivityCard(item: item)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -410,13 +388,22 @@ struct TodayView: View {
     private var noPlanState: some View {
         ScrollView {
             VStack(spacing: 16) {
-                greetingHeader
+                noPlanGreetingHeader
                 SetupMyPlanCard()
                 quickActions
                 todayActivityLogSection
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
+        }
+    }
+
+    private var noPlanGreetingHeader: some View {
+        HStack {
+            Text(viewModel.greeting)
+                .font(RRFont.title)
+                .foregroundStyle(Color.rrText)
+            Spacer()
         }
     }
 

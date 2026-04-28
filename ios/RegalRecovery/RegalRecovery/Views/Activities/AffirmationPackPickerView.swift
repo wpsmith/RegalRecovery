@@ -56,8 +56,15 @@ struct AffirmationPackPickerView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                // Favorites card (only if user has favorites)
-                if !favorites.isEmpty {
+                // Favorites card (always visible)
+                if favorites.isEmpty {
+                    packCard(
+                        name: "Favorites",
+                        count: 0,
+                        preview: "Tap the heart on any affirmation to add it here",
+                        isFavorites: true
+                    )
+                } else {
                     NavigationLink {
                         AffirmationDeckView(
                             packName: "Favorites",
@@ -128,12 +135,12 @@ struct AffirmationPackPickerView: View {
                 ZStack {
                     Circle()
                         .fill(isFavorites
-                              ? Color.yellow.opacity(0.18)
+                              ? Color.rrDestructive.opacity(0.15)
                               : Color.rrPrimary.opacity(0.12))
                         .frame(width: 44, height: 44)
                     Image(systemName: isFavorites ? "heart.fill" : "text.quote")
                         .font(.title3)
-                        .foregroundStyle(isFavorites ? .yellow : Color.rrPrimary)
+                        .foregroundStyle(isFavorites ? Color.rrDestructive : Color.rrPrimary)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
@@ -144,7 +151,7 @@ struct AffirmationPackPickerView: View {
                         Spacer()
                         RRBadge(
                             text: "\(count)",
-                            color: isFavorites ? .yellow : .rrSecondary
+                            color: isFavorites ? .rrDestructive : .rrSecondary
                         )
                     }
 

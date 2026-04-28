@@ -27,7 +27,7 @@ struct RecoveryScoreSummaryView: View {
                 .alert("Recovery Score", isPresented: $showScoreInfo) {
                     Button("OK", role: .cancel) { }
                 } message: {
-                    Text("Your daily recovery score reflects how many planned activities you've completed today.")
+                    Text("Your daily recovery score reflects an algorithmic calculation of completing your planned activities, your profile, foundation work, and your stage of recovery.")
                 }
             }
 

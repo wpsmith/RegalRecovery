@@ -277,6 +277,8 @@ struct RecoveryWorkView: View {
             BowtieSessionView()
         case "integrityInventory":
             EveningReviewView()
+        case "urgeSurfingConfig":
+            UrgeSurfingConfigView()
         case "memoryVerseReview":
             Text("Memory Verse - Coming Soon")
                 .font(RRFont.title3)

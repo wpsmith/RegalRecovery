@@ -524,7 +524,12 @@ class TodayViewModel {
                     if case .int(let v) = a.data.data["durationSeconds"] { return v }
                     return 0
                 }()
-                let detail = "\(cardsViewed)/\(totalCards) cards, \(formatDuration(durationSeconds))"
+                let packName: String = {
+                    if case .string(let v) = a.data.data["packName"] { return v }
+                    return ""
+                }()
+                let packLabel = packName.isEmpty ? "" : " · \(packName)"
+                let detail = "\(cardsViewed)/\(totalCards) cards, \(formatDuration(durationSeconds))\(packLabel)"
                 all.append((a.date, RecentActivity(title: "Affirmations", detail: detail, time: fmt.localizedString(for: a.date, relativeTo: now), icon: ActivityType.affirmationLog.icon, iconColor: ActivityType.affirmationLog.iconColor)))
             }
         }

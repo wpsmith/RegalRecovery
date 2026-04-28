@@ -233,6 +233,7 @@
 		10001203 /* BookLanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001203 /* BookLanguageManager.swift */; };
 		10001204 /* TextToSpeechService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001204 /* TextToSpeechService.swift */; };
 		10001205 /* LocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001205 /* LocationService.swift */; };
+		10001206 /* TodayActivityCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20001206 /* TodayActivityCard.swift */; };
 		10002001 /* BigBook in Resources */ = {isa = PBXBuildFile; fileRef = 20002001 /* BigBook */; };
 		10003000 /* BookData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003000 /* BookData.swift */; };
 		10003001 /* BookCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20003001 /* BookCatalog.swift */; };
@@ -583,6 +584,7 @@
 		20001203 /* BookLanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookLanguageManager.swift; sourceTree = "<group>"; };
 		20001204 /* TextToSpeechService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextToSpeechService.swift; sourceTree = "<group>"; };
 		20001205 /* LocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationService.swift; sourceTree = "<group>"; };
+		20001206 /* TodayActivityCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayActivityCard.swift; sourceTree = "<group>"; };
 		20002001 /* BigBook */ = {isa = PBXFileReference; lastKnownFileType = folder; path = BigBook; sourceTree = "<group>"; };
 		20003000 /* BookData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookData.swift; sourceTree = "<group>"; };
 		20003001 /* BookCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCatalog.swift; sourceTree = "<group>"; };
@@ -1179,6 +1181,7 @@
 				20000300 /* TodayView.swift */,
 				20000301 /* TodayTimeBlockSection.swift */,
 				20000302 /* TodayActivityRow.swift */,
+				20001206 /* TodayActivityCard.swift */,
 				20000303 /* RecoveryScoreSummaryView.swift */,
 				20000304 /* RecoveryScoreDetailView.swift */,
 				20000305 /* RecoveryWorkCardView.swift */,
@@ -1759,6 +1762,7 @@
 				10001203 /* BookLanguageManager.swift in Sources */,
 				10001204 /* TextToSpeechService.swift in Sources */,
 				10001205 /* LocationService.swift in Sources */,
+				10001206 /* TodayActivityCard.swift in Sources */,
 				10005001 /* VisionTypes.swift in Sources */,
 				10005002 /* VisionWizardViewModel.swift in Sources */,
 				10005003 /* VisionWizardView.swift in Sources */,

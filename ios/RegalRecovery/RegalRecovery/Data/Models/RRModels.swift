@@ -101,6 +101,7 @@ final class RRUser {
     var bibleVersion: String
     var motivations: [String]
     var avatarInitial: String
+    var recoveryStage: String
     var createdAt: Date
     var modifiedAt: Date
 
@@ -120,6 +121,7 @@ final class RRUser {
         bibleVersion: String,
         motivations: [String] = [],
         avatarInitial: String,
+        recoveryStage: String = "early",
         createdAt: Date = Date(),
         modifiedAt: Date = Date()
     ) {
@@ -132,6 +134,7 @@ final class RRUser {
         self.bibleVersion = bibleVersion
         self.motivations = motivations
         self.avatarInitial = avatarInitial
+        self.recoveryStage = recoveryStage
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }
